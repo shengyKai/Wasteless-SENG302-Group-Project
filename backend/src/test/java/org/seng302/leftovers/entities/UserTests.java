@@ -12,6 +12,8 @@ import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.MockitoAnnotations;
 import org.mockito.internal.matchers.apachecommons.ReflectionEquals;
 import org.seng302.leftovers.dto.LocationDTO;
+import org.seng302.leftovers.dto.business.BusinessResponseDTO;
+import org.seng302.leftovers.dto.business.BusinessType;
 import org.seng302.leftovers.dto.user.UserResponseDTO;
 import org.seng302.leftovers.dto.user.UserRole;
 import org.seng302.leftovers.exceptions.EmailInUseException;
@@ -28,7 +30,10 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.Date;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -104,7 +109,7 @@ class UserTests {
 
             Business testBusiness1 = new Business.Builder()
                 .withName("Corellis")
-                .withBusinessType("Accommodation and Food Services")
+                .withBusinessType(BusinessType.ACCOMMODATION_AND_FOOD_SERVICES)
                 .withAddress(Location.covertAddressStringToLocation("46,Victoria Road,Ashburton,Auckland,Auckland,New Zealand,0624"))
                 .withPrimaryOwner(testUser)
                 .withDescription("Great coffee")
@@ -114,7 +119,7 @@ class UserTests {
 
             Business testBusiness2 = new Business.Builder()
                 .withName("Cakes n Ladders")
-                .withBusinessType("Accommodation and Food Services")
+                .withBusinessType(BusinessType.ACCOMMODATION_AND_FOOD_SERVICES)
                 .withAddress(Location.covertAddressStringToLocation("173,Symonds Street,Ashburton,Auckland,Auckland,New Zealand,1010"))
                 .withPrimaryOwner(testUser2)
                 .withDescription("Chill spot")
@@ -858,9 +863,9 @@ class UserTests {
             testBusinesses.sort(Comparator.comparing(Business::getId));
             assertEquals(2, testBusinesses.size());
             var json = objectMapper.convertValue(new UserResponseDTO(testUser, true, false), JSONObject.class);
-            JSONArray expectedBusinessArray = new JSONArray();
+            List<BusinessResponseDTO> expectedBusinessArray = new ArrayList<>();
             for (Business business : testBusinesses) {
-                expectedBusinessArray.add(business.constructJson(false));
+                expectedBusinessArray.add(BusinessResponseDTO.withoutAdmins(business));
             }
             assertEquals(objectMapper.writeValueAsString(expectedBusinessArray), objectMapper.writeValueAsString(json.get("businessesAdministered")));
         }
@@ -906,9 +911,9 @@ class UserTests {
             testBusinesses.sort(Comparator.comparing(Business::getId));
             assertEquals(2, testBusinesses.size());
             var json = objectMapper.convertValue(new UserResponseDTO(testUser, true, true), JSONObject.class);
-            JSONArray expectedBusinessArray = new JSONArray();
+            List<BusinessResponseDTO> expectedBusinessArray = new ArrayList<>();
             for (Business business : testBusinesses) {
-                expectedBusinessArray.add(business.constructJson(false));
+                expectedBusinessArray.add(BusinessResponseDTO.withoutAdmins(business));
             }
             assertEquals(objectMapper.writeValueAsString(expectedBusinessArray), objectMapper.writeValueAsString(json.get("businessesAdministered")));
         }

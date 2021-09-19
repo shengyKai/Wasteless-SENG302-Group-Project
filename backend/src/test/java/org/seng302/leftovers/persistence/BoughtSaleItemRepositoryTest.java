@@ -3,19 +3,18 @@ package org.seng302.leftovers.persistence;
 import org.junit.jupiter.api.*;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
+import org.seng302.leftovers.dto.business.BusinessType;
 import org.seng302.leftovers.entities.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.web.server.ResponseStatusException;
 
 import javax.transaction.Transactional;
 import java.math.BigDecimal;
-import java.text.ParseException;
 import java.time.Instant;
-import java.util.Arrays;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
 
 @RunWith(SpringRunner.class)
@@ -69,7 +68,7 @@ class BoughtSaleItemRepositoryTest {
                 .withPrimaryOwner(user)
                 .withName("Help Industries")
                 .withAddress(Location.covertAddressStringToLocation("6,Help Street,Place,Dunedin,New Zelaand,Otago,6959"))
-                .withBusinessType("Accommodation and Food Services")
+                .withBusinessType(BusinessType.ACCOMMODATION_AND_FOOD_SERVICES)
                 .withDescription("Helps industries hopefully")
                 .build();
         business = businessRepository.save(business);

@@ -33,22 +33,21 @@ public interface InventoryItemRepository extends CrudRepository<InventoryItem, L
 
     public List<InventoryItem> findAllByProduct(@Param("product") Product product);
     /**
-     * Gets a inventory item from the repository
+     * Finds an inventory item in the repository
      * If there is no inventory for the provided business and inventoryItemId
-     * then a 406 not acceptable is thrown.
+     * then a Optional.empty() is returned
      *
      * @param business Business this inventory item must belong to
      * @param inventoryItemId Inventory item id to search for
-     * @return Inventory id for business and inventoryItemId
+     * @return Inventory item for business and inventoryItemId if present otherwise Optional.empty()
      */
-    default InventoryItem getInventoryItemByBusinessAndId(Business business, Long inventoryItemId) {
+    default Optional<InventoryItem> findInventoryItemByBusinessAndId(Business business, Long inventoryItemId) {
         Optional<InventoryItem> inventoryItem = findById(inventoryItemId);
         if (
-                inventoryItem.isEmpty() ||
-                !inventoryItem.get().getBusiness().getId().equals(business.getId())
+                inventoryItem.isEmpty() || !inventoryItem.get().getBusiness().getId().equals(business.getId())
         ) {
-            throw new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE, "inventory item does not exist for this business");
+            return Optional.empty();
         }
-        return inventoryItem.get();
+        return inventoryItem;
     }
 }

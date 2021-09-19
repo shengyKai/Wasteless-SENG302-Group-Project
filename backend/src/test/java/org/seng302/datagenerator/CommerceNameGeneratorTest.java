@@ -5,6 +5,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.seng302.leftovers.dto.business.BusinessType;
 import org.seng302.leftovers.entities.Business;
 import org.seng302.leftovers.entities.Location;
 import org.seng302.leftovers.entities.Product;
@@ -80,7 +81,7 @@ class CommerceNameGeneratorTest {
 
         Business.Builder builder = new Business.Builder()
                 .withPrimaryOwner(mockUser)
-                .withBusinessType("Retail Trade")
+                .withBusinessType(BusinessType.RETAIL_TRADE)
                 .withAddress(mockLocation);
 
         String businessName = commerceNameGenerator.randomBusinessName();

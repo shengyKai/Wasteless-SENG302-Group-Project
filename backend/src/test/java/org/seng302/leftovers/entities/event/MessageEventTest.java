@@ -51,9 +51,7 @@ class MessageEventTest {
         when(buyer.getAddress()).thenReturn(address);
         when(seller.getAddress()).thenReturn(address);
 
-        var cardJson = new JSONObject();
-        cardJson.appendField("id", 520);
-        when(card.constructJSONObject()).thenReturn(cardJson);
+        when(card.getID()).thenReturn(520L);
 
         when(buyer.getUserID()).thenReturn(92L);
         when(seller.getUserID()).thenReturn(38L);

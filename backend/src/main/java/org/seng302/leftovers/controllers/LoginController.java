@@ -1,6 +1,8 @@
 package org.seng302.leftovers.controllers;
 
-import net.minidev.json.JSONObject;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.ToString;
 import org.seng302.leftovers.entities.Account;
 import org.seng302.leftovers.entities.User;
 import org.seng302.leftovers.persistence.AccountRepository;
@@ -16,7 +18,8 @@ import org.springframework.web.server.ResponseStatusException;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
+import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
 import java.util.Optional;
 
 /**
@@ -35,32 +38,46 @@ public class LoginController {
     }
 
     /**
+     * DTO representing a login request
+     */
+    @Getter
+    @ToString
+    public static class LoginRequestDTO {
+        @NotNull
+        private String email;
+        @NotNull
+        private String password;
+    }
+
+    /**
+     * DTO representing the response of a login request
+     */
+    @Getter
+    @ToString
+    @AllArgsConstructor
+    public static class LoginResponseDTO {
+        private Long userId;
+    }
+
+
+    /**
      * Check that the entered email exists and the password is correct. If they are, respond with status code 200: OK and
      * a cookie with the user's authentication token. If they are not, respond with status code 400: Bad request.
-     * @param userinfo JSON object with user's email and password.
+     * @param userInfo JSON object with user's email and password.
      * @param response HTTP response.
      */
     @PostMapping("/login")
-    public void login(@RequestBody JSONObject userinfo, HttpServletRequest request, HttpServletResponse response) {
-        String email = userinfo.getAsString("email");
-        String password = userinfo.getAsString("password");
-        Account matchingAccount = accountRepository.findByEmail(email);
+    public LoginResponseDTO login(@RequestBody @Valid LoginRequestDTO userInfo, HttpServletRequest request, HttpServletResponse response) {
+        Account matchingAccount = accountRepository.findByEmail(userInfo.getEmail());
         if (matchingAccount == null) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "There is no account associated with this email");
         } else {
-            PasswordAuthenticator.verifyPassword(password, matchingAccount.getAuthenticationCode());
+            PasswordAuthenticator.verifyPassword(userInfo.getPassword(), matchingAccount.getAuthenticationCode());
 
             Optional<User> accountAsUser = userRepository.findById(matchingAccount.getUserID());
             AuthenticationTokenManager.setAuthenticationToken(request, response, accountAsUser.orElseThrow());
-            try {
-                response.setStatus(200);
-                response.setContentType("application/json");
-                response.getWriter().write("{\"userId\":" + matchingAccount.getUserID() + "}");
-                response.getWriter().flush();
-            } catch (IOException e) {
-                e.getMessage();
-            }
 
+            return new LoginResponseDTO(matchingAccount.getUserID());
         }
     }
 }

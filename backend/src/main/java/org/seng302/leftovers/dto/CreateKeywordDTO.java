@@ -7,15 +7,12 @@ import lombok.ToString;
 import javax.validation.constraints.NotNull;
 
 /**
- * DTO for the request body of the PUT /listings/:id/interest
+ * A DTO representing a keyword entity
  */
 @Getter
 @ToString
 @EqualsAndHashCode
-public class SetSaleItemInterestDTO {
+public class CreateKeywordDTO {
     @NotNull
-    private Long userId;
-
-    @NotNull
-    private Boolean interested;
+    private String name;
 }

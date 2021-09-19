@@ -8,7 +8,8 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mockito;
 import org.mockito.internal.matchers.apachecommons.ReflectionEquals;
 import org.seng302.leftovers.controllers.DGAAController;
-import org.seng302.leftovers.dto.ProductFilterOption;
+import org.seng302.leftovers.dto.product.ProductFilterOption;
+import org.seng302.leftovers.dto.business.BusinessType;
 import org.seng302.leftovers.entities.*;
 import org.seng302.leftovers.exceptions.SearchFormatException;
 import org.seng302.leftovers.persistence.*;
@@ -760,7 +761,7 @@ class SearchHelperTest {
         var testUser = userRepository.findAll().iterator().next();
         var testBusiness = new Business.Builder()
                 .withPrimaryOwner(testUser)
-                .withBusinessType("Accommodation and Food Services")
+                .withBusinessType(BusinessType.ACCOMMODATION_AND_FOOD_SERVICES)
                 .withDescription("DESCRIPTION")
                 .withName("BUSINESS_NAME")
                 .withAddress(Location.covertAddressStringToLocation("108,Albert Road,Ashburton,Christchurch,New Zealand,Canterbury,8041"))
