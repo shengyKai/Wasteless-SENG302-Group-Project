@@ -1,5 +1,7 @@
 package org.seng302.leftovers.entities;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
@@ -9,11 +11,14 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.NullSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.seng302.leftovers.dto.LocationDTO;
+import org.seng302.leftovers.dto.business.BusinessResponseDTO;
+import org.seng302.leftovers.dto.business.BusinessType;
 import org.seng302.leftovers.dto.user.UserResponseDTO;
 import org.seng302.leftovers.dto.user.UserRole;
 import org.seng302.leftovers.exceptions.AccessTokenException;
@@ -36,6 +41,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.when;
@@ -44,26 +50,26 @@ import static org.mockito.Mockito.when;
 class BusinessTests {
 
     @Autowired
-    BusinessRepository businessRepository;
+    private BusinessRepository businessRepository;
     @Autowired
-    UserRepository userRepository;
+    private UserRepository userRepository;
     @Autowired
-    ProductRepository productRepository;
+    private ProductRepository productRepository;
     @Autowired
-    ImageRepository imageRepository;
+    private ImageRepository imageRepository;
     @Mock
-    HttpServletRequest request;
+    private HttpServletRequest request;
     @Mock
-    HttpSession session;
+    private HttpSession session;
     @Autowired
-    SessionFactory sessionFactory;
+    private SessionFactory sessionFactory;
     @Autowired
-    ObjectMapper objectMapper;
+    private ObjectMapper objectMapper;
 
-    User testUser1;
-    User testUser2;
-    User testUser3;
-    Business testBusiness1;
+    private User testUser1;
+    private User testUser2;
+    private User testUser3;
+    private Business testBusiness1;
 
     /**
      * Sets up 3 Users and 1 Business
@@ -120,7 +126,7 @@ class BusinessTests {
         testUser2 = userRepository.save(testUser2);
         testUser3 = userRepository.save(testUser3);
         testBusiness1 = new Business.Builder()
-                .withBusinessType("Accommodation and Food Services")
+                .withBusinessType(BusinessType.ACCOMMODATION_AND_FOOD_SERVICES)
                 .withAddress(Location.covertAddressStringToLocation("4,Rountree Street,Ashburton,Christchurch,New Zealand," +
                         "Canterbury,8041"))
                 .withDescription("Some description")
@@ -167,22 +173,8 @@ class BusinessTests {
      */
     @Test
     void setBusinessTypeWhenValid() throws ResponseStatusException {
-        testBusiness1.setBusinessType("Retail Trade");
-        assertEquals("Retail Trade", testBusiness1.getBusinessType());
-    }
-
-    /**
-     * Test that an error is thrown when the business type is invalid
-     * @throws ResponseStatusException
-     */
-    @Test
-    void setBusinessTypeThrowsWhenInvalid() throws ResponseStatusException {
-        try {
-            testBusiness1.setBusinessType("invalid type");
-            fail(); // shouldnt get here
-        } catch (ResponseStatusException err) {
-
-        }
+        testBusiness1.setBusinessType(BusinessType.RETAIL_TRADE);
+        assertEquals(BusinessType.RETAIL_TRADE, testBusiness1.getBusinessType());
     }
 
     /**
@@ -219,7 +211,7 @@ class BusinessTests {
     @Test
     void setBelowMinimumAge() {
         Business.Builder builder = new Business.Builder()
-                .withBusinessType("Accommodation and Food Services")
+                .withBusinessType(BusinessType.ACCOMMODATION_AND_FOOD_SERVICES)
                 .withAddress(
                         Location.covertAddressStringToLocation("4,Rountree Street,Ashburton,Christchurch,New Zealand," +
                         "Canterbury,8041"))
@@ -544,9 +536,13 @@ class BusinessTests {
      */
     @Test
     void setCreatedInitialValueTest() {
-        Business testBusiness2 = new Business.Builder().withBusinessType("Non-profit organisation").withName("Zesty Business")
+        Business testBusiness2 = new Business.Builder()
+                .withBusinessType(BusinessType.NON_PROFIT)
+                .withName("Zesty Business")
                 .withAddress(Location.covertAddressStringToLocation("101,My Street,Ashburton,Christchurch,Canterbury,New Zealand,1010"))
-                .withDescription("A nice place").withPrimaryOwner(testUser2).build();
+                .withDescription("A nice place")
+                .withPrimaryOwner(testUser2)
+                .build();
         assertTrue(ChronoUnit.SECONDS.between(Instant.now(), testBusiness2.getCreated()) < 20);
     }
 
@@ -582,11 +578,8 @@ class BusinessTests {
      * @return A lsit of JSONObjects produced by calling constructJson with true, false and no arg
      */
     private List<JSONObject> getTestJsons(Business business) {
-        List<JSONObject> testJsons = new ArrayList<>();
-        testJsons.add(business.constructJson(true));
-        testJsons.add(business.constructJson(false));
-        testJsons.add(business.constructJson());
-        return testJsons;
+        List<BusinessResponseDTO> testDTOs = List.of(BusinessResponseDTO.withAdmins(business), BusinessResponseDTO.withoutAdmins(business));
+        return objectMapper.convertValue(testDTOs, new TypeReference<>() {});
     }
 
     /**
@@ -596,7 +589,7 @@ class BusinessTests {
      */
     @Test
     void constructJsonHasExpectedFieldsFullDetailsTrueTest() {
-       JSONObject json = testBusiness1.constructJson(true);
+        var json = objectMapper.convertValue(BusinessResponseDTO.withAdmins(testBusiness1), JSONObject.class);
        assertTrue(json.containsKey("name"));
        assertTrue(json.containsKey("description"));
        assertTrue(json.containsKey("businessType"));
@@ -614,18 +607,14 @@ class BusinessTests {
      */
     @Test
     void constructJsonHasExpectedFieldsFullDetailsFalseTest() {
-        List<JSONObject> testJsons = new ArrayList<>();
-        testJsons.add(testBusiness1.constructJson(false));
-        testJsons.add(testBusiness1.constructJson());
-        for (JSONObject json : testJsons) {
-            assertTrue(json.containsKey("name"));
-            assertTrue(json.containsKey("description"));
-            assertTrue(json.containsKey("businessType"));
-            assertTrue(json.containsKey("address"));
-            assertTrue(json.containsKey("id"));
-            assertTrue(json.containsKey("primaryAdministratorId"));
-            assertTrue(json.containsKey("created"));
-        }
+        var json = objectMapper.convertValue(BusinessResponseDTO.withoutAdmins(testBusiness1), JSONObject.class);
+        assertTrue(json.containsKey("name"));
+        assertTrue(json.containsKey("description"));
+        assertTrue(json.containsKey("businessType"));
+        assertTrue(json.containsKey("address"));
+        assertTrue(json.containsKey("id"));
+        assertTrue(json.containsKey("primaryAdministratorId"));
+        assertTrue(json.containsKey("created"));
     }
 
     /**
@@ -635,7 +624,7 @@ class BusinessTests {
      */
     @Test
     void constructJsonDoesntHaveUnexpectedFieldsFullDetailsTrueTest() {
-        JSONObject json = testBusiness1.constructJson(true);
+        JSONObject json = objectMapper.convertValue(BusinessResponseDTO.withAdmins(testBusiness1), JSONObject.class);
         json.remove("name");
         json.remove("description");
         json.remove("businessType");
@@ -655,20 +644,16 @@ class BusinessTests {
      */
     @Test
     void constructJsonDoesntHaveUnexpectedFieldsFullDetailsFalseTest() {
-        List<JSONObject> testJsons = new ArrayList<>();
-        testJsons.add(testBusiness1.constructJson(false));
-        testJsons.add(testBusiness1.constructJson());
-        for (JSONObject json : testJsons) {
-            json.remove("name");
-            json.remove("description");
-            json.remove("businessType");
-            json.remove("address");
-            json.remove("id");
-            json.remove("primaryAdministratorId");
-            json.remove("created");
-            json.remove("images");
-            assertTrue(json.isEmpty());
-        }
+        var json = objectMapper.convertValue(BusinessResponseDTO.withoutAdmins(testBusiness1), JSONObject.class);
+        json.remove("name");
+        json.remove("description");
+        json.remove("businessType");
+        json.remove("address");
+        json.remove("id");
+        json.remove("primaryAdministratorId");
+        json.remove("created");
+        json.remove("images");
+        assertTrue(json.isEmpty());
     }
 
     /**
@@ -679,10 +664,10 @@ class BusinessTests {
     @Test
     void constructJsonSimpleFieldsHaveExpectedValueTest() {
         List<JSONObject> testJsons = getTestJsons(testBusiness1);
-        for (JSONObject json : testJsons) {
+        for (var json : testJsons) {
             assertEquals(testBusiness1.getName(), json.getAsString("name"));
             assertEquals(testBusiness1.getDescription(), json.getAsString("description"));
-            assertEquals(testBusiness1.getBusinessType(), json.getAsString("businessType"));
+            assertEquals(testBusiness1.getBusinessType(), objectMapper.convertValue(json.get("businessType"), BusinessType.class));
             assertEquals(new LocationDTO(testBusiness1.getAddress(), true), objectMapper.convertValue(json.get("address"), LocationDTO.class));
             assertEquals(testBusiness1.getId().toString(), json.getAsString("id"));
             assertEquals(testBusiness1.getPrimaryOwner().getUserID().toString(), json.getAsString("primaryAdministratorId"));
@@ -696,18 +681,18 @@ class BusinessTests {
      * contains a list of User JSONs with the details of the business's administrators.
      */
     @Test
-    void constructJsonAdministratorsFullDetailsTest() {
+    void constructJsonAdministratorsFullDetailsTest() throws JsonProcessingException {
         testBusiness1.addAdmin(testUser2);
         assertEquals(2, testBusiness1.getOwnerAndAdministrators().size());
         List<User> admins = new ArrayList<>(testBusiness1.getOwnerAndAdministrators());
         admins.sort(Comparator.comparing(Account::getUserID));
-        JSONArray expectedAdminArray = new JSONArray();
-        for (User user : admins) {
-            expectedAdminArray.add(new UserResponseDTO(user));
-        }
-        String expectedAdminString = expectedAdminArray.toJSONString();
-        JSONObject testJson = testBusiness1.constructJson(true);
-        assertEquals(expectedAdminString, testJson.getAsString("administrators"));
+
+        List<UserResponseDTO> expectedAdminArray = admins.stream().map(UserResponseDTO::new).collect(Collectors.toList());
+
+        var json = objectMapper.convertValue(BusinessResponseDTO.withAdmins(testBusiness1), JSONObject.class);
+        List<UserResponseDTO> actualAdminArray = objectMapper.convertValue(json.get("administrators"), new TypeReference<>() {});
+
+        assertEquals(expectedAdminArray, actualAdminArray);
     }
 
     /**
@@ -900,5 +885,17 @@ class BusinessTests {
 
         testBusiness1 = businessRepository.save(testBusiness1);
         assertEquals(2, productRepository.findAllByBusiness(testBusiness1).size());
+    }
+
+    @ParameterizedTest
+    @CsvSource({
+            "ACCOMMODATION_AND_FOOD_SERVICES,Accommodation and Food Services",
+            "RETAIL_TRADE,Retail Trade",
+            "CHARITABLE,Charitable organisation",
+            "NON_PROFIT,Non-profit organisation"
+    })
+    void businessType_toString_isExpectedString(String typeString, String mappedTypeString) {
+        BusinessType role = BusinessType.valueOf(typeString);
+        assertEquals(mappedTypeString, objectMapper.convertValue(role, String.class));
     }
 }

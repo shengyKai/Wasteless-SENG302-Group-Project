@@ -1,11 +1,8 @@
 /* Subtype of Account for individual users */
 package org.seng302.leftovers.entities;
 
-import net.minidev.json.JSONArray;
-import net.minidev.json.JSONObject;
 import org.seng302.leftovers.dto.user.UserRole;
 import org.seng302.leftovers.entities.event.Event;
-import org.seng302.leftovers.tools.JsonTools;
 import org.springframework.data.annotation.ReadOnlyProperty;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
@@ -13,7 +10,8 @@ import org.springframework.web.server.ResponseStatusException;
 import javax.persistence.*;
 import java.time.Instant;
 import java.time.LocalDate;
-import java.util.*;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.regex.Pattern;
 
 @Entity

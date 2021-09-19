@@ -2,10 +2,6 @@ package org.seng302.leftovers.entities;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import net.minidev.json.JSONArray;
-import net.minidev.json.JSONObject;
-import org.seng302.leftovers.dto.user.UserResponseDTO;
-import org.seng302.leftovers.tools.JsonTools;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -216,32 +212,6 @@ public class MarketplaceCard {
      */
     public void removeKeyword(Keyword keyword) {
         keywords.remove(keyword);
-    }
-
-    /**
-     * Constructs the JSON representation of this card
-     * @return A JSONObject containing this cards data
-     */
-    public JSONObject constructJSONObject() {
-        JSONObject json = new JSONObject();
-
-        json.appendField("id", this.getID());
-        json.appendField("creator", new UserResponseDTO(this.creator));
-        json.appendField("section", this.section.getName());
-        json.appendField("created", this.created.toString());
-        json.appendField("lastRenewed", this.lastRenewed.toString());
-        json.appendField("displayPeriodEnd", this.closes.toString());
-        json.appendField("title", this.title);
-        json.appendField("description", this.description);
-
-        JSONArray keywordArray = new JSONArray();
-        // jsonify the keywords
-        for (Keyword keyword : this.getKeywords()) {
-            keywordArray.appendElement(keyword.constructJSONObject());
-        }
-        json.appendField("keywords", keywordArray);
-        JsonTools.removeNullsFromJson(json);
-        return json;
     }
 
     /**

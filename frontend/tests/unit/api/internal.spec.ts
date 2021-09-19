@@ -128,6 +128,7 @@ const testSaleItem: Sale = {
   quantity: 4,
   price: 1000,
   created: '1-1-1900',
+  interestCount: 8
 };
 
 const testMessage: Message = {

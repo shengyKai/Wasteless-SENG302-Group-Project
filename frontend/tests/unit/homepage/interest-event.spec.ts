@@ -57,7 +57,8 @@ const saleItem: api.Sale = {
   "created":"2021-06-17T08:47:20Z",
   "id":1,
   "moreInfo":"Es pariatur est explicabo fugiat, dolorum eligendi quam cupiditate excepturi mollitia maiores labore suscipit quas? Nulla,.",
-  "closes":"2022-03-20"
+  "closes":"2022-03-20",
+  "interestCount": 7
 };
 const event: events.InterestEvent = {
   "id":1,
@@ -96,6 +97,17 @@ describe("InterestEvent.vue", () => {
 
   it("The title contains the business name", ()=>{
     expect(wrapper.text()).toContain("Hillary Cresenct Jewelers");
+  });
+
+  it("When the event is not liked, the like count is shown", async ()=>{
+    let newEvent = {...event};
+    newEvent.interested = false;
+    await wrapper.setProps({event:newEvent});
+    expect(wrapper.text()).toContain("Like 7");
+  });
+
+  it("When the event is liked, the like count is shown", async ()=>{
+    expect(wrapper.text()).toContain("Unlike 7");
   });
 
   const closesDays = [1, 2, 10, 35];

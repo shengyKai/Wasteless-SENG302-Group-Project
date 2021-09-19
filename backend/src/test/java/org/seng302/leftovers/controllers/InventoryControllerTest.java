@@ -10,7 +10,8 @@ import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.runner.RunWith;
 import org.mockito.*;
 import org.mockito.internal.matchers.apachecommons.ReflectionEquals;
-import org.seng302.leftovers.dto.InventoryItemDTO;
+import org.seng302.leftovers.dto.inventory.InventoryItemResponseDTO;
+import org.seng302.leftovers.dto.business.BusinessType;
 import org.seng302.leftovers.entities.*;
 import org.seng302.leftovers.exceptions.AccessTokenException;
 import org.seng302.leftovers.persistence.BusinessRepository;
@@ -105,7 +106,7 @@ class InventoryControllerTest {
                 .withAddress(Location.covertAddressStringToLocation("108,Albert Road,Ashburton,Christchurch,New Zealand,Canterbury,8041"))
                 .build();
         testBusiness = new Business.Builder()
-                .withBusinessType("Accommodation and Food Services")
+                .withBusinessType(BusinessType.ACCOMMODATION_AND_FOOD_SERVICES)
                 .withDescription("DESCRIPTION")
                 .withName("BUSINESS_NAME")
                 .withAddress(Location.covertAddressStringToLocation("108,Albert Road,Ashburton,Christchurch,New Zealand,Canterbury,8041"))
@@ -357,7 +358,7 @@ class InventoryControllerTest {
         var result = inventoryController.getInventory(1L, request, null, null, null, null);
         
         JSONArray expectedArray = new JSONArray();
-        items.stream().map(InventoryItemDTO::new).forEach(expectedArray::add);
+        items.stream().map(InventoryItemResponseDTO::new).forEach(expectedArray::add);
         
         assertEquals(expectedArray, result.getResults());
         assertEquals(1000L, result.getCount());

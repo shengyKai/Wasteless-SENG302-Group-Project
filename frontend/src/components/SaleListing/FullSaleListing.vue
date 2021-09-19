@@ -27,7 +27,7 @@
               </v-btn>
               <!-- Thumb up/down button to show and allow user the like & unlike feature -->
               <v-btn class=" pl-2 pr-2 ml-2" color="grey lighten-2" @click="changeInterest">
-                {{thumbMessage}} {{interestedCount}}
+                {{thumbMessage}} {{interestCount}}
                 <v-icon class="ml-1">{{thumbIcon}}</v-icon>
               </v-btn>
               <!-- A return button for user to go back to business profile-->
@@ -137,7 +137,7 @@ export default {
   },
   data() {
     return {
-      interestedCount: "",
+      interestCount: "",
       currency: {
         code: "",
         symbol: "",
@@ -151,7 +151,7 @@ export default {
   },
   mounted() {
     console.log(this.saleItem);
-    this.interestedCount = this.saleItem.interestedCount;
+    this.interestCount = this.saleItem.interestCount;
   },
   computed: {
     imagesList() {
@@ -162,14 +162,14 @@ export default {
     },
     thumbIcon() {
       if (this.isInterested) {
-        return "mdi-thumb-down";
-      } else {
         return "mdi-thumb-up";
+      } else {
+        return "mdi-thumb-up-outline";
       }
     },
     thumbMessage() {
       if (this.isInterested) {
-        return "Unlike";
+        return "Liked";
       } else {
         return "Like";
       }
@@ -252,8 +252,8 @@ export default {
     async changeInterest() {
       await setListingInterest(this.saleItem.id, this.userId, !this.isInterested);
       await this.computeIsInterested();
-      if(this.isInterested) this.interestedCount += 1;
-      else this.interestedCount -= 1;
+      if(this.isInterested) this.interestCount += 1;
+      else this.interestCount -= 1;
     },
     /**
      * Compute the lising isInterested

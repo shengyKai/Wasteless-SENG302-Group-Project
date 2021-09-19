@@ -168,6 +168,7 @@ export type Sale = {
   moreInfo?: string,
   created: string,
   closes?: string,
+  interestCount: number
 };
 
 export type InventoryItem = {
@@ -1379,7 +1380,8 @@ export async function getDummySaleItemSearchResult() : Promise<SearchResults<Sal
         price: 600,
         moreInfo: "The Nathan Apple is my favourite kind of apple. It was born in the Polish Jungle in Switzerland.",
         created: "2020-10-10",
-        closes: "2021-09-09"
+        closes: "2021-09-09",
+        interestCount: 5,
       },
       {
         id: 70,
@@ -1408,7 +1410,8 @@ export async function getDummySaleItemSearchResult() : Promise<SearchResults<Sal
         price: 600,
         moreInfo: "The Nathan Apple is my favourite kind of apple. It was born in the Polish Jungle in Switzerland.",
         created: "2020-10-10",
-        closes: "2021-09-09"
+        closes: "2021-09-09",
+        interestCount: 12,
       }
     ]
   };
