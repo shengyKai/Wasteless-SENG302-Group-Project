@@ -1,6 +1,7 @@
 package org.seng302.leftovers.entities.event;
 
 import org.seng302.leftovers.dto.event.EventDTO;
+import org.seng302.leftovers.dto.event.PurchasedEventDTO;
 import org.seng302.leftovers.entities.BoughtSaleItem;
 import org.seng302.leftovers.entities.User;
 
@@ -39,6 +40,6 @@ public class PurchasedEvent extends Event{
 
     @Override
     public EventDTO asDTO() {
-        return null;
+        return new PurchasedEventDTO(this);
     }
 }
