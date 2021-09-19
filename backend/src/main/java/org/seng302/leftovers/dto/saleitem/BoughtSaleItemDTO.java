@@ -6,7 +6,6 @@ import lombok.ToString;
 import org.seng302.leftovers.dto.product.ProductResponseDTO;
 import org.seng302.leftovers.dto.user.UserResponseDTO;
 import org.seng302.leftovers.entities.BoughtSaleItem;
-
 import java.math.BigDecimal;
 import java.time.Instant;
 
@@ -26,6 +25,10 @@ public class BoughtSaleItemDTO {
     private Instant saleDate;
     private Instant listingDate;
 
+    /**
+     * Converts a BoughtSaleItem to its JSON form
+     * @param item BroughtSaleItem to serialize
+     */
     public BoughtSaleItemDTO(BoughtSaleItem item) {
         this.id = item.getId();
         this.buyer = new UserResponseDTO(item.getBuyer());
