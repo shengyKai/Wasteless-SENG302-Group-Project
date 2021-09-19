@@ -23,7 +23,8 @@ export default {
   },
   data() {
     return {
-      title: "New Marketplace Purchase"
+      title: "New Purchase",
+      address: this.event.saleItem.inventoryItem.product.business.address
     };
   },
   computed: {
@@ -34,7 +35,21 @@ export default {
       return this.event.saleItem.inventoryItem.product.business.name;
     },
     location() {
-      return this.event.saleItem.inventoryItem.product.business.address;
+      let location;
+      if (this.address.streetNumber && this.address.streetName) {
+        location += this.address.streetNumber + " " + this.address.streetName + ", ";
+      }
+      if (this.address.district) {
+        location += this.address.district + ", ";
+      }
+      if (this.address.city) {
+        location += this.address.city + ", ";
+      }
+      if (this.address.region) {
+        location += this.address.region + ", ";
+      }
+      location += this.address.country;
+      return location;
     },
     price() {
       return this.event.saleItem.price;
