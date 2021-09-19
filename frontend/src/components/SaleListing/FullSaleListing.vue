@@ -18,7 +18,6 @@
               </v-card-text>
             </v-card>
           </v-col>
-          <!-- <v-col cols="12" sm="4" class="text-center mt-3 mb-1"> -->
           <!-- Buy feature will not be implemented yet -->
           <v-row>
             <v-col class="align-self-center text-center">
@@ -28,7 +27,7 @@
               </v-btn>
               <!-- Thumb up/down button to show and allow user the like & unlike feature -->
               <v-btn class=" pl-2 pr-2 ml-2" color="grey lighten-2" @click="changeInterest">
-                {{thumbMessage}}
+                {{thumbMessage}} {{interestedCount}}
                 <v-icon class="ml-1">{{thumbIcon}}</v-icon>
               </v-btn>
               <!-- A return button for user to go back to business profile-->
@@ -138,6 +137,7 @@ export default {
   },
   data() {
     return {
+      interestedCount: "",
       currency: {
         code: "",
         symbol: "",
@@ -148,6 +148,10 @@ export default {
   },
   props: {
     saleItem: Object
+  },
+  mounted() {
+    console.log(this.saleItem);
+    this.interestedCount = this.saleItem.interestedCount;
   },
   computed: {
     imagesList() {
@@ -248,6 +252,8 @@ export default {
     async changeInterest() {
       await setListingInterest(this.saleItem.id, this.userId, !this.isInterested);
       await this.computeIsInterested();
+      if(this.isInterested) this.interestedCount += 1;
+      else this.interestedCount -= 1;
     },
     /**
      * Compute the lising isInterested
