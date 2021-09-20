@@ -2,33 +2,54 @@
   <div>
     <v-row class="mt-5">
       <v-col class="align-self-center shrink" no-gutters>
-        <v-chip
-          class="mt-2"
-          color="success"
-          outlined
-        >
-          <v-icon center>
-            mdi-upload
-          </v-icon>
-        </v-chip>
-        <v-chip
-          class="mt-2"
-          color="success"
-          outlined
-        >
-          <v-icon center>
-            mdi-trash-can
-          </v-icon>
-        </v-chip>
-        <v-chip
-          class="mt-2"
-          color="success"
-          outlined
-        >
-          <v-icon center>
-            mdi-pen
-          </v-icon>
-        </v-chip>
+        <v-tooltip right>
+          <template v-slot:activator="{ on, attrs }">
+            <v-chip
+              class="mt-2"
+              color="success"
+              outlined
+              v-bind="attrs"
+              v-on="on"
+            >
+              <v-icon center>
+                mdi-upload
+              </v-icon>
+            </v-chip>
+          </template>
+          <span>Click to upload an image</span>
+        </v-tooltip>
+        <v-tooltip right>
+          <template v-slot:activator="{ on, attrs }">
+            <v-chip
+              class="mt-2"
+              color="success"
+              outlined
+              v-bind="attrs"
+              v-on="on"
+            >
+              <v-icon center>
+                mdi-trash-can
+              </v-icon>
+            </v-chip>
+          </template>
+          <span>Click to delete an image</span>
+        </v-tooltip>
+        <v-tooltip right>
+          <template v-slot:activator="{ on, attrs }">
+            <v-chip
+              class="mt-2"
+              color="success"
+              outlined
+              v-bind="attrs"
+              v-on="on"
+            >
+              <v-icon center>
+                mdi-image-edit
+              </v-icon>
+            </v-chip>
+          </template>
+          <span>Click to set image as thumbnail primary</span>
+        </v-tooltip>
       </v-col>
       <v-col>
         <v-carousel v-model="model">
@@ -53,42 +74,6 @@
             </v-sheet>
           </v-carousel-item>
         </v-carousel>
-      </v-col>
-    </v-row>
-    <v-row no-gutters>
-      <v-col>
-        <v-expand-transition>
-          <v-card
-            v-show="expand"
-            max-width="1200"
-            class="mx-auto"
-          >
-            <div class="font-weight-medium">
-              <span class="ml-4">
-                Change your Tag:
-              </span>
-            </div>
-            <!--  Content that run through a loop of colours which at the same time set the colour of the chip
-              Make the code more maintainable as it will be easy to modify colour in future and get the index
-              Trigger a tagNotification when the chip is clicked (will take the colour as param)
-        -->
-            <div class="ml-3">
-              <v-chip
-                class="ma-1"
-                v-for="colour in colours"
-                :key=colour
-                :color="colour"
-                label
-                text-color="white"
-                @click="tagNotification(colour)"
-              >
-                <v-icon left>
-                  mdi-label
-                </v-icon>
-              </v-chip>
-            </div>
-          </v-card>
-        </v-expand-transition>
       </v-col>
     </v-row>
   </div>
