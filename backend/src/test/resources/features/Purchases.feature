@@ -33,3 +33,10 @@ Feature: U31 - Purchases
     When I try to purchase the most recent sale listing
     Then The request succeeds
     And A record of the purchase is added to the business's sale history
+
+  Scenario: AC2: A notification appears on my home feed to remind me what I have purchased
+    Given I am logged into "Alice" account
+    And I am viewing the sale listings for business "Amazon"
+    When I try to purchase the most recent sale listing
+    And I check my notification feed
+    Then I receive a notification

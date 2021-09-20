@@ -1,5 +1,6 @@
 package org.seng302.leftovers.dto.saleitem;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.ToString;
@@ -22,7 +23,9 @@ public class BoughtSaleItemDTO {
     private Integer interestCount;
     private BigDecimal price;
     private Integer quantity;
+    @JsonFormat(shape=JsonFormat.Shape.STRING)
     private Instant saleDate;
+    @JsonFormat(shape=JsonFormat.Shape.STRING)
     private Instant listingDate;
 
     /**
