@@ -1,30 +1,58 @@
 package org.seng302.leftovers.entities;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import net.minidev.json.JSONObject;
+import org.hibernate.Session;
+import org.hibernate.SessionFactory;
+import org.hibernate.exception.ConstraintViolationException;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
+import org.seng302.leftovers.dto.ImageDTO;
+import org.seng302.leftovers.dto.business.BusinessType;
+import org.seng302.leftovers.persistence.BusinessRepository;
 import org.seng302.leftovers.exceptions.ValidationResponseException;
 import org.seng302.leftovers.persistence.ImageRepository;
+import org.seng302.leftovers.persistence.ProductRepository;
+import org.seng302.leftovers.persistence.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.dao.DataIntegrityViolationException;
 
+import java.time.Instant;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 @SpringBootTest
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class ImageTests {
     @Autowired
-    ImageRepository imageRepository;
+    private ImageRepository imageRepository;
 
-    Image testImage;
+    @Autowired
+    private UserRepository userRepository;
 
-    final List<String> illegalCharacters = Arrays.asList(".", "\n", "\t", "\\", ",");
+    @Autowired
+    private BusinessRepository businessRepository;
+
+    @Autowired
+    private ProductRepository productRepository;
+
+    @Autowired
+    private SessionFactory sessionFactory;
+
+    @Autowired
+    private ObjectMapper objectMapper;
+
+    private Image testImage;
+
+    final private List<String> illegalCharacters = Arrays.asList(".", "\n", "\t", "\\", ",");
 
     /**
      * Creates a test image to be used within these tests
@@ -37,12 +65,18 @@ class ImageTests {
     @BeforeEach
     void setUp() {
         imageRepository.deleteAll();
+        productRepository.deleteAll();
+        businessRepository.deleteAll();
+        userRepository.deleteAll();
         createTestImage();
     }
 
     @AfterAll
     void teardown() {
         imageRepository.deleteAll();
+        productRepository.deleteAll();
+        businessRepository.deleteAll();
+        userRepository.deleteAll();
     }
 
     /**
@@ -253,5 +287,171 @@ class ImageTests {
         } catch (Exception e) { assertEquals(DataIntegrityViolationException.class, e.getClass()); }
     }
 
+    @Test
+    void createImage_validParameters_creationTimeSet() {
+        var before = Instant.now();
+        testImage = new Image("help.png", "original_thumbnail.png");
+        var after = Instant.now();
+        assertFalse(testImage.getCreated().isBefore(before));
+        assertFalse(testImage.getCreated().isAfter(after));
+    }
+
+    @Test
+    void imageDTO_withImage_expectedFieldsReturned() {
+        var image = mock(Image.class);
+        when(image.getID()).thenReturn(6L);
+        when(image.getFilename()).thenReturn("foo.png");
+        when(image.getFilenameThumbnail()).thenReturn("bar.png");
+
+        var json = objectMapper.convertValue(new ImageDTO(image), JSONObject.class);
+        assertEquals(image.getID(), json.get("id"));
+        assertEquals( "/media/images/foo.png", json.get("filename"));
+        assertEquals("/media/images/bar.png", json.get("thumbnailFilename"));
+        assertEquals(3, json.size());
+    }
+
+    /**
+     * Creates a test user
+     * @return Test user
+     */
+    private User createUser() {
+        return new User.Builder()
+                .withFirstName("Joe")
+                .withMiddleName("Hector")
+                .withLastName("Smith")
+                .withNickName("Jonny")
+                .withEmail("johnsmith99@gmail.com")
+                .withPassword("1337-H%nt3r2")
+                .withDob("2001-03-11")
+                .withPhoneNumber("64 3555012")
+                .withAddress(Location.covertAddressStringToLocation("4,Rountree Street,Ashburton,Christchurch,New Zealand," +
+                        "Canterbury,8041"))
+                .build();
+    }
+
+    /**
+     * Creates a test business with the provided owner
+     * @param owner Business owner
+     * @return Created business
+     */
+    private Business createBusiness(User owner) {
+        return new Business.Builder()
+                .withBusinessType(BusinessType.ACCOMMODATION_AND_FOOD_SERVICES)
+                .withAddress(Location.covertAddressStringToLocation("4,Rountree Street,Ashburton,Christchurch,New Zealand," +
+                        "Canterbury,8041"))
+                .withDescription("Some description")
+                .withName("Joe's Garage")
+                .withPrimaryOwner(owner)
+                .build();
+    }
+
+    /**
+     * Creates a test product with the provided business
+     * @param business Business to assign to
+     * @return Created product
+     */
+    private Product createProduct(Business business) {
+        return new Product.Builder()
+                .withProductCode("ORANGE-69")
+                .withName("Fresh Orange")
+                .withDescription("This is a fresh orange")
+                .withManufacturer("Apple")
+                .withRecommendedRetailPrice("2.01")
+                .withBusiness(business)
+                .build();
+    }
+
+    @Test
+    void getAttachment_noAttachment_nullReturned() {
+        var image = imageRepository.save(new Image("foo.png", "bar.png"));
+        assertNull(image.getAttachment());
+    }
+
+    @Test
+    void getAttachment_savedUser_userReturned() {
+        var image = imageRepository.save(new Image("foo.png", "bar.png"));
+
+        var user = createUser();
+        user.addImage(image);
+        userRepository.save(user);
+
+        try (Session session = sessionFactory.openSession()) {
+            image = session.get(Image.class, image.getID());
+            assertTrue(image.getAttachment() instanceof User);
+            assertEquals(user.getUserID(), ((User)image.getAttachment()).getUserID());
+        }
+    }
+
+    @Test
+    void getAttachment_savedBusiness_businessReturned() {
+        var image = imageRepository.save(new Image("foo.png", "bar.png"));
+
+        var business = createBusiness(userRepository.save(createUser()));
+        business.addImage(image);
+        businessRepository.save(business);
+
+        try (Session session = sessionFactory.openSession()) {
+            image = session.get(Image.class, image.getID());
+            assertTrue(image.getAttachment() instanceof Business);
+            assertEquals(business.getId(), ((Business)image.getAttachment()).getId());
+        }
+    }
+
+    @Test
+    void getAttachment_savedProduct_productReturned() {
+        var image = imageRepository.save(new Image("foo.png", "bar.png"));
+
+        var product = createProduct(businessRepository.save(createBusiness(userRepository.save(createUser()))));
+        product.addImage(image);
+        productRepository.save(product);
+
+        try (Session session = sessionFactory.openSession()) {
+            image = session.get(Image.class, image.getID());
+            assertTrue(image.getAttachment() instanceof Product);
+            assertEquals(product.getID(), ((Product)image.getAttachment()).getID());
+        }
+    }
+
+    @Test
+    void save_savedUserAndBusinessWithImage_failsToSave() {
+        var image = imageRepository.save(new Image("foo.png", "bar.png"));
+
+        var user = createUser();
+        user.addImage(image);
+        user = userRepository.save(user);
+
+        var business = createBusiness(user);
+        business.addImage(image);
+
+        assertThrows(DataIntegrityViolationException.class, () -> businessRepository.save(business));
+    }
+
+    @Test
+    void save_savedUserAndProductWithImage_failsToSave() {
+        var image = imageRepository.save(new Image("foo.png", "bar.png"));
+
+        var user = createUser();
+        user.addImage(image);
+        user = userRepository.save(user);
+
+        var product = createProduct(businessRepository.save(createBusiness(user)));
+        product.addImage(image);
+
+        assertThrows(DataIntegrityViolationException.class, () -> productRepository.save(product));
+    }
+
+    @Test
+    void save_savedBusinessAndProduct_failsToSave() {
+        var image = imageRepository.save(new Image("foo.png", "bar.png"));
+
+        var business = createBusiness(userRepository.save(createUser()));
+        business.addImage(image);
+        business = businessRepository.save(business);
+
+        var product = createProduct(business);
+        product.addImage(image);
+
+        assertThrows(DataIntegrityViolationException.class, () -> productRepository.save(product));
+    }
 }
 

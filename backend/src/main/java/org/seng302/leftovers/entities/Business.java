@@ -18,7 +18,7 @@ import java.util.List;
 import java.util.Set;
 
 @Entity
-public class Business {
+public class Business implements ImageAttachment {
 
     //Minimum age to create a business
     private static final int MINIMUM_AGE = 16;
@@ -321,6 +321,7 @@ public class Business {
      * Returns the images associated with this business.
      * @return List of business images
      */
+    @Override
     public List<Image> getImages() { return this.images; }
 
     /**
