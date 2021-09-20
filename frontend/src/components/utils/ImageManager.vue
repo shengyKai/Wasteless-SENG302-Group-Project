@@ -1,28 +1,60 @@
 <template>
   <div>
-    <v-row>
-      <v-carousel v-model="model">
-        <v-carousel-item
-          v-for="(color, i) in colors"
-          :key="color"
+    <v-row class="mt-5">
+      <!-- <div  class="d-flex flex-column" no-gutters> -->
+      <v-col cols="1" class="align-self-center d-flex flex-column" no-gutters>
+        <v-chip
+          class="mt-2"
+          color="success"
+          outlined
         >
-          <v-sheet
-            :color="color"
-            height="100%"
-            tile
+          <v-icon center>
+            mdi-upload
+          </v-icon>
+        </v-chip>
+        <v-chip
+          class="mt-2"
+          color="success"
+          outlined
+        >
+          <v-icon center>
+            mdi-trash-can
+          </v-icon>
+        </v-chip>
+        <v-chip
+          class="mt-2"
+          color="success"
+          outlined
+        >
+          <v-icon center>
+            mdi-pen
+          </v-icon>
+        </v-chip>
+      </v-col>
+      <v-col cols="11">
+        <v-carousel v-model="model">
+          <v-carousel-item
+            v-for="(color, i) in colors"
+            :key="color"
           >
-            <v-row
-              class="fill-height"
-              align="center"
-              justify="center"
+            <v-sheet
+              :color="color"
+              height="100%"
+              tile
             >
-              <div class="text-h2">
-                Slide {{ i + 1 }}
-              </div>
-            </v-row>
-          </v-sheet>
-        </v-carousel-item>
-      </v-carousel>
+              <v-row
+                class="fill-height"
+                align="center"
+                justify="center"
+              >
+                <div class="text-h2">
+                  Slide {{ i + 1 }}
+                </div>
+              </v-row>
+            </v-sheet>
+          </v-carousel-item>
+        </v-carousel>
+      </v-col>
     </v-row>
     <v-row no-gutters>
       <v-col>
