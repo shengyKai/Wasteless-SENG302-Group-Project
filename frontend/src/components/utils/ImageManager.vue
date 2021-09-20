@@ -1,8 +1,7 @@
 <template>
   <div>
     <v-row class="mt-5">
-      <!-- <div  class="d-flex flex-column" no-gutters> -->
-      <v-col cols="1" class="align-self-center d-flex flex-column" no-gutters>
+      <v-col class="align-self-center shrink" no-gutters>
         <v-chip
           class="mt-2"
           color="success"
@@ -31,7 +30,7 @@
           </v-icon>
         </v-chip>
       </v-col>
-      <v-col cols="11">
+      <v-col>
         <v-carousel v-model="model">
           <v-carousel-item
             v-for="(color, i) in colors"
