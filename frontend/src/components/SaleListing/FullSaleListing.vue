@@ -10,7 +10,7 @@
           <v-col cols="12" sm="8">
             <v-card flat>
               <v-card-text>
-                <p class="text-h4 text--primary d-inline-block">
+                <p ref="productName" class="text-h4 text--primary d-inline-block">
                   {{ product.name }}
                 </p>
                 <p class="ml-2 text-h5 text--secondary d-inline-block text-decoration-underline">FROM {{this.product.manufacturer}}</p>
@@ -28,7 +28,7 @@
                 <v-icon>mdi-currency-usd</v-icon>
               </v-btn>
               <!-- Thumb up/down button to show and allow user the like & unlike feature -->
-              <v-btn class=" pl-2 pr-2 ml-2" color="grey lighten-2" @click="changeInterest">
+              <v-btn ref="likeButton" class=" pl-2 pr-2 ml-2" color="grey lighten-2" @click="changeInterest">
                 {{thumbMessage}} {{interestCount}}
                 <v-icon class="ml-1">{{thumbIcon}}</v-icon>
               </v-btn>
