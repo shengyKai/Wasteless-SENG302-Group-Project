@@ -131,7 +131,7 @@ class ProductControllerDeleteImageTests {
                 .withRecommendedRetailPrice("3.20")
                 .withBusiness(testBusiness)
                 .build();
-        testProduct.setProductImages(Arrays.asList(testImage));
+        testProduct.setImages(Arrays.asList(testImage));
         productRepository.save(testProduct);
 
         testUser2 = new User.Builder()
@@ -207,7 +207,7 @@ class ProductControllerDeleteImageTests {
     void deleteProductImage_noImage_406Response() throws Exception {
         String url = String.format("/businesses/%d/products/%s/images/%d",
                 testBusiness.getId(), testProduct.getProductCode(), 999);
-        testProduct.setProductImages(Arrays.asList());
+        testProduct.setImages(Arrays.asList());
         productRepository.save(testProduct);
 
         setActiveUser(testUser.getUserID());

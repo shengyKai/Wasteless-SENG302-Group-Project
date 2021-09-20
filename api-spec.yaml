@@ -75,6 +75,7 @@ tags:
     description: >-
       Grouping of endpoints related to system-wide keywords that can be added by
       users and attached to marketplace cards
+  - name: Images
 security:
   - CookieAuth:
       - user
@@ -2527,6 +2528,66 @@ paths:
         '406':
           description: >-
             Not Acceptable: There is no newsfeed item with this ID
+  /media/images:
+    post:
+      tags:
+        - Images
+      summary: Upload a new detached image
+      security:
+        - CookieAuth:
+            - user
+            - globalApplicationAdmin
+            - defaultGlobalApplicationAdmin
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+      responses:
+        '201':
+          description: Image created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Image'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+  /media/images/{imageFilename}:
+    get:
+      tags:
+        - Images
+      summary: Retrieve an image
+      parameters:
+        - name: imageFilename
+          in: path
+          description: Filename of retrieved image
+          required: true
+          schema:
+            type: string
+      security:
+        - CookieAuth:
+            - user
+            - globalApplicationAdmin
+            - defaultGlobalApplicationAdmin
+      responses:
+        '200':
+          description: Image retrieved successfully
+          content:
+            image/*:
+              schema:
+                type: string
+                format: binary
+        '406':
+          description: >-
+            Not Acceptable: Returned when the image with the given filename does not exist.
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
 components:
   securitySchemes:
     CookieAuth:

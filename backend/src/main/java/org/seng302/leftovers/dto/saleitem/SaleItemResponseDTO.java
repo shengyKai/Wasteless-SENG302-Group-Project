@@ -10,7 +10,7 @@ import org.seng302.leftovers.entities.SaleItem;
 import java.time.Instant;
 
 /**
- * TODO
+ *  A DTO representing a sale item being sent to a client
  */
 @Getter
 @ToString

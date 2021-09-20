@@ -1,6 +1,7 @@
 package cucumber.stepDefinitions;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import cucumber.context.CardContext;
 import cucumber.context.EventContext;
@@ -25,7 +26,6 @@ import org.seng302.leftovers.entities.User;
 import org.seng302.leftovers.persistence.KeywordRepository;
 import org.seng302.leftovers.persistence.MarketplaceCardRepository;
 import org.seng302.leftovers.service.CardService;
-import org.seng302.leftovers.tools.JsonTools;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
@@ -416,9 +416,7 @@ public class CardStepDefinition {
         assertEquals(modifyParameters.getAsString("title"), updatedCard.getTitle());
         assertEquals(modifyParameters.getAsString("description"), updatedCard.getDescription());
 
-        Set<Long> expectedKeywordIds = Arrays.stream(JsonTools.parseLongArrayFromJsonField(modifyParameters, "keywordIds"))
-                .boxed()
-                .collect(Collectors.toSet());
+        Set<Long> expectedKeywordIds = mapper.convertValue(modifyParameters.get("keywordIds"), new TypeReference<>() {});
         Set<Long> actualKeywordIds = updatedCard.getKeywords().stream()
                 .map(Keyword::getID)
                 .collect(Collectors.toSet());

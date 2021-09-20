@@ -1,19 +1,29 @@
 package org.seng302.leftovers.entities;
 
-import net.minidev.json.JSONObject;
+import org.hibernate.annotations.Check;
 import org.seng302.leftovers.exceptions.ValidationResponseException;
 
 import javax.persistence.*;
+import java.time.Instant;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
+/**
+ * Entity representing the location of an image+image thumbnail stored in the server
+ *
+ * The @Check constraint ensures that the image is attached to at most 1 other entity
+ */
 @Entity
+@Check(constraints = "(CAST(product_id IS NOT NULL AS int) + CAST(business_id IS NOT NULL AS int) + CAST(user_id IS NOT NULL AS int)) < 2")
 public class Image {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @Column(nullable = false)
+    private Instant created;
 
     @Column(name = "filename", nullable = false, unique = true)
     private String filename;
@@ -21,12 +31,26 @@ public class Image {
     @Column(name = "filename_thumbnail", nullable = true, unique = false)
     private String filenameThumbnail;
 
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "product_id")
+    private Product product;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "business_id")
+    private Business business;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id")
+    private User user;
+
     /**
      * The constructor for a product image
      * @param filename the directory where the image is stored
      * @param filenameThumbnail the directory where the image's thumbnail is located
      */
     public Image(String filename, String filenameThumbnail) {
+        created = Instant.now();
         setFilename(filename);
         setFilenameThumbnail(filenameThumbnail);
     }
@@ -35,14 +59,6 @@ public class Image {
      * Empty constructor to make spring happy
      */
     protected Image() {
-    }
-
-    public JSONObject constructJSONObject() {
-        var object = new JSONObject();
-        object.put("id", getID());
-        object.put("filename", "/media/images/" + getFilename());
-        object.put("thumbnailFilename", "/media/images/" + getFilenameThumbnail());
-        return object;
     }
 
     /**
@@ -86,6 +102,25 @@ public class Image {
      * @return the directory
      */
     public String getFilenameThumbnail() { return filenameThumbnail; }
+
+    /**
+     * Gets the moment in time that the image was made
+     * @return Image creation date+time
+     */
+    public Instant getCreated() {
+        return created;
+    }
+
+    /**
+     * Gets the current entity that owns this image
+     * @return Entity that has this image attached
+     */
+    public ImageAttachment getAttachment() {
+        if (product != null) return product;
+        if (business != null) return business;
+        if (user != null) return user;
+        return null;
+    }
 
     /**
      * Sets the direction location of where the image file is located
