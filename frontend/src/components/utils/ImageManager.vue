@@ -1,56 +1,6 @@
 <template>
   <div>
     <v-row class="mt-5">
-      <v-col class="align-self-center shrink" no-gutters>
-        <v-tooltip right>
-          <template v-slot:activator="{ on, attrs }">
-            <v-chip
-              class="mt-2"
-              color="success"
-              outlined
-              v-bind="attrs"
-              v-on="on"
-            >
-              <v-icon center>
-                mdi-upload
-              </v-icon>
-            </v-chip>
-          </template>
-          <span>Upload a new image</span>
-        </v-tooltip>
-        <v-tooltip right>
-          <template v-slot:activator="{ on, attrs }">
-            <v-chip
-              class="mt-2"
-              color="success"
-              outlined
-              v-bind="attrs"
-              v-on="on"
-            >
-              <v-icon center>
-                mdi-trash-can
-              </v-icon>
-            </v-chip>
-          </template>
-          <span>Delete the current image</span>
-        </v-tooltip>
-        <v-tooltip right>
-          <template v-slot:activator="{ on, attrs }">
-            <v-chip
-              class="mt-2"
-              color="success"
-              outlined
-              v-bind="attrs"
-              v-on="on"
-            >
-              <v-icon center>
-                mdi-image-edit
-              </v-icon>
-            </v-chip>
-          </template>
-          <span>Set current image as primary thumbnail</span>
-        </v-tooltip>
-      </v-col>
       <v-col>
         <v-carousel v-model="model">
           <v-carousel-item
@@ -62,6 +12,49 @@
               height="100%"
               tile
             >
+              <v-row>
+                <v-col class="text-right">
+                  <v-tooltip bottom>
+                    <template v-slot:activator="{ on, attrs }">
+                      <v-icon center
+                              outlined
+                              class="ma-2"
+                              color="primary"
+                              v-bind="attrs"
+                              v-on="on">
+                        mdi-upload
+                      </v-icon>
+                    </template>
+                    <span>Upload a new image</span>
+                  </v-tooltip>
+                  <v-tooltip bottom>
+                    <template v-slot:activator="{ on, attrs }">
+                      <v-icon center
+                              outlined
+                              class="ma-2"
+                              color="primary"
+                              v-bind="attrs"
+                              v-on="on">
+                        mdi-trash-can
+                      </v-icon>
+                    </template>
+                    <span>Delete the current image</span>
+                  </v-tooltip>
+                  <v-tooltip bottom>
+                    <template v-slot:activator="{ on, attrs }">
+                      <v-icon center
+                              outlined
+                              class="ma-2"
+                              color="primary"
+                              v-bind="attrs"
+                              v-on="on">
+                        mdi-image-edit
+                      </v-icon>
+                    </template>
+                    <span>Set current image as primary thumbnail</span>
+                  </v-tooltip>
+                </v-col>
+              </v-row>
               <v-row
                 class="fill-height"
                 align="center"
