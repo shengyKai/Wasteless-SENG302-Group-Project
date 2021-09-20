@@ -1,9 +1,11 @@
 <template>
   <div>
     <v-card class="pa-2">
+      <!-- Image carousel component -->
       <div>
         <ImageCarousel v-if="imagesList.length > 0" :imagesList="product.images" :productId="product.id"/>
         <div/>
+        <!-- Product titile and core information -->
         <v-row>
           <v-col cols="12" sm="8">
             <v-card flat>
@@ -40,6 +42,7 @@
           <!-- </v-col> -->
         </v-row>
       </div>
+      <!-- Listing details -->
       <div>
         <v-row no-gutters class="mt-3">
           <v-col class="mt-2" cols="6" sm="2">
@@ -80,11 +83,11 @@
           <v-col class="mt-2" cols="6" sm="4">
             <label class="text-h6 font-weight-regular">{{ createdFormatted }}</label>
           </v-col>
-          <!-- change -->
           <v-col class="column" cols="6" sm="4">
             <label class="followingLabel">{{ closesFormatted }}</label>
           </v-col>
         </v-row>
+        <!-- Addtional listing details -->
         <div>
           <v-row no-gutters>
             <v-col class="mt-2" cols="6" sm="2">
@@ -144,22 +147,31 @@ export default {
       },
       extraDetails: false,
       isInterested: "",
+      errorMessage: undefined,
     };
   },
   props: {
     saleItem: Object
   },
   mounted() {
-    console.log(this.saleItem);
     this.interestCount = this.saleItem.interestCount;
   },
   computed: {
+    /**
+     * Stay consistent with other folder by the name imageList and easier access to the product images list
+     */
     imagesList() {
       return this.product.images;
     },
+    /**
+     * Easy access to user id
+     */
     userId() {
       return this.$store.state.user.id;
     },
+    /**
+     * Compute the thumb icon base on user interest status
+     */
     thumbIcon() {
       if (this.isInterested) {
         return "mdi-thumb-up";
@@ -167,6 +179,9 @@ export default {
         return "mdi-thumb-up-outline";
       }
     },
+    /**
+     * Compute the message to be render beside the like icon
+     */
     thumbMessage() {
       if (this.isInterested) {
         return "Liked";
@@ -250,10 +265,15 @@ export default {
     /** Change the user interest status on the listing (toggle)
      */
     async changeInterest() {
-      await setListingInterest(this.saleItem.id, this.userId, !this.isInterested);
-      await this.computeIsInterested();
-      if(this.isInterested) this.interestCount += 1;
-      else this.interestCount -= 1;
+      const result = await setListingInterest(this.saleItem.id, this.userId, !this.isInterested);
+      if (typeof result === 'string'){
+        this.errorMessage = result;
+      } else {
+        this.errorMessage = undefined;
+        await this.computeIsInterested();
+        if(this.isInterested) this.interestCount += 1;
+        else this.interestCount -= 1;
+      }
     },
     /**
      * Compute the lising isInterested
@@ -261,8 +281,10 @@ export default {
     async computeIsInterested() {
       this.isInterested = await getListingInterest(this.saleItem.id, this.userId);
     },
+    /**
+     * TODO in other task
+     */
     buy() {
-      console.log(this.isInterested);
       console.log(this.saleItem);
     },
     /**
@@ -271,10 +293,16 @@ export default {
     computeCurrency() {
       this.currency = currencyFromCountry(this.product.countryOfSale);
     },
+    /**
+     * Minimize the full sale listing and back to the listing result page
+     */
     hideExpand() {
       this.$emit('goBack');
     },
   },
+  /**
+   * Compute the currency to be rendered and check have this user liked this listing
+   */
   beforeMount() {
     this.computeCurrency();
     this.computeIsInterested();
