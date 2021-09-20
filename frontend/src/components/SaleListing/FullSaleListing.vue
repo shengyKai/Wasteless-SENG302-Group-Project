@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div ref="fullListing">
     <v-card class="pa-2">
       <!-- Image carousel component -->
       <div>
