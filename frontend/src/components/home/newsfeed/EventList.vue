@@ -29,6 +29,7 @@
         <KeywordCreated v-else-if="event.type === 'KeywordCreatedEvent'" :event="event"/>
         <MessageEvent v-else-if="event.type === 'MessageEvent'" :event="event"/>
         <InterestEvent v-else-if="event.type === 'InterestEvent'" :event="event"/>
+        <InterestPurchasedEvent v-else-if="event.type === 'InterestPurchasedEvent'" :event="event"/>
         <Event v-else :title="event.type">
           <pre>{{ event }}</pre>
         </Event>
