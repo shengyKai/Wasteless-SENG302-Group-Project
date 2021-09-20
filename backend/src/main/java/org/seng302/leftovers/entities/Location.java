@@ -3,7 +3,6 @@ package org.seng302.leftovers.entities;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
-import net.minidev.json.JSONObject;
 import org.seng302.leftovers.exceptions.ValidationResponseException;
 
 import javax.persistence.*;
@@ -59,23 +58,6 @@ public class Location {
         Builder locationBuilder = new Builder().atStreetNumber(streetNumber).onStreet(streetName)
                 .inCity(city).inRegion(region).inCountry(country).withPostCode(postCode).atDistrict(district);
         return locationBuilder.build();
-    }
-
-    /**
-     * Parses an address from JSON format into a Location object
-     * @param json JSON representation of the address
-     * @return A Location object representing the given address
-     */
-    public static Location parseLocationFromJson(JSONObject json) {
-        return new Builder()
-                .inCountry(json.getAsString("country"))
-                .inCity(json.getAsString("city"))
-                .inRegion(json.getAsString("region"))
-                .onStreet(json.getAsString("streetName"))
-                .atStreetNumber(json.getAsString("streetNumber"))
-                .withPostCode(json.getAsString("postcode"))
-                .atDistrict(json.getAsString("district"))
-                .build();
     }
 
     /**

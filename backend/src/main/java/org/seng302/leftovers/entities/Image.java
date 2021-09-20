@@ -1,6 +1,6 @@
 package org.seng302.leftovers.entities;
 
-import net.minidev.json.JSONObject;
+import org.hibernate.annotations.Check;
 import org.seng302.leftovers.exceptions.ValidationResponseException;
 
 import javax.persistence.*;
@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Objects;
 
 @Entity
+@Check(constraints = "(CAST(product_id IS NOT NULL AS int) + CAST(business_id IS NOT NULL AS int) + CAST(user_id IS NOT NULL AS int)) < 2")
 public class Image {
 
     @Id
@@ -106,8 +107,8 @@ public class Image {
     }
 
     /**
-     * Gets the current attached image
-     * @return
+     * Gets the current entity that owns this image
+     * @return Entity that has this image attached
      */
     public ImageAttachment getAttachment() {
         if (product != null) return product;
@@ -166,20 +167,5 @@ public class Image {
     @Override
     public int hashCode() {
         return Objects.hash(id, filename, filenameThumbnail);
-    }
-
-    @PrePersist
-    @PreUpdate
-    public void checkNoDoubleAttachments() {
-        int totalAttachments = 0;
-        if (this.user != null) totalAttachments++;
-        if (this.business != null) totalAttachments++;
-        if (this.product != null) totalAttachments++;
-
-        System.out.println("Image attachment count: " + totalAttachments);
-
-        if (totalAttachments > 1) {
-            throw new IllegalStateException("Image has multiple attachments");
-        }
     }
 }

@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import net.minidev.json.JSONObject;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
+import org.hibernate.exception.ConstraintViolationException;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -412,7 +413,7 @@ class ImageTests {
     }
 
     @Test
-    void checkNoDoubleAttachments_savedUserAndProductWithImage_failsToSave() {
+    void save_savedUserAndBusinessWithImage_failsToSave() {
         var image = imageRepository.save(new Image("foo.png", "bar.png"));
 
         var user = createUser();
@@ -421,7 +422,36 @@ class ImageTests {
 
         var business = createBusiness(user);
         business.addImage(image);
-        businessRepository.save(business);
+
+        assertThrows(DataIntegrityViolationException.class, () -> businessRepository.save(business));
+    }
+
+    @Test
+    void save_savedUserAndProductWithImage_failsToSave() {
+        var image = imageRepository.save(new Image("foo.png", "bar.png"));
+
+        var user = createUser();
+        user.addImage(image);
+        user = userRepository.save(user);
+
+        var product = createProduct(businessRepository.save(createBusiness(user)));
+        product.addImage(image);
+
+        assertThrows(DataIntegrityViolationException.class, () -> productRepository.save(product));
+    }
+
+    @Test
+    void save_savedBusinessAndProduct_failsToSave() {
+        var image = imageRepository.save(new Image("foo.png", "bar.png"));
+
+        var business = createBusiness(userRepository.save(createUser()));
+        business.addImage(image);
+        business = businessRepository.save(business);
+
+        var product = createProduct(business);
+        product.addImage(image);
+
+        assertThrows(DataIntegrityViolationException.class, () -> productRepository.save(product));
     }
 }
 

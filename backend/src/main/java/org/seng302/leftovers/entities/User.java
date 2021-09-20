@@ -298,8 +298,8 @@ public class User extends Account implements ImageAttachment {
     public Set<Event> getEvents() { return this.events;}
 
     /**
-     * TODO
-     * @return
+     * Gets the list of images for this user
+     * @return List of images
      */
     @Override
     public List<Image> getImages() { return this.images; }
@@ -346,8 +346,8 @@ public class User extends Account implements ImageAttachment {
     }
 
     /**
-     * TODO
-     * @param image
+     * Adds an image to this user
+     * @param image Image to add
      */
     public void addImage(Image image) {
         this.images.add(image);

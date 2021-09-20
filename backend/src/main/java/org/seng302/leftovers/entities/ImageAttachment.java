@@ -7,8 +7,8 @@ import java.util.List;
  */
 public interface ImageAttachment {
     /**
-     * TODO
-     * @return
+     * Gets the images associated with this image attachment point
+     * @return List of images
      */
     List<Image> getImages();
 }

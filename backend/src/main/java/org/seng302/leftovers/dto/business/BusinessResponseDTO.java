@@ -5,12 +5,10 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.ToString;
-import net.minidev.json.JSONObject;
 import org.seng302.leftovers.dto.ImageDTO;
 import org.seng302.leftovers.dto.user.UserResponseDTO;
 import org.seng302.leftovers.entities.Account;
 import org.seng302.leftovers.entities.Business;
-import org.seng302.leftovers.entities.Image;
 
 import java.time.Instant;
 import java.util.Comparator;
