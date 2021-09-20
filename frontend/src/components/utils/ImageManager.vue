@@ -18,7 +18,7 @@
                     <template v-slot:activator="{ on, attrs }">
                       <v-icon center
                               outlined
-                              class="ma-2"
+                              class="ma-2 img-button"
                               color="primary"
                               v-bind="attrs"
                               v-on="on">
@@ -31,7 +31,7 @@
                     <template v-slot:activator="{ on, attrs }">
                       <v-icon center
                               outlined
-                              class="ma-2"
+                              class="ma-2 img-button"
                               color="primary"
                               v-bind="attrs"
                               v-on="on">
@@ -44,7 +44,7 @@
                     <template v-slot:activator="{ on, attrs }">
                       <v-icon center
                               outlined
-                              class="ma-2"
+                              class="ma-2 img-button"
                               color="primary"
                               v-bind="attrs"
                               v-on="on">
@@ -86,3 +86,9 @@ export default {
   }),
 };
 </script>
+
+<style scoped>
+.img-button {
+  text-shadow: 0px 0px 14px #000000;
+}
+</style>

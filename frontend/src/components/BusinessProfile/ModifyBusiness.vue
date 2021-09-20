@@ -148,8 +148,9 @@
                       </v-alert>
                     </v-row>
                   </div>
-                  <v-card-title class="mt-n3">Image</v-card-title>
-                  <v-card v-if="businessImages && businessImages.length > 0">
+                  <v-card-title class="mt-n3 image-title">Image</v-card-title>
+                  <!-- Use as a starting point for converting this image carousel to the image manager -->
+                  <!-- <v-card v-if="businessImages && businessImages.length > 0">
                     <ImageCarousel
                       :imagesList="businessImages"
                       :showMakePrimary="true"
@@ -157,9 +158,10 @@
                       @change-primary-image="makeImagePrimary"
                       ref="businessImageCarousel"
                     />
-                  </v-card>
+                  </v-card> -->
                   <!-- INPUT: Image Uploader -->
-                  <v-btn
+                  <!-- Change to button in the frontend task -->
+                  <!-- <v-btn
                     class="upload-image"
                     color="primary"
                     outlined
@@ -172,7 +174,7 @@
                       mdi-upload
                     </v-icon>
                     Upload new image
-                  </v-btn>
+                  </v-btn> -->
                   <ImageManager/>
                   <BusinessImageUploader
                     v-model="imageFile"
@@ -267,14 +269,12 @@ import {
   USER_ROLES
 } from "@/utils";
 import { modifyBusiness, uploadBusinessImage, makeBusinessImagePrimary, getUser } from '@/api/internal';
-import ImageCarousel from "@/components/utils/ImageCarousel";
 
 export default {
   name: 'ModifyBusiness',
   components: {
     LocationAutocomplete,
     BusinessImageUploader,
-    ImageCarousel,
     ImageManager
   },
   props: {
@@ -503,5 +503,9 @@ export default {
 
 .upload-image {
   margin-top: 25px;
+}
+
+.image-title {
+  margin-bottom: -25px;
 }
 </style>
