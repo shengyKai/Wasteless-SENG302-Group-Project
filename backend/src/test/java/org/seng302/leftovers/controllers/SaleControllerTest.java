@@ -15,8 +15,8 @@ import org.seng302.leftovers.entities.*;
 import org.seng302.leftovers.entities.event.InterestEvent;
 import org.seng302.leftovers.exceptions.AccessTokenException;
 import org.seng302.leftovers.persistence.*;
+import org.seng302.leftovers.persistence.event.EventRepository;
 import org.seng302.leftovers.persistence.event.InterestEventRepository;
-import org.seng302.leftovers.persistence.event.InterestPurchasedEventRepository;
 import org.seng302.leftovers.tools.AuthenticationTokenManager;
 import org.seng302.leftovers.tools.SearchHelper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -66,7 +66,7 @@ class SaleControllerTest {
     @Mock
     private BoughtSaleItemRepository boughtSaleItemRepository;
     @Mock
-    private InterestPurchasedEventRepository interestPurchasedEventRepository;
+    private EventRepository eventRepository;
     @Mock
     private Business business;
     @Mock
@@ -126,7 +126,7 @@ class SaleControllerTest {
         when(userRepository.findById(not(eq(4L)))).thenReturn(Optional.empty());
 
         saleController = spy(new SaleController(userRepository, businessRepository, saleItemRepository,
-                inventoryItemRepository, interestEventRepository, boughtSaleItemRepository, interestPurchasedEventRepository));
+                inventoryItemRepository, interestEventRepository, boughtSaleItemRepository, eventRepository));
         mockMvc = MockMvcBuilders.standaloneSetup(saleController).build();
     }
 
