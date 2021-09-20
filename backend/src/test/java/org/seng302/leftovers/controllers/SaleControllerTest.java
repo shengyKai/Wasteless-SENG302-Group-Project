@@ -13,6 +13,7 @@ import org.mockito.*;
 import org.mockito.internal.matchers.apachecommons.ReflectionEquals;
 import org.seng302.leftovers.entities.*;
 import org.seng302.leftovers.entities.event.InterestEvent;
+import org.seng302.leftovers.entities.event.InterestPurchasedEvent;
 import org.seng302.leftovers.entities.event.PurchasedEvent;
 import org.seng302.leftovers.exceptions.AccessTokenException;
 import org.seng302.leftovers.persistence.*;
@@ -73,6 +74,8 @@ class SaleControllerTest {
     @Mock
     private User user;
     @Mock
+    private User interestedUser;
+    @Mock
     private InventoryItem inventoryItem;
     @Mock
     private SaleItem saleItem;
@@ -92,6 +95,8 @@ class SaleControllerTest {
     ArgumentCaptor<Specification<SaleItem>> specificationArgumentCaptor;
     @Captor
     ArgumentCaptor<PageRequest> pageRequestArgumentCaptor;
+    @Captor
+    ArgumentCaptor<InterestPurchasedEvent> interestPurchasedEventCaptor;
 
 
     @BeforeEach
@@ -150,6 +155,7 @@ class SaleControllerTest {
     @AfterEach
     public void tearDown() {
         authenticationTokenManager.close();
+        reset(eventRepository);
     }
 
     @Test
@@ -990,4 +996,18 @@ class SaleControllerTest {
         assertEquals(user, purchasedEventArgumentCaptor.getValue().getBoughtSaleItem().getBuyer());
     }
 
+    @Test
+    void purchaseSaleItem_usersSetInterestInSaleItemButBoughtByAnotherUser_eventsCreatedForTheInterestedUsers() throws Exception {
+        when(saleItem.getInterestedUsers()).thenReturn(Set.of(interestedUser));
+        authenticationTokenManager.when(() -> AuthenticationTokenManager.sessionCanSeePrivate(any(), any())).thenReturn(true);
+        JSONObject validBody = new JSONObject();
+        validBody.put("purchaserId", user.getUserID());
+
+        mockMvc.perform(post(String.format("/listings/%d/purchase", saleItem.getId()))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(validBody.toString()))
+                .andExpect(status().isOk());
+
+        verify(eventRepository, times(1)).save(interestPurchasedEventCaptor.capture());
+    }
 }
