@@ -5,8 +5,10 @@ import lombok.Getter;
 import lombok.ToString;
 import org.seng302.leftovers.dto.LocationDTO;
 import org.seng302.leftovers.entities.Business;
+import org.seng302.leftovers.entities.Image;
 
 import javax.validation.constraints.NotNull;
+import java.util.List;
 
 /**
  * A DTO representing the parameters passed to a POST /businesses request
@@ -25,6 +27,7 @@ public class CreateBusinessDTO {
     private LocationDTO address;
     @NotNull
     private BusinessType businessType;
+    private List<Image> images;
 
     /**
      * Constructs a create business request from a business
@@ -37,6 +40,7 @@ public class CreateBusinessDTO {
         this.description = business.getDescription();
         this.address = new LocationDTO(business.getAddress(), true);
         this.businessType = business.getBusinessType();
+        this.images = business.getImages();
     }
 
     /**
