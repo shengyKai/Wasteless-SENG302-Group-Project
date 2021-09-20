@@ -256,12 +256,6 @@ export default {
     },
   },
   methods: {
-    /**
-     * Shows the business profile page
-     */
-    viewProfile() {
-      this.$router.push("/business/" + this.$store.state.activeRole.id);
-    },
     /** Change the user interest status on the listing (toggle)
      */
     async changeInterest() {
