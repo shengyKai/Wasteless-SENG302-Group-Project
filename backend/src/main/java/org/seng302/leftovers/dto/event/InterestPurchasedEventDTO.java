@@ -13,11 +13,15 @@ import org.seng302.leftovers.entities.event.InterestPurchasedEvent;
 @ToString
 @EqualsAndHashCode(callSuper = false)
 public class InterestPurchasedEventDTO extends EventDTO {
-    private BoughtSaleItemDTO boughtSaleItemDTO;
+    private BoughtSaleItemDTO boughtSaleItem;
 
+    /**
+     * Converts a InterestPurchasedEventDTO into its JSON form
+     * @param event The InterestPurchasedEvent to serialize
+     */
     public InterestPurchasedEventDTO(InterestPurchasedEvent event) {
         super(event);
-        this.boughtSaleItemDTO = new BoughtSaleItemDTO(event.getBoughtSaleItem());
+        this.boughtSaleItem = new BoughtSaleItemDTO(event.getBoughtSaleItem(), false);
     }
 
 }
