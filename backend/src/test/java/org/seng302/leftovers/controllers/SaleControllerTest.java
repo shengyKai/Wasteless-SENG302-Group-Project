@@ -12,6 +12,7 @@ import org.junit.runner.RunWith;
 import org.mockito.*;
 import org.mockito.internal.matchers.apachecommons.ReflectionEquals;
 import org.seng302.leftovers.entities.*;
+import org.seng302.leftovers.entities.event.Event;
 import org.seng302.leftovers.entities.event.InterestEvent;
 import org.seng302.leftovers.entities.event.InterestPurchasedEvent;
 import org.seng302.leftovers.entities.event.PurchasedEvent;
@@ -74,7 +75,11 @@ class SaleControllerTest {
     @Mock
     private User user;
     @Mock
-    private User interestedUser;
+    private User interestedUser1;
+    @Mock
+    private User interestedUser2;
+    @Mock
+    private User interestedUser3;
     @Mock
     private InventoryItem inventoryItem;
     @Mock
@@ -96,7 +101,7 @@ class SaleControllerTest {
     @Captor
     ArgumentCaptor<PageRequest> pageRequestArgumentCaptor;
     @Captor
-    ArgumentCaptor<InterestPurchasedEvent> interestPurchasedEventCaptor;
+    ArgumentCaptor<Event> eventCaptor;
 
 
     @BeforeEach
@@ -153,10 +158,7 @@ class SaleControllerTest {
     }
 
     @AfterEach
-    public void tearDown() {
-        authenticationTokenManager.close();
-        reset(eventRepository);
-    }
+    public void tearDown() { authenticationTokenManager.close(); }
 
     @Test
     void addSaleItemToBusiness_noAuthToken_401Response() throws Exception {
@@ -997,8 +999,8 @@ class SaleControllerTest {
     }
 
     @Test
-    void purchaseSaleItem_usersSetInterestInSaleItemButBoughtByAnotherUser_eventsCreatedForTheInterestedUsers() throws Exception {
-        when(saleItem.getInterestedUsers()).thenReturn(Set.of(interestedUser));
+    void purchaseSaleItem_userSetInterestInSaleItemBoughtByAnotherUser_eventCreatedForTheInterestedUser() throws Exception {
+        when(saleItem.getInterestedUsers()).thenReturn(Set.of(interestedUser1));
         authenticationTokenManager.when(() -> AuthenticationTokenManager.sessionCanSeePrivate(any(), any())).thenReturn(true);
         JSONObject validBody = new JSONObject();
         validBody.put("purchaserId", user.getUserID());
@@ -1008,6 +1010,46 @@ class SaleControllerTest {
                 .content(validBody.toString()))
                 .andExpect(status().isOk());
 
-        verify(eventRepository, times(1)).save(interestPurchasedEventCaptor.capture());
+        verify(eventRepository, times(2)).save(eventCaptor.capture());
+        List<Event> allSavedEvents = eventCaptor.getAllValues();
+        assertEquals(allSavedEvents.get(0).getClass(), InterestPurchasedEvent.class);
+        assertEquals(allSavedEvents.get(1).getClass(), PurchasedEvent.class);
+    }
+
+    @Test
+    void purchaseSaleItem_noUsersSetInterestInSaleItemBoughtByAnotherUser_noEventsCreated() throws Exception {
+        when(saleItem.getInterestedUsers()).thenReturn(Set.of());
+        authenticationTokenManager.when(() -> AuthenticationTokenManager.sessionCanSeePrivate(any(), any())).thenReturn(true);
+        JSONObject validBody = new JSONObject();
+        validBody.put("purchaserId", user.getUserID());
+
+        mockMvc.perform(post(String.format("/listings/%d/purchase", saleItem.getId()))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(validBody.toString()))
+                .andExpect(status().isOk());
+
+        verify(eventRepository, times(1)).save(eventCaptor.capture());
+        List<Event> allSavedEvents = eventCaptor.getAllValues();
+        assertEquals(allSavedEvents.get(0).getClass(), PurchasedEvent.class);
+    }
+
+    @Test
+    void purchaseSaleItem_multipleUsersSetInterestInSaleItemBoughtByAnotherUser_eventsCreatedForTheInterestedUsers() throws Exception {
+        when(saleItem.getInterestedUsers()).thenReturn(Set.of(interestedUser1, interestedUser2, interestedUser3));
+        authenticationTokenManager.when(() -> AuthenticationTokenManager.sessionCanSeePrivate(any(), any())).thenReturn(true);
+        JSONObject validBody = new JSONObject();
+        validBody.put("purchaserId", user.getUserID());
+
+        mockMvc.perform(post(String.format("/listings/%d/purchase", saleItem.getId()))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(validBody.toString()))
+                .andExpect(status().isOk());
+
+        verify(eventRepository, times(4)).save(eventCaptor.capture());
+        List<Event> allSavedEvents = eventCaptor.getAllValues();
+        assertEquals(allSavedEvents.get(0).getClass(), InterestPurchasedEvent.class);
+        assertEquals(allSavedEvents.get(1).getClass(), InterestPurchasedEvent.class);
+        assertEquals(allSavedEvents.get(2).getClass(), InterestPurchasedEvent.class);
+        assertEquals(allSavedEvents.get(3).getClass(), PurchasedEvent.class);
     }
 }
