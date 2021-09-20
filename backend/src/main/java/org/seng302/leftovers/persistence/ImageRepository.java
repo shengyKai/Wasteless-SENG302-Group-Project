@@ -51,7 +51,7 @@ public interface ImageRepository extends CrudRepository<Image, Long> {
      */
     default Image getImageByProductAndId(Product product, Long imageId) {
         Optional<Image> image = this.findById(imageId);
-        if (image.isEmpty() || !product.getProductImages().contains(image.get())) {
+        if (image.isEmpty() || !product.getImages().contains(image.get())) {
             throw new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE,
                     "The given image does not exist");
         }

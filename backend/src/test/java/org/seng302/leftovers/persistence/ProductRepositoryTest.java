@@ -87,7 +87,7 @@ class ProductRepositoryTest {
                 .withRecommendedRetailPrice("3.20")
                 .withBusiness(testBusiness)
                 .build();
-        testProduct.setProductImages(Arrays.asList(testImage));
+        testProduct.setImages(Arrays.asList(testImage));
         productRepository.save(testProduct);
         testBusiness = businessRepository.save(testBusiness);
 

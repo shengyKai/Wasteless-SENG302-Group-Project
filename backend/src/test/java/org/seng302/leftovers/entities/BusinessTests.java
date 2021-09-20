@@ -868,8 +868,8 @@ class BusinessTests {
             .withBusiness(testBusiness1)
             .build();
         testProduct1 = productRepository.save(testProduct1);      
-        testProduct1.addProductImage(testImage1);
-        testProduct1.addProductImage(testImage2);
+        testProduct1.addImage(testImage1);
+        testProduct1.addImage(testImage2);
         testProduct1 = productRepository.save(testProduct1);
           
         Product testProduct2 = new Product.Builder()
@@ -878,8 +878,8 @@ class BusinessTests {
             .withBusiness(testBusiness1)
             .build();
         testProduct2 = productRepository.save(testProduct2);
-        testProduct2.addProductImage(testImage3);
-        testProduct2.addProductImage(testImage4);
+        testProduct2.addImage(testImage3);
+        testProduct2.addImage(testImage4);
         testProduct2 = productRepository.save(testProduct2);
         
 

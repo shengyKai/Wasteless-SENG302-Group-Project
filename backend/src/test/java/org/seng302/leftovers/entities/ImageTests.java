@@ -2,12 +2,18 @@ package org.seng302.leftovers.entities;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import net.minidev.json.JSONObject;
+import org.hibernate.Session;
+import org.hibernate.SessionFactory;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.seng302.leftovers.dto.ImageDTO;
+import org.seng302.leftovers.dto.business.BusinessType;
+import org.seng302.leftovers.persistence.BusinessRepository;
 import org.seng302.leftovers.persistence.ImageRepository;
+import org.seng302.leftovers.persistence.ProductRepository;
+import org.seng302.leftovers.persistence.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -30,6 +36,18 @@ class ImageTests {
     private ImageRepository imageRepository;
 
     @Autowired
+    private UserRepository userRepository;
+
+    @Autowired
+    private BusinessRepository businessRepository;
+
+    @Autowired
+    private ProductRepository productRepository;
+
+    @Autowired
+    private SessionFactory sessionFactory;
+
+    @Autowired
     private ObjectMapper objectMapper;
 
     private Image testImage;
@@ -47,12 +65,18 @@ class ImageTests {
     @BeforeEach
     void setUp() {
         imageRepository.deleteAll();
+        productRepository.deleteAll();
+        businessRepository.deleteAll();
+        userRepository.deleteAll();
         createTestImage();
     }
 
     @AfterAll
     void teardown() {
         imageRepository.deleteAll();
+        productRepository.deleteAll();
+        businessRepository.deleteAll();
+        userRepository.deleteAll();
     }
 
     /**
@@ -344,6 +368,121 @@ class ImageTests {
         assertEquals( "/media/images/foo.png", json.get("filename"));
         assertEquals("/media/images/bar.png", json.get("thumbnailFilename"));
         assertEquals(3, json.size());
+    }
+
+    /**
+     * Creates a test user
+     * @return Test user
+     */
+    private User createUser() {
+        return new User.Builder()
+                .withFirstName("Joe")
+                .withMiddleName("Hector")
+                .withLastName("Smith")
+                .withNickName("Jonny")
+                .withEmail("johnsmith99@gmail.com")
+                .withPassword("1337-H%nt3r2")
+                .withDob("2001-03-11")
+                .withPhoneNumber("64 3555012")
+                .withAddress(Location.covertAddressStringToLocation("4,Rountree Street,Ashburton,Christchurch,New Zealand," +
+                        "Canterbury,8041"))
+                .build();
+    }
+
+    /**
+     * Creates a test business with the provided owner
+     * @param owner Business owner
+     * @return Created business
+     */
+    private Business createBusiness(User owner) {
+        return new Business.Builder()
+                .withBusinessType(BusinessType.ACCOMMODATION_AND_FOOD_SERVICES)
+                .withAddress(Location.covertAddressStringToLocation("4,Rountree Street,Ashburton,Christchurch,New Zealand," +
+                        "Canterbury,8041"))
+                .withDescription("Some description")
+                .withName("Joe's Garage")
+                .withPrimaryOwner(owner)
+                .build();
+    }
+
+    /**
+     * Creates a test product with the provided business
+     * @param business Business to assign to
+     * @return Created product
+     */
+    private Product createProduct(Business business) {
+        return new Product.Builder()
+                .withProductCode("ORANGE-69")
+                .withName("Fresh Orange")
+                .withDescription("This is a fresh orange")
+                .withManufacturer("Apple")
+                .withRecommendedRetailPrice("2.01")
+                .withBusiness(business)
+                .build();
+    }
+
+    @Test
+    void getAttachment_noAttachment_nullReturned() {
+        var image = imageRepository.save(new Image("foo.png", "bar.png"));
+        assertNull(image.getAttachment());
+    }
+
+    @Test
+    void getAttachment_savedUser_userReturned() {
+        var image = imageRepository.save(new Image("foo.png", "bar.png"));
+
+        var user = createUser();
+        user.addImage(image);
+        userRepository.save(user);
+
+        try (Session session = sessionFactory.openSession()) {
+            image = session.get(Image.class, image.getID());
+            assertTrue(image.getAttachment() instanceof User);
+            assertEquals(user.getUserID(), ((User)image.getAttachment()).getUserID());
+        }
+    }
+
+    @Test
+    void getAttachment_savedBusiness_businessReturned() {
+        var image = imageRepository.save(new Image("foo.png", "bar.png"));
+
+        var business = createBusiness(userRepository.save(createUser()));
+        business.addImage(image);
+        businessRepository.save(business);
+
+        try (Session session = sessionFactory.openSession()) {
+            image = session.get(Image.class, image.getID());
+            assertTrue(image.getAttachment() instanceof Business);
+            assertEquals(business.getId(), ((Business)image.getAttachment()).getId());
+        }
+    }
+
+    @Test
+    void getAttachment_savedProduct_productReturned() {
+        var image = imageRepository.save(new Image("foo.png", "bar.png"));
+
+        var product = createProduct(businessRepository.save(createBusiness(userRepository.save(createUser()))));
+        product.addImage(image);
+        productRepository.save(product);
+
+        try (Session session = sessionFactory.openSession()) {
+            image = session.get(Image.class, image.getID());
+            assertTrue(image.getAttachment() instanceof Product);
+            assertEquals(product.getID(), ((Product)image.getAttachment()).getID());
+        }
+    }
+
+    @Test
+    void checkNoDoubleAttachments_savedUserAndProductWithImage_failsToSave() {
+        var image = imageRepository.save(new Image("foo.png", "bar.png"));
+
+        var user = createUser();
+        user.addImage(image);
+        user = userRepository.save(user);
+
+        var business = createBusiness(user);
+        business.addImage(image);
+        businessRepository.save(business);
     }
 }
 

@@ -946,7 +946,7 @@ class ProductTests {
                .withBusiness(testBusiness1)
                .build();
        JSONArray images = new JSONArray();
-       for (Image image : testProduct.getProductImages()) {
+       for (Image image : testProduct.getImages()) {
            images.add(new ImageDTO(image));
        }
        String imageString = images.toString();
@@ -1003,7 +1003,7 @@ class ProductTests {
                .withBusiness(testBusiness1)
                .build();
        JSONArray images = new JSONArray();
-       for (Image image : testProduct.getProductImages()) {
+       for (Image image : testProduct.getImages()) {
            images.add(new ImageDTO(image));
        }
        String imageString = images.toString();

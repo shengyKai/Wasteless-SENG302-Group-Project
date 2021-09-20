@@ -1,9 +1,5 @@
 package org.seng302.leftovers.entities;
 
-import net.minidev.json.JSONArray;
-import net.minidev.json.JSONObject;
-import org.seng302.leftovers.dto.business.BusinessResponseDTO;
-import org.seng302.leftovers.tools.JsonTools;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -17,7 +13,7 @@ import java.util.List;
         @UniqueConstraint(columnNames = {"product_code", "business_id"})
 })
 @Entity
-public class Product {
+public class Product implements ImageAttachment {
     // Product code must only contain uppercase letters, numbers and dashes
     // Product code have a length between 1-15
     private static final String PRODUCT_CODE_REGEX = "^[-A-Z0-9]{1,15}$";
@@ -52,7 +48,7 @@ public class Product {
     @OrderColumn(name="image_order")
     @OneToMany(fetch = FetchType.EAGER)
     @JoinColumn(name="product_id")
-    private List<Image> productImages = new ArrayList<>();
+    private List<Image> images = new ArrayList<>();
 
 
 
@@ -81,8 +77,8 @@ public class Product {
      * Adds a single image to the Product's list of images
      * @param image An image entity to be linked to this product.
      */
-    public void addProductImage(Image image) {
-        this.productImages.add(image);
+    public void addImage(Image image) {
+        this.images.add(image);
     }
     /**
      * Get the description of the product
@@ -118,7 +114,8 @@ public class Product {
      * Get the image object associated with this product
      * @return the image
      */
-    public List<Image> getProductImages() { return productImages; }
+    @Override
+    public List<Image> getImages() { return images; }
 
     /**
      * Get the name of the country which the product is being sold in.
@@ -211,21 +208,21 @@ public class Product {
 
     /**
      * Sets the images associated with the product
-     * @param productImages the product images
+     * @param images the product images
      */
-    public void setProductImages(List<Image> productImages) {
-        this.productImages = productImages;
+    public void setImages(List<Image> images) {
+        this.images = images;
     }
 
     /**
      * Removes a given image from the list of products
-     * @param productImage The image to remove
+     * @param image The image to remove
      */
-    public void removeProductImage(Image productImage) {
-        if (!this.productImages.contains(productImage)) {
+    public void removeImage(Image image) {
+        if (!this.images.contains(image)) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Product cannot be removed");
         }
-        this.productImages.remove(productImage);
+        this.images.remove(image);
     }
 
     /**

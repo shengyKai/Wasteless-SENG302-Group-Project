@@ -252,7 +252,7 @@ public class ProductController {
 
         imageService.delete(image);
 
-        product.removeProductImage(image);
+        product.removeImage(image);
         productRepository.save(product);
     }
 
@@ -278,7 +278,7 @@ public class ProductController {
 
             Image image = imageService.create(file);
 
-            product.addProductImage(image);
+            product.addImage(image);
             productRepository.save(product);
 
             return new ResponseEntity<>(HttpStatus.CREATED);
@@ -308,7 +308,7 @@ public class ProductController {
         // get image + sanity
         Image image = imageRepository.getImageByProductAndId(product, imageId);
 
-        List<Image> images = product.getProductImages(); // get the images so we can manipulate them
+        List<Image> images = product.getImages(); // get the images so we can manipulate them
         // If the given image is already the primary image, return
         if (images.get(0).getID().equals(image.getID())) {
             return;
@@ -316,7 +316,7 @@ public class ProductController {
 
         images.remove(image); // pop the image from the list
         images.add(0, image); // append to the start of the list
-        product.setProductImages(images); // apply the changes
+        product.setImages(images); // apply the changes
         productRepository.save(product);
         logger.info(() -> String.format("Set Image %d of product \"%s\" as the primary image", image.getID(), product.getName()));
     }

@@ -26,6 +26,19 @@ public class Image {
     @Column(name = "filename_thumbnail", nullable = true, unique = false)
     private String filenameThumbnail;
 
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "product_id")
+    private Product product;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "business_id")
+    private Business business;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id")
+    private User user;
+
     /**
      * The constructor for a product image
      * @param filename the directory where the image is stored
@@ -94,6 +107,17 @@ public class Image {
     }
 
     /**
+     * Gets the current attached image
+     * @return
+     */
+    public ImageAttachment getAttachment() {
+        if (product != null) return product;
+        if (business != null) return business;
+        if (user != null) return user;
+        return null;
+    }
+
+    /**
      * Sets the direction location of where the image file is located
      * @param filename the directory of where the image is located
      */
@@ -143,5 +167,20 @@ public class Image {
     @Override
     public int hashCode() {
         return Objects.hash(id, filename, filenameThumbnail);
+    }
+
+    @PrePersist
+    @PreUpdate
+    public void checkNoDoubleAttachments() {
+        int totalAttachments = 0;
+        if (this.user != null) totalAttachments++;
+        if (this.business != null) totalAttachments++;
+        if (this.product != null) totalAttachments++;
+
+        System.out.println("Image attachment count: " + totalAttachments);
+
+        if (totalAttachments > 1) {
+            throw new IllegalStateException("Image has multiple attachments");
+        }
     }
 }

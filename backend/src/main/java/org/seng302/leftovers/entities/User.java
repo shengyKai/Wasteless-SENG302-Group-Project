@@ -10,12 +10,14 @@ import org.springframework.web.server.ResponseStatusException;
 import javax.persistence.*;
 import java.time.Instant;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.regex.Pattern;
 
 @Entity
-public class User extends Account {
+public class User extends Account implements ImageAttachment {
 
     private static final String NAME_REGEX = "[ \\p{L}\\-'.]+";
 
@@ -53,6 +55,11 @@ public class User extends Account {
 
     @ManyToMany(mappedBy = "interestedUsers", fetch = FetchType.LAZY)
     private Set<SaleItem> likedSaleItems = new HashSet<>();
+
+    @OrderColumn(name="image_order")
+    @OneToMany(fetch = FetchType.EAGER)
+    @JoinColumn(name="user_id")
+    private List<Image> images = new ArrayList<>();
 
     /* Matches:
     123-456-7890
@@ -292,6 +299,13 @@ public class User extends Account {
     public Set<Event> getEvents() { return this.events;}
 
     /**
+     * TODO
+     * @return
+     */
+    @Override
+    public List<Image> getImages() { return this.images; }
+
+    /**
      * Gets the set of businesses that the user is an admin of OR is the owner of
      * @return Businesses administered or owned
      */
@@ -331,6 +345,14 @@ public class User extends Account {
         for (Business business : this.getBusinessesAdministered()) {
             business.removeAdmin(this);
         }
+    }
+
+    /**
+     * TODO
+     * @param image
+     */
+    public void addImage(Image image) {
+        this.images.add(image);
     }
 
 
