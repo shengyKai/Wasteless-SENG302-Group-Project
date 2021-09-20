@@ -1,26 +1,29 @@
 package org.seng302.leftovers.controllers;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import net.minidev.json.JSONObject;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.runner.RunWith;
-import org.mockito.Mock;
-import org.mockito.MockedStatic;
-import org.mockito.Mockito;
-import org.mockito.MockitoAnnotations;
+import org.mockito.*;
+import org.seng302.leftovers.dto.ImageDTO;
 import org.seng302.leftovers.entities.Image;
 import org.seng302.leftovers.exceptions.AccessTokenResponseException;
 import org.seng302.leftovers.exceptions.DoesNotExistResponseException;
+import org.seng302.leftovers.exceptions.ValidationResponseException;
 import org.seng302.leftovers.persistence.ImageRepository;
 import org.seng302.leftovers.service.ImageService;
 import org.seng302.leftovers.service.StorageService;
 import org.seng302.leftovers.tools.AuthenticationTokenManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Optional;
 
@@ -30,7 +33,7 @@ import static org.mockito.AdditionalMatchers.not;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @RunWith(SpringRunner.class)
@@ -38,6 +41,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class ImageControllerTest {
 
+    @Autowired
+    private ObjectMapper objectMapper;
     @Autowired
     private ImageRepository imageRepository;
 
@@ -150,5 +155,57 @@ class ImageControllerTest {
         verify(mockImageRepository, times(1)).findByFilename("foo.thumb.png");
         verify(mockImageRepository, times(1)).findByFilenameThumbnail("foo.thumb.png");
         verify(mockStorageService, times(1)).load("foo.thumb.png");
+    }
+
+    @Test
+    void createImage_notLoggedIn_401Response() throws Exception {
+        // Mock the AuthenticationTokenManager to respond as it would when the authentication token is missing or invalid
+        authenticationTokenManager.when(() -> AuthenticationTokenManager.checkAuthenticationToken(any()))
+                .thenThrow(new AccessTokenResponseException());
+
+        MockMultipartFile file = new MockMultipartFile("file", "filename.txt", "image/png", new byte[100]);
+        mockMvc.perform(multipart("/media/images")
+                .file(file))
+                .andExpect(status().isUnauthorized());
+
+        // Check that the authentication token manager was called
+        authenticationTokenManager.verify(() -> AuthenticationTokenManager.checkAuthenticationToken(any()));
+    }
+
+    @Test
+    void createImage_failsToCreate_400Response() throws Exception {
+        when(mockImageService.create(any())).thenThrow(new ValidationResponseException("Hey!"));
+
+        MockMultipartFile file = new MockMultipartFile("file", "filename.txt", "bar/baz", new byte[100]);
+        mockMvc.perform(multipart("/media/images")
+                .file(file))
+                .andExpect(status().isBadRequest());
+
+        var captor = ArgumentCaptor.forClass(MultipartFile.class);
+        verify(mockImageService, times(1)).create(captor.capture());
+
+        assertEquals("bar/baz", captor.getValue().getContentType());
+    }
+
+    @Test
+    void createImage_validImage_201ResponseAndImageReturned() throws Exception {
+        var image = mock(Image.class);
+        when(image.getID()).thenReturn(7L);
+        when(image.getFilename()).thenReturn("foo.png");
+        when(image.getFilenameThumbnail()).thenReturn("bar.png");
+        when(mockImageService.create(any())).thenReturn(image);
+
+        MockMultipartFile file = new MockMultipartFile("file", "filename.txt", "bar/baz", new byte[100]);
+        var result = mockMvc.perform(multipart("/media/images")
+                .file(file))
+                .andExpect(status().isCreated())
+                .andReturn();
+
+        verify(mockImageService, times(1)).create(any());
+
+        var expected = new ImageDTO(image);
+        var actual = objectMapper.readValue(result.getResponse().getContentAsString(), ImageDTO.class);
+
+        assertEquals(expected, actual);
     }
 }

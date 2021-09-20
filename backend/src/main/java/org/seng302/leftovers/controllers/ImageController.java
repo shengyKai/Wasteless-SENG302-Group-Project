@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.util.Optional;
 
 @RestController
@@ -37,13 +38,14 @@ public class ImageController {
     }
 
     @PostMapping("/media/images")
-    public ImageDTO createImage(@RequestParam("file") MultipartFile file, HttpServletRequest request) {
+    public ImageDTO createImage(@RequestParam("file") MultipartFile file, HttpServletRequest request, HttpServletResponse response) {
         try {
             AuthenticationTokenManager.checkAuthenticationToken(request);
             logger.info("Creating new image");
 
             Image image = imageService.create(file);
 
+            response.setStatus(201);
             return new ImageDTO(image);
         } catch (Exception e) {
             logger.error(e.getMessage());
