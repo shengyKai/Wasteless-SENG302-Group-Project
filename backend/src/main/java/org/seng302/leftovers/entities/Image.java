@@ -17,6 +17,9 @@ public class Image {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(nullable = false)
+    private Instant created;
+
     @Column(name = "filename", nullable = false, unique = true)
     private String filename;
 
@@ -29,6 +32,7 @@ public class Image {
      * @param filenameThumbnail the directory where the image's thumbnail is located
      */
     public Image(String filename, String filenameThumbnail) {
+        created = Instant.now();
         setFilename(filename);
         setFilenameThumbnail(filenameThumbnail);
     }
@@ -80,6 +84,14 @@ public class Image {
      * @return the directory
      */
     public String getFilenameThumbnail() { return filenameThumbnail; }
+
+    /**
+     * Gets the moment in time that the image was made
+     * @return Image creation date+time
+     */
+    public Instant getCreated() {
+        return created;
+    }
 
     /**
      * Sets the direction location of where the image file is located

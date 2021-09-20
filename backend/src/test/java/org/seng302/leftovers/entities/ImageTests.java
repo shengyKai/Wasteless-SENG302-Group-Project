@@ -14,6 +14,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.time.Instant;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -322,6 +323,14 @@ class ImageTests {
         } catch (Exception e) { assertEquals(DataIntegrityViolationException.class, e.getClass()); }
     }
 
+    @Test
+    void createImage_validParameters_creationTimeSet() {
+        var before = Instant.now();
+        testImage = new Image("help.png", "original_thumbnail.png");
+        var after = Instant.now();
+        assertFalse(testImage.getCreated().isBefore(before));
+        assertFalse(testImage.getCreated().isAfter(after));
+    }
 
     @Test
     void imageDTO_withImage_expectedFieldsReturned() {

@@ -10,6 +10,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.sql.*;
+import java.time.Instant;
 import java.util.*;
 
 public class BusinessImageGenerator {
@@ -89,14 +90,15 @@ public class BusinessImageGenerator {
      */
     private long createInsertImageSQL(Long businessId, String filename, int order) {
         try (PreparedStatement stmt = conn.prepareStatement(
-                "INSERT INTO image (filename, business_id, image_order, filename_thumbnail) " +
-                        "VALUES (?,?,?,?)",
+                "INSERT INTO image (filename, business_id, image_order, filename_thumbnail, created) " +
+                        "VALUES (?,?,?,?,?)",
                     Statement.RETURN_GENERATED_KEYS
             )) {
             stmt.setObject(1, filename);
             stmt.setObject(2, businessId);
             stmt.setObject(3, order);
             stmt.setObject(4, filename);
+            stmt.setObject(5, Instant.now());
 
             stmt.executeUpdate();
 
