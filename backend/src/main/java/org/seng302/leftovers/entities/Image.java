@@ -9,6 +9,11 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
+/**
+ * Entity representing the location of an image+image thumbnail stored in the server
+ *
+ * The @Check constraint ensures that the image is attached to at most 1 other entity
+ */
 @Entity
 @Check(constraints = "(CAST(product_id IS NOT NULL AS int) + CAST(business_id IS NOT NULL AS int) + CAST(user_id IS NOT NULL AS int)) < 2")
 public class Image {

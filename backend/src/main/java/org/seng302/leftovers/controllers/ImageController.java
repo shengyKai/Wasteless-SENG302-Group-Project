@@ -37,6 +37,10 @@ public class ImageController {
         this.storageService = storageService;
     }
 
+    /**
+     * POST endpoint for creating a new detached image.
+     * @param file Uploaded image file
+     */
     @PostMapping("/media/images")
     public ImageDTO createImage(@RequestParam("file") MultipartFile file, HttpServletRequest request, HttpServletResponse response) {
         try {
@@ -53,6 +57,11 @@ public class ImageController {
         }
     }
 
+    /**
+     * GET endpoint for retrieving an image
+     * @param imageName Filename of the image to retrieve
+     * @return Image binary data
+     */
     @GetMapping("/media/images/{imageName}")
     public ResponseEntity<Resource> getImage(@PathVariable("imageName") String imageName, HttpServletRequest session) {
         logger.info(() -> String.format("Fetching image with name=%s", imageName));
