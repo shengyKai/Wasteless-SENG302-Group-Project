@@ -32,6 +32,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.server.ResponseStatusException;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
@@ -118,19 +119,31 @@ public class BusinessController {
             if(!business.getPrimaryOwner().getUserID().equals(newAdminID)) {
                 business.checkSessionPermissionsOwner(request);
 
-                User newOwner = userRepository.findById(newAdminID)  
-                .orElseThrow(() -> new ValidationResponseException("Updated primary administrator does not exist"));
+                User newOwner = userRepository.findById(newAdminID)
+                        .orElseThrow(() -> new ValidationResponseException("Updated primary administrator does not exist"));
                 User previousOwner = userRepository.findById(business.getPrimaryOwner().getUserID())
-                .orElseThrow(() -> new ValidationResponseException("Previous business owner account does not exist"));
+                        .orElseThrow(() -> new ValidationResponseException("Previous business owner account does not exist"));
 
                 business.removeAdmin(newOwner);
-                business.setPrimaryOwner(newOwner);    
-                business.addAdmin(previousOwner);      
+                business.setPrimaryOwner(newOwner);
+                business.addAdmin(previousOwner);
             }
             business.setName(body.getName());
             business.setDescription(body.getDescription());
             business.setAddress(body.getAddress().createLocation());
             business.setBusinessType(body.getBusinessType());
+
+            Image image = imageRepository.getImageById(body.getPrimaryImageId());
+            var images = business.getImages();
+            // Ensure that the provided image belongs to this business. Otherwise, action is forbidden
+            if (!images.contains(image)) {
+                throw new InsufficientPermissionResponseException("You cannot modify this image");
+            }
+            if (!images.get(0).equals(image)) {
+                throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "The primary image was not changed");
+            }
+            business.removeImage(image);
+            business.addImage(0, image);
 
             if (Boolean.TRUE.equals(body.getUpdateProductCountry())) {
                 List<Product> catalogue = business.getCatalogue();
@@ -323,40 +336,6 @@ public class BusinessController {
             businessRepository.save(business);
 
             return new ResponseEntity<>(HttpStatus.CREATED);
-        } catch (Exception e) {
-            logger.error(e.getMessage());
-            throw e;
-        }
-    }
-
-    /**
-     * Sets the new primary image to be displayed for a business
-     * @param businessId The ID of the business to modify
-     * @param imageId The ID of the image to set as primary image
-     * @return Empty response with 200 if successful
-     */
-    @PutMapping("/businesses/{businessId}/images/{imageId}/makeprimary")
-    public ResponseEntity<Void> makeImagePrimary(@PathVariable Long businessId, @PathVariable Long imageId, HttpServletRequest request) {
-        logger.info("Making business image primary (businessId={}, imageId={})", businessId, imageId);
-        AuthenticationTokenManager.checkAuthenticationToken(request);
-        try {
-            Business business = businessRepository.getBusinessById(businessId);
-            business.checkSessionPermissions(request);
-
-            Image image = imageRepository.getImageById(imageId);
-            var images = business.getImages();
-            // Ensure that the provided image belongs to this business. Otherwise, action is forbidden
-            if (!images.contains(image)) {
-                throw new InsufficientPermissionResponseException("You cannot modify this image");
-            }
-            if (images.get(0).equals(image)) {
-                return new ResponseEntity<>(HttpStatus.OK);
-            }
-            business.removeImage(image);
-            business.addImage(0, image);
-            businessRepository.save(business);
-
-            return new ResponseEntity<>(HttpStatus.OK);
         } catch (Exception e) {
             logger.error(e.getMessage());
             throw e;
