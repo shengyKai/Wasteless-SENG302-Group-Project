@@ -13,7 +13,7 @@ import org.seng302.leftovers.dto.KeywordDTO;
 import org.seng302.leftovers.entities.Keyword;
 import org.seng302.leftovers.entities.User;
 import org.seng302.leftovers.entities.event.KeywordCreatedEvent;
-import org.seng302.leftovers.exceptions.AccessTokenException;
+import org.seng302.leftovers.exceptions.AccessTokenResponseException;
 import org.seng302.leftovers.persistence.KeywordRepository;
 import org.seng302.leftovers.persistence.UserRepository;
 import org.seng302.leftovers.persistence.event.CreateKeywordEventRepository;
@@ -104,7 +104,7 @@ class KeywordControllerTest {
     void searchKeywords_noAuthentication_401Response() throws Exception {
         // Mock the AuthenticationTokenManager to respond as it would when the authentication token is missing or invalid
         authenticationTokenManager.when(() -> AuthenticationTokenManager.checkAuthenticationToken(any()))
-                .thenThrow(new AccessTokenException());
+                .thenThrow(new AccessTokenResponseException());
 
         // Verify that a 401 response is received in response to the GET request
         mockMvc.perform(get("/keywords/search"))
@@ -194,7 +194,7 @@ class KeywordControllerTest {
     void deleteKeyword_noAuthentication_401Response() throws Exception {
         // Mock the AuthenticationTokenManager to respond as it would when the authentication token is missing or invalid
         authenticationTokenManager.when(() -> AuthenticationTokenManager.checkAuthenticationToken(any()))
-                .thenThrow(new AccessTokenException());
+                .thenThrow(new AccessTokenResponseException());
 
         // Verify that a 401 response is received in response to the DELETE request
         mockMvc.perform(delete("/keywords/1"))
@@ -261,7 +261,7 @@ class KeywordControllerTest {
     void addKeyword_noAuthentication_401Response() throws Exception {
         // Mock the AuthenticationTokenManager to respond as it would when the authentication token is missing or invalid
         authenticationTokenManager.when(() -> AuthenticationTokenManager.checkAuthenticationToken(any()))
-                .thenThrow(new AccessTokenException());
+                .thenThrow(new AccessTokenResponseException());
 
         JSONObject json = new JSONObject();
         json.put("name", "Dance");

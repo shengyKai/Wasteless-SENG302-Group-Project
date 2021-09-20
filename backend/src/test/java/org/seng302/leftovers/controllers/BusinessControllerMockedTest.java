@@ -13,7 +13,7 @@ import org.mockito.*;
 import org.seng302.leftovers.dto.LocationDTO;
 import org.seng302.leftovers.dto.business.BusinessType;
 import org.seng302.leftovers.entities.*;
-import org.seng302.leftovers.exceptions.AccessTokenException;
+import org.seng302.leftovers.exceptions.AccessTokenResponseException;
 import org.seng302.leftovers.persistence.BusinessRepository;
 import org.seng302.leftovers.persistence.ImageRepository;
 import org.seng302.leftovers.persistence.UserRepository;
@@ -145,7 +145,7 @@ class BusinessControllerMockedTest {
     void modifyBusiness_notLoggedIn_401Response() throws Exception {
         // Mock the AuthenticationTokenManager to respond as it would when the authentication token is missing or invalid
         authenticationTokenManager.when(() -> AuthenticationTokenManager.checkAuthenticationToken(any()))
-                .thenThrow(new AccessTokenException());
+                .thenThrow(new AccessTokenResponseException());
 
         var json = createValidRequest();
         mockMvc.perform(
@@ -389,7 +389,7 @@ class BusinessControllerMockedTest {
     void uploadImage_notLoggedIn_401Response() throws Exception {
         // Mock the AuthenticationTokenManager to respond as it would when the authentication token is missing or invalid
         authenticationTokenManager.when(() -> AuthenticationTokenManager.checkAuthenticationToken(any()))
-                .thenThrow(new AccessTokenException());
+                .thenThrow(new AccessTokenResponseException());
 
         mockMvc.perform(multipart("/businesses/" + mockBusinessId + "/images")
                 .file(createMockUpload()))
@@ -454,7 +454,7 @@ class BusinessControllerMockedTest {
     void makeImagePrimary_notLoggedIn_401Response() throws Exception {
         // Mock the AuthenticationTokenManager to respond as it would when the authentication token is missing or invalid
         authenticationTokenManager.when(() -> AuthenticationTokenManager.checkAuthenticationToken(any()))
-                .thenThrow(new AccessTokenException());
+                .thenThrow(new AccessTokenResponseException());
 
         mockMvc.perform(put("/businesses/" + mockBusinessId + "/images/" + mockImageId + "/makeprimary"))
                 .andExpect(status().isUnauthorized())

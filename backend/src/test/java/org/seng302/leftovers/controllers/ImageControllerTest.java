@@ -10,7 +10,8 @@ import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.seng302.leftovers.entities.Image;
-import org.seng302.leftovers.exceptions.AccessTokenException;
+import org.seng302.leftovers.exceptions.AccessTokenResponseException;
+import org.seng302.leftovers.exceptions.DoesNotExistResponseException;
 import org.seng302.leftovers.persistence.ImageRepository;
 import org.seng302.leftovers.service.StorageService;
 import org.seng302.leftovers.tools.AuthenticationTokenManager;
@@ -19,7 +20,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Optional;
 
@@ -96,7 +96,7 @@ class ImageControllerTest {
     void getImage_ImageDoesNotExist_406ResponseException() {
         imageRepository.delete(testImage);
         long id = testImage.getID();
-        assertThrows(ResponseStatusException.class, () -> {
+        assertThrows(DoesNotExistResponseException.class, () -> {
             imageRepository.getImageById(id);
         });
     }
@@ -105,7 +105,7 @@ class ImageControllerTest {
     void requestImage_notAuthorised_401Response() throws Exception {
         // Mock the AuthenticationTokenManager to respond as it would when the authentication token is missing or invalid
         authenticationTokenManager.when(() -> AuthenticationTokenManager.checkAuthenticationToken(any()))
-                .thenThrow(new AccessTokenException());
+                .thenThrow(new AccessTokenResponseException());
 
         mockMvc.perform(get("/media/images/foo.png"))
                 .andExpect(status().isUnauthorized())
@@ -116,10 +116,10 @@ class ImageControllerTest {
     }
 
     @Test
-    void requestImage_imageNotFound_404Response() throws Exception {
+    void requestImage_imageNotFound_406Response() throws Exception {
         // Not sure why everything after and including the final dot is removed
         mockMvc.perform(get("/media/images/notfound.png."))
-                .andExpect(status().isNotFound())
+                .andExpect(status().isNotAcceptable())
                 .andReturn();
 
         verify(mockImageRepository, times(1)).findByFilename("notfound.png");

@@ -1,8 +1,7 @@
 package org.seng302.leftovers.entities;
 
 import net.minidev.json.JSONObject;
-import org.springframework.http.HttpStatus;
-import org.springframework.web.server.ResponseStatusException;
+import org.seng302.leftovers.exceptions.ValidationResponseException;
 
 import javax.persistence.*;
 import java.util.Arrays;
@@ -94,13 +93,13 @@ public class Image {
      */
     public void setFilename(String filename) {
         if (filename == null) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "No filename was provided");
+            throw new ValidationResponseException("No filename was provided");
         } else if (filename.isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "An empty filename was provided");
+            throw new ValidationResponseException("An empty filename was provided");
         } else if (filename.contains(" ")) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Spaces are not allowed in the filename");
+            throw new ValidationResponseException("Spaces are not allowed in the filename");
         } else if (!checkImageFormats(filename)) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "An invalid image format was provided");
+            throw new ValidationResponseException("An invalid image format was provided");
         }
         this.filename = filename;
     }
@@ -111,13 +110,13 @@ public class Image {
      */
     public void setFilenameThumbnail(String filenameThumbnail) {
         if (filenameThumbnail == null) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "No thumbnail filename was provided");
+            throw new ValidationResponseException("No thumbnail filename was provided");
         } else if (filenameThumbnail.isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "An empty thumbnail filename was provided");
+            throw new ValidationResponseException("An empty thumbnail filename was provided");
         } else if (filenameThumbnail.contains(" ")) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Spaces are not allowed in the thumbnail filename");
+            throw new ValidationResponseException("Spaces are not allowed in the thumbnail filename");
         } else if (!checkImageFormats(filenameThumbnail)) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "An invalid image format was provided");
+            throw new ValidationResponseException("An invalid image format was provided");
         }
         this.filenameThumbnail = filenameThumbnail;
     }

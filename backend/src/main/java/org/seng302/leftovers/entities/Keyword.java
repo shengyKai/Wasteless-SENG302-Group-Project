@@ -3,8 +3,7 @@ package org.seng302.leftovers.entities;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
-import org.springframework.http.HttpStatus;
-import org.springframework.web.server.ResponseStatusException;
+import org.seng302.leftovers.exceptions.ValidationResponseException;
 
 import javax.persistence.*;
 import java.time.Instant;
@@ -89,13 +88,13 @@ public class Keyword {
     public void setName(String name) {
         name = formatName(name);
         if (name == null) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Keyword name must be provided");
+            throw new ValidationResponseException("Keyword name must be provided");
         }
         if (name.isEmpty() || name.length() > 25) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Keyword name must be between 1-25 characters long");
+            throw new ValidationResponseException("Keyword name must be between 1-25 characters long");
         }
         if (!name.matches("^[ \\p{L}]*$")) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Keyword name must only contain letters");
+            throw new ValidationResponseException("Keyword name must only contain letters");
         }
         this.name = name;
     }

@@ -1,16 +1,13 @@
 package org.seng302.leftovers.dto.saleitem;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.ToString;
 import org.seng302.leftovers.dto.inventory.InventoryItemResponseDTO;
 import org.seng302.leftovers.entities.SaleItem;
 
-import java.math.BigDecimal;
 import java.time.Instant;
-import java.time.LocalDate;
 
 /**
  * TODO
