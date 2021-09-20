@@ -13,12 +13,10 @@ import org.seng302.leftovers.entities.User;
 import org.seng302.leftovers.entities.event.Event;
 import org.seng302.leftovers.entities.event.GlobalMessageEvent;
 import org.seng302.leftovers.persistence.UserRepository;
-import org.seng302.leftovers.persistence.event.EventRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import javax.annotation.Resource;
-import javax.transaction.Transactional;
 import java.lang.reflect.Field;
 import java.time.Duration;
 import java.time.Instant;
@@ -38,12 +36,11 @@ class EventRepositoryTest {
 
     User testUser;
     User otherUser;
-    Event testUserEvent1;
-    Event testUserEvent2;
-    Event testUserEvent3;
-    Event otherUserEvent1;
+    GlobalMessageEvent testUserEvent1;
+    GlobalMessageEvent testUserEvent2;
+    GlobalMessageEvent testUserEvent3;
+    GlobalMessageEvent otherUserEvent1;
     Instant beforeCreation;
-    Instant lastCreation;
 
     @BeforeEach
     void setUp() throws InterruptedException {
@@ -81,12 +78,12 @@ class EventRepositoryTest {
         testUserEvent3 = eventRepository.save(new GlobalMessageEvent(testUser, "Test user event 3"));
         otherUserEvent1 = eventRepository.save(new GlobalMessageEvent(otherUser, "Other user event 1"));
         
-        // Give all events a different creation and lastModified date so sorting an filtering can be tested
-        List<Event> events = List.of(testUserEvent1, testUserEvent2, testUserEvent3, otherUserEvent1);
+        // Give all events a different creation and lastModified date so sorting and filtering can be tested
+        List<GlobalMessageEvent> events = List.of(testUserEvent1, testUserEvent2, testUserEvent3, otherUserEvent1);
         beforeCreation = Instant.parse("2021-09-10T12:00:00Z");
         for (int i = 0; i < events.size(); i++) {
-            setCreatedForEventInDatabase((GlobalMessageEvent) events.get(i), beforeCreation.plus(Duration.ofSeconds(i+1)));
-            setLastModifiedForEventInDatabase((GlobalMessageEvent) events.get(i), beforeCreation.plus(Duration.ofSeconds(i+1)));
+            setCreatedForEventInDatabase(events.get(i), beforeCreation.plus(Duration.ofSeconds(i+1)));
+            setLastModifiedForEventInDatabase(events.get(i), beforeCreation.plus(Duration.ofSeconds(i+1)));
         }
     }
 
@@ -177,9 +174,9 @@ class EventRepositoryTest {
     @Test
     void findEventsForUser_allModifiedAfterSinceModified_allReturned() {
         Instant modifiedSinceDate = Instant.parse("2021-09-11T12:00:00Z");
-        setLastModifiedForEventInDatabase((GlobalMessageEvent) testUserEvent1, modifiedSinceDate.plus(Duration.ofSeconds(1)));
-        setLastModifiedForEventInDatabase((GlobalMessageEvent) testUserEvent2, modifiedSinceDate.plus(Duration.ofSeconds(1)));
-        setLastModifiedForEventInDatabase((GlobalMessageEvent) testUserEvent3, modifiedSinceDate.plus(Duration.ofSeconds(1)));
+        setLastModifiedForEventInDatabase(testUserEvent1, modifiedSinceDate.plus(Duration.ofSeconds(1)));
+        setLastModifiedForEventInDatabase(testUserEvent2, modifiedSinceDate.plus(Duration.ofSeconds(1)));
+        setLastModifiedForEventInDatabase(testUserEvent3, modifiedSinceDate.plus(Duration.ofSeconds(1)));
 
         List<Event> queryResult = eventRepository.findEventsForUser(testUser, modifiedSinceDate);
 
@@ -191,9 +188,9 @@ class EventRepositoryTest {
     @Test
     void findEventsForUser_someModifiedAfterSinceModified_modifiedEventsReturned() {
         Instant modifiedSinceDate = Instant.parse("2021-09-11T12:00:00Z");
-        setLastModifiedForEventInDatabase((GlobalMessageEvent) testUserEvent1, modifiedSinceDate.plus(Duration.ofSeconds(1)));
-        setLastModifiedForEventInDatabase((GlobalMessageEvent) testUserEvent2, modifiedSinceDate.plus(Duration.ofSeconds(1)));
-        setLastModifiedForEventInDatabase((GlobalMessageEvent) testUserEvent3, modifiedSinceDate.minus(Duration.ofSeconds(1)));
+        setLastModifiedForEventInDatabase(testUserEvent1, modifiedSinceDate.plus(Duration.ofSeconds(1)));
+        setLastModifiedForEventInDatabase(testUserEvent2, modifiedSinceDate.plus(Duration.ofSeconds(1)));
+        setLastModifiedForEventInDatabase(testUserEvent3, modifiedSinceDate.minus(Duration.ofSeconds(1)));
 
         List<Event> allEvents = eventRepository.findEventsForUser(testUser);
         System.out.println(allEvents.get(0).getLastModified());
@@ -210,9 +207,9 @@ class EventRepositoryTest {
     @Test
     void findEventsForUser_noneModifiedAfterSinceModified_noneReturned() {
         Instant modifiedSinceDate = Instant.parse("2021-09-11T12:00:00Z");
-        setLastModifiedForEventInDatabase((GlobalMessageEvent) testUserEvent1, modifiedSinceDate.minus(Duration.ofSeconds(1)));
-        setLastModifiedForEventInDatabase((GlobalMessageEvent) testUserEvent2, modifiedSinceDate.minus(Duration.ofSeconds(1)));
-        setLastModifiedForEventInDatabase((GlobalMessageEvent) testUserEvent3, modifiedSinceDate.minus(Duration.ofSeconds(1)));
+        setLastModifiedForEventInDatabase(testUserEvent1, modifiedSinceDate.minus(Duration.ofSeconds(1)));
+        setLastModifiedForEventInDatabase(testUserEvent2, modifiedSinceDate.minus(Duration.ofSeconds(1)));
+        setLastModifiedForEventInDatabase(testUserEvent3, modifiedSinceDate.minus(Duration.ofSeconds(1)));
 
         List<Event> allEvents = eventRepository.findEventsForUser(testUser);
         System.out.println(allEvents.get(0).getLastModified());

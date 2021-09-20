@@ -3,8 +3,7 @@ package org.seng302.leftovers.dto.event;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.ToString;
-import org.seng302.leftovers.dto.SaleItemDTO;
-import org.seng302.leftovers.entities.event.InterestEvent;
+import org.seng302.leftovers.dto.saleitem.BoughtSaleItemDTO;
 import org.seng302.leftovers.entities.event.InterestPurchasedEvent;
 
 /**
@@ -15,7 +14,7 @@ import org.seng302.leftovers.entities.event.InterestPurchasedEvent;
 @EqualsAndHashCode(callSuper = false)
 public class InterestPurchasedEventDTO extends EventDTO {
     //TODO may have to create a boughtSaleItemDTO
-    private SaleItemDTO saleItem;
+    private BoughtSaleItemDTO boughtSaleItemDTO;
 
     /**
      * Converts a InterestPurchasedEvent entity to its JSON form

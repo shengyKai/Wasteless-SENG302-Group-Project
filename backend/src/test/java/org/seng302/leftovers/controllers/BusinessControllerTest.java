@@ -14,6 +14,8 @@ import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
+import org.seng302.leftovers.dto.business.BusinessResponseDTO;
+import org.seng302.leftovers.dto.business.BusinessType;
 import org.seng302.leftovers.dto.user.UserRole;
 import org.seng302.leftovers.entities.Business;
 import org.seng302.leftovers.entities.Location;
@@ -136,7 +138,7 @@ class BusinessControllerTest {
      */
     private void setUpTestBusinesses() throws ParseException {
         testBusiness = new Business.Builder()
-                .withBusinessType("Accommodation and Food Services")
+                .withBusinessType(BusinessType.ACCOMMODATION_AND_FOOD_SERVICES)
                 .withAddress(Location.covertAddressStringToLocation("4,Rountree Street,Ashburton,Christchurch,New Zealand," +
                         "Canterbury,8041"))
                 .withDescription("Some description")
@@ -148,7 +150,7 @@ class BusinessControllerTest {
         testBusiness = businessRepository.save(testBusiness);
 
         Business business1 = new Business.Builder()
-                .withBusinessType("Accommodation and Food Services")
+                .withBusinessType(BusinessType.ACCOMMODATION_AND_FOOD_SERVICES)
                 .withAddress(Location.covertAddressStringToLocation("4,Rountree Street,Ashburton,Wellington,New Zealand," +
                         "Canterbury,8041"))
                 .withDescription("Some description")
@@ -160,7 +162,7 @@ class BusinessControllerTest {
         businessRepository.save(business1);
 
         Business business2 = new Business.Builder()
-                .withBusinessType("Charitable organisation")
+                .withBusinessType(BusinessType.CHARITABLE)
                 .withAddress(Location.covertAddressStringToLocation("4,Rountree Street,Ashburton,Canberra,Australia," +
                         "Canterbury,8041"))
                 .withDescription("Some description")
@@ -172,7 +174,7 @@ class BusinessControllerTest {
         businessRepository.save(business2);
 
         Business business3 = new Business.Builder()
-                .withBusinessType("Non-profit organisation")
+                .withBusinessType(BusinessType.NON_PROFIT)
                 .withAddress(Location.covertAddressStringToLocation("4,Rountree Street,Ashburton,Christchurch,New Zealand," +
                         "Canterbury,8041"))
                 .withDescription("Some description")
@@ -232,7 +234,8 @@ class BusinessControllerTest {
         assertEquals(json.getAsString("primaryAdministratorId"), object.getPrimaryOwner().getUserID().toString());
         assertEquals(json.getAsString("name"), object.getName());
         assertEquals(json.getAsString("description"), object.getDescription());
-        assertEquals(json.getAsString("businessType"), object.getBusinessType());
+        assertEquals(json.getAsString("businessType"), objectMapper.convertValue(object.getBusinessType(), String.class));
+
         JSONObject address = new JSONObject((Map<String, ?>) json.get("address"));
         assertEquals(address.getAsString("streetNumber"), object.getAddress().getStreetNumber().toString());
         assertEquals(address.getAsString("streetName"), object.getAddress().getStreetName());
@@ -506,7 +509,7 @@ class BusinessControllerTest {
         String adminString = json.getAsString("administrators");
         assertTrue(adminString.contains(String.format("\"id\":%d", owner.getUserID())));
         assertEquals(
-                objectMapper.readTree(objectMapper.writeValueAsString(testBusiness.constructJson(true))),
+                objectMapper.readTree(objectMapper.writeValueAsString(BusinessResponseDTO.withAdmins(testBusiness))),
                 objectMapper.readTree(objectMapper.writeValueAsString(json))
         );
     }
@@ -530,7 +533,7 @@ class BusinessControllerTest {
         String adminString = json.getAsString("administrators");
         assertTrue(adminString.contains(String.format("\"id\":%d", admin.getUserID())));
         assertEquals(
-                objectMapper.readTree(objectMapper.writeValueAsString(testBusiness.constructJson(true))),
+                objectMapper.readTree(objectMapper.writeValueAsString(BusinessResponseDTO.withAdmins(testBusiness))),
                 objectMapper.readTree(objectMapper.writeValueAsString(json))
         );
     }
@@ -554,7 +557,7 @@ class BusinessControllerTest {
         String adminString = json.getAsString("administrators");
         assertFalse(adminString.contains(String.format("\"id\":%d", otherUser.getUserID())));
         assertEquals(
-                objectMapper.readTree(objectMapper.writeValueAsString(testBusiness.constructJson(true))),
+                objectMapper.readTree(objectMapper.writeValueAsString(BusinessResponseDTO.withAdmins(testBusiness))),
                 objectMapper.readTree(objectMapper.writeValueAsString(json))
         );
     }

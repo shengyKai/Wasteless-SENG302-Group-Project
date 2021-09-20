@@ -1,14 +1,17 @@
 package org.seng302.leftovers.entities;
 
 
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
 import org.mockito.Mock;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import java.math.BigDecimal;
 import java.time.Instant;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.mockito.Mockito.when;
 
 @SpringBootTest
@@ -40,7 +43,7 @@ class BoughtSaleItemTest {
         assertEquals(saleItem.getPrice(), boughtSaleItem.getPrice());
         assertEquals(saleItem.getQuantity(), boughtSaleItem.getQuantity());
         assertEquals(saleItem.getCreated(), boughtSaleItem.getListingDate());
-        assertEquals(saleItem.getLikeCount(), boughtSaleItem.getLikeCount());
+        assertEquals(saleItem.getLikeCount(), boughtSaleItem.getInterestCount());
     }
 
     @Test

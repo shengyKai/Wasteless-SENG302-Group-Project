@@ -12,6 +12,7 @@ import org.junit.jupiter.api.TestInstance;
 import org.junit.runner.RunWith;
 import org.mockito.MockedConstruction;
 import org.mockito.Mockito;
+import org.seng302.leftovers.dto.business.BusinessType;
 import org.seng302.leftovers.dto.user.UserRole;
 import org.seng302.leftovers.entities.*;
 import org.seng302.leftovers.persistence.BusinessRepository;
@@ -33,6 +34,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import javax.servlet.http.Cookie;
 import java.lang.reflect.Field;
+import java.math.BigDecimal;
 import java.text.ParseException;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
@@ -105,7 +107,7 @@ class ProductControllerTest {
     void createTestBusiness() {
         businessRepository.deleteAll();
         testBusiness1 = new Business.Builder()
-                .withBusinessType("Accommodation and Food Services")
+                .withBusinessType(BusinessType.ACCOMMODATION_AND_FOOD_SERVICES)
                 .withAddress(Location.covertAddressStringToLocation("4,Rountree Street,Ashburton,Christchurch,New Zealand," +
                         "Canterbury,8041"))
                 .withDescription("Some description")
@@ -543,7 +545,7 @@ class ProductControllerTest {
 
         Business tempBusiness = businessRepository.save(
                 new Business.Builder()
-                        .withBusinessType("Accommodation and Food Services")
+                        .withBusinessType(BusinessType.ACCOMMODATION_AND_FOOD_SERVICES)
                     .withAddress(Location.covertAddressStringToLocation("4,Rountree Street,Ashburton,Christchurch,New Zealand," +
                         "Canterbury,8041"))
                         .withDescription("Some description2")
@@ -612,7 +614,7 @@ class ProductControllerTest {
             verify(mockBuilder).withName(productInfo.getAsString("name"));
             verify(mockBuilder).withDescription(productInfo.getAsString("description"));
             verify(mockBuilder).withManufacturer(productInfo.getAsString("manufacturer"));
-            verify(mockBuilder).withRecommendedRetailPrice(productInfo.getAsString("recommendedRetailPrice"));
+            verify(mockBuilder).withRecommendedRetailPrice(new BigDecimal(productInfo.getAsString("recommendedRetailPrice")));
             verify(mockBuilder).build();
         }
     }

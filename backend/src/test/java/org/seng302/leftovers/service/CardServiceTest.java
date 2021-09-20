@@ -9,9 +9,9 @@ import org.mockito.*;
 import org.seng302.leftovers.entities.MarketplaceCard;
 import org.seng302.leftovers.entities.User;
 import org.seng302.leftovers.entities.event.ExpiryEvent;
+import org.seng302.leftovers.persistence.MarketplaceCardRepository;
 import org.seng302.leftovers.persistence.event.EventRepository;
 import org.seng302.leftovers.persistence.event.ExpiryEventRepository;
-import org.seng302.leftovers.persistence.MarketplaceCardRepository;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;

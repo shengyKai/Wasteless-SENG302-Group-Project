@@ -7,8 +7,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.seng302.leftovers.dto.ConversationDTO;
-import org.seng302.leftovers.dto.MessageDTO;
+import org.seng302.leftovers.dto.conversation.ConversationDTO;
+import org.seng302.leftovers.dto.conversation.MessageDTO;
 import org.seng302.leftovers.entities.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -51,9 +51,7 @@ class MessageEventTest {
         when(buyer.getAddress()).thenReturn(address);
         when(seller.getAddress()).thenReturn(address);
 
-        var cardJson = new JSONObject();
-        cardJson.appendField("id", 520);
-        when(card.constructJSONObject()).thenReturn(cardJson);
+        when(card.getID()).thenReturn(520L);
 
         when(buyer.getUserID()).thenReturn(92L);
         when(seller.getUserID()).thenReturn(38L);

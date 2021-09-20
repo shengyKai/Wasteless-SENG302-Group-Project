@@ -13,6 +13,7 @@ import org.mockito.*;
 import org.mockito.internal.matchers.apachecommons.ReflectionEquals;
 import org.seng302.leftovers.entities.*;
 import org.seng302.leftovers.entities.event.InterestEvent;
+import org.seng302.leftovers.entities.event.PurchasedEvent;
 import org.seng302.leftovers.exceptions.AccessTokenException;
 import org.seng302.leftovers.persistence.*;
 import org.seng302.leftovers.persistence.event.EventRepository;
@@ -75,6 +76,10 @@ class SaleControllerTest {
     private InventoryItem inventoryItem;
     @Mock
     private SaleItem saleItem;
+    @Mock
+    private User businessPrimaryOwner;
+    @Mock
+    private Location businessAddress;
 
     private MockedStatic<AuthenticationTokenManager> authenticationTokenManager;
 
@@ -98,6 +103,8 @@ class SaleControllerTest {
 
         // Setup mock business
         when(business.getId()).thenReturn(1L);
+        when(business.getAddress()).thenReturn(businessAddress);
+        when(business.getPrimaryOwner()).thenReturn(businessPrimaryOwner);
 
         when(businessRepository.getBusinessById(1L)).thenReturn(business);
         when(businessRepository.getBusinessById(not(eq(1L)))).thenThrow(new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE));
@@ -107,7 +114,7 @@ class SaleControllerTest {
         when(inventoryItem.getExpires()).thenReturn(LocalDate.now());
         when(inventoryItem.getBusiness()).thenReturn(business);
 
-        when(inventoryItemRepository.getInventoryItemByBusinessAndId(any(Business.class), anyLong())).thenCallRealMethod();
+        when(inventoryItemRepository.findInventoryItemByBusinessAndId(any(Business.class), anyLong())).thenCallRealMethod();
         when(inventoryItemRepository.findById(2L)).thenReturn(Optional.of(inventoryItem));
         when(inventoryItemRepository.findById(not(eq(2L)))).thenReturn(Optional.empty());
 
@@ -400,6 +407,7 @@ class SaleControllerTest {
             var inventoryItem = mock(InventoryItem.class);
             when(saleItem.getInventoryItem()).thenReturn(inventoryItem);
             when(inventoryItem.getProduct()).thenReturn(product);
+            when(product.getBusiness()).thenReturn(business);
             mockItems.add(saleItem);
         }
         // Ensure determinism
@@ -410,7 +418,7 @@ class SaleControllerTest {
     @Test
     void getSaleItemsForBusiness_noReverse_itemsAscending() throws Exception {
         var items = generateMockSaleItems();
-        when(saleItemRepository.findAll(any(), any(PageRequest.class))).thenReturn(new PageImpl<SaleItem>(items));
+        when(saleItemRepository.findAll(any(), any(PageRequest.class))).thenReturn(new PageImpl<>(items));
         MvcResult result = mockMvc.perform(get("/businesses/1/listings"))
                 .andExpect(status().isOk())
                 .andReturn();
@@ -798,7 +806,7 @@ class SaleControllerTest {
         JSONObject invalidBody = new JSONObject();
         invalidBody.put("id", 33);
 
-        mockMvc.perform(put(String.format("/listings/%d/purchase", saleItem.getId()))
+        mockMvc.perform(post(String.format("/listings/%d/purchase", saleItem.getId()))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(invalidBody.toString()))
                 .andExpect(status().isBadRequest());
@@ -822,7 +830,7 @@ class SaleControllerTest {
         JSONObject validBody = new JSONObject();
         validBody.put("purchaserId", user.getUserID());
 
-        mockMvc.perform(put(String.format("/listings/%d/purchase", saleItem.getId()))
+        mockMvc.perform(post(String.format("/listings/%d/purchase", saleItem.getId()))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(validBody.toString()))
                 .andExpect(status().isUnauthorized());
@@ -845,7 +853,7 @@ class SaleControllerTest {
         JSONObject validBody = new JSONObject();
         validBody.put("purchaserId", user.getUserID());
 
-        mockMvc.perform(put(String.format("/listings/%d/purchase", saleItem.getId()))
+        mockMvc.perform(post(String.format("/listings/%d/purchase", saleItem.getId()))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(validBody.toString()))
                 .andExpect(status().isForbidden());
@@ -868,7 +876,7 @@ class SaleControllerTest {
         JSONObject validBody = new JSONObject();
         validBody.put("purchaserId", user.getUserID());
 
-        mockMvc.perform(put(String.format("/listings/%d/purchase", saleItem.getId()))
+        mockMvc.perform(post(String.format("/listings/%d/purchase", saleItem.getId()))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(validBody.toString()))
                 .andExpect(status().isNotAcceptable());
@@ -891,7 +899,7 @@ class SaleControllerTest {
         JSONObject validBody = new JSONObject();
         validBody.put("purchaserId", user.getUserID());
 
-        mockMvc.perform(put(String.format("/listings/%d/purchase", saleItem.getId()))
+        mockMvc.perform(post(String.format("/listings/%d/purchase", saleItem.getId()))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(validBody.toString()))
                 .andExpect(status().isNotAcceptable());
@@ -913,7 +921,7 @@ class SaleControllerTest {
         JSONObject validBody = new JSONObject();
         validBody.put("purchaserId", user.getUserID());
 
-        mockMvc.perform(put(String.format("/listings/%d/purchase", saleItem.getId()))
+        mockMvc.perform(post(String.format("/listings/%d/purchase", saleItem.getId()))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(validBody.toString()))
                 .andExpect(status().isOk());
@@ -932,7 +940,7 @@ class SaleControllerTest {
         JSONObject validBody = new JSONObject();
         validBody.put("purchaserId", user.getUserID());
 
-        mockMvc.perform(put(String.format("/listings/%d/purchase", saleItem.getId()))
+        mockMvc.perform(post(String.format("/listings/%d/purchase", saleItem.getId()))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(validBody.toString()))
                 .andExpect(status().isOk());
@@ -949,21 +957,37 @@ class SaleControllerTest {
         authenticationTokenManager.when(() -> AuthenticationTokenManager.sessionCanSeePrivate(any(), any())).thenReturn(true);
 
         when(saleItem.getQuantity()).thenReturn(50);
-        when(inventoryItem.getRemainingQuantity()).thenReturn(120);
+        when(inventoryItem.getQuantity()).thenReturn(120);
 
         JSONObject validBody = new JSONObject();
         validBody.put("purchaserId", user.getUserID());
 
-        mockMvc.perform(put(String.format("/listings/%d/purchase", saleItem.getId()))
+        mockMvc.perform(post(String.format("/listings/%d/purchase", saleItem.getId()))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(validBody.toString()))
                 .andExpect(status().isOk());
 
         // Inventory item should be updated if request is successful
-        verify(inventoryItem, times(1)).setRemainingQuantity(170);
+        verify(inventoryItem, times(1)).setQuantity(70);
         var inventoryItemCaptor = ArgumentCaptor.forClass(InventoryItem.class);
         verify(inventoryItemRepository, times(1)).save(inventoryItemCaptor.capture());
         assertEquals(inventoryItem, inventoryItemCaptor.getValue());
+    }
+    @Test
+    void purchaseSaleItem_validRequest_purchaseEventCreated() throws Exception {
+        authenticationTokenManager.when(() -> AuthenticationTokenManager.sessionCanSeePrivate(any(), any())).thenReturn(true);
+        var product = Mockito.mock(Product.class);
+        JSONObject validBody = new JSONObject();
+        validBody.put("purchaserId", user.getUserID());
+
+        mockMvc.perform(post(String.format("/listings/%d/purchase", saleItem.getId()))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(validBody.toString()))
+                .andExpect(status().isOk());
+
+        var purchasedEventArgumentCaptor = ArgumentCaptor.forClass(PurchasedEvent.class);
+        verify(eventRepository, times(1)).save(purchasedEventArgumentCaptor.capture());
+        assertEquals(user, purchasedEventArgumentCaptor.getValue().getBoughtSaleItem().getBuyer());
     }
 
 }

@@ -3,6 +3,7 @@ package org.seng302.datagenerator;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
+import org.seng302.leftovers.dto.business.BusinessType;
 import org.seng302.leftovers.entities.*;
 import org.springframework.boot.test.context.SpringBootTest;
 
@@ -47,7 +48,7 @@ class DescriptionGeneratorTest {
                 .withCloses(closes)
                 .build();
         testBusiness = new Business.Builder()
-                .withBusinessType("Accommodation and Food Services")
+                .withBusinessType(BusinessType.ACCOMMODATION_AND_FOOD_SERVICES)
                 .withAddress(Location.covertAddressStringToLocation("4,Rountree Street,Ashburton,Christchurch,New Zealand," +
                         "Canterbury,8041"))
                 .withDescription("Some description")

@@ -2288,7 +2288,7 @@ paths:
         '406':
           $ref: '#/components/responses/NotAcceptableError'
   listings/{id}/purchase:
-    put:
+    post:
       tags:
         - 'U31: Purchases'
         - 'Listings / sales'

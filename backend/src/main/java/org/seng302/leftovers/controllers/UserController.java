@@ -1,7 +1,5 @@
 package org.seng302.leftovers.controllers;
 
-import net.minidev.json.JSONArray;
-import net.minidev.json.JSONObject;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.seng302.leftovers.dto.ResultPageDTO;
@@ -29,7 +27,6 @@ import org.springframework.web.server.ResponseStatusException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
-import java.util.List;
 import java.util.Optional;
 
 @RestController

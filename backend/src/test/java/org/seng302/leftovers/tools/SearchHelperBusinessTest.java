@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.seng302.leftovers.dto.business.BusinessType;
 import org.seng302.leftovers.entities.Business;
 import org.seng302.leftovers.entities.Location;
 import org.seng302.leftovers.entities.User;
@@ -49,7 +50,7 @@ class SearchHelperBusinessTest {
                 .build();
         owner = userRepository.save(owner);
         Business testBusiness1 = new Business.Builder()
-                .withBusinessType("Accommodation and Food Services")
+                .withBusinessType(BusinessType.ACCOMMODATION_AND_FOOD_SERVICES)
                 .withAddress(Location.covertAddressStringToLocation("4,Rountree Street,Ashburton,Christchurch,New Zealand," +
                         "Canterbury,8041"))
                 .withDescription("Some description")
@@ -58,7 +59,7 @@ class SearchHelperBusinessTest {
                 .build();
         businessRepository.save(testBusiness1);
         Business testBusiness2 = new Business.Builder()
-                .withBusinessType("Retail Trade")
+                .withBusinessType(BusinessType.RETAIL_TRADE)
                 .withAddress(Location.covertAddressStringToLocation("4,Rountree Street,Ashburton,Christchurch,New Zealand," +
                         "Canterbury,8041"))
                 .withDescription("Some description")
@@ -67,7 +68,7 @@ class SearchHelperBusinessTest {
                 .build();
         businessRepository.save(testBusiness2);
         Business testBusiness3 = new Business.Builder()
-                .withBusinessType("Retail Trade")
+                .withBusinessType(BusinessType.RETAIL_TRADE)
                 .withAddress(Location.covertAddressStringToLocation("4,Rountree Street,Ashburton,Christchurch,New Zealand," +
                         "Canterbury,8041"))
                 .withDescription("Some description")
@@ -215,8 +216,11 @@ class SearchHelperBusinessTest {
     }
 
     @ParameterizedTest
-    @CsvSource({"Accommodation and Food Services,1", "Retail Trade,2"})
-    void constructSpecificationFromBusinessSearch_onlyBusinessTypeProvided_specificationMatchesGivenType(String type, int numMatches) {
+    @CsvSource({
+            "ACCOMMODATION_AND_FOOD_SERVICES,1",
+            "RETAIL_TRADE,2"
+    })
+    void constructSpecificationFromBusinessSearch_onlyBusinessTypeProvided_specificationMatchesGivenType(BusinessType type, int numMatches) {
         createBusinesses();
         var specification= SearchHelper.constructSpecificationFromBusinessSearch(null, type);
         var businesses = businessRepository.findAll(specification);
@@ -225,19 +229,12 @@ class SearchHelperBusinessTest {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"Charitable organisation","Non-profit organisation"})
-    void constructSpecificationFromBusinessSearch_onlyBusinessTypeProvided_specificationDoesNotMatchOtherType(String type) {
+    @ValueSource(strings = {"CHARITABLE","NON_PROFIT"})
+    void constructSpecificationFromBusinessSearch_onlyBusinessTypeProvided_specificationDoesNotMatchOtherType(BusinessType type) {
         createBusinesses();
         var specification= SearchHelper.constructSpecificationFromBusinessSearch(null, type);
         var businesses = businessRepository.findAll(specification);
         assertEquals(0, businesses.size());
-    }
-
-    @Test
-    void constructSpecificationFromBusinessSearch_invalidBusinessTypeProvided_exceptionThrown() {
-        assertThrows(SearchFormatException.class, () -> {
-            SearchHelper.constructSpecificationFromBusinessSearch(null, "Foo");
-        });
     }
 
     @Test
@@ -248,8 +245,11 @@ class SearchHelperBusinessTest {
     }
 
     @ParameterizedTest
-    @CsvSource({"Accommodation and Food Services,joe,1", "Retail Trade,Steve,1"})
-    void constructSpecificationFromBusinessSearch_queryAndTypeProvided_specificationMatchesIfBothMatch(String type, String query, int numMatches) {
+    @CsvSource({
+            "ACCOMMODATION_AND_FOOD_SERVICES,joe,1",
+            "RETAIL_TRADE,Steve,1"
+    })
+    void constructSpecificationFromBusinessSearch_queryAndTypeProvided_specificationMatchesIfBothMatch(BusinessType type, String query, int numMatches) {
         createBusinesses();
         var specification= SearchHelper.constructSpecificationFromBusinessSearch(query, type);
         var businesses = businessRepository.findAll(specification);
@@ -257,8 +257,11 @@ class SearchHelperBusinessTest {
     }
 
     @ParameterizedTest
-    @CsvSource({"Charitable organisation,joe", "Non-profit organisation,Steve"})
-    void constructSpecificationFromBusinessSearch_queryAndTypeProvided_specificationDoesNotMatchIfOnlyQueryMatches(String type, String query) {
+    @CsvSource({
+            "CHARITABLE,joe",
+            "NON_PROFIT,Steve"
+    })
+    void constructSpecificationFromBusinessSearch_queryAndTypeProvided_specificationDoesNotMatchIfOnlyQueryMatches(BusinessType type, String query) {
         createBusinesses();
         var specification= SearchHelper.constructSpecificationFromBusinessSearch(query, type);
         var businesses = businessRepository.findAll(specification);
@@ -266,8 +269,11 @@ class SearchHelperBusinessTest {
     }
 
     @ParameterizedTest
-    @CsvSource({"Accommodation and Food Services,hamburgers", "Retail Trade,My shop"})
-    void constructSpecificationFromBusinessSearch_queryAndTypeProvided_specificationDoesNotMatchIfOnlyTypeMatches(String type, String query) {
+    @CsvSource({
+            "ACCOMMODATION_AND_FOOD_SERVICES,hamburgers",
+            "RETAIL_TRADE,My shop"
+    })
+    void constructSpecificationFromBusinessSearch_queryAndTypeProvided_specificationDoesNotMatchIfOnlyTypeMatches(BusinessType type, String query) {
         createBusinesses();
         var specification= SearchHelper.constructSpecificationFromBusinessSearch(query, type);
         var businesses = businessRepository.findAll(specification);
@@ -275,8 +281,11 @@ class SearchHelperBusinessTest {
     }
 
     @ParameterizedTest
-    @CsvSource({"Charitable organisation,hamburgers", "Non-profit organisation,My shop"})
-    void constructSpecificationFromBusinessSearch_queryAndTypeProvided_specificationDoesNotMatchIfNeitherMatches(String type, String query) {
+    @CsvSource({
+            "CHARITABLE,hamburgers",
+            "NON_PROFIT,My shop"
+    })
+    void constructSpecificationFromBusinessSearch_queryAndTypeProvided_specificationDoesNotMatchIfNeitherMatches(BusinessType type, String query) {
         createBusinesses();
         var specification= SearchHelper.constructSpecificationFromBusinessSearch(query, type);
         var businesses = businessRepository.findAll(specification);

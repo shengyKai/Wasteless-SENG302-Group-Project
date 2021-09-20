@@ -5,6 +5,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.runner.RunWith;
+import org.seng302.leftovers.dto.business.BusinessType;
 import org.seng302.leftovers.entities.*;
 import org.seng302.leftovers.entities.event.InterestEvent;
 import org.seng302.leftovers.persistence.event.EventRepository;
@@ -67,7 +68,7 @@ class SaleItemRepositoryTest {
                 .withPassword("password123").build();
         testUser = userRepository.save(testUser);
         var testBusiness = new Business.Builder()
-                .withBusinessType("Accommodation and Food Services")
+                .withBusinessType(BusinessType.ACCOMMODATION_AND_FOOD_SERVICES)
                 .withAddress(testBusinessLocation)
                 .withName("Gregs pies")
                 .withDescription("We enjoy pies")

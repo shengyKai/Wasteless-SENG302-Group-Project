@@ -6,7 +6,6 @@ import Index from '@/components/Auth/index.vue';
 import Login from '@/components/Auth/Login.vue';
 import Register from '@/components/Auth/Register.vue';
 import LocationAutocomplete from "@/components/utils/LocationAutocomplete.vue";
-import { TEST_DIACRITICS } from './utils';
 
 Vue.use(Vuetify);
 
@@ -249,10 +248,10 @@ describe('Register.vue', () => {
     expect(registerButton.props().disabled).toBeTruthy();
   });
 
-  it.each(TEST_DIACRITICS)("Testing first name supports diacritics and accents", async (char) => {
+  it("Testing first name supports diacritics and accents", async () => {
     const registerButton = wrapper.find(".v-btn");
     await wrapper.setData({
-      firstName: char
+      firstName: "ÙÀàìÓÍóéÎúâÔôÕõñŸäöÿ"
     });
     await Vue.nextTick();
     expect(registerButton.props().disabled).toBeFalsy();
@@ -285,10 +284,10 @@ describe('Register.vue', () => {
     expect(registerButton.props().disabled).toBeFalsy();
   });
 
-  it.each(TEST_DIACRITICS)("Testing middle name supports diacritics and accents", async (char) => {
+  it("Testing middle name supports diacritics and accents", async () => {
     const registerButton = wrapper.find(".v-btn");
     await wrapper.setData({
-      middleName: char
+      middleName: "ÙÀàìÓÍóéÎúâÔôÕõñŸäöÿ"
     });
     await Vue.nextTick();
     expect(registerButton.props().disabled).toBeFalsy();
@@ -321,10 +320,10 @@ describe('Register.vue', () => {
     expect(registerButton.props().disabled).toBeTruthy();
   });
 
-  it.each(TEST_DIACRITICS)("Testing last name supports diacritics and accents", async (char) => {
+  it("Testing last name supports diacritics and accents", async () => {
     const registerButton = wrapper.find(".v-btn");
     await wrapper.setData({
-      lastName: char
+      lastName: "ÙÀàìÓÍóéÎúâÔôÕõñŸäöÿ"
     });
     await Vue.nextTick();
     expect(registerButton.props().disabled).toBeFalsy();
@@ -357,10 +356,10 @@ describe('Register.vue', () => {
     expect(registerButton.props().disabled).toBeTruthy();
   });
 
-  it.each(TEST_DIACRITICS)("Testing nickname supports diacritics and accents", async (char) => {
+  it("Testing nickname supports diacritics and accents", async () => {
     const registerButton = wrapper.find(".v-btn");
     await wrapper.setData({
-      nickname: char
+      nickname: "ÙÀàìÓÍóéÎúâÔôÕõñŸäöÿ"
     });
     await Vue.nextTick();
     expect(registerButton.props().disabled).toBeFalsy();

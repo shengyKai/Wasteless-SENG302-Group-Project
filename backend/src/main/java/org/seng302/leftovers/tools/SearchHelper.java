@@ -4,8 +4,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.Data;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.seng302.leftovers.dto.ProductFilterOption;
-import org.seng302.leftovers.dto.SaleListingSearchDTO;
+import org.seng302.leftovers.dto.business.BusinessType;
+import org.seng302.leftovers.dto.product.ProductFilterOption;
+import org.seng302.leftovers.dto.saleitem.SaleListingSearchDTO;
 import org.seng302.leftovers.dto.user.UserRole;
 import org.seng302.leftovers.entities.*;
 import org.seng302.leftovers.exceptions.SearchFormatException;
@@ -194,7 +195,7 @@ public class SearchHelper {
      * @param businessType A business type provided by the user, used to find businesses with matching type.
      * @return A specification for businesses matching the provided search query and type.
      */
-    public static Specification<Business> constructSpecificationFromBusinessSearch(String searchQuery, String businessType) {
+    public static Specification<Business> constructSpecificationFromBusinessSearch(String searchQuery, BusinessType businessType) {
         if (searchQuery == null && businessType == null) {
             SearchFormatException exception =
                     new SearchFormatException("Provide either a search query or business type to find matching businesses");
@@ -263,25 +264,19 @@ public class SearchHelper {
      */
     private static Specification<Business> constructBusinessSpecificationFromSearchQuery(String searchQuery) {
         List<String> searchTokens = splitSearchStringIntoTerms(searchQuery);
-        List<String> fieldNames = Collections.singletonList("name");
+        List<String> fieldNames = Arrays.asList("name", "address.country", "address.city", "address.country", "address.region");
 
         SearchQuery<Business> searchSpecs = parseSearchTokens(searchTokens, fieldNames);
         return buildCompoundSpecification(searchSpecs);
     }
 
     /**
-     * This method returns a specification which will only match businesses with the given string for their business type.
-     * An exception will be thrown if an invalid business type is provided.
+     * This method returns a specification which will only match businesses with the given value for their business type.
      * @param businessType The type to match.
      * @return Specification for finding businesses with the given type.
      */
-    private static Specification<Business> constructBusinessSpecificationFromType(String businessType) {
-        if (!Business.getBusinessTypes().contains(businessType)) {
-            SearchFormatException exception = new SearchFormatException(String.format("\"%s\" is an invalid business type", businessType));
-            logger.error(exception.getMessage());
-            throw exception;
-        }
-        return buildExactMatchSpec(businessType, Collections.singletonList("businessType"));
+    private static Specification<Business> constructBusinessSpecificationFromType(BusinessType businessType) {
+        return (root, query, criteriaBuilder) -> criteriaBuilder.equal(root.get("businessType"), businessType);
     }
      
     /**
@@ -760,9 +755,9 @@ public class SearchHelper {
      * @param businessTypes a list of strings containing the business types of the business
      * @return A specification for Sale items which matches the business's business type
      */
-    public static Specification<SaleItem> constructSaleListingSpecificationFromBusinessType(List<String> businessTypes) {
+    public static Specification<SaleItem> constructSaleListingSpecificationFromBusinessType(List<BusinessType> businessTypes) {
         if  (businessTypes.isEmpty()) {
-            return (root, query, criteriaBuilder) -> root.get("inventoryItem").get("product").get("business").get("businessType").in(Business.getBusinessTypes());
+            return null; // Null specification matches all business types
         } else {
             return (root, query, criteriaBuilder) -> root.get("inventoryItem").get("product").get("business").get("businessType").in(businessTypes);
         }

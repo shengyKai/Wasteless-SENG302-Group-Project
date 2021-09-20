@@ -19,7 +19,7 @@ Feature: U31 - Purchases
     And I am logged into "Jeffrey" account
     When I try to access the inventory of the business
     Then the inventory of the business is returned to me
-    And the remaining quantity of the inventory item "fish" will be 17
+    And the quantity of the inventory item "fish" will be 12
 
   Scenario: AC4: When an item is purchased, the item is removed from the sale listings
     Given user "Alice" has purchased the sale listing "fish" from business "Amazon"
@@ -33,3 +33,10 @@ Feature: U31 - Purchases
     When I try to purchase the most recent sale listing
     Then The request succeeds
     And A record of the purchase is added to the business's sale history
+
+  Scenario: AC2: A notification appears on my home feed to remind me what I have purchased
+    Given I am logged into "Alice" account
+    And I am viewing the sale listings for business "Amazon"
+    When I try to purchase the most recent sale listing
+    And I check my notification feed
+    Then I receive a notification

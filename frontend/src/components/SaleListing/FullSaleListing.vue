@@ -10,7 +10,7 @@
           </v-btn>
           <v-btn class="action-btn white--text" color="green">
             <v-icon>mdi-thumb-up</v-icon>
-            Like 69
+            Like {{interestCount}}
           </v-btn>
           <v-btn class="action-btn white--text" color="purple" @click="goBack()">
             <v-icon>mdi-arrow-left</v-icon>
@@ -186,6 +186,12 @@ export default {
     productDescription() {
       return this.product.description || "Not set";
     },
+    /**
+     * Returns the number of likes for the sale listing
+     */
+    interestCount()  {
+      return this.saleItem.interestCount;
+    }
   },
   methods: {
     /**

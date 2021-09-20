@@ -1,8 +1,5 @@
 package org.seng302.leftovers.entities;
 
-import net.minidev.json.JSONArray;
-import net.minidev.json.JSONObject;
-import org.seng302.leftovers.tools.JsonTools;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -202,26 +199,10 @@ public class Product {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Product recommended retail price must not be less than 0");
             }
             if (recommendedRetailPrice.compareTo(new BigDecimal(10000)) >= 0) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Product recommended retail price must be less that 100,000");
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Product recommended retail price must be less that 10,000");
             }
         }
         this.recommendedRetailPrice = recommendedRetailPrice;
-    }
-
-    /**
-     * Convenience method for setting the recommended retail price from a string
-     * @param recommendedRetailPrice The new RRP of the product as a string
-     */
-    public void setRecommendedRetailPrice(String recommendedRetailPrice) {
-        if (recommendedRetailPrice == null || recommendedRetailPrice.equals("")) {
-            this.recommendedRetailPrice = null;
-            return;
-        }
-        try {
-            this.setRecommendedRetailPrice(new BigDecimal(recommendedRetailPrice));
-        } catch (NumberFormatException ignored) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The recommended retail price is not a number");
-        }
     }
 
     /**
@@ -261,28 +242,6 @@ public class Product {
     }
 
     /**
-     * Convert product to a JSON object
-     */
-    public JSONObject constructJSONObject() {
-        JSONObject object = new JSONObject();
-        object.put("id", productCode);
-        object.put("name", name);
-        object.put("description", description);
-        object.put("manufacturer", manufacturer);
-        object.put("recommendedRetailPrice", recommendedRetailPrice);
-        object.put("created", created.toString());
-        object.put("business", business.constructJson());
-        JSONArray images = new JSONArray();
-        for (Image image : productImages) {
-            images.add(image.constructJSONObject());
-        }
-        object.put("images", images);
-        object.put("countryOfSale", countryOfSale);
-        JsonTools.removeNullsFromJson(object);
-        return object;
-    }
-
-    /**
      * Builder for Product
      */
     public static class Builder {
@@ -290,7 +249,7 @@ public class Product {
         private String name;
         private String description;
         private String manufacturer;
-        private String recommendedRetailPrice;
+        private BigDecimal recommendedRetailPrice;
         private Business business;
 
         /**
@@ -340,8 +299,24 @@ public class Product {
          * @param recommendedRetailPrice the recommended retail price of the product
          * @return Builder with the recommended retail price set
          */
-        public Builder withRecommendedRetailPrice(String recommendedRetailPrice) {
+        public Builder withRecommendedRetailPrice(BigDecimal recommendedRetailPrice) {
             this.recommendedRetailPrice = recommendedRetailPrice;
+            return this;
+        }
+
+        /**
+         * Sets the builder's recommended retail price.
+         * If the provided string is not a valid number then this method will throw an exception
+         *
+         * @param recommendedRetailPrice the recommended retail price of the product
+         * @return Builder with the recommended retail price set
+         */
+        public Builder withRecommendedRetailPrice(String recommendedRetailPrice) {
+            try {
+                this.recommendedRetailPrice = new BigDecimal(recommendedRetailPrice);
+            } catch (NumberFormatException ignored) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The recommended retail price is not a number");
+            }
             return this;
         }
 

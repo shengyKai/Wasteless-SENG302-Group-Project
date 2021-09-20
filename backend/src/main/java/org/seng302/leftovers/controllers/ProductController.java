@@ -2,10 +2,12 @@ package org.seng302.leftovers.controllers;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import net.minidev.json.JSONObject;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.seng302.leftovers.dto.ProductFilterOption;
+import org.seng302.leftovers.dto.ResultPageDTO;
+import org.seng302.leftovers.dto.product.ProductFilterOption;
+import org.seng302.leftovers.dto.product.ProductResponseDTO;
+import org.seng302.leftovers.dto.product.UpdateProductDTO;
 import org.seng302.leftovers.entities.Business;
 import org.seng302.leftovers.entities.Image;
 import org.seng302.leftovers.entities.Product;
@@ -14,7 +16,6 @@ import org.seng302.leftovers.persistence.ImageRepository;
 import org.seng302.leftovers.persistence.ProductRepository;
 import org.seng302.leftovers.service.ImageService;
 import org.seng302.leftovers.tools.AuthenticationTokenManager;
-import org.seng302.leftovers.tools.JsonTools;
 import org.seng302.leftovers.tools.SearchHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -39,6 +40,8 @@ import java.util.Set;
  */
 @RestController
 public class ProductController {
+    @Autowired
+    private ObjectMapper objectMapper;
 
     private final ProductRepository productRepository;
     private final BusinessRepository businessRepository;
@@ -62,17 +65,16 @@ public class ProductController {
      * @return List of products in the business's catalogue
      */
     @GetMapping("/businesses/{id}/products")
-    public JSONObject retrieveCatalogue(@PathVariable Long id,
-                                       HttpServletRequest request,
-                                       @RequestParam(required = false) String orderBy,
-                                       @RequestParam(required = false) Integer page,
-                                       @RequestParam(required = false) Integer resultsPerPage,
-                                       @RequestParam(required = false) Boolean reverse) {
-                                        
-        logger.info("Get catalogue by business id.");
+    public ResultPageDTO<ProductResponseDTO> retrieveCatalogue(@PathVariable Long id,
+                                                               HttpServletRequest request,
+                                                               @RequestParam(required = false) String orderBy,
+                                                               @RequestParam(required = false) Integer page,
+                                                               @RequestParam(required = false) Integer resultsPerPage,
+                                                               @RequestParam(required = false) Boolean reverse) {
+
+        logger.info("Retrieving catalogue from business with id={}", id);
         AuthenticationTokenManager.checkAuthenticationToken(request);
-                            
-        logger.info(() -> String.format("Retrieving catalogue from business with id %d.", id));
+
         Business business = businessRepository.getBusinessById(id);
 
         List<Sort.Order> sortOrder = getSortOrder(orderBy, reverse);
@@ -80,7 +82,7 @@ public class ProductController {
         business.checkSessionPermissions(request);
         PageRequest pageablePage = SearchHelper.getPageRequest(page, resultsPerPage, Sort.by(sortOrder));
         Page<Product> catalogue = productRepository.getAllByBusiness(business, pageablePage);
-        return JsonTools.constructPageJSON(catalogue.map(Product::constructJSONObject));
+        return new ResultPageDTO<>(catalogue.map(ProductResponseDTO::new));
     }
 
     /**
@@ -96,14 +98,14 @@ public class ProductController {
      * @return List of products
      */
     @GetMapping("/businesses/{id}/products/search")
-    public JSONObject retrieveCatalogueSearch(@PathVariable Long id,
-                                              HttpServletRequest request,
-                                              @RequestParam(required = false) String searchQuery,
-                                              @RequestParam(required = false) Integer page,
-                                              @RequestParam(required = false) Integer resultsPerPage,
-                                              @RequestParam(required = false) List<String> searchBy,
-                                              @RequestParam(required = false) Boolean reverse,
-                                              @RequestParam(required = false) String orderBy
+    public ResultPageDTO<ProductResponseDTO> retrieveCatalogueSearch(@PathVariable Long id,
+                                                                     HttpServletRequest request,
+                                                                     @RequestParam(required = false) String searchQuery,
+                                                                     @RequestParam(required = false) Integer page,
+                                                                     @RequestParam(required = false) Integer resultsPerPage,
+                                                                     @RequestParam(required = false) List<String> searchBy,
+                                                                     @RequestParam(required = false) Boolean reverse,
+                                                                     @RequestParam(required = false) String orderBy
                                               ) {
         logger.info("Get catalogue by business id.");
         AuthenticationTokenManager.checkAuthenticationToken(request);
@@ -114,7 +116,6 @@ public class ProductController {
         // Convert searchBy into ProductFilterOption type and check valid
         searchBy = Optional.ofNullable(searchBy).orElse(List.of());
 
-        ObjectMapper objectMapper = new ObjectMapper();
         Set<ProductFilterOption> searchSet;
         try {
             searchSet = objectMapper.convertValue(searchBy, new TypeReference<>() {});
@@ -128,7 +129,7 @@ public class ProductController {
         Specification<Product> prodSpec = SearchHelper.constructSpecificationFromProductSearch(business, searchQuery, searchSet);
 
         Page<Product> catalogue = productRepository.findAll(prodSpec, pageablePage);
-        return JsonTools.constructPageJSON(catalogue.map(Product::constructJSONObject));
+        return new ResultPageDTO<>(catalogue.map(ProductResponseDTO::new));
     }
 
     /**
@@ -158,7 +159,7 @@ public class ProductController {
      * @param response The response to this request
      */
     @PostMapping("/businesses/{id}/products")
-    public void addProductToBusiness(@PathVariable Long id, @RequestBody JSONObject productInfo, HttpServletRequest request, HttpServletResponse response) {
+    public void addProductToBusiness(@PathVariable Long id, @RequestBody UpdateProductDTO productInfo, HttpServletRequest request, HttpServletResponse response) {
         try {
             AuthenticationTokenManager.checkAuthenticationToken(request);
             logger.info(() -> String.format("Adding product to business (businessId=%d).", id));
@@ -169,18 +170,17 @@ public class ProductController {
             if (productInfo == null) {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Product creation info not provided");
             }
-            String productCode = productInfo.getAsString("id");
 
-            if (productRepository.findByBusinessAndProductCode(business, productCode).isPresent()) {
-                throw new ResponseStatusException(HttpStatus.CONFLICT, "Product already exists with product code in this catalogue \"" + productCode + "\"");
+            if (productRepository.findByBusinessAndProductCode(business, productInfo.getId()).isPresent()) {
+                throw new ResponseStatusException(HttpStatus.CONFLICT, "Product already exists with product code in this catalogue \"" + productInfo.getId() + "\"");
             }
 
             Product product = new Product.Builder()
-                    .withProductCode(productCode)
-                    .withName(productInfo.getAsString("name"))
-                    .withDescription(productInfo.getAsString("description"))
-                    .withManufacturer(productInfo.getAsString("manufacturer"))
-                    .withRecommendedRetailPrice(productInfo.getAsString("recommendedRetailPrice"))
+                    .withProductCode(productInfo.getId())
+                    .withName(productInfo.getName())
+                    .withDescription(productInfo.getDescription())
+                    .withManufacturer(productInfo.getManufacturer())
+                    .withRecommendedRetailPrice(productInfo.getRecommendedRetailPrice())
                     .withBusiness(business)
                     .build();
             productRepository.save(product);
@@ -200,7 +200,7 @@ public class ProductController {
      * @param request Additional information about the request
      */
     @PutMapping("/businesses/{businessId}/products/{productCode}")
-    public void modifyProduct(@PathVariable Long businessId, @PathVariable String productCode, @RequestBody JSONObject productInfo, HttpServletRequest request) {
+    public void modifyProduct(@PathVariable Long businessId, @PathVariable String productCode, @RequestBody UpdateProductDTO productInfo, HttpServletRequest request) {
         try {
             logger.info(() -> String.format("Modifying product in business (businessId=%d, productCode=%s).", businessId, productCode));
             AuthenticationTokenManager.checkAuthenticationToken(request);
@@ -214,16 +214,15 @@ public class ProductController {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "No request body provided");
             }
 
-            String newProductCode = productInfo.getAsString("id");
-            if (!Objects.equals(productCode, newProductCode) && productRepository.findByBusinessAndProductCode(business, newProductCode).isPresent()) {
+            if (!Objects.equals(productCode, productInfo.getId()) && productRepository.findByBusinessAndProductCode(business, productInfo.getId()).isPresent()) {
                 throw new ResponseStatusException(HttpStatus.CONFLICT, "Product already exists with product code in this catalogue \"" + productCode + "\"");
             }
 
-            product.setProductCode(newProductCode);
-            product.setName(productInfo.getAsString("name"));
-            product.setDescription(productInfo.getAsString("description"));
-            product.setManufacturer(productInfo.getAsString("manufacturer"));
-            product.setRecommendedRetailPrice(productInfo.getAsString("recommendedRetailPrice"));
+            product.setProductCode(productInfo.getId());
+            product.setName(productInfo.getName());
+            product.setDescription(productInfo.getDescription());
+            product.setManufacturer(productInfo.getManufacturer());
+            product.setRecommendedRetailPrice(productInfo.getRecommendedRetailPrice());
             productRepository.save(product);
         } catch (Exception e) {
             logger.error(e.getMessage());

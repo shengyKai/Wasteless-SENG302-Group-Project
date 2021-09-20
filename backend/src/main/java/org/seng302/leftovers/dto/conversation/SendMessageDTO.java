@@ -1,9 +1,8 @@
-package org.seng302.leftovers.dto;
+package org.seng302.leftovers.dto.conversation;
 
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.ToString;
-import org.seng302.leftovers.entities.Message;
 
 import javax.validation.constraints.NotNull;
 

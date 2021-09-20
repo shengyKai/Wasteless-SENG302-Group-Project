@@ -1,15 +1,20 @@
 package org.seng302.leftovers.controllers;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
-import net.minidev.json.JSONObject;
+import lombok.ToString;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.seng302.leftovers.dto.ResultPageDTO;
-import org.seng302.leftovers.dto.SaleItemDTO;
-import org.seng302.leftovers.dto.SetSaleItemInterestDTO;
+
 import org.seng302.leftovers.entities.*;
 import org.seng302.leftovers.entities.event.InterestEvent;
 import org.seng302.leftovers.entities.event.InterestPurchasedEvent;
+import org.seng302.leftovers.dto.saleitem.CreateSaleItemDTO;
+import org.seng302.leftovers.dto.saleitem.SaleItemResponseDTO;
+import org.seng302.leftovers.dto.saleitem.SetSaleItemInterestDTO;
+import org.seng302.leftovers.entities.event.PurchasedEvent;
+
 import org.seng302.leftovers.persistence.*;
 import org.seng302.leftovers.persistence.event.EventRepository;
 import org.seng302.leftovers.persistence.event.InterestEventRepository;
@@ -81,6 +86,16 @@ public class SaleController {
     }
 
     /**
+     * DTO representing the response from adding a sale item
+     */
+    @Getter
+    @ToString
+    @AllArgsConstructor
+    public static class CreateSaleItemResponseDTO {
+        private Long listingId;
+    }
+
+    /**
      * Adds a sale item to a given business
      *
      * @param id           The id of the business to add to
@@ -88,48 +103,27 @@ public class SaleController {
      * @return The ID of the new listing
      */
     @PostMapping("/businesses/{id}/listings")
-    public JSONObject addSaleItemToBusiness(@PathVariable Long id, @RequestBody JSONObject saleItemInfo, HttpServletRequest request, HttpServletResponse response) {
+    public CreateSaleItemResponseDTO addSaleItemToBusiness(@PathVariable Long id, @RequestBody @Valid CreateSaleItemDTO saleItemInfo, HttpServletRequest request, HttpServletResponse response) {
         try {
             AuthenticationTokenManager.checkAuthenticationToken(request);
             logger.info("Adding sales item to business (businessId={}).", id);
             Business business = businessRepository.getBusinessById(id);
             business.checkSessionPermissions(request);
 
-            if (saleItemInfo == null) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Sale item creation info not provided");
-            }
-            Object inventoryItemIdObj = saleItemInfo.get("inventoryItemId");
-            if (!(inventoryItemIdObj instanceof Number)) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "inventoryItemId not a number");
-            }
-            InventoryItem inventoryItem;
-            try {
-                inventoryItem = inventoryItemRepository.getInventoryItemByBusinessAndId(
-                        business,
-                        ((Number) inventoryItemIdObj).longValue()
-                );
-            } catch (ResponseStatusException exception) {
-                // Make sure to return a 400 instead of a 406
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, exception.getReason());
-            }
-
-            if (!(saleItemInfo.get("quantity") instanceof Integer)) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Quantity not a integer");
-            }
+            InventoryItem inventoryItem = inventoryItemRepository.findInventoryItemByBusinessAndId(business,saleItemInfo.getInventoryItemId())
+                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Inventory item does not exist for this business"));
 
             SaleItem saleItem = new SaleItem.Builder()
                     .withInventoryItem(inventoryItem)
-                    .withQuantity((Integer) saleItemInfo.get("quantity"))
-                    .withPrice(saleItemInfo.getAsString("price"))
-                    .withMoreInfo(saleItemInfo.getAsString("moreInfo"))
-                    .withCloses(saleItemInfo.getAsString("closes"))
+                    .withQuantity(saleItemInfo.getQuantity())
+                    .withPrice(saleItemInfo.getPrice())
+                    .withMoreInfo(saleItemInfo.getMoreInfo())
+                    .withCloses(saleItemInfo.getCloses())
                     .build();
             saleItem = saleItemRepository.save(saleItem);
 
             response.setStatus(201);
-            var object = new JSONObject();
-            object.put("listingId", saleItem.getId());
-            return object;
+            return new CreateSaleItemResponseDTO(saleItem.getId());
         } catch (Exception error) {
             logger.error(error.getMessage());
             throw error;
@@ -144,12 +138,12 @@ public class SaleController {
      * @return List of sale items the business is listing
      */
     @GetMapping("/businesses/{id}/listings")
-    public ResultPageDTO<SaleItemDTO> getSaleItemsForBusiness(@PathVariable Long id,
-                                              HttpServletRequest request,
-                                              @RequestParam(required = false) String orderBy,
-                                              @RequestParam(required = false) Integer page,
-                                              @RequestParam(required = false) Integer resultsPerPage,
-                                              @RequestParam(required = false) Boolean reverse) {
+    public ResultPageDTO<SaleItemResponseDTO> getSaleItemsForBusiness(@PathVariable Long id,
+                                                                      HttpServletRequest request,
+                                                                      @RequestParam(required = false) String orderBy,
+                                                                      @RequestParam(required = false) Integer page,
+                                                                      @RequestParam(required = false) Integer resultsPerPage,
+                                                                      @RequestParam(required = false) Boolean reverse) {
         try {
             AuthenticationTokenManager.checkAuthenticationToken(request);
             logger.info("Getting sales item for business (businessId={}).", id);
@@ -163,7 +157,7 @@ public class SaleController {
             Specification<SaleItem> specification = SearchHelper.constructSpecificationFromSaleItemsFilter(business);
             Page<SaleItem> result = saleItemRepository.findAll(specification, pageRequest);
 
-            return new ResultPageDTO(result.map(SaleItemDTO::new));
+            return new ResultPageDTO<>(result.map(SaleItemResponseDTO::new));
 
         } catch (Exception error) {
             logger.error(error.getMessage());
@@ -172,7 +166,7 @@ public class SaleController {
     }
 
     /**
-     * Set the user isInterested for a listing byadding user into the interestedUser Set.
+     * Set the user isInterested for a listing by adding user into the interestedUser Set.
      * @param id        ID of the saleListing
      * @param request   The HTTp request
      * @param body      The body of SaleItemInterest
@@ -239,7 +233,7 @@ public class SaleController {
      * @param request The HTTP request, used for validating the authentication token.
      * @param body The body of the request, used for getting the purchaser ID.
      */
-    @PutMapping("listings/{id}/purchase")
+    @PostMapping("listings/{id}/purchase")
     public void purchaseSaleItem(@PathVariable long id,
                                  HttpServletRequest request,
                                  @Valid @RequestBody PurchaseSaleItemDTO body) {
@@ -267,8 +261,11 @@ public class SaleController {
                 }
             }
 
+            PurchasedEvent purchasedEvent = new PurchasedEvent(purchaser, boughtSaleItem);
+            eventRepository.save(purchasedEvent);
+
             var inventoryItem = saleItem.getInventoryItem();
-            inventoryItem.setRemainingQuantity(inventoryItem.getRemainingQuantity() + saleItem.getQuantity());
+            inventoryItem.setQuantity(inventoryItem.getQuantity() - saleItem.getQuantity());
             inventoryItemRepository.save(inventoryItem);
 
             saleItemRepository.delete(saleItem);
@@ -282,6 +279,16 @@ public class SaleController {
     }
 
     /**
+     * DTO representing the response from getting the interest of a sale item
+     */
+    @Getter
+    @ToString
+    @AllArgsConstructor
+    public static class GetSaleItemInterestDTO {
+        private Boolean isInterested;
+    }
+
+    /**
      * Get the interestedUser Set and check does the set contain the param user.
      * @param listingId             Sale Listing id
      * @param request               The HTTP request
@@ -289,7 +296,7 @@ public class SaleController {
      * @return boolean              Does the user liked the sale listing
      */
     @GetMapping("/listings/{listingId}/interest")
-    public JSONObject getSaleItemsInterest(@PathVariable Long listingId,
+    public GetSaleItemInterestDTO getSaleItemsInterest(@PathVariable Long listingId,
                                            HttpServletRequest request,
                                             @RequestParam Long userId) {
         try {
@@ -306,10 +313,7 @@ public class SaleController {
             var saleItem = saleItemRepository.findById(listingId)
                     .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE, "Listing not found"));
 
-            var object = new JSONObject();
-            object.put("isInterested", saleItem.getInterestedUsers().contains(user));
-            return object;
-
+            return new GetSaleItemInterestDTO(saleItem.getInterestedUsers().contains(user));
         } catch (Exception error) {
             logger.error(error.getMessage());
             throw error;
