@@ -43,7 +43,7 @@ class EventRepositoryTest {
     Instant beforeCreation;
 
     @BeforeEach
-    void setUp() throws InterruptedException {
+    void setUp() {
         testUser = new User.Builder()
                 .withFirstName("John")
                 .withMiddleName("Hector")
@@ -192,11 +192,6 @@ class EventRepositoryTest {
         setLastModifiedForEventInDatabase(testUserEvent2, modifiedSinceDate.plus(Duration.ofSeconds(1)));
         setLastModifiedForEventInDatabase(testUserEvent3, modifiedSinceDate.minus(Duration.ofSeconds(1)));
 
-        List<Event> allEvents = eventRepository.findEventsForUser(testUser);
-        System.out.println(allEvents.get(0).getLastModified());
-        System.out.println(allEvents.get(1).getLastModified());
-        System.out.println(allEvents.get(2).getLastModified());
-
         List<Event> queryResult = eventRepository.findEventsForUser(testUser, modifiedSinceDate);
 
         assertTrue(queryResult.contains(testUserEvent1));
@@ -210,11 +205,6 @@ class EventRepositoryTest {
         setLastModifiedForEventInDatabase(testUserEvent1, modifiedSinceDate.minus(Duration.ofSeconds(1)));
         setLastModifiedForEventInDatabase(testUserEvent2, modifiedSinceDate.minus(Duration.ofSeconds(1)));
         setLastModifiedForEventInDatabase(testUserEvent3, modifiedSinceDate.minus(Duration.ofSeconds(1)));
-
-        List<Event> allEvents = eventRepository.findEventsForUser(testUser);
-        System.out.println(allEvents.get(0).getLastModified());
-        System.out.println(allEvents.get(1).getLastModified());
-        System.out.println(allEvents.get(2).getLastModified());
 
         List<Event> queryResult = eventRepository.findEventsForUser(testUser, modifiedSinceDate);
 

@@ -223,8 +223,8 @@ class InventoryControllerModifyInvEntriesTest {
     }
 
     @Test
-    void modifyInvEntries_modifyIdInvalid_cannotModify400() throws Exception {
-        int[] productIds = {-1, -2, 0};
+    void modifyInvEntries_productNotFound_cannotModify406() throws Exception {
+        int[] productIds = {-1, 999999, 0};
         JSONObject invBody = generateInvJSONBody();
 
         for (int productId : productIds) {
@@ -234,7 +234,7 @@ class InventoryControllerModifyInvEntriesTest {
                     .put("/businesses/1/inventory/1")
                     .contentType(MediaType.APPLICATION_JSON)
                     .content(invBody.toString()))
-                    .andExpect(status().isBadRequest());
+                    .andExpect(status().isNotAcceptable());
         }
     }
 

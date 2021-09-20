@@ -10,7 +10,8 @@ import org.seng302.leftovers.dto.user.UserRole;
 import org.seng302.leftovers.entities.Account;
 import org.seng302.leftovers.entities.Location;
 import org.seng302.leftovers.entities.User;
-import org.seng302.leftovers.exceptions.UserNotFoundException;
+import org.seng302.leftovers.exceptions.DoesNotExistResponseException;
+import org.seng302.leftovers.exceptions.InsufficientPermissionResponseException;
 import org.seng302.leftovers.persistence.UserRepository;
 import org.seng302.leftovers.tools.AuthenticationTokenManager;
 import org.seng302.leftovers.tools.PasswordAuthenticator;
@@ -20,9 +21,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ResponseStatusException;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -92,7 +91,7 @@ public class UserController {
             User user = userRepository.getUser(id);
 
             if (!AuthenticationTokenManager.sessionCanSeePrivate(request, id)) {
-                throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+                throw new InsufficientPermissionResponseException(
                         "You do not have permission to modify another user");
             }
             
@@ -138,7 +137,7 @@ public class UserController {
         logger.info(() -> String.format("Retrieving user with ID %d.", id));
         Optional<User> user = userRepository.findById(id);
         if (user.isEmpty()) {
-            UserNotFoundException notFound = new UserNotFoundException();
+            var notFound = new DoesNotExistResponseException(User.class);
             logger.error(notFound.getMessage());
             throw notFound;
         } else {
@@ -226,7 +225,7 @@ public class UserController {
         long userId = id;
         Optional<User> user = userRepository.findById(userId);
         if (user.isEmpty()) {
-            UserNotFoundException notFoundException = new UserNotFoundException("The requested user does not exist");
+            var notFoundException = new DoesNotExistResponseException(User.class);
             logger.error(notFoundException.getMessage());
             throw notFoundException;
         } else {

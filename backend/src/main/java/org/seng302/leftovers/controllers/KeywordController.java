@@ -10,15 +10,17 @@ import org.seng302.leftovers.dto.KeywordDTO;
 import org.seng302.leftovers.entities.Keyword;
 import org.seng302.leftovers.entities.User;
 import org.seng302.leftovers.entities.event.KeywordCreatedEvent;
+import org.seng302.leftovers.exceptions.AccessTokenResponseException;
+import org.seng302.leftovers.exceptions.DoesNotExistResponseException;
+import org.seng302.leftovers.exceptions.InsufficientPermissionResponseException;
+import org.seng302.leftovers.exceptions.ValidationResponseException;
 import org.seng302.leftovers.persistence.KeywordRepository;
 import org.seng302.leftovers.persistence.UserRepository;
 import org.seng302.leftovers.persistence.event.CreateKeywordEventRepository;
 import org.seng302.leftovers.service.KeywordService;
 import org.seng302.leftovers.tools.AuthenticationTokenManager;
 import org.seng302.leftovers.tools.SearchHelper;
-import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ResponseStatusException;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -95,11 +97,11 @@ public class KeywordController {
             AuthenticationTokenManager.checkAuthenticationToken(request);
 
             if (!AuthenticationTokenManager.sessionIsAdmin(request)) {
-                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Only admin users can delete keywords");
+                throw new InsufficientPermissionResponseException("Only admin users can delete keywords");
             }
 
             Keyword keyword = keywordRepository.findById(id)
-                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE, "Keyword not found"));
+                    .orElseThrow(() -> new DoesNotExistResponseException(Keyword.class));
             Optional<KeywordCreatedEvent> keywordEvent = createKeywordEventRepository.getByNewKeyword(keyword);
             keywordEvent.ifPresent(createKeywordEventRepository::delete);
             keywordRepository.delete(keyword);
@@ -136,7 +138,7 @@ public class KeywordController {
             // Formats keyword to have capitals at the start of each word
             Keyword keyword = new Keyword(name);
             if (keywordRepository.findByName(keyword.getName()).isPresent()) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Keyword with the given name already exists");
+                throw new ValidationResponseException("Keyword with the given name already exists");
             }
 
             User creator = findUserFromRequest(request);
@@ -160,11 +162,11 @@ public class KeywordController {
         HttpSession session = request.getSession();
         Long userId = (Long) session.getAttribute("accountId");
         if (userId == null) {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Could not get user ID from request");
+            throw new AccessTokenResponseException("Could not get user ID from request");
         }
         Optional<User> user = userRepository.findById(userId);
         if (user.isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid user ID");
+            throw new AccessTokenResponseException("Invalid user ID");
         }
         return user.get();
     }

@@ -15,6 +15,7 @@ Feature: U22 - List Sale
 
 
   Scenario: When not logged in I cannot like / unlike sale items
+    Given I am not logged in
     When I like the sale item
     Then The request fails due to not authorised
     And The like count of the sale item is 0

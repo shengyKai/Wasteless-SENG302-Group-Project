@@ -13,6 +13,9 @@ import org.seng302.leftovers.entities.Keyword;
 import org.seng302.leftovers.entities.MarketplaceCard;
 import org.seng302.leftovers.entities.User;
 import org.seng302.leftovers.entities.event.ExpiryEvent;
+import org.seng302.leftovers.exceptions.DoesNotExistResponseException;
+import org.seng302.leftovers.exceptions.InsufficientPermissionResponseException;
+import org.seng302.leftovers.exceptions.ValidationResponseException;
 import org.seng302.leftovers.persistence.KeywordRepository;
 import org.seng302.leftovers.persistence.MarketplaceCardRepository;
 import org.seng302.leftovers.persistence.SearchMarketplaceCardHelper;
@@ -26,9 +29,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.util.Streamable;
-import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ResponseStatusException;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -89,7 +90,7 @@ public class CardController {
             // Check that request comes from a user whose account matches the card's creator id or who is an admin
             long creatorId = cardProperties.getCreatorId();
             if (!AuthenticationTokenManager.sessionCanSeePrivate(request, creatorId)) {
-                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "User cannot create card for another user");
+                throw new InsufficientPermissionResponseException("User cannot create card for another user");
             }
 
             // Save the card to the database
@@ -119,10 +120,10 @@ public class CardController {
         AuthenticationTokenManager.checkAuthenticationToken(request);
         try {
             MarketplaceCard card = marketplaceCardRepository.findById(id)
-                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE, "Card not found"));
+                    .orElseThrow(() -> new DoesNotExistResponseException(MarketplaceCard.class));
 
             if (!AuthenticationTokenManager.sessionCanSeePrivate(request, card.getCreator().getUserID())) {
-                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Current user does not have permission to modify this card");
+                throw new InsufficientPermissionResponseException("Current user does not have permission to modify this card");
             }
 
             // Updates fields
@@ -158,7 +159,7 @@ public class CardController {
             MarketplaceCard card = marketplaceCardRepository.getCard(id);
 
             if (!AuthenticationTokenManager.sessionCanSeePrivate(request, card.getCreator().getUserID())) {
-                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Current user does not have permission to delete this card");
+                throw new InsufficientPermissionResponseException("Current user does not have permission to delete this card");
             }
 
             Optional<ExpiryEvent> expiryEvent = expiryEventRepository.getByExpiringCard(card);
@@ -188,7 +189,7 @@ public class CardController {
         ).toList();
 
         if (keywords.isEmpty()) { // findAllById will return an empty iterable if any keyword id is invalid
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid keyword ID");
+            throw new ValidationResponseException("Invalid keyword ID");
         }
 
         return keywords;
@@ -206,7 +207,7 @@ public class CardController {
         long creatorId = cardProperties.getCreatorId();
         Optional<User> optionalUser = userRepository.findById(creatorId);
         if (optionalUser.isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, String.format("User with ID %d does not exist", creatorId));
+            throw new ValidationResponseException(String.format("User with ID %d does not exist", creatorId));
         }
         User creator = optionalUser.get();
 
@@ -240,7 +241,7 @@ public class CardController {
             MarketplaceCard card = marketplaceCardRepository.getCard(id);
 
             if (!AuthenticationTokenManager.sessionCanSeePrivate(request, card.getCreator().getUserID())) {
-                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Current user does not have permission to extend display period for this card");
+                throw new InsufficientPermissionResponseException("Current user does not have permission to extend display period for this card");
             }
 
             Optional<ExpiryEvent> expiryEvent = expiryEventRepository.getByExpiringCard(card);
@@ -271,7 +272,7 @@ public class CardController {
         }
 
         if (!VALID_CARD_ORDERINGS.contains(orderBy)) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid card ordering");
+            throw new ValidationResponseException("Invalid card ordering");
         }
 
         List<Sort.Order> sortOrder;
@@ -348,7 +349,7 @@ public class CardController {
             // fetch the keywords
             List<Keyword> keywords = Streamable.of(keywordRepository.findAllById(keywordIds)).toList();
             if (keywords.isEmpty()) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Failed to find a provided keyword");
+                throw new ValidationResponseException("Failed to find a provided keyword");
             }
 
             PageRequest pageRequest = generatePageRequest(orderBy, page, resultsPerPage, reverse);
@@ -381,7 +382,7 @@ public class CardController {
         logger.info("Request to get marketplace cards for user {}", id);
         AuthenticationTokenManager.checkAuthenticationToken(request);
 
-        User user = userRepository.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE, "User not found"));
+        User user = userRepository.findById(id).orElseThrow(() -> new DoesNotExistResponseException(User.class));
 
         PageRequest pageRequest = SearchHelper.getPageRequest(page, resultsPerPage, Sort.by(Sort.Direction.DESC, DEFAULT_ORDERING));
         var results = marketplaceCardRepository.getAllByCreator(user, pageRequest);

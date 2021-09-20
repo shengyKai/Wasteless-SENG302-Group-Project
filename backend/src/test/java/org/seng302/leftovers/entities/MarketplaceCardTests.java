@@ -7,11 +7,11 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.NullSource;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.seng302.leftovers.exceptions.DoesNotExistResponseException;
+import org.seng302.leftovers.exceptions.ValidationResponseException;
 import org.seng302.leftovers.persistence.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.http.HttpStatus;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
@@ -128,9 +128,8 @@ class MarketplaceCardTests {
                 .withCloses(closes)
                 .build();
 
-        var exception = assertThrows(ResponseStatusException.class, () -> card.delayCloses());
-        assertEquals(HttpStatus.BAD_REQUEST, exception.getStatus());
-        assertEquals("Too early to extend closing date", exception.getReason());
+        var exception = assertThrows(ValidationResponseException.class, () -> card.delayCloses());
+        assertEquals("Too early to extend closing date", exception.getMessage());
     }
 
     @Test
@@ -211,9 +210,8 @@ class MarketplaceCardTests {
     void marketplaceCardBuild_withInvalidSectionName_throws400Exception(String sectionName) {
         var builder = new MarketplaceCard.Builder();
 
-        var exception = assertThrows(ResponseStatusException.class, () -> builder.withSection(sectionName));
-        assertEquals(HttpStatus.BAD_REQUEST, exception.getStatus());
-        assertEquals("Invalid section name", exception.getReason());
+        var exception = assertThrows(ValidationResponseException.class, () -> builder.withSection(sectionName));
+        assertEquals("Invalid section name", exception.getMessage());
     }
 
     @Test
@@ -222,9 +220,8 @@ class MarketplaceCardTests {
                 .withSection(MarketplaceCard.Section.EXCHANGE)
                 .withTitle("test_title")
                 .withDescription("test_description");
-        var exception = assertThrows(ResponseStatusException.class, builder::build);
-        assertEquals(HttpStatus.BAD_REQUEST, exception.getStatus());
-        assertEquals("Card creator not provided", exception.getReason());
+        var exception = assertThrows(ValidationResponseException.class, builder::build);
+        assertEquals("Card creator not provided", exception.getMessage());
     }
 
     @Test
@@ -233,9 +230,8 @@ class MarketplaceCardTests {
                 .withCreator(testUser)
                 .withSection(MarketplaceCard.Section.EXCHANGE)
                 .withDescription("test_description");
-        var exception = assertThrows(ResponseStatusException.class, builder::build);
-        assertEquals(HttpStatus.BAD_REQUEST, exception.getStatus());
-        assertEquals("Card title must be provided", exception.getReason());
+        var exception = assertThrows(ValidationResponseException.class, builder::build);
+        assertEquals("Card title must be provided", exception.getMessage());
     }
 
     @Test
@@ -245,9 +241,8 @@ class MarketplaceCardTests {
                 .withSection(MarketplaceCard.Section.EXCHANGE)
                 .withTitle("")
                 .withDescription("test_description");
-        var exception = assertThrows(ResponseStatusException.class, builder::build);
-        assertEquals(HttpStatus.BAD_REQUEST, exception.getStatus());
-        assertEquals("Card title must be between 1-50 characters long", exception.getReason());
+        var exception = assertThrows(ValidationResponseException.class, builder::build);
+        assertEquals("Card title must be between 1-50 characters long", exception.getMessage());
     }
 
     @Test
@@ -257,9 +252,8 @@ class MarketplaceCardTests {
                 .withSection(MarketplaceCard.Section.EXCHANGE)
                 .withTitle("a".repeat(51))
                 .withDescription("test_description");
-        var exception = assertThrows(ResponseStatusException.class, builder::build);
-        assertEquals(HttpStatus.BAD_REQUEST, exception.getStatus());
-        assertEquals("Card title must be between 1-50 characters long", exception.getReason());
+        var exception = assertThrows(ValidationResponseException.class, builder::build);
+        assertEquals("Card title must be between 1-50 characters long", exception.getMessage());
     }
 
     @ParameterizedTest
@@ -270,9 +264,8 @@ class MarketplaceCardTests {
                 .withSection(MarketplaceCard.Section.EXCHANGE)
                 .withTitle(title)
                 .withDescription("test_description");
-        var exception = assertThrows(ResponseStatusException.class, builder::build);
-        assertEquals(HttpStatus.BAD_REQUEST, exception.getStatus());
-        assertEquals("Card title must only contain letters, numbers, spaces and punctuation", exception.getReason());
+        var exception = assertThrows(ValidationResponseException.class, builder::build);
+        assertEquals("Card title must only contain letters, numbers, spaces and punctuation", exception.getMessage());
     }
 
     @ParameterizedTest
@@ -307,9 +300,8 @@ class MarketplaceCardTests {
                 .withTitle("test_title")
                 .withDescription(description);
 
-        var exception = assertThrows(ResponseStatusException.class, builder::build);
-        assertEquals(HttpStatus.BAD_REQUEST, exception.getStatus());
-        assertEquals("Card description must only contain letters, numbers, whitespace and punctuation", exception.getReason());
+        var exception = assertThrows(ValidationResponseException.class, builder::build);
+        assertEquals("Card description must only contain letters, numbers, whitespace and punctuation", exception.getMessage());
     }
 
     @ParameterizedTest
@@ -332,9 +324,8 @@ class MarketplaceCardTests {
                 .withTitle("test_title")
                 .withDescription("a".repeat(201));
 
-        var exception = assertThrows(ResponseStatusException.class, builder::build);
-        assertEquals(HttpStatus.BAD_REQUEST, exception.getStatus());
-        assertEquals("Card description must not be longer than 200 characters", exception.getReason());
+        var exception = assertThrows(ValidationResponseException.class, builder::build);
+        assertEquals("Card description must not be longer than 200 characters", exception.getMessage());
     }
 
     @Test
@@ -346,9 +337,8 @@ class MarketplaceCardTests {
                 .withDescription("test_description")
                 .build();
 
-        var exception = assertThrows(ResponseStatusException.class, () -> card.setCloses(null));
-        assertEquals(HttpStatus.BAD_REQUEST, exception.getStatus());
-        assertEquals("Closing time cannot be null", exception.getReason());
+        var exception = assertThrows(ValidationResponseException.class, () -> card.setCloses(null));
+        assertEquals("Closing time cannot be null", exception.getMessage());
     }
 
     @Test
@@ -359,9 +349,8 @@ class MarketplaceCardTests {
                 .withTitle("test_title")
                 .withDescription("test_description")
                 .withCloses(Instant.now().minus(1, ChronoUnit.DAYS));
-        var exception = assertThrows(ResponseStatusException.class, builder::build);
-        assertEquals(HttpStatus.BAD_REQUEST, exception.getStatus());
-        assertEquals("Closing time cannot be before creation", exception.getReason());
+        var exception = assertThrows(ValidationResponseException.class, builder::build);
+        assertEquals("Closing time cannot be before creation", exception.getMessage());
     }
 
     @Test
@@ -372,9 +361,8 @@ class MarketplaceCardTests {
                 .withTitle("test_title")
                 .withDescription("test_description")
                 .addKeyword(null);
-        var exception = assertThrows(ResponseStatusException.class, builder::build);
-        assertEquals(HttpStatus.BAD_REQUEST, exception.getStatus());
-        assertEquals("Keyword cannot be null", exception.getReason());
+        var exception = assertThrows(ValidationResponseException.class, builder::build);
+        assertEquals("Keyword cannot be null", exception.getMessage());
     }
 
     @Test
@@ -475,9 +463,8 @@ class MarketplaceCardTests {
         marketplaceCardRepository.delete(card);
         Long id = card.getID();
 
-        var exception = assertThrows(ResponseStatusException.class, () -> marketplaceCardRepository.getCard(id));
-        assertEquals(HttpStatus.NOT_FOUND, exception.getStatus());
-        assertEquals("No card exists with the given id", exception.getReason());
+        var exception = assertThrows(DoesNotExistResponseException.class, () -> marketplaceCardRepository.getCard(id));
+        assertEquals("MarketplaceCard does not exist", exception.getMessage());
     }
 
     @Test

@@ -7,9 +7,8 @@ import com.fasterxml.jackson.databind.node.JsonNodeType;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
+import org.seng302.leftovers.exceptions.ValidationResponseException;
 import org.springframework.data.domain.Page;
-import org.springframework.http.HttpStatus;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -48,10 +47,10 @@ public class JsonTools {
             if (json.containsKey(fieldName)) {
                 return Long.parseLong(json.getAsString(fieldName));
             } else {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, String.format("%s is not present", fieldName));
+                throw new ValidationResponseException(String.format("%s is not present", fieldName));
             }
         } catch (NumberFormatException e) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, String.format("%s must be a number", fieldName));
+            throw new ValidationResponseException(String.format("%s must be a number", fieldName));
         }
     }
 
@@ -66,7 +65,7 @@ public class JsonTools {
         if (json.containsKey(fieldName)) {
             return json.getAsString(fieldName);
         } else {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, String.format("%s is not present", fieldName));
+            throw new ValidationResponseException(String.format("%s is not present", fieldName));
         }
     }
 
@@ -78,9 +77,9 @@ public class JsonTools {
      * @return The value from the field
      */
     public static long[] parseLongArrayFromJsonField(JSONObject json, String fieldName) {
-        ResponseStatusException invalidFormatException = new ResponseStatusException(HttpStatus.BAD_REQUEST,
+        var invalidFormatException = new ValidationResponseException(
                 String.format("%s must be an array of numbers", fieldName));
-        ResponseStatusException notPresentException = new ResponseStatusException(HttpStatus.BAD_REQUEST,
+       var notPresentException = new ValidationResponseException(
                 String.format("%s is not present", fieldName));
 
         try {

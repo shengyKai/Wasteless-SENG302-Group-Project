@@ -4,8 +4,7 @@ import org.seng302.leftovers.dto.event.EventDTO;
 import org.seng302.leftovers.dto.event.EventStatus;
 import org.seng302.leftovers.dto.event.EventTag;
 import org.seng302.leftovers.entities.User;
-import org.springframework.http.HttpStatus;
-import org.springframework.web.server.ResponseStatusException;
+import org.seng302.leftovers.exceptions.ValidationResponseException;
 
 import javax.persistence.*;
 import java.time.Instant;
@@ -81,7 +80,7 @@ public abstract class Event {
      */
     public void setTag(EventTag eventTag) {
         if (eventTag == null) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Tag cannot be null");
+            throw new ValidationResponseException("Tag cannot be null");
         }
         this.eventTag = eventTag;
     }
