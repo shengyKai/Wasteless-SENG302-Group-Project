@@ -268,7 +268,7 @@ import {
   maxCharRules, postCodeRules, streetNumRules,
   USER_ROLES
 } from "@/utils";
-import { modifyBusiness, uploadBusinessImage, makeBusinessImagePrimary, getUser } from '@/api/internal';
+import { modifyBusiness, uploadBusinessImage, getUser } from '@/api/internal';
 
 export default {
   name: 'ModifyBusiness',
@@ -322,6 +322,7 @@ export default {
       streetRules: ()=> streetNumRules,
       postcodeRules: ()=> postCodeRules,
       isLoading: false,
+      primaryImageId: null,
     };
   },
   computed: {
@@ -376,12 +377,7 @@ export default {
      * @param imageId ID of the Image to set
      */
     async makeImagePrimary(imageId) {
-      this.errorMessage = undefined;
-      const result = await makeBusinessImagePrimary(this.business.id, imageId);
-      if (typeof result === 'string') {
-        this.errorMessage = result;
-        this.$refs.businessImageCarousel.forceClose();
-      }
+      this.primaryImageId = imageId;
     },
     /**
      * Action(s) of modifying a business
@@ -411,7 +407,8 @@ export default {
           postcode: this.postcode
         },
         businessType: this.businessType,
-        updateProductCountry: this.updateProductCountry
+        updateProductCountry: this.updateProductCountry,
+        primaryImageId: this.primaryImageId,
       };
       const result = await modifyBusiness(this.business.id, modifiedFields);
 

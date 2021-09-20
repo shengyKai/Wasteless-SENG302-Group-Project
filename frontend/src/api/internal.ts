@@ -120,7 +120,8 @@ export type ModifyBusiness = {
   description?: string,
   address: Location,
   businessType: BusinessType,
-  updateProductCountry: boolean
+  updateProductCountry: boolean,
+  primaryImageId: number,
 }
 
 export type Image = {
@@ -1255,25 +1256,6 @@ export async function searchCatalogue(businessId: number, query: string, pageInd
   }
 
   return response.data;
-}
-/**
- * Sets an image as the primary image for a business
- * @param businessId The ID of the business to change
- * @param imageId The ID of the image
- */
-export async function makeBusinessImagePrimary(businessId: number, imageId: number): Promise<MaybeError<undefined>> {
-  try {
-    await instance.put(`/businesses/${businessId}/images/${imageId}/makeprimary`);
-  } catch (error) {
-    let status: number | undefined = error.response?.status;
-    if (status === undefined) return 'Failed to reach backend';
-    if (status === 401) return 'You have been logged out. Please login again and retry';
-    if (status === 403) return 'Operation not permitted';
-    if (status === 406) return 'Business or Image not found';
-
-    return 'Request failed: ' + error.response?.data.message;
-  }
-  return undefined;
 }
 
 /**

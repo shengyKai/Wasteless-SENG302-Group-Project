@@ -15,4 +15,5 @@ import javax.validation.constraints.NotNull;
 public class ModifyBusinessDTO extends CreateBusinessDTO {
     @NotNull
     private Boolean updateProductCountry;
+    private Long primaryImageId;
 }
