@@ -9,7 +9,7 @@ import org.seng302.leftovers.dto.business.BusinessType;
 import org.seng302.leftovers.entities.Business;
 import org.seng302.leftovers.entities.Location;
 import org.seng302.leftovers.entities.User;
-import org.seng302.leftovers.exceptions.SearchFormatException;
+import org.seng302.leftovers.exceptions.ValidationResponseException;
 import org.seng302.leftovers.persistence.BusinessRepository;
 import org.seng302.leftovers.persistence.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -106,7 +106,7 @@ class SearchHelperBusinessTest {
 
     @Test
     void constructSpecificationFromBusinessSearch_EmptyStringTest() {
-        assertThrows(SearchFormatException.class, () -> {
+        assertThrows(ValidationResponseException.class, () -> {
             SearchHelper.constructSpecificationFromBusinessSearch("", null);
         });
     }
@@ -192,25 +192,25 @@ class SearchHelperBusinessTest {
 
     /**
      * Verify that when constructUserSpecificationFromSearchQuery is called with just the word 'and' as its argument,
-     * a SearchFormatException is thrown.
+     * a ValidationResponseException is thrown.
      */
     @Test
     void constructSpecificationFromBusinessSearch_JustAndTest() {
-        assertThrows(SearchFormatException.class, () -> {
+        assertThrows(ValidationResponseException.class, () -> {
             SearchHelper.constructSpecificationFromBusinessSearch("and", null);
         });
     }
 
     @Test
     void constructSpecificationFromBusinessSearch_JustOrTest() {
-        assertThrows(SearchFormatException.class, () -> {
+        assertThrows(ValidationResponseException.class, () -> {
             SearchHelper.constructSpecificationFromBusinessSearch("OR", null);
         });
     }
 
     @Test
     void constructSpecificationFromBusinessSearch_OpeningQuoteTest() {
-        assertThrows(SearchFormatException.class, () -> {
+        assertThrows(ValidationResponseException.class, () -> {
             SearchHelper.constructSpecificationFromBusinessSearch("\"hello", null);
         });
     }
@@ -239,7 +239,7 @@ class SearchHelperBusinessTest {
 
     @Test
     void constructSpecificationFromBusinessSearch_queryAndTypeNotProvided_exceptionThrown() {
-        assertThrows(SearchFormatException.class, () -> {
+        assertThrows(ValidationResponseException.class, () -> {
             SearchHelper.constructSpecificationFromBusinessSearch(null, null);
         });
     }

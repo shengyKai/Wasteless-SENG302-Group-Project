@@ -10,10 +10,10 @@ import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.runner.RunWith;
 import org.mockito.*;
 import org.mockito.internal.matchers.apachecommons.ReflectionEquals;
-import org.seng302.leftovers.dto.inventory.InventoryItemResponseDTO;
 import org.seng302.leftovers.dto.business.BusinessType;
+import org.seng302.leftovers.dto.inventory.InventoryItemResponseDTO;
 import org.seng302.leftovers.entities.*;
-import org.seng302.leftovers.exceptions.AccessTokenException;
+import org.seng302.leftovers.exceptions.AccessTokenResponseException;
 import org.seng302.leftovers.persistence.BusinessRepository;
 import org.seng302.leftovers.persistence.InventoryItemRepository;
 import org.seng302.leftovers.persistence.ProductRepository;
@@ -214,7 +214,7 @@ class InventoryControllerTest {
     @Test
     void addInventory_notLoggedIn_cannotAddInventory401() throws Exception {
         authenticationTokenManager.when(() -> AuthenticationTokenManager.checkAuthenticationToken(any()))
-                .thenThrow(new AccessTokenException());
+                .thenThrow(new AccessTokenResponseException());
         Business businessSpy = spy(testBusiness);
         when(businessRepository.getBusinessById(any())).thenReturn(businessSpy); // use our business
         doCallRealMethod().when(businessSpy).checkSessionPermissions(any());

@@ -3,6 +3,8 @@ package org.seng302.leftovers.controllers;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.seng302.leftovers.entities.Image;
+import org.seng302.leftovers.exceptions.DoesNotExistResponseException;
+import org.seng302.leftovers.exceptions.InternalErrorResponseException;
 import org.seng302.leftovers.persistence.ImageRepository;
 import org.seng302.leftovers.service.StorageService;
 import org.seng302.leftovers.tools.AuthenticationTokenManager;
@@ -14,7 +16,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.server.ResponseStatusException;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.Optional;
@@ -42,7 +43,7 @@ public class ImageController {
             retrievedImage = imageRepository.findByFilenameThumbnail(imageName);
         }
         if (retrievedImage.isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Failed to find image with the given name");
+            throw new DoesNotExistResponseException(Image.class);
         }
         Resource file = storageService.load(imageName);
         return ResponseEntity.status(HttpStatus.OK).contentType(guessMediaType(imageName)).body(file);
@@ -56,6 +57,6 @@ public class ImageController {
             return MediaType.IMAGE_PNG;
         }
 
-        throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Couldn't determine image type");
+        throw new InternalErrorResponseException("Couldn't determine image type");
     }
 }

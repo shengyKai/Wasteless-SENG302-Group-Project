@@ -5,16 +5,15 @@ import lombok.Getter;
 import lombok.ToString;
 import org.seng302.leftovers.entities.Account;
 import org.seng302.leftovers.entities.User;
+import org.seng302.leftovers.exceptions.ValidationResponseException;
 import org.seng302.leftovers.persistence.AccountRepository;
 import org.seng302.leftovers.persistence.UserRepository;
 import org.seng302.leftovers.tools.AuthenticationTokenManager;
 import org.seng302.leftovers.tools.PasswordAuthenticator;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.server.ResponseStatusException;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -70,7 +69,7 @@ public class LoginController {
     public LoginResponseDTO login(@RequestBody @Valid LoginRequestDTO userInfo, HttpServletRequest request, HttpServletResponse response) {
         Account matchingAccount = accountRepository.findByEmail(userInfo.getEmail());
         if (matchingAccount == null) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "There is no account associated with this email");
+            throw new ValidationResponseException("There is no account associated with this email");
         } else {
             PasswordAuthenticator.verifyPassword(userInfo.getPassword(), matchingAccount.getAuthenticationCode());
 

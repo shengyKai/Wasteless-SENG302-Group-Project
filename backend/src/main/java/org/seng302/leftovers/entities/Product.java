@@ -1,7 +1,6 @@
 package org.seng302.leftovers.entities;
 
-import org.springframework.http.HttpStatus;
-import org.springframework.web.server.ResponseStatusException;
+import org.seng302.leftovers.exceptions.ValidationResponseException;
 
 import javax.persistence.*;
 import java.math.BigDecimal;
@@ -128,10 +127,10 @@ public class Product {
      */
     public void setProductCode(String productCode) {
         if (productCode == null) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Product code must be provided");
+            throw new ValidationResponseException("Product code must be provided");
         }
         if (!productCode.matches(PRODUCT_CODE_REGEX)) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Product code must have a valid format");
+            throw new ValidationResponseException("Product code must have a valid format");
         }
         this.productCode = productCode;
     }
@@ -142,13 +141,13 @@ public class Product {
      */
     public void setName(String name) {
         if (name == null) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Product name must be provided");
+            throw new ValidationResponseException("Product name must be provided");
         }
         if (name.isEmpty() || name.length() > 50) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Product name must be between 1-50 characters long");
+            throw new ValidationResponseException("Product name must be between 1-50 characters long");
         }
         if (!name.matches("^[ \\d\\p{Punct}\\p{L}]*$")) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Product name must only contain letters, numbers, spaces and punctuation");
+            throw new ValidationResponseException("Product name must only contain letters, numbers, spaces and punctuation");
         }
         this.name = name;
     }
@@ -163,10 +162,10 @@ public class Product {
             return;
         }
         if (description.length() > 200) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Product description must not be longer than 200 characters");
+            throw new ValidationResponseException("Product description must not be longer than 200 characters");
         }
         if (!description.matches("^[\\p{Space}\\d\\p{Punct}\\p{L}]*$")) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Product description must only contain letters, numbers, whitespace and punctuation");
+            throw new ValidationResponseException("Product description must only contain letters, numbers, whitespace and punctuation");
         }
         this.description = description;
     }
@@ -181,10 +180,10 @@ public class Product {
             return;
         }
         if (manufacturer.length() > 100) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Product manufacturer must not be longer than 100 characters");
+            throw new ValidationResponseException("Product manufacturer must not be longer than 100 characters");
         }
         if (!manufacturer.matches("^[ \\d\\p{Punct}\\p{L}]*$")) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Product manufacturer must only contain letters, numbers, spaces and punctuation");
+            throw new ValidationResponseException("Product manufacturer must only contain letters, numbers, spaces and punctuation");
         }
         this.manufacturer = manufacturer;
     }
@@ -196,10 +195,10 @@ public class Product {
     public void setRecommendedRetailPrice(BigDecimal recommendedRetailPrice) {
         if (recommendedRetailPrice != null) {
             if (recommendedRetailPrice.compareTo(BigDecimal.ZERO) < 0) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Product recommended retail price must not be less than 0");
+                throw new ValidationResponseException("Product recommended retail price must not be less than 0");
             }
             if (recommendedRetailPrice.compareTo(new BigDecimal(10000)) >= 0) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Product recommended retail price must be less that 10,000");
+                throw new ValidationResponseException("Product recommended retail price must be less that 10,000");
             }
         }
         this.recommendedRetailPrice = recommendedRetailPrice;
@@ -219,7 +218,7 @@ public class Product {
      */
     public void removeProductImage(Image productImage) {
         if (!this.productImages.contains(productImage)) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Product cannot be removed");
+            throw new ValidationResponseException("Product cannot be removed");
         }
         this.productImages.remove(productImage);
     }
@@ -231,11 +230,11 @@ public class Product {
      */
     public void setCountryOfSale(String countryOfSale) {
         if (countryOfSale == null || countryOfSale.isEmpty() || countryOfSale.isBlank()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Country of sale cannot be empty");
+            throw new ValidationResponseException("Country of sale cannot be empty");
         } else if (countryOfSale.length() > 100) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Country of sale must be less than 100 characters long");
+            throw new ValidationResponseException("Country of sale must be less than 100 characters long");
         } else if (!countryOfSale.matches("[ \\p{L}]+")) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Country of sale contains illegal characters");
+            throw new ValidationResponseException("Country of sale contains illegal characters");
         } else {
             this.countryOfSale = countryOfSale;
         }
@@ -315,7 +314,7 @@ public class Product {
             try {
                 this.recommendedRetailPrice = new BigDecimal(recommendedRetailPrice);
             } catch (NumberFormatException ignored) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The recommended retail price is not a number");
+                throw new ValidationResponseException("The recommended retail price is not a number");
             }
             return this;
         }

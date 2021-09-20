@@ -16,7 +16,8 @@ import org.seng302.leftovers.entities.event.Event;
 import org.seng302.leftovers.entities.event.InterestEvent;
 import org.seng302.leftovers.entities.event.InterestPurchasedEvent;
 import org.seng302.leftovers.entities.event.PurchasedEvent;
-import org.seng302.leftovers.exceptions.AccessTokenException;
+import org.seng302.leftovers.exceptions.AccessTokenResponseException;
+
 import org.seng302.leftovers.persistence.*;
 import org.seng302.leftovers.persistence.event.EventRepository;
 import org.seng302.leftovers.persistence.event.InterestEventRepository;
@@ -164,7 +165,7 @@ class SaleControllerTest {
     void addSaleItemToBusiness_noAuthToken_401Response() throws Exception {
         // Mock the AuthenticationTokenManager to respond as it would when the authentication token is missing or invalid
         authenticationTokenManager.when(() -> AuthenticationTokenManager.checkAuthenticationToken(any()))
-                    .thenThrow(new AccessTokenException());
+                    .thenThrow(new AccessTokenResponseException());
 
         // Verify that a 401 response is received in response to the POST request
         mockMvc.perform(post("/businesses/1/listings")
@@ -339,7 +340,7 @@ class SaleControllerTest {
     void getSaleItemsForBusiness_noAuthToken_401Response() throws Exception {
         // Mock the AuthenticationTokenManager to respond as it would when the authentication token is missing or invalid
         authenticationTokenManager.when(() -> AuthenticationTokenManager.checkAuthenticationToken(any()))
-                .thenThrow(new AccessTokenException());
+                .thenThrow(new AccessTokenResponseException());
 
         // Verify that a 401 response is received in response to the GET request
         mockMvc.perform(get("/businesses/1/listings"))
@@ -528,7 +529,7 @@ class SaleControllerTest {
     void setSaleItemInterest_notLoggedIn_401Response() throws Exception {
         // Mock the AuthenticationTokenManager to respond as it would when the authentication token is missing or invalid
         authenticationTokenManager.when(() -> AuthenticationTokenManager.checkAuthenticationToken(any()))
-                .thenThrow(new AccessTokenException());
+                .thenThrow(new AccessTokenResponseException());
 
         // Verify that a 401 response is received in response to the PUT request
         mockMvc.perform(put("/listings/1/interest")
@@ -720,7 +721,7 @@ class SaleControllerTest {
     void getSaleItemsInterest_noAuthToken_401Response() throws Exception {
         // Mock the AuthenticationTokenManager to respond as it would when the authentication token is missing or invalid
         authenticationTokenManager.when(() -> AuthenticationTokenManager.checkAuthenticationToken(any()))
-                .thenThrow(new AccessTokenException());
+                .thenThrow(new AccessTokenResponseException());
 
         // Verify that a 401 response is received in response to the GET request
         mockMvc.perform(get(String.format("/listings/%s/interest", saleItem.getId()))
@@ -833,7 +834,7 @@ class SaleControllerTest {
     void purchaseSaleItem_invalidAuthenticationToken_401Response() throws Exception {
         // Mock the AuthenticationTokenManager to respond as it would when the authentication token is missing or invalid
         authenticationTokenManager.when(() -> AuthenticationTokenManager.checkAuthenticationToken(any()))
-                .thenThrow(new AccessTokenException());
+                .thenThrow(new AccessTokenResponseException());
 
         JSONObject validBody = new JSONObject();
         validBody.put("purchaserId", user.getUserID());
@@ -976,7 +977,7 @@ class SaleControllerTest {
                 .andExpect(status().isOk());
 
         // Inventory item should be updated if request is successful
-        verify(inventoryItem, times(1)).setQuantity(70);
+        verify(inventoryItem, times(1)).sellQuantity(50);
         var inventoryItemCaptor = ArgumentCaptor.forClass(InventoryItem.class);
         verify(inventoryItemRepository, times(1)).save(inventoryItemCaptor.capture());
         assertEquals(inventoryItem, inventoryItemCaptor.getValue());
