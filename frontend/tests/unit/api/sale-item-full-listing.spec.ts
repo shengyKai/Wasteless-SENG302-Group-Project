@@ -147,10 +147,10 @@ describe('FullSaleListing.vue', () => {
   it.only("Update user status upon clicking on the like button", async () => {
     const likeButton = wrapper.findComponent({ref:'likeButton'});
     expect(likeButton.exists()).toBeTruthy;
-    console.log(likeButton);
     await likeButton.trigger('click');
     await Vue.nextTick();
     expect(setListingInterest).toBeCalled();
+    expect(getListingInterest).toBeCalled();
   });
 
 });
