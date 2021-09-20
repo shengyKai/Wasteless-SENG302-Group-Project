@@ -15,6 +15,7 @@ import org.mockito.Mockito;
 import org.seng302.leftovers.dto.business.BusinessType;
 import org.seng302.leftovers.dto.user.UserRole;
 import org.seng302.leftovers.entities.*;
+import org.seng302.leftovers.exceptions.ValidationResponseException;
 import org.seng302.leftovers.persistence.BusinessRepository;
 import org.seng302.leftovers.persistence.ImageRepository;
 import org.seng302.leftovers.persistence.ProductRepository;
@@ -25,12 +26,10 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
-import org.springframework.http.HttpStatus;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
-import org.springframework.web.server.ResponseStatusException;
 
 import javax.servlet.http.Cookie;
 import java.lang.reflect.Field;
@@ -625,7 +624,7 @@ class ProductControllerTest {
     @Test
     void postingProductFailsIfProductBuilderFails() {
         try (MockedConstruction<Product.Builder> ignored = Mockito.mockConstruction(Product.Builder.class, withSettings().defaultAnswer(RETURNS_SELF), (mock, context) ->
-                when(mock.build()).thenThrow(new ResponseStatusException(HttpStatus.BAD_REQUEST, "Failed for some reason"))
+                when(mock.build()).thenThrow(new ValidationResponseException("Failed for some reason"))
         )) {
             setCurrentUser(ownerUser.getUserID());
             var productInfo = generateProductCreationInfo();

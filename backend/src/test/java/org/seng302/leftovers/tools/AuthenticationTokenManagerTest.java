@@ -7,7 +7,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.*;
 import org.seng302.leftovers.dto.user.UserRole;
-import org.seng302.leftovers.exceptions.AccessTokenException;
+import org.seng302.leftovers.exceptions.AccessTokenResponseException;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import javax.servlet.http.Cookie;
@@ -117,7 +117,7 @@ class AuthenticationTokenManagerTest {
 
     /**
      * Verify that when checkAuthenticationToken is called and the cookie AUTHTOKEN is not present in the request an
-     * AccessTokenException is thrown.
+     * AccessTokenResponseException is thrown.
      */
     @Test
     void checkAuthenticationTokenCookieNotPresentTest() {
@@ -127,14 +127,14 @@ class AuthenticationTokenManagerTest {
                 invocation -> "abcd1234");
         when(request.getCookies()).thenAnswer(
                 invocation -> new Cookie[0]);
-        assertThrows(AccessTokenException.class, () ->
+        assertThrows(AccessTokenResponseException.class, () ->
             AuthenticationTokenManager.checkAuthenticationToken(request)
         );
     }
 
     /**
      * Verify that when checkAuthenticationToken is called and the attribute AUTHTOKEN does not exist for this session
-     * an AccessTokenException is thrown.
+     * an AccessTokenResponseException is thrown.
      */
     @Test
     void checkAuthenticationTokenSessionAttributeNotPresentTest() {
@@ -144,14 +144,14 @@ class AuthenticationTokenManagerTest {
                 invocation -> null);
         when(request.getCookies()).thenAnswer(
                 invocation -> new Cookie[0]);
-        assertThrows(AccessTokenException.class, () ->
+        assertThrows(AccessTokenResponseException.class, () ->
             AuthenticationTokenManager.checkAuthenticationToken(request)
         );
     }
 
     /**
      * Verify that when checkAuthenticationToken is called and the value of the cookie AUTHTOKEN does not match the
-     * value of the attribute AUTHTOKEN for this session an AccessTokenException is thrown.
+     * value of the attribute AUTHTOKEN for this session an AccessTokenResponseException is thrown.
      */
     @Test
     void checkAuthenticationTokenNoMatchTest() {
@@ -165,7 +165,7 @@ class AuthenticationTokenManagerTest {
                     cookieArray[0] = new Cookie(authTokenName, "1234abcd");
                     return cookieArray;
                 });
-        assertThrows(AccessTokenException.class, () ->
+        assertThrows(AccessTokenResponseException.class, () ->
             AuthenticationTokenManager.checkAuthenticationToken(request)
         );
     }

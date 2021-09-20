@@ -8,11 +8,10 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.seng302.leftovers.exceptions.ValidationResponseException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.HttpStatus;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -95,9 +94,8 @@ class JsonToolsTest {
     @ParameterizedTest
     @MethodSource("provideInvalidArgsForParseLongFromJsonField")
     void parseLongFromJsonField_fieldInvalid_shouldThrowException(JSONObject json, String field, String message) {
-        ResponseStatusException exception = assertThrows(ResponseStatusException.class, () -> JsonTools.parseLongFromJsonField(json, field));
-        assertEquals(HttpStatus.BAD_REQUEST, exception.getStatus());
-        assertEquals(message, exception.getReason());
+        var exception = assertThrows(ValidationResponseException.class, () -> JsonTools.parseLongFromJsonField(json, field));
+        assertEquals(message, exception.getMessage());
     }
 
     private static Stream<Arguments> provideValidArgsForParseLongArrayFromJsonField() {
@@ -142,9 +140,8 @@ class JsonToolsTest {
     @ParameterizedTest
     @MethodSource("provideInvalidArgsForParseLongArrayFromJsonField")
     void parseLongArrayFromJsonField_fieldInvalid_shouldThrowException(JSONObject json, String field, String message) {
-        ResponseStatusException exception = assertThrows(ResponseStatusException.class, () -> JsonTools.parseLongArrayFromJsonField(json, field));
-        assertEquals(HttpStatus.BAD_REQUEST, exception.getStatus());
-        assertEquals(message, exception.getReason());
+        var exception = assertThrows(ValidationResponseException.class, () -> JsonTools.parseLongArrayFromJsonField(json, field));
+        assertEquals(message, exception.getMessage());
     }
 
     private <T> Page<T> createPage(List<T> items, long totalItems) {

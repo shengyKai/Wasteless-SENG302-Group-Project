@@ -4,13 +4,15 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.seng302.leftovers.dto.product.ProductResponseDTO;
-import org.seng302.leftovers.dto.product.ProductFilterOption;
 import org.seng302.leftovers.dto.ResultPageDTO;
+import org.seng302.leftovers.dto.product.ProductFilterOption;
+import org.seng302.leftovers.dto.product.ProductResponseDTO;
 import org.seng302.leftovers.dto.product.UpdateProductDTO;
 import org.seng302.leftovers.entities.Business;
 import org.seng302.leftovers.entities.Image;
 import org.seng302.leftovers.entities.Product;
+import org.seng302.leftovers.exceptions.ConflictResponseException;
+import org.seng302.leftovers.exceptions.ValidationResponseException;
 import org.seng302.leftovers.persistence.BusinessRepository;
 import org.seng302.leftovers.persistence.ImageRepository;
 import org.seng302.leftovers.persistence.ProductRepository;
@@ -26,7 +28,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.server.ResponseStatusException;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -120,7 +121,7 @@ public class ProductController {
         try {
             searchSet = objectMapper.convertValue(searchBy, new TypeReference<>() {});
         } catch (IllegalArgumentException e) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid search option provided", e);
+            throw new ValidationResponseException("Invalid search option provided");
         }
 
         business.checkSessionPermissions(request);
@@ -141,7 +142,7 @@ public class ProductController {
     private List<Sort.Order> getSortOrder(String orderBy, Boolean reverse) {
         orderBy = Optional.ofNullable(orderBy).orElse("productCode");
         if (!VALID_ORDERINGS.contains(orderBy)) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "OrderBy term " + orderBy + " is invalid");
+            throw new ValidationResponseException("OrderBy term " + orderBy + " is invalid");
         }
 
         List<Sort.Order> sortOrder;
@@ -168,11 +169,11 @@ public class ProductController {
             business.checkSessionPermissions(request);
 
             if (productInfo == null) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Product creation info not provided");
+                throw new ValidationResponseException("Product creation info not provided");
             }
 
             if (productRepository.findByBusinessAndProductCode(business, productInfo.getId()).isPresent()) {
-                throw new ResponseStatusException(HttpStatus.CONFLICT, "Product already exists with product code in this catalogue \"" + productInfo.getId() + "\"");
+                throw new ConflictResponseException("Product already exists with product code in this catalogue \"" + productInfo.getId() + "\"");
             }
 
             Product product = new Product.Builder()
@@ -211,11 +212,11 @@ public class ProductController {
             Product product = productRepository.getProduct(business, productCode);
 
             if (productInfo == null) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "No request body provided");
+                throw new ValidationResponseException("No request body provided");
             }
 
             if (!Objects.equals(productCode, productInfo.getId()) && productRepository.findByBusinessAndProductCode(business, productInfo.getId()).isPresent()) {
-                throw new ResponseStatusException(HttpStatus.CONFLICT, "Product already exists with product code in this catalogue \"" + productCode + "\"");
+                throw new ConflictResponseException("Product already exists with product code in this catalogue \"" + productCode + "\"");
             }
 
             product.setProductCode(productInfo.getId());

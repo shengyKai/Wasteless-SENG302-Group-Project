@@ -11,14 +11,13 @@ import org.junit.jupiter.api.TestInstance;
 import org.seng302.leftovers.dto.ImageDTO;
 import org.seng302.leftovers.dto.business.BusinessType;
 import org.seng302.leftovers.persistence.BusinessRepository;
+import org.seng302.leftovers.exceptions.ValidationResponseException;
 import org.seng302.leftovers.persistence.ImageRepository;
 import org.seng302.leftovers.persistence.ProductRepository;
 import org.seng302.leftovers.persistence.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.http.HttpStatus;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.time.Instant;
 import java.util.Arrays;
@@ -129,13 +128,8 @@ class ImageTests {
      */
     @Test
     void setFilename_changeFilenameToNull_BadRequestException() {
-        try {
-            testImage.setFilename(null);
-            fail();
-        } catch (ResponseStatusException e) {
-            assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
-            assertEquals("No filename was provided", e.getReason());
-        } catch (Exception e) { fail(); }
+        var e = assertThrows(ValidationResponseException.class, () -> testImage.setFilename(null));
+        assertEquals("No filename was provided", e.getMessage());
     }
 
     /**
@@ -143,13 +137,8 @@ class ImageTests {
      */
     @Test
     void setFilenameThumbnail_changeFilenameThumbnailToNull_BadRequestException() {
-        try {
-            testImage.setFilenameThumbnail(null);
-            fail();
-        } catch (ResponseStatusException e) {
-            assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
-            assertEquals("No thumbnail filename was provided", e.getReason());
-        } catch (Exception e) { fail(); }
+        var e = assertThrows(ValidationResponseException.class, () -> testImage.setFilenameThumbnail(null));
+        assertEquals("No thumbnail filename was provided", e.getMessage());
     }
 
     /**
@@ -157,13 +146,8 @@ class ImageTests {
      */
     @Test
     void setFilename_changeFilenameToEmpty_BadRequestException() {
-        try {
-            testImage.setFilename("");
-            fail();
-        } catch (ResponseStatusException e) {
-            assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
-            assertEquals("An empty filename was provided", e.getReason());
-        } catch (Exception e) { fail(); }
+        var e = assertThrows(ValidationResponseException.class, () -> testImage.setFilename(""));
+        assertEquals("An empty filename was provided", e.getMessage());
     }
 
     /**
@@ -171,13 +155,8 @@ class ImageTests {
      */
     @Test
     void setFilenameThumbnail_changeFilenameThumbnailToEmpty_BadRequestException() {
-        try {
-            testImage.setFilenameThumbnail("");
-            fail();
-        } catch (ResponseStatusException e) {
-            assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
-            assertEquals("An empty thumbnail filename was provided", e.getReason());
-        } catch (Exception e) { fail(); }
+        var e = assertThrows(ValidationResponseException.class, () -> testImage.setFilenameThumbnail(""));
+        assertEquals("An empty thumbnail filename was provided", e.getMessage());
     }
 
     /**
@@ -185,13 +164,8 @@ class ImageTests {
      */
     @Test
     void setFilename_changeFilenameHaveSpace_BadRequestException() {
-        try {
-            testImage.setFilename("Happy Meal.png");
-            fail();
-        } catch (ResponseStatusException e) {
-            assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
-            assertEquals("Spaces are not allowed in the filename", e.getReason());
-        } catch (Exception e) { fail(); }
+        var e = assertThrows(ValidationResponseException.class, () -> testImage.setFilename("Happy Meal.png"));
+        assertEquals("Spaces are not allowed in the filename", e.getMessage());
     }
 
     /**
@@ -200,13 +174,8 @@ class ImageTests {
      */
     @Test
     void setFilename_changeFilenameHaveNoDot_BadRequestException() {
-        try {
-            testImage.setFilename("Connorpng");
-            fail();
-        } catch (ResponseStatusException e) {
-            assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
-            assertEquals("An invalid image format was provided", e.getReason());
-        } catch (Exception e) { fail(); }
+        var e = assertThrows(ValidationResponseException.class, () -> testImage.setFilename("Connorpng"));
+        assertEquals("An invalid image format was provided", e.getMessage());
     }
 
     /**
@@ -215,13 +184,8 @@ class ImageTests {
      */
     @Test
     void setFilename_changeFilenameInvalidImageType_BadRequestException() {
-        try {
-            testImage.setFilename("Connor.yup");
-            fail();
-        } catch (ResponseStatusException e) {
-            assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
-            assertEquals("An invalid image format was provided", e.getReason());
-        } catch (Exception e) { fail(); }
+        var e = assertThrows(ValidationResponseException.class, () -> testImage.setFilename("Connor.yup"));
+        assertEquals("An invalid image format was provided", e.getMessage());
     }
 
     /**
@@ -248,13 +212,8 @@ class ImageTests {
      */
     @Test
     void setFilename_changeFilenameForwardSlashesBeforeDot_BadRequestException() {
-        try {
-            testImage.setFilename("connor./png");
-            fail();
-        } catch (ResponseStatusException e) {
-            assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
-            assertEquals("An invalid image format was provided", e.getReason());
-        } catch (Exception e) { fail(); }
+        var e = assertThrows(ValidationResponseException.class, () -> testImage.setFilename("connor./png"));
+        assertEquals("An invalid image format was provided", e.getMessage());
     }
 
     /**
@@ -262,13 +221,8 @@ class ImageTests {
      */
     @Test
     void setFilenameThumbnail_changeFilenameThumbnailHaveSpace_BadRequestException() {
-        try {
-            testImage.setFilenameThumbnail("Happy Meal_thumbnail.png");
-            fail();
-        } catch (ResponseStatusException e) {
-            assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
-            assertEquals("Spaces are not allowed in the thumbnail filename", e.getReason());
-        } catch (Exception e) { fail(); }
+        var e = assertThrows(ValidationResponseException.class, () -> testImage.setFilenameThumbnail("Happy Meal_thumbnail.png"));
+        assertEquals("Spaces are not allowed in the thumbnail filename", e.getMessage());
     }
 
     /**
@@ -277,13 +231,8 @@ class ImageTests {
      */
     @Test
     void setFilenameThumbnail_changeFilenameThumbnailHaveNoDot_BadRequestException() {
-        try {
-            testImage.setFilenameThumbnail("Connorthumbnailpng");
-            fail();
-        } catch (ResponseStatusException e) {
-            assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
-            assertEquals("An invalid image format was provided", e.getReason());
-        } catch (Exception e) { fail(); }
+        var e = assertThrows(ValidationResponseException.class, () -> testImage.setFilenameThumbnail("Connorthumbnailpng"));
+        assertEquals("An invalid image format was provided", e.getMessage());
     }
 
     /**
@@ -292,13 +241,8 @@ class ImageTests {
      */
     @Test
     void setFilenameThumbnail_changeFilenameThumbnailInvalidImageType_BadRequestException() {
-        try {
-            testImage.setFilenameThumbnail("Connor_thumbnail.yup");
-            fail();
-        } catch (ResponseStatusException e) {
-            assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
-            assertEquals("An invalid image format was provided", e.getReason());
-        } catch (Exception e) { fail(); }
+        var e = assertThrows(ValidationResponseException.class, () -> testImage.setFilenameThumbnail("Connor_thumbnail.yup"));
+        assertEquals("An invalid image format was provided", e.getMessage());
     }
 
     /**
@@ -326,13 +270,8 @@ class ImageTests {
      */
     @Test
     void setFilenameThumbnail_changeFilenameThumbnailForwardSlashesBeforeDot_BadRequestException() {
-        try {
-            testImage.setFilenameThumbnail("connor_thumbnail./png");
-            fail();
-        } catch (ResponseStatusException e) {
-            assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
-            assertEquals("An invalid image format was provided", e.getReason());
-        } catch (Exception e) { fail(); }
+        var e = assertThrows(ValidationResponseException.class, () -> testImage.setFilenameThumbnail("connor_thumbnail./png"));
+        assertEquals("An invalid image format was provided", e.getMessage());
     }
 
     /**

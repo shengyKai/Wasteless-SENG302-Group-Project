@@ -10,10 +10,9 @@ import org.junit.jupiter.params.provider.EnumSource;
 import org.seng302.leftovers.dto.event.EventDTO;
 import org.seng302.leftovers.dto.event.EventStatus;
 import org.seng302.leftovers.dto.event.EventTag;
+import org.seng302.leftovers.exceptions.ValidationResponseException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.http.HttpStatus;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.lang.reflect.Field;
 import java.time.Duration;
@@ -51,9 +50,8 @@ class EventTest {
     void setTag_nullTag_400Response() {
         Event event = new EventSubclass();
 
-        var exception = assertThrows(ResponseStatusException.class, () -> event.setTag(null));
-        assertEquals(HttpStatus.BAD_REQUEST, exception.getStatus());
-        assertEquals("Tag cannot be null", exception.getReason());
+        var exception = assertThrows(ValidationResponseException.class, () -> event.setTag(null));
+        assertEquals("Tag cannot be null", exception.getMessage());
     }
 
     @Test

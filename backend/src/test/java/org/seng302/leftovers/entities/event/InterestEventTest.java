@@ -9,10 +9,6 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.seng302.leftovers.dto.saleitem.SaleItemResponseDTO;
 import org.seng302.leftovers.entities.*;
-import org.seng302.leftovers.entities.InventoryItem;
-import org.seng302.leftovers.entities.Product;
-import org.seng302.leftovers.entities.SaleItem;
-import org.seng302.leftovers.entities.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 

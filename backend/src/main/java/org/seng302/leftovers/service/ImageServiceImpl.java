@@ -1,13 +1,13 @@
 package org.seng302.leftovers.service;
 
 import org.seng302.leftovers.entities.Image;
+import org.seng302.leftovers.exceptions.InternalErrorResponseException;
+import org.seng302.leftovers.exceptions.ValidationResponseException;
 import org.seng302.leftovers.persistence.ImageRepository;
 import org.seng302.leftovers.tools.ImageTools;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.server.ResponseStatusException;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
@@ -40,7 +40,7 @@ public class ImageServiceImpl implements ImageService {
         } else if ("image/png".equals(contentType)) {
             return "png";
         } else {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid image format. Must be jpeg or png");
+            throw new ValidationResponseException("Invalid image format. Must be jpeg or png");
         }
     }
 
@@ -59,10 +59,10 @@ public class ImageServiceImpl implements ImageService {
         try (InputStream stream = file.getInputStream()) {
             original = ImageIO.read(stream);
         } catch (IOException e) {
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Failed get input stream", e);
+            throw new InternalErrorResponseException("Failed get input stream", e);
         }
         if (original == null) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid image provided");
+            throw new ValidationResponseException("Invalid image provided");
         }
 
         BufferedImage scaled = ImageTools.generateThumbnail(original);
@@ -72,7 +72,7 @@ public class ImageServiceImpl implements ImageService {
         try (InputStream stream = file.getInputStream()) {
             storageService.store(stream, filename);
         } catch (IOException e) {
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Failed to save image", e);
+            throw new InternalErrorResponseException("Failed to save image", e);
         }
 
         if (scaled == original) { // Scaled is identity to original, therefore original is already thumbnail sized
@@ -84,7 +84,7 @@ public class ImageServiceImpl implements ImageService {
             try {
                 stream = ImageTools.writeImage(scaled, ext);
             } catch (IOException e) {
-                throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Failed to write thumbnail", e);
+                throw new InternalErrorResponseException("Failed to write thumbnail", e);
             }
             storageService.store(stream, thumbnailFilename);
         }
