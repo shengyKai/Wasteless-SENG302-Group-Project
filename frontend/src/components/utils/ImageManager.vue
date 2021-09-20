@@ -16,7 +16,7 @@
               </v-icon>
             </v-chip>
           </template>
-          <span>Click to upload an image</span>
+          <span>Upload a new image</span>
         </v-tooltip>
         <v-tooltip right>
           <template v-slot:activator="{ on, attrs }">
@@ -32,7 +32,7 @@
               </v-icon>
             </v-chip>
           </template>
-          <span>Click to delete an image</span>
+          <span>Delete the current image</span>
         </v-tooltip>
         <v-tooltip right>
           <template v-slot:activator="{ on, attrs }">
@@ -48,7 +48,7 @@
               </v-icon>
             </v-chip>
           </template>
-          <span>Click to set image as thumbnail primary</span>
+          <span>Set current image as primary thumbnail</span>
         </v-tooltip>
       </v-col>
       <v-col>
