@@ -14,6 +14,12 @@ Feature: U31 - Purchases
       | FISH       | 10    | 5        |
     And A user exists with name "Alice"
 
+  Scenario: AC1: When an item is purchased, any other users who have liked that item will be notified that it is unavailable
+    Given I am logged into "Jeffrey" account
+    And I like the sale item
+    When user "Alice" has purchased the sale listing "fish" from business "Amazon"
+    Then "Jeffrey" will receive a notification stating that "fish" is no longer available
+
   Scenario: AC3: When an item is purchased, the seller's inventory is updated
     Given user "Alice" has purchased the sale listing "fish" from business "Amazon"
     And I am logged into "Jeffrey" account
