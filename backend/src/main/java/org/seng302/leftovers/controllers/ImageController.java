@@ -2,8 +2,12 @@ package org.seng302.leftovers.controllers;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.seng302.leftovers.dto.ImageDTO;
+import org.seng302.leftovers.entities.Business;
 import org.seng302.leftovers.entities.Image;
+import org.seng302.leftovers.entities.Product;
 import org.seng302.leftovers.persistence.ImageRepository;
+import org.seng302.leftovers.service.ImageService;
 import org.seng302.leftovers.service.StorageService;
 import org.seng302.leftovers.tools.AuthenticationTokenManager;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,9 +15,8 @@ import org.springframework.core.io.Resource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
 import javax.servlet.http.HttpServletRequest;
@@ -23,13 +26,30 @@ import java.util.Optional;
 public class ImageController {
     private static final Logger logger = LogManager.getLogger(ImageController.class);
 
-    private ImageRepository imageRepository;
-    private StorageService storageService;
+    private final ImageRepository imageRepository;
+    private final ImageService imageService;
+    private final StorageService storageService;
 
     @Autowired
-    public ImageController(ImageRepository imageRepository, StorageService storageService) {
+    public ImageController(ImageRepository imageRepository, ImageService imageService, StorageService storageService) {
         this.imageRepository = imageRepository;
+        this.imageService = imageService;
         this.storageService = storageService;
+    }
+
+    @PostMapping("/media/images")
+    public ImageDTO createImage(@RequestParam("file") MultipartFile file, HttpServletRequest request) {
+        try {
+            AuthenticationTokenManager.checkAuthenticationToken(request);
+            logger.info("Creating new image");
+
+            Image image = imageService.create(file);
+
+            return new ImageDTO(image);
+        } catch (Exception e) {
+            logger.error(e.getMessage());
+            throw e;
+        }
     }
 
     @GetMapping("/media/images/{imageName}")

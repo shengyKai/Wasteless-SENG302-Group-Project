@@ -5,6 +5,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 
 import javax.persistence.*;
+import java.time.Instant;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
@@ -36,14 +37,6 @@ public class Image {
      * Empty constructor to make spring happy
      */
     protected Image() {
-    }
-
-    public JSONObject constructJSONObject() {
-        var object = new JSONObject();
-        object.put("id", getID());
-        object.put("filename", "/media/images/" + getFilename());
-        object.put("thumbnailFilename", "/media/images/" + getFilenameThumbnail());
-        return object;
     }
 
     /**

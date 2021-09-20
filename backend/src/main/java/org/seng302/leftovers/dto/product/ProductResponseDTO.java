@@ -7,6 +7,7 @@ import lombok.Getter;
 import lombok.ToString;
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
+import org.seng302.leftovers.dto.ImageDTO;
 import org.seng302.leftovers.dto.business.BusinessResponseDTO;
 import org.seng302.leftovers.entities.Image;
 import org.seng302.leftovers.entities.InventoryItem;
@@ -32,7 +33,7 @@ public class ProductResponseDTO extends UpdateProductDTO {
     @JsonFormat(shape=JsonFormat.Shape.STRING)
     private Instant created;
     private BusinessResponseDTO business;
-    private List<JSONObject> images;
+    private List<ImageDTO> images;
     private String countryOfSale;
 
     /**
@@ -48,8 +49,7 @@ public class ProductResponseDTO extends UpdateProductDTO {
         super(product);
         this.created = product.getCreated();
         this.business = BusinessResponseDTO.withoutAdmins(product.getBusiness());
-        // TODO When ImageDTO is done, then update this
-        this.images = product.getProductImages().stream().map(Image::constructJSONObject).collect(Collectors.toList());
+        this.images = product.getProductImages().stream().map(ImageDTO::new).collect(Collectors.toList());
         this.countryOfSale = product.getCountryOfSale();
     }
 }

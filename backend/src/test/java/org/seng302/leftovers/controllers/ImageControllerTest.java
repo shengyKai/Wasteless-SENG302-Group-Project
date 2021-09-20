@@ -12,6 +12,7 @@ import org.mockito.MockitoAnnotations;
 import org.seng302.leftovers.entities.Image;
 import org.seng302.leftovers.exceptions.AccessTokenException;
 import org.seng302.leftovers.persistence.ImageRepository;
+import org.seng302.leftovers.service.ImageService;
 import org.seng302.leftovers.service.StorageService;
 import org.seng302.leftovers.tools.AuthenticationTokenManager;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,6 +44,8 @@ class ImageControllerTest {
     @Mock
     private ImageRepository mockImageRepository;
     @Mock
+    private ImageService mockImageService;
+    @Mock
     private StorageService mockStorageService;
 
     @Mock
@@ -70,7 +73,7 @@ class ImageControllerTest {
         when(mockImageRepository.findByFilenameThumbnail(not(eq("foo.thumb.png")))).thenReturn(Optional.empty());
         when(mockImageRepository.findByFilenameThumbnail("foo.thumb.png")).thenReturn(Optional.of(mockImage));
 
-        ImageController imageController = new ImageController(mockImageRepository, mockStorageService);
+        ImageController imageController = new ImageController(mockImageRepository, mockImageService, mockStorageService);
         mockMvc = MockMvcBuilders.standaloneSetup(imageController).build();
     }
 

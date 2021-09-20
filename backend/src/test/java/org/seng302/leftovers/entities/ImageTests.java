@@ -1,9 +1,12 @@
 package org.seng302.leftovers.entities;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import net.minidev.json.JSONObject;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
+import org.seng302.leftovers.dto.ImageDTO;
 import org.seng302.leftovers.persistence.ImageRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -16,16 +19,21 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 @SpringBootTest
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class ImageTests {
     @Autowired
-    ImageRepository imageRepository;
+    private ImageRepository imageRepository;
 
-    Image testImage;
+    @Autowired
+    private ObjectMapper objectMapper;
 
-    final List<String> illegalCharacters = Arrays.asList(".", "\n", "\t", "\\", ",");
+    private Image testImage;
+
+    final private List<String> illegalCharacters = Arrays.asList(".", "\n", "\t", "\\", ",");
 
     /**
      * Creates a test image to be used within these tests
@@ -314,5 +322,19 @@ class ImageTests {
         } catch (Exception e) { assertEquals(DataIntegrityViolationException.class, e.getClass()); }
     }
 
+
+    @Test
+    void imageDTO_withImage_expectedFieldsReturned() {
+        var image = mock(Image.class);
+        when(image.getID()).thenReturn(6L);
+        when(image.getFilename()).thenReturn("foo.png");
+        when(image.getFilenameThumbnail()).thenReturn("bar.png");
+
+        var json = objectMapper.convertValue(new ImageDTO(image), JSONObject.class);
+        assertEquals(image.getID(), json.get("id"));
+        assertEquals( "/media/images/foo.png", json.get("filename"));
+        assertEquals("/media/images/bar.png", json.get("thumbnailFilename"));
+        assertEquals(3, json.size());
+    }
 }
 
