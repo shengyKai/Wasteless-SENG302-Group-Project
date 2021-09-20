@@ -1,4 +1,4 @@
-import {Keyword, MarketplaceCard, MarketplaceCardSection, MaybeError, Message, Sale, User} from "./internal";
+import {Keyword, MarketplaceCard, MarketplaceCardSection, MaybeError, Message, Sale, User, Product} from "./internal";
 import axios from 'axios';
 import { is } from 'typescript-is';
 
@@ -57,7 +57,15 @@ export type InterestEvent = BaseEvent<'InterestEvent'> & {
 }
 
 export type PurchaseEvent = BaseEvent<'PurchaseEvent'> & {
-  saleItem: Sale
+  boughtSaleItem: {
+    buyer: User,
+    product: Product
+    interestCount: number,
+    price: number,
+    quantity: number,
+    saleDate: string,
+    listingDate: string,
+  }
 }
 
 /**

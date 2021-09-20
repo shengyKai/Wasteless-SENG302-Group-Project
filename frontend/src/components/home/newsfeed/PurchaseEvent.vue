@@ -1,7 +1,7 @@
 <template>
   <Event :event="event" :title="title" :error="errorMessage">
     <v-card-text class="pb-1">
-      You have purchased <b>{{itemBought}}</b> from <b><a :href="viewBusiness()">{{seller}}</a></b> for <b>${{price}}</b>.<br>
+      You have purchased <b>{{itemBought}}</b> from <b><a ref="bla" :href="viewBusiness()">{{seller}}</a></b> for <b>${{price}}</b>.<br>
       This can be collected from <b>{{location}}</b> or otherwise arranged with the seller.
     </v-card-text>
   </Event>
@@ -23,19 +23,21 @@ export default {
   },
   data() {
     return {
-      title: "New Purchase",
-      address: this.event.saleItem.inventoryItem.product.business.address
+      address: this.event.boughtSaleItem.product.business.address
     };
   },
   computed: {
+    title() {
+      return "Purchased " + this.itemBought;
+    },
     itemBought() {
-      return this.event.saleItem.quantity + " " + this.event.saleItem.inventoryItem.product.name;
+      return this.event.boughtSaleItem.quantity + " " + this.event.boughtSaleItem.product.name;
     },
     seller() {
-      return this.event.saleItem.inventoryItem.product.business.name;
+      return this.event.boughtSaleItem.product.business.name;
     },
     location() {
-      let location;
+      let location = "";
       if (this.address.streetNumber && this.address.streetName) {
         location += this.address.streetNumber + " " + this.address.streetName + ", ";
       }
@@ -52,12 +54,12 @@ export default {
       return location;
     },
     price() {
-      return this.event.saleItem.price;
+      return this.event.boughtSaleItem.price;
     }
   },
   methods: {
     viewBusiness() {
-      this.$router.push("/business/" + this.event.saleItem.inventoryItem.product.business.id);
+      this.$router.push("/business/" + this.event.boughtSaleItem.product.business.id);
     }
   }
 };
