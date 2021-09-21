@@ -82,7 +82,7 @@
                 </v-row>
               </div>
             </v-tab-item>
-            <v-tab-item key="address">
+            <v-tab-item key="address" :eager="true">
               <v-row no-gutters>
                 <v-col cols="12" sm="6">
                   <!-- INPUT: Street Address -->
@@ -155,7 +155,7 @@
                 />
               </v-row>
             </v-tab-item>
-            <v-tab-item key="image">
+            <v-tab-item key="image" :eager="true">
               <!-- <v-card-title class="mt-n3">Image</v-card-title>
               <v-card v-if="businessImages && businessImages.length > 0">
                 <ImageCarousel
