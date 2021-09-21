@@ -283,7 +283,6 @@ export default {
   data() {
     return {
       currencyConfirmDialog: false,
-      serverUrl: process.env.VUE_APP_SERVER_ADD,
       readableAddress: "",
       errorMessage: undefined,
       dialog: true,
