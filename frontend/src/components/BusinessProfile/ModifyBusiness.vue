@@ -496,26 +496,6 @@ export default {
 </script>
 
 <style scoped>
-.body {
-    padding: 16px;
-    width: 100%;
-    margin-top: 140px;
-}
-
-.top-section {
-  display: flex;
-  flex-wrap: wrap;
-}
-
-.business-modify {
-  margin-top: 20px;
-}
-
-.modify-business-button {
-  display: block;
-  margin-right: 48%;
-}
-
 .expand-icon {
   padding-right: 10px;
 }
