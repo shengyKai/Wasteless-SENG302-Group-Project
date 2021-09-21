@@ -14,7 +14,7 @@ import org.seng302.leftovers.dto.event.EventTag;
 import org.seng302.leftovers.entities.User;
 import org.seng302.leftovers.entities.event.Event;
 import org.seng302.leftovers.entities.event.GlobalMessageEvent;
-import org.seng302.leftovers.exceptions.AccessTokenException;
+import org.seng302.leftovers.exceptions.AccessTokenResponseException;
 import org.seng302.leftovers.persistence.UserRepository;
 import org.seng302.leftovers.persistence.event.EventRepository;
 import org.seng302.leftovers.tools.AuthenticationTokenManager;
@@ -111,7 +111,7 @@ class EventControllerTest {
     void setEventTag_noAuthToken_401Response() throws Exception {
         // Mock the AuthenticationTokenManager to respond as it would when the authentication token is missing or invalid
         authenticationTokenManager.when(() -> AuthenticationTokenManager.checkAuthenticationToken(any()))
-                .thenThrow(new AccessTokenException());
+                .thenThrow(new AccessTokenResponseException());
 
         var json = new JSONObject();
         json.put("value", "none");
@@ -204,7 +204,7 @@ class EventControllerTest {
     void postDemoEvent_noAuthToken_401Response() throws Exception {
         // Mock the AuthenticationTokenManager to respond as it would when the authentication token is missing or invalid
         authenticationTokenManager.when(() -> AuthenticationTokenManager.checkAuthenticationToken(any()))
-                .thenThrow(new AccessTokenException());
+                .thenThrow(new AccessTokenResponseException());
 
         var json = new JSONObject();
         json.put("message", "this that");
@@ -263,7 +263,7 @@ class EventControllerTest {
     void getEvents_noAuthToken_401Response() throws Exception {
         // Mock the AuthenticationTokenManager to respond as it would when the authentication token is missing or invalid
         authenticationTokenManager.when(() -> AuthenticationTokenManager.checkAuthenticationToken(any()))
-                .thenThrow(new AccessTokenException());
+                .thenThrow(new AccessTokenResponseException());
 
         mockMvc.perform(get("/users/7/feed"))
                 .andExpect(status().isUnauthorized());
@@ -374,7 +374,7 @@ class EventControllerTest {
 
     @Test
     void deleteEvent_noAuthToken_401ResponseAndNoEventDeleted() throws Exception {
-        authenticationTokenManager.when(() -> AuthenticationTokenManager.checkAuthenticationToken(any())).thenThrow(new AccessTokenException());
+        authenticationTokenManager.when(() -> AuthenticationTokenManager.checkAuthenticationToken(any())).thenThrow(new AccessTokenResponseException());
         mockMvc.perform(
                 delete("/feed/10"))
                 .andExpect(status().isUnauthorized());
@@ -393,7 +393,7 @@ class EventControllerTest {
     void updateEventStatus_noAuthToken_401Response() throws Exception {
         // Mock the AuthenticationTokenManager to respond as it would when the authentication token is missing or invalid
         authenticationTokenManager.when(() -> AuthenticationTokenManager.checkAuthenticationToken(any()))
-                .thenThrow(new AccessTokenException());
+                .thenThrow(new AccessTokenResponseException());
 
         var json = new JSONObject();
         json.put("value", "normal");

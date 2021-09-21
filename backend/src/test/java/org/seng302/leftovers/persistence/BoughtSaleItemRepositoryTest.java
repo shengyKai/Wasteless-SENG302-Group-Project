@@ -107,7 +107,7 @@ class BoughtSaleItemRepositoryTest {
     void findById_withValidId_boughtSaleItemReturned() {
         var found = boughtSaleItemRepository.findById(boughtSaleItem.getId()).orElseThrow();
         assertEquals(boughtSaleItem.getId(), found.getId());
-        assertEquals(boughtSaleItem.getLikeCount(), found.getLikeCount());
+        assertEquals(boughtSaleItem.getInterestCount(), found.getInterestCount());
         assertEquals(boughtSaleItem.getProduct().getID(), found.getProduct().getID());
         assertEquals(boughtSaleItem.getBuyer().getUserID(), found.getBuyer().getUserID());
     }

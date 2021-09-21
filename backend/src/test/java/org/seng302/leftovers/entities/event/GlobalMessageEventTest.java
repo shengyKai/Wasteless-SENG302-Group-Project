@@ -5,12 +5,11 @@ import net.minidev.json.JSONObject;
 import org.junit.jupiter.api.*;
 import org.seng302.leftovers.entities.Location;
 import org.seng302.leftovers.entities.User;
+import org.seng302.leftovers.exceptions.ValidationResponseException;
 import org.seng302.leftovers.persistence.UserRepository;
 import org.seng302.leftovers.persistence.event.EventRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.http.HttpStatus;
-import org.springframework.web.server.ResponseStatusException;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -60,9 +59,8 @@ class GlobalMessageEventTest {
 
     @Test
     void createMessageEvent_nullMessage_400Response() {
-        var exception = assertThrows(ResponseStatusException.class, () -> new GlobalMessageEvent(user, null));
-        assertEquals(HttpStatus.BAD_REQUEST, exception.getStatus());
-        assertEquals("Message cannot be null", exception.getReason());
+        var exception = assertThrows(ValidationResponseException.class, () -> new GlobalMessageEvent(user, null));
+        assertEquals("Message cannot be null", exception.getMessage());
     }
 
     @Test

@@ -8,10 +8,10 @@ import io.cucumber.java.en.When;
 import net.minidev.json.JSONObject;
 import org.junit.jupiter.api.Assertions;
 import org.seng302.leftovers.entities.Product;
+import org.seng302.leftovers.exceptions.ValidationResponseException;
 import org.seng302.leftovers.persistence.ProductRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.math.BigDecimal;
 import java.time.Instant;
@@ -42,7 +42,7 @@ public class ProductStepDefinition {
                     .withName(name)
                     .withBusiness(businessContext.getLast())
                     .build();
-        } catch (ResponseStatusException | NullPointerException ignored) {}
+        } catch (ValidationResponseException | NullPointerException ignored) {}
     }
 
     @Then("the product {string} exists for the business")

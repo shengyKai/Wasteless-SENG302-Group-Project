@@ -4,8 +4,8 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.seng302.leftovers.dto.user.UserRole;
 import org.seng302.leftovers.entities.User;
-import org.seng302.leftovers.exceptions.AccessTokenException;
-import org.seng302.leftovers.exceptions.InsufficientPermissionException;
+import org.seng302.leftovers.exceptions.AccessTokenResponseException;
+import org.seng302.leftovers.exceptions.InsufficientPermissionResponseException;
 
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
@@ -81,9 +81,9 @@ public class AuthenticationTokenManager {
         HttpSession session = request.getSession();
         String expectedAuthString = (String) session.getAttribute(AUTH_TOKEN_NAME);
         if (expectedAuthString == null) {
-            AccessTokenException accessTokenException = new AccessTokenException("Access token not present for session.");
-            logger.error(accessTokenException.getMessage());
-            throw accessTokenException;
+            AccessTokenResponseException exception = new AccessTokenResponseException("Access token not present for session.");
+            logger.error(exception.getMessage());
+            throw exception;
         }
         Cookie[] requestCookies = request.getCookies();
         if (requestCookies != null) {
@@ -92,16 +92,16 @@ public class AuthenticationTokenManager {
                     if (cookie.getValue().equals(session.getAttribute(AUTH_TOKEN_NAME))) {
                         return;
                     } else {
-                        AccessTokenException accessTokenException = new AccessTokenException("Invalid access token.");
-                        logger.error(accessTokenException.getMessage());
-                        throw accessTokenException;
+                        AccessTokenResponseException exception = new AccessTokenResponseException("Invalid access token.");
+                        logger.error(exception.getMessage());
+                        throw exception;
                     }
                 }
             }
         }
-        AccessTokenException accessTokenException = new AccessTokenException("Access token not present in request.");
-        logger.error(accessTokenException.getMessage());
-        throw accessTokenException;
+        AccessTokenResponseException exception = new AccessTokenResponseException("Access token not present in request.");
+        logger.error(exception.getMessage());
+        throw exception;
     }
 
     /**
@@ -112,9 +112,9 @@ public class AuthenticationTokenManager {
         HttpSession session = request.getSession();
         var sessionRole = session.getAttribute("role");
         if (!UserRole.DGAA.equals(sessionRole)) {
-            InsufficientPermissionException insufficientPermissionException = new InsufficientPermissionException("The user does not have permission to perform the requested action");
-            logger.error(insufficientPermissionException.getMessage());
-            throw insufficientPermissionException;
+            InsufficientPermissionResponseException insufficientPermissionResponseException = new InsufficientPermissionResponseException("The user does not have permission to perform the requested action");
+            logger.error(insufficientPermissionResponseException.getMessage());
+            throw insufficientPermissionResponseException;
         }
     }
 

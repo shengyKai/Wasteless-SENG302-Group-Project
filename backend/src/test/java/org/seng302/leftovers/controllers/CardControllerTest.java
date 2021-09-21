@@ -18,7 +18,7 @@ import org.seng302.leftovers.entities.Location;
 import org.seng302.leftovers.entities.MarketplaceCard;
 import org.seng302.leftovers.entities.User;
 import org.seng302.leftovers.entities.event.ExpiryEvent;
-import org.seng302.leftovers.exceptions.AccessTokenException;
+import org.seng302.leftovers.exceptions.AccessTokenResponseException;
 import org.seng302.leftovers.persistence.KeywordRepository;
 import org.seng302.leftovers.persistence.MarketplaceCardRepository;
 import org.seng302.leftovers.persistence.SearchMarketplaceCardHelper;
@@ -276,7 +276,7 @@ class CardControllerTest {
 
     @Test
     void createCard_invalidAuthToken_cannotCreateCard() throws Exception {
-       authenticationTokenManager.when(() -> AuthenticationTokenManager.checkAuthenticationToken(any())).thenThrow(new AccessTokenException());
+       authenticationTokenManager.when(() -> AuthenticationTokenManager.checkAuthenticationToken(any())).thenThrow(new AccessTokenResponseException());
        mockMvc.perform(post("/cards")
                .contentType(MediaType.APPLICATION_JSON)
                .content(createCardJson.toString()))
@@ -314,7 +314,6 @@ class CardControllerTest {
                 .content(createCardJson.toString()))
                 .andExpect(status().isBadRequest())
                 .andReturn();
-        assertEquals("Card title must be between 1-50 characters long", result.getResponse().getErrorMessage());
         verify(marketplaceCardRepository, times(0)).save(any(MarketplaceCard.class));
     }
 
@@ -466,13 +465,12 @@ class CardControllerTest {
     void createCard_creatorIdNotInRepository_cardNotCreated() throws Exception {
         when(userRepository.findById(userId)).thenReturn(Optional.empty());
 
-        MvcResult result = mockMvc.perform(post("/cards")
+        mockMvc.perform(post("/cards")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(createCardJson.toString()))
                 .andExpect(status().isBadRequest())
                 .andReturn();
 
-        assertEquals(String.format("User with ID %d does not exist", userId), result.getResponse().getErrorMessage());
         verify(marketplaceCardRepository, times(0)).save(any(MarketplaceCard.class));
     }
 
@@ -496,13 +494,12 @@ class CardControllerTest {
         int[] keywordIds = new int[] {9999};
         createCardJson.appendField("keywordIds", keywordIds);
 
-        MvcResult result = mockMvc.perform(post("/cards")
+        mockMvc.perform(post("/cards")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(createCardJson.toString()))
                 .andExpect(status().isBadRequest())
                 .andReturn();
 
-        assertEquals("Invalid keyword ID", result.getResponse().getErrorMessage());
         verify(marketplaceCardRepository, times(0)).save(any(MarketplaceCard.class));
     }
 
@@ -512,7 +509,7 @@ class CardControllerTest {
     void modifyCard_invalidAuthToken_401Response() throws Exception {
         createCardJson.remove("creatorId"); // Will not need this field
 
-        authenticationTokenManager.when(() -> AuthenticationTokenManager.checkAuthenticationToken(any())).thenThrow(new AccessTokenException());
+        authenticationTokenManager.when(() -> AuthenticationTokenManager.checkAuthenticationToken(any())).thenThrow(new AccessTokenResponseException());
         mockMvc.perform(put("/cards/1")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(createCardJson.toString()))
@@ -647,7 +644,7 @@ class CardControllerTest {
 
     @Test
     void getCards_invalidAuthToken_CannotViewCards() throws Exception {
-        authenticationTokenManager.when(() -> AuthenticationTokenManager.checkAuthenticationToken(any())).thenThrow(new AccessTokenException());
+        authenticationTokenManager.when(() -> AuthenticationTokenManager.checkAuthenticationToken(any())).thenThrow(new AccessTokenResponseException());
         mockMvc.perform(get("/cards")
                 .param("section", "Wanted"))
                 .andExpect(status().isUnauthorized());
@@ -738,7 +735,7 @@ class CardControllerTest {
 
     @Test
     void searchCards_invalidAuthToken_cannotViewCards() throws Exception {
-        authenticationTokenManager.when(() -> AuthenticationTokenManager.checkAuthenticationToken(any())).thenThrow(new AccessTokenException());
+        authenticationTokenManager.when(() -> AuthenticationTokenManager.checkAuthenticationToken(any())).thenThrow(new AccessTokenResponseException());
         var res = mockMvc.perform(get("/cards/search")
                 .param("section", "Wanted")
                 .param("keywordIds", "1")
@@ -897,15 +894,15 @@ class CardControllerTest {
 
     @Test
     void extendCardDisplayPeriod_noAuthToken_401Response() throws Exception {
-        authenticationTokenManager.when(() -> AuthenticationTokenManager.checkAuthenticationToken(any())).thenThrow(new AccessTokenException());
+        authenticationTokenManager.when(() -> AuthenticationTokenManager.checkAuthenticationToken(any())).thenThrow(new AccessTokenResponseException());
         mockMvc.perform(put("/cards/1/extenddisplayperiod")).andExpect(status().isUnauthorized());
         verify(mockCard, times(0)).delayCloses();
         verify(marketplaceCardRepository, times(0)).save(any());
     }
 
     @Test
-    void extendCardDisplayPeriod_cardDoesNotExist_404Response() throws Exception {
-        mockMvc.perform(put("/cards/2/extenddisplayperiod")).andExpect(status().isNotFound());
+    void extendCardDisplayPeriod_cardDoesNotExist_406Response() throws Exception {
+        mockMvc.perform(put("/cards/2/extenddisplayperiod")).andExpect(status().isNotAcceptable());
         verify(mockCard, times(0)).delayCloses();
         verify(marketplaceCardRepository, times(0)).save(any());
     }
@@ -937,14 +934,14 @@ class CardControllerTest {
 
     @Test
     void deleteCard_noAuthToken_401Response() throws Exception {
-        authenticationTokenManager.when(() -> AuthenticationTokenManager.checkAuthenticationToken(any())).thenThrow(new AccessTokenException());
+        authenticationTokenManager.when(() -> AuthenticationTokenManager.checkAuthenticationToken(any())).thenThrow(new AccessTokenResponseException());
         mockMvc.perform(delete("/cards/1")).andExpect(status().isUnauthorized());
         verify(marketplaceCardRepository, times(0)).delete(any());
     }
 
     @Test
-    void deleteCard_cardDoesNotExist_404Response() throws Exception {
-        mockMvc.perform(delete("/cards/2")).andExpect(status().isNotFound());
+    void deleteCard_cardDoesNotExist_406Response() throws Exception {
+        mockMvc.perform(delete("/cards/2")).andExpect(status().isNotAcceptable());
         verify(marketplaceCardRepository, times(0)).delete(any());
     }
 
@@ -973,7 +970,7 @@ class CardControllerTest {
 
     @Test
     void getCardsForUser_noAuthToken_401Response() throws Exception {
-        authenticationTokenManager.when(() -> AuthenticationTokenManager.checkAuthenticationToken(any())).thenThrow(new AccessTokenException());
+        authenticationTokenManager.when(() -> AuthenticationTokenManager.checkAuthenticationToken(any())).thenThrow(new AccessTokenResponseException());
         mockMvc.perform(get("/users/1/cards")).andExpect(status().isUnauthorized());
         // Check that the authentication token manager was called
         authenticationTokenManager.verify(() -> AuthenticationTokenManager.checkAuthenticationToken(any()));

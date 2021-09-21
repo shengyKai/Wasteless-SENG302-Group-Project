@@ -24,6 +24,7 @@ import org.springframework.http.MediaType;
 
 import javax.transaction.Transactional;
 import java.util.*;
+import java.util.stream.StreamSupport;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -57,6 +58,7 @@ public class SaleItemStepDefinition {
     @Given("the business is listing the following items")
     public void the_business_is_listing_the_following_items(io.cucumber.datatable.DataTable dataTable) throws Exception {
         addedSaleItems = new HashSet<>();
+        requestContext.setLoggedInAccount(businessContext.getLast().getPrimaryOwner());
 
         List<Map<String, String>> rows = dataTable.asMaps(String.class, String.class);
         for (Map<String, String> row : rows) {
@@ -66,12 +68,20 @@ public class SaleItemStepDefinition {
             }
             InventoryItem inventoryItem = inventoryItemRepository.findAllByProduct(product.get()).get(0);
 
-            SaleItem item = new SaleItem.Builder()
-                    .withInventoryItem(inventoryItem)
-                    .withQuantity(Integer.parseInt(row.get("quantity")))
-                    .withPrice(row.get("price"))
-                    .build();
-            item = saleItemRepository.save(item);
+            var object = new JSONObject();
+            object.put("inventoryItemId", inventoryItem.getId());
+            object.put("quantity", row.get("quantity"));
+            object.put("price", row.get("price"));
+
+            requestContext.performRequest(
+                    post(String.format("/businesses/%d/listings", businessContext.getLast().getId()))
+                            .content(object.toString())
+                            .contentType(MediaType.APPLICATION_JSON));
+
+            var item = StreamSupport.stream(saleItemRepository.findAll().spliterator(), false)
+                    .max(Comparator.comparing(SaleItem::getCreated))
+                    .orElseThrow();
+
             addedSaleItems.add(item);
         }
     }

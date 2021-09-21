@@ -16,6 +16,7 @@ import Inventory from "../components/Inventory.vue";
 import SalePage from "../components/SalePage.vue";
 import Marketplace from "../components/marketplace/Marketplace.vue";
 import UserCards from "../components/marketplace/UserCards.vue";
+import ImageManager from "../components/utils/ImageManager.vue";
 import { COOKIE, getCookie } from "@/utils";
 import { getStore } from "@/store";
 
@@ -101,6 +102,11 @@ const routes = [
     path: '/usercards/:id',
     component: UserCards,
     meta: { title: 'User Cards' },
+  },
+  {
+    path: '/imagemanager',
+    component: ImageManager,
+    meta: { title: 'Image Manager' },
   },
   {
     path: "*",

@@ -3,19 +3,20 @@ package org.seng302.leftovers.entities;
 
 import org.seng302.leftovers.dto.user.UserRole;
 import org.seng302.leftovers.entities.event.Event;
+import org.seng302.leftovers.exceptions.ValidationResponseException;
 import org.springframework.data.annotation.ReadOnlyProperty;
-import org.springframework.http.HttpStatus;
-import org.springframework.web.server.ResponseStatusException;
 
 import javax.persistence.*;
 import java.time.Instant;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.regex.Pattern;
 
 @Entity
-public class User extends Account {
+public class User extends Account implements ImageAttachment {
 
     private static final String NAME_REGEX = "[ \\p{L}\\-'.]+";
 
@@ -54,6 +55,11 @@ public class User extends Account {
     @ManyToMany(mappedBy = "interestedUsers", fetch = FetchType.LAZY)
     private Set<SaleItem> likedSaleItems = new HashSet<>();
 
+    @OrderColumn(name="image_order")
+    @OneToMany(fetch = FetchType.EAGER)
+    @JoinColumn(name="user_id")
+    private List<Image> images = new ArrayList<>();
+
     /* Matches:
     123-456-7890
     (123) 456-7890
@@ -84,7 +90,7 @@ public class User extends Account {
         if (firstName != null && firstName.length() > 0 && firstName.length() <= 32 && firstName.matches(NAME_REGEX)) {
             this.firstName = firstName;
         } else {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The first name must not be empty, be less then 16 characters, and only contain letters.");
+            throw new ValidationResponseException("The first name must not be empty, be less then 16 characters, and only contain letters.");
         }
     }
 
@@ -105,7 +111,7 @@ public class User extends Account {
         } else if (middleName.equals("")) {
             this.middleName = null;
         } else {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The middle name must not be empty, be less then 16 characters, and only contain letters.");
+            throw new ValidationResponseException("The middle name must not be empty, be less then 16 characters, and only contain letters.");
         }
     }
 
@@ -127,7 +133,7 @@ public class User extends Account {
         if (lastName != null && lastName.length() > 0 && lastName.length() <= 32 && lastName.matches(NAME_REGEX)) {
             this.lastName = lastName;
         } else {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The last name must not be empty, be less then 16 characters, and only contain letters.");
+            throw new ValidationResponseException("The last name must not be empty, be less then 16 characters, and only contain letters.");
         }
     }
 
@@ -149,7 +155,7 @@ public class User extends Account {
         } else if (nickname.equals("")) {
             this.nickname = null;
         } else {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The nickname must not be empty, be less then 16 characters, and only contain letters.");
+            throw new ValidationResponseException("The nickname must not be empty, be less then 16 characters, and only contain letters.");
         }
     }
 
@@ -171,7 +177,7 @@ public class User extends Account {
         } else if (bio.equals("")) {
             this.bio = null;
         } else {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The bio must be less than 200 characters long," + 
+            throw new ValidationResponseException("The bio must be less than 200 characters long," + 
             "and only contain letters, numbers, and valid special characters");
         }
     }
@@ -200,10 +206,10 @@ public class User extends Account {
             if (dob.compareTo(minDate) < 0) {
                 this.dob = dob;
             } else {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "You must be at least 13 years old to create an account");
+                throw new ValidationResponseException("You must be at least 13 years old to create an account");
             }
         } else {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Your date of birth has been entered incorrectly");
+            throw new ValidationResponseException("Your date of birth has been entered incorrectly");
         }
     }
 
@@ -229,7 +235,7 @@ public class User extends Account {
         } else if (phNum.equals("")) {
             this.phNum = null;
         } else {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Your phone number has been entered incorrectly");
+            throw new ValidationResponseException("Your phone number has been entered incorrectly");
         }
     }
 
@@ -250,7 +256,7 @@ public class User extends Account {
         if (address != null) {
             this.address = address;
         } else {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Your address has been entered incorrectly");
+            throw new ValidationResponseException("Your address has been entered incorrectly");
         }
     }
 
@@ -292,6 +298,13 @@ public class User extends Account {
     public Set<Event> getEvents() { return this.events;}
 
     /**
+     * Gets the list of images for this user
+     * @return List of images
+     */
+    @Override
+    public List<Image> getImages() { return this.images; }
+
+    /**
      * Gets the set of businesses that the user is an admin of OR is the owner of
      * @return Businesses administered or owned
      */
@@ -321,16 +334,23 @@ public class User extends Account {
      * Called before a user is removed from the database
      * Ensures that the User is not an owner of any Businesses.
      * If the User is an administrator for any businesses, they are removed from the administrator set for each business
-     * @throws ResponseStatusException If User owns any businesses
      */
     @PreRemove
     public void preRemove() {
         if (!this.getBusinessesOwned().isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Cannot delete a user who is an owner of one or more businesses");
+            throw new ValidationResponseException("Cannot delete a user who is an owner of one or more businesses");
         }
         for (Business business : this.getBusinessesAdministered()) {
             business.removeAdmin(this);
         }
+    }
+
+    /**
+     * Adds an image to this user
+     * @param image Image to add
+     */
+    public void addImage(Image image) {
+        this.images.add(image);
     }
 
 

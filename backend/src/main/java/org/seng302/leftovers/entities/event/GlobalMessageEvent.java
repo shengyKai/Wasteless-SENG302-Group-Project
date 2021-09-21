@@ -3,8 +3,7 @@ package org.seng302.leftovers.entities.event;
 import lombok.EqualsAndHashCode;
 import org.seng302.leftovers.dto.event.GlobalMessageEventDTO;
 import org.seng302.leftovers.entities.User;
-import org.springframework.http.HttpStatus;
-import org.springframework.web.server.ResponseStatusException;
+import org.seng302.leftovers.exceptions.ValidationResponseException;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -36,7 +35,7 @@ public class GlobalMessageEvent extends Event {
      */
     public void setGlobalMessage(String content) {
         if (content == null) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Message cannot be null");
+            throw new ValidationResponseException("Message cannot be null");
         }
         this.globalMessage = content;
     }
