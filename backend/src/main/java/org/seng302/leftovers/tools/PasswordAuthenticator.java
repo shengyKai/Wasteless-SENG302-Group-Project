@@ -1,7 +1,7 @@
 package org.seng302.leftovers.tools;
 
-import org.springframework.http.HttpStatus;
-import org.springframework.web.server.ResponseStatusException;
+import org.seng302.leftovers.exceptions.InternalErrorResponseException;
+import org.seng302.leftovers.exceptions.ValidationResponseException;
 
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
@@ -34,14 +34,14 @@ public class PasswordAuthenticator {
     public static void verifyPassword(String password, String storedAuthenticationCode) {
         try {
             if (password == null) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Password must be provided");
+                throw new ValidationResponseException("Password must be provided");
             }
             String receivedAuthenticationCode = generateAuthenticationCode(password);
             if (!receivedAuthenticationCode.equals(storedAuthenticationCode)) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Password is incorrect");
+                throw new ValidationResponseException("Password is incorrect");
             }
         } catch (NoSuchAlgorithmException e) {
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Could not verify password");
+            throw new InternalErrorResponseException("Could not verify password", e);
         }
     }
 

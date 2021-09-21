@@ -1,5 +1,7 @@
 package org.seng302.leftovers.entities.event;
 
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 import org.seng302.leftovers.dto.event.InterestEventDTO;
 import org.seng302.leftovers.entities.SaleItem;
 import org.seng302.leftovers.entities.User;
@@ -17,6 +19,7 @@ public class InterestEvent extends Event {
 
     @ManyToOne
     @JoinColumn(name = "sale_item_id", nullable = false)
+    @OnDelete(action = OnDeleteAction.CASCADE)
     private SaleItem saleItem;
 
     @Column(nullable = false)

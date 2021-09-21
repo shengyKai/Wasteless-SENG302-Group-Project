@@ -5,6 +5,7 @@ import org.hibernate.SessionFactory;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.seng302.leftovers.exceptions.ValidationResponseException;
 import org.seng302.leftovers.persistence.BusinessRepository;
 import org.seng302.leftovers.persistence.KeywordRepository;
 import org.seng302.leftovers.persistence.MarketplaceCardRepository;
@@ -12,8 +13,6 @@ import org.seng302.leftovers.persistence.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.http.HttpStatus;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -229,33 +228,29 @@ class KeywordTests {
 
     @Test
     void keywordConstructor_nullName_throws400Exception() {
-        var exception = assertThrows(ResponseStatusException.class, () -> new Keyword(null));
-        assertEquals(HttpStatus.BAD_REQUEST, exception.getStatus());
-        assertEquals("Keyword name must be provided", exception.getReason());
+        var exception = assertThrows(ValidationResponseException.class, () -> new Keyword(null));
+        assertEquals("Keyword name must be provided", exception.getMessage());
     }
 
     @Test
     void keywordConstructor_emptyName_throws400Exception() {
-        var exception = assertThrows(ResponseStatusException.class, () -> new Keyword(""));
-        assertEquals(HttpStatus.BAD_REQUEST, exception.getStatus());
-        assertEquals("Keyword name must be between 1-25 characters long", exception.getReason());
+        var exception = assertThrows(ValidationResponseException.class, () -> new Keyword(""));
+        assertEquals("Keyword name must be between 1-25 characters long", exception.getMessage());
     }
 
     @Test
     void keywordConstructor_tooLongName_throws400Exception() {
         String name = "a".repeat(26);
 
-        var exception = assertThrows(ResponseStatusException.class, () -> new Keyword(name));
-        assertEquals(HttpStatus.BAD_REQUEST, exception.getStatus());
-        assertEquals("Keyword name must be between 1-25 characters long", exception.getReason());
+        var exception = assertThrows(ValidationResponseException.class, () -> new Keyword(name));
+        assertEquals("Keyword name must be between 1-25 characters long", exception.getMessage());
     }
 
     @ParameterizedTest
     @ValueSource(strings = {",", ".", "+", "\uD83D\uDE02", "\uFFFF"})
     void keywordConstructor_invalidCharacters_throws400Exception(String name) {
-        var exception = assertThrows(ResponseStatusException.class, () -> new Keyword(name));
-        assertEquals(HttpStatus.BAD_REQUEST, exception.getStatus());
-        assertEquals("Keyword name must only contain letters", exception.getReason());
+        var exception = assertThrows(ValidationResponseException.class, () -> new Keyword(name));
+        assertEquals("Keyword name must only contain letters", exception.getMessage());
     }
 
     @ParameterizedTest

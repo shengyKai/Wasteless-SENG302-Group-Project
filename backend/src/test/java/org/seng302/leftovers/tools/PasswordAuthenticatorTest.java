@@ -1,8 +1,8 @@
 package org.seng302.leftovers.tools;
 
 import org.junit.jupiter.api.Test;
+import org.seng302.leftovers.exceptions.ValidationResponseException;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.security.NoSuchAlgorithmException;
 
@@ -65,7 +65,7 @@ class PasswordAuthenticatorTest {
     void verifyPasswordShouldNotMatchTest() {
         try {
             String authenticationCode = PasswordAuthenticator.generateAuthenticationCode("password123");
-            assertThrows(ResponseStatusException.class, () -> {
+            assertThrows(ValidationResponseException.class, () -> {
                 PasswordAuthenticator.verifyPassword("passwerd123", authenticationCode);
             });
         } catch (NoSuchAlgorithmException e) {

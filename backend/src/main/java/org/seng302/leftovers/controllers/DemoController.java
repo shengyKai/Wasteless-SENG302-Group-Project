@@ -9,14 +9,13 @@ import org.hibernate.Session;
 import org.seng302.datagenerator.*;
 import org.seng302.leftovers.dto.business.BusinessType;
 import org.seng302.leftovers.entities.*;
+import org.seng302.leftovers.exceptions.InsufficientPermissionResponseException;
 import org.seng302.leftovers.persistence.*;
 import org.seng302.leftovers.tools.AuthenticationTokenManager;
-import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.server.ResponseStatusException;
 
 import javax.persistence.EntityManager;
 import javax.servlet.http.HttpServletRequest;
@@ -64,7 +63,7 @@ public class DemoController {
         try {
             AuthenticationTokenManager.checkAuthenticationToken(request);
             if (!AuthenticationTokenManager.sessionIsAdmin(request)) {
-                ResponseStatusException error = new ResponseStatusException(HttpStatus.FORBIDDEN, "Only admin accounts can perform demo actions.");
+                var error = new InsufficientPermissionResponseException("Only admin accounts can perform demo actions.");
                 logger.error(error.getMessage());
                 throw error;
             }

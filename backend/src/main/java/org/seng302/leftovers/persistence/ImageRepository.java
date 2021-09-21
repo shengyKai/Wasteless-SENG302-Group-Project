@@ -2,11 +2,10 @@ package org.seng302.leftovers.persistence;
 
 import org.seng302.leftovers.entities.Image;
 import org.seng302.leftovers.entities.Product;
+import org.seng302.leftovers.exceptions.DoesNotExistResponseException;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Repository;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Optional;
 
@@ -36,8 +35,7 @@ public interface ImageRepository extends CrudRepository<Image, Long> {
     default Image getImageById(Long imageId) {
         Optional<Image> image = findById(imageId);
         if (image.isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE,
-                    "the given image does not exist");
+            throw new DoesNotExistResponseException(Image.class);
         }
         return image.get();
     }
@@ -51,9 +49,8 @@ public interface ImageRepository extends CrudRepository<Image, Long> {
      */
     default Image getImageByProductAndId(Product product, Long imageId) {
         Optional<Image> image = this.findById(imageId);
-        if (image.isEmpty() || !product.getProductImages().contains(image.get())) {
-            throw new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE,
-                    "The given image does not exist");
+        if (image.isEmpty() || !product.getImages().contains(image.get())) {
+            throw new DoesNotExistResponseException(Image.class);
         }
         return image.get();
 

@@ -98,7 +98,6 @@ class KeywordCreatedEventTest {
                 event.isRead(),
                 mapper.writeValueAsString(new UserResponseDTO(user)),
                 event.getLastModified().toString());
-        System.out.println(expectedJsonString);
         String actualJsonString = mapper.writeValueAsString(event.asDTO());
         assertEquals(mapper.readTree(expectedJsonString), mapper.readTree(actualJsonString));
     }
