@@ -2,8 +2,8 @@ package org.seng302.leftovers.controllers;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.seng302.leftovers.dto.conversation.MessageDTO;
 import org.seng302.leftovers.dto.ResultPageDTO;
+import org.seng302.leftovers.dto.conversation.MessageDTO;
 import org.seng302.leftovers.dto.conversation.SendMessageDTO;
 import org.seng302.leftovers.entities.Conversation;
 import org.seng302.leftovers.entities.Message;

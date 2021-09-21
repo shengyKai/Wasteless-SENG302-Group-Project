@@ -1,7 +1,5 @@
 package org.seng302.leftovers.entities;
 
-import org.springframework.http.HttpStatus;
-import org.springframework.web.server.ResponseStatusException;
 import org.seng302.leftovers.exceptions.ValidationResponseException;
 
 import javax.persistence.*;
