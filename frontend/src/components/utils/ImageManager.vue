@@ -19,6 +19,7 @@
                       <v-icon center
                               outlined
                               class="ma-2"
+                              size="30"
                               color="primary"
                               v-bind="attrs"
                               v-on="on">
@@ -31,7 +32,8 @@
                     <template v-slot:activator="{ on, attrs }">
                       <v-icon center
                               outlined
-                              class="ma-2"
+                              class="ma-2 size='30"
+                              size="30"
                               color="primary"
                               v-bind="attrs"
                               v-on="on">
@@ -45,6 +47,7 @@
                       <v-icon center
                               outlined
                               class="ma-2"
+                              size="30"
                               color="primary"
                               v-bind="attrs"
                               v-on="on">
@@ -61,7 +64,7 @@
                 justify="center"
               >
                 <div class="text-h2">
-                  Slide {{ i + 1 }}
+                  Image {{ i + 1 }}
                 </div>
               </v-row>
             </v-sheet>
@@ -77,9 +80,9 @@ export default {
   data: () => ({
     model: 0,
     colors: [
-      'primary',
-      'secondary',
       'yellow darken-2',
+      'secondary',
+      'grey',
       'red',
       'orange',
     ],
