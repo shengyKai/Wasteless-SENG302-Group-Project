@@ -121,7 +121,7 @@ export type ModifyBusiness = {
   address: Location,
   businessType: BusinessType,
   updateProductCountry: boolean,
-  primaryImageId: number,
+  primaryImageId?: number,
 }
 
 export type Image = {
