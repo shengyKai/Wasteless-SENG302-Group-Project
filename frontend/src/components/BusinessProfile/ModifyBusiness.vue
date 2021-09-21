@@ -197,7 +197,9 @@
               <!-- INPUT: Submit -->
               <v-btn
                 type="submit"
+                ref="submitButton"
                 color="primary"
+                :disabled=!valid
                 @click.prevent="openCurrencyDialog"
               >
                 Submit
@@ -211,6 +213,7 @@
               <!-- INPUT: Discard -->
               <v-btn
                 color="secondary"
+                ref="discardButton"
                 class="ml-2"
                 @click="discardButton"
               > Discard

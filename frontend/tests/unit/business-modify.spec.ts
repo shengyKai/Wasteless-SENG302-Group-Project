@@ -307,13 +307,19 @@ describe('modifyBusiness.vue', () => {
     expect(wrapper.vm.valid).toBeTruthy();
   });
 
-  it('Invalid if the new street address is empty', async () => {
-    await populateRequiredFields();
-    await wrapper.setData({
-      streetAddress: ''
-    });
+  it.only('Invalid if the new street address is empty', async () => {
+    const submitButton = wrapper.findComponent({ref: 'submitButton'});
+    console.log(submitButton.exists);
+
+    await populateRequiredFields(); // do nothing the implementation was wrong
+
+    console.log(wrapper.vm.business.address.streetAddress)
+    await wrapper.setData({streetAddress: ""});
+    console.log(wrapper.vm.business.address.streetAddress)
+
     await Vue.nextTick();
     expect(wrapper.vm.valid).toBeFalsy();
+    expect(submitButton.props().disabled).toBeTruthy();
   });
 
   it('Valid if the new district is empty', async () => {
