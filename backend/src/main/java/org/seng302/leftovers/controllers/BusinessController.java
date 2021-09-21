@@ -22,7 +22,6 @@ import org.seng302.leftovers.persistence.ImageRepository;
 import org.seng302.leftovers.persistence.UserRepository;
 import org.seng302.leftovers.service.ImageService;
 import org.seng302.leftovers.tools.AuthenticationTokenManager;
-import org.seng302.leftovers.tools.JsonTools;
 import org.seng302.leftovers.service.searchservice.SearchPageConstructor;
 import org.seng302.leftovers.service.searchservice.SearchQueryParser;
 import org.seng302.leftovers.service.searchservice.SearchSpecConstructor;

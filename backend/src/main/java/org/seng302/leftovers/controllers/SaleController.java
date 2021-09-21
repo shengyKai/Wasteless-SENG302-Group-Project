@@ -5,7 +5,8 @@ import lombok.Getter;
 import lombok.ToString;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.seng302.leftovers.dto.SaleListingSearchDTO;
+import org.seng302.leftovers.dto.business.BusinessType;
+import org.seng302.leftovers.dto.saleitem.SaleListingSearchDTO;
 import org.seng302.leftovers.dto.ResultPageDTO;
 import org.seng302.leftovers.dto.saleitem.CreateSaleItemDTO;
 import org.seng302.leftovers.dto.saleitem.SaleItemResponseDTO;
@@ -27,6 +28,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
@@ -37,6 +39,7 @@ import javax.validation.constraints.NotNull;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
@@ -65,9 +68,6 @@ public class SaleController {
         this.eventRepository = eventRepository;
     }
 
-    private static final Set<String> VALID_SEARCH_ORDERINGS = Set.of("created", "closing", "productName", "quantity", "price", "businessName", "businessLocation");
-    private static final Set<String> VALID_BUSINESS_TYPES = Set.of("Accommodation and Food Services", "Retail Trade", "Charitable organisation", "Non-profit organisation");
-
     /**
      * Returns the ordering term for the Sort object for sorting Sale Items
      *
@@ -88,7 +88,7 @@ public class SaleController {
                 break;
             default:
                 logger.error("Invalid sale item ordering given: {}", orderBy);
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The provided ordering is invalid");
+                throw new ValidationResponseException("The provided ordering is invalid");
         }
         return new Sort.Order(direction, orderBy).ignoreCase();
     }
@@ -107,10 +107,10 @@ public class SaleController {
      * Parse search order term into proper access of term to sort by
      * @param orderBy term to order results by in sale search
      * @param direction Sort.Order value for Ascending or descending
-     * @return
+     * @return list of Sort.Order
      */
     private List<Sort.Order> getSaleItemSearchOrder(String orderBy, Sort.Direction direction) {
-        if (orderBy == null) orderBy = "created";
+        if (orderBy == null || orderBy.isEmpty()) orderBy = "created";
         switch (orderBy) {
             case "created": case "quantity": case "price":
                 return List.of(new Sort.Order(direction, orderBy).ignoreCase());
@@ -124,7 +124,7 @@ public class SaleController {
                 return List.of(new Sort.Order(direction, "inventoryItem.product.business.address.country"), new Sort.Order(direction, "inventoryItem.product.business.address.city"));
             default:
                 logger.error("Invalid sale item ordering given: {}", orderBy);
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The provided ordering is invalid");
+                throw new ValidationResponseException("The provided ordering is invalid");
         }
     }
 
@@ -171,7 +171,7 @@ public class SaleController {
      * @return List of sale items the business is listing
      */
     @GetMapping("/businesses/{id}/listings")
-    public ResultPageDTO<SaleItemDTO> getSaleItemsForBusiness(@PathVariable Long id,
+    public ResultPageDTO<SaleItemResponseDTO> getSaleItemsForBusiness(@PathVariable Long id,
                                                                       HttpServletRequest request,
                                                                       @RequestParam(required = false) String orderBy,
                                                                       @RequestParam(required = false) Integer page,
@@ -190,13 +190,14 @@ public class SaleController {
             Specification<SaleItem> specification = SearchSpecConstructor.constructSpecificationFromSaleItemsFilter(business);
             Page<SaleItem> result = saleItemRepository.findAll(specification, pageRequest);
 
-            return new ResultPageDTO<>(result.map(SaleItemDTO::new));
+            return new ResultPageDTO<>(result.map(SaleItemResponseDTO::new));
 
         } catch (Exception error) {
             logger.error(error.getMessage());
             throw error;
         }
     }
+
 
     /**
      * REST GET method to return sale items that match search criteria
@@ -216,7 +217,7 @@ public class SaleController {
      * @return JSON page of sale items
      */
     @GetMapping("/businesses/listings/search")
-    public ResultPageDTO<SaleItemDTO> searchSaleItems(HttpServletRequest request,
+    public ResultPageDTO<SaleItemResponseDTO> searchSaleItems(HttpServletRequest request,
                                                       @RequestParam(required = false) String basicSearchQuery,
                                                       @RequestParam(required = false) String productSearchQuery,
                                                       @RequestParam(required = false) String businessSearchQuery,
@@ -236,20 +237,15 @@ public class SaleController {
             AuthenticationTokenManager.checkAuthenticationToken(request);
 
             // Check sort ordering
-            if (orderBy == null || orderBy.isEmpty()) {
-                orderBy = "productName";
-            }
             Sort.Direction direction = SearchQueryParser.getSortDirection(reverse);
             List<Sort.Order> sortOrder = getSaleItemSearchOrder(orderBy, direction);
 
             // Check filter options
-            if (businessTypes != null) {
-                for (String businessType : businessTypes) {
-                    if (!VALID_BUSINESS_TYPES.contains(businessType)) {
-                        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "BusinessType term " + businessType + " is invalid");
-                    }
-                }
+            List<BusinessType> types = null;
+            if (businessTypes != null && !businessTypes.isEmpty()) {
+                types = stringToBusinessType(businessTypes);
             }
+
             BigDecimal minPrice = null;
             BigDecimal maxPrice = null;
             if (priceLower != null && !priceLower.isEmpty()) minPrice = new BigDecimal(priceLower);
@@ -265,19 +261,47 @@ public class SaleController {
             PageRequest pageablePage = SearchPageConstructor.getPageRequest(page, resultsPerPage, Sort.by(sortOrder));
             Specification<SaleItem> specification = Specification.where(
                     SearchSpecConstructor.constructSaleItemSpecificationFromSearchQueries(basicSearchQuery, productSearchQuery, businessSearchQuery, locationSearchQuery))
-                            .and(SearchSpecConstructor.constructSaleListingSpecificationForSearch(new SaleListingSearchDTO(minPrice, maxPrice, minDate, maxDate, businessTypes)));
+                            .and(SearchSpecConstructor.constructSaleListingSpecificationForSearch(new SaleListingSearchDTO(minPrice, maxPrice, minDate, maxDate, types)));
             Page<SaleItem> result = saleItemRepository.findAll(specification, pageablePage);
 
-            return new ResultPageDTO<>(result.map(SaleItemDTO::new));
+            return new ResultPageDTO<>(result.map(SaleItemResponseDTO::new));
 
         } catch (DateTimeParseException badDate) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Close date parameters were not in date format");
+            throw new ValidationResponseException("Close date parameters were not in date format");
         } catch (NumberFormatException badPrice) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Price parameters were not valid numbers");
+            throw new ValidationResponseException("Price parameters were not valid numbers");
         } catch (Exception error) {
             logger.error(error.getMessage());
             throw error;
         }
+    }
+
+    /**
+     * Turns list of strings into BusinessType DTOs
+     * @param businessTypes String of business types
+     * @return List of BusinessType DTOs
+     */
+    private List<BusinessType> stringToBusinessType(List<String> businessTypes) {
+        List<BusinessType> types = new ArrayList<>();
+        for (String type : businessTypes) {
+            switch(type) {
+                case "Accommodation and Food Services":
+                    types.add(BusinessType.ACCOMMODATION_AND_FOOD_SERVICES);
+                    break;
+                case "Retail Trade":
+                    types.add(BusinessType.RETAIL_TRADE);
+                    break;
+                case "Charitable organisation":
+                    types.add(BusinessType.CHARITABLE);
+                    break;
+                case "Non-profit organisation":
+                    types.add(BusinessType.NON_PROFIT);
+                    break;
+                default:
+                    throw new ValidationResponseException("BusinessType term " + type + " is invalid");
+            }
+        }
+        return types;
     }
 
     /**

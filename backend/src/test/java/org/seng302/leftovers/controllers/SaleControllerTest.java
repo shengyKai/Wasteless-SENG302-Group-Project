@@ -721,7 +721,7 @@ class SaleControllerTest {
     @Test
     void saleSearch_notLoggedIn_401() throws Exception {
         authenticationTokenManager.when(() -> AuthenticationTokenManager.checkAuthenticationToken(any()))
-                .thenThrow(new AccessTokenException());
+                .thenThrow(new AccessTokenResponseException());
 
         mockMvc.perform(get("/businesses/listings/search"))
                 .andExpect(status().isUnauthorized());

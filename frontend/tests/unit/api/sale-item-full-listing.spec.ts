@@ -3,10 +3,9 @@ import Vuetify from 'vuetify';
 import { createLocalVue, mount, Wrapper } from '@vue/test-utils';
 import FullSaleListing from "@/components/SaleListing/FullSaleListing.vue";
 import Vuex, { Store } from 'vuex';
-import * as api from '@/api/internal';
-import { User } from '@/api/internal';
+import { User } from '@/api/internal-user';
 import { getStore, resetStoreForTesting, StoreData } from '@/store';
-import {createSaleItem} from '@/api/internal';
+import { getListingInterest, setListingInterest } from '@/api/internal-sale';
 import { castMock } from '../utils';
 
 Vue.use(Vuetify);
@@ -28,13 +27,13 @@ jest.mock('@/api/currency', () => ({
   })
 }));
 
-jest.mock('@/api/internal', () => ({
+jest.mock('@/api/internal-sale', () => ({
   getListingInterest: jest.fn(),
   setListingInterest: jest.fn(),
 }));
 
-const getListingInterest = castMock(api.getListingInterest);
-const setListingInterest = castMock(api.getListingInterest);
+const listingInterestGet = castMock(getListingInterest);
+const listingInterestSet = castMock(setListingInterest);
 
 describe('FullSaleListing.vue', () => {
   let wrapper: Wrapper<any>;
@@ -98,7 +97,6 @@ describe('FullSaleListing.vue', () => {
   });
 
   it("Must contain the product name and quantity", () => {
-    console.log(wrapper.text());
     expect(wrapper.text()).toContain("Watties Baked Beans - 420g can");
   });
 
@@ -149,8 +147,8 @@ describe('FullSaleListing.vue', () => {
     expect(likeButton.exists()).toBeTruthy;
     await likeButton.trigger('click');
     await Vue.nextTick();
-    expect(setListingInterest).toBeCalled();
-    expect(getListingInterest).toBeCalled();
+    expect(listingInterestGet).toBeCalled();
+    expect(listingInterestSet).toBeCalled();
   });
 
 });

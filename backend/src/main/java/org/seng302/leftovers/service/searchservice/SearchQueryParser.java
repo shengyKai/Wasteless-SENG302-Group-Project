@@ -4,7 +4,7 @@ import lombok.Data;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.seng302.leftovers.entities.User;
-import org.seng302.leftovers.exceptions.SearchFormatException;
+import org.seng302.leftovers.exceptions.ValidationResponseException;
 import org.seng302.leftovers.persistence.UserRepository;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
@@ -90,7 +90,7 @@ public class SearchQueryParser {
         }
 
         if (searchSpecs.isEmpty()) {
-            SearchFormatException searchFormatException = new SearchFormatException("No valid search terms in query.");
+            ValidationResponseException searchFormatException = new ValidationResponseException("No valid search terms in query.");
             logger.error(searchFormatException.getMessage());
             throw(searchFormatException);
         }
@@ -121,7 +121,7 @@ public class SearchQueryParser {
      */
     static List<String> splitSearchStringIntoTerms(String searchString) {
         if (searchString.isBlank()) {
-            SearchFormatException searchFormatException = new SearchFormatException("Search query cannot be blank.");
+            ValidationResponseException searchFormatException = new ValidationResponseException("Search query cannot be blank.");
             logger.error(searchFormatException.getMessage());
             throw(searchFormatException);
         }
@@ -178,7 +178,7 @@ public class SearchQueryParser {
                 termEndingIndex++;
             }
             if (!foundClosingQuote) {
-                SearchFormatException searchFormatException = new SearchFormatException("Search string contains opening quote but " +
+                ValidationResponseException searchFormatException = new ValidationResponseException("Search string contains opening quote but " +
                         "no closing quote.");
                 logger.error(searchFormatException.getMessage());
                 throw(searchFormatException);

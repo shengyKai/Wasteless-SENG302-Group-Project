@@ -13,7 +13,6 @@ import org.seng302.leftovers.exceptions.ValidationResponseException;
 import org.seng302.leftovers.persistence.BusinessRepository;
 import org.seng302.leftovers.persistence.InventoryItemRepository;
 import org.seng302.leftovers.persistence.ProductRepository;
-import org.seng302.leftovers.tools.JsonTools;
 import org.seng302.leftovers.service.searchservice.SearchPageConstructor;
 import org.seng302.leftovers.service.searchservice.SearchQueryParser;
 import org.seng302.leftovers.service.searchservice.SearchSpecConstructor;

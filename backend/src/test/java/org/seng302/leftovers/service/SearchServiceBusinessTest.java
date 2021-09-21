@@ -231,11 +231,6 @@ class SearchServiceBusinessTest {
     }
 
     @Test
-    void constructSpecificationFromBusinessSearch_invalidBusinessTypeProvided_exceptionThrown() {
-        assertThrows(ValidationResponseException.class, () -> SearchSpecConstructor.constructSpecificationFromBusinessSearch(null, "Foo"));
-    }
-
-    @Test
     void constructSpecificationFromBusinessSearch_queryAndTypeNotProvided_exceptionThrown() {
         assertThrows(ValidationResponseException.class, () -> SearchSpecConstructor.constructSpecificationFromBusinessSearch(null, null));
     }

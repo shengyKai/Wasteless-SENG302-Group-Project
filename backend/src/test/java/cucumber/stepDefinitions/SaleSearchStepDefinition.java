@@ -170,7 +170,7 @@ public class SaleSearchStepDefinition {
         this.productSearch = "";
         this.businessSearch = "";
         this.locationSearch = "";
-        this.businessTypes = "";
+        this.businessTypes = null;
         this.priceLower = "";
         this.priceUpper = "";
         this.closeLower = "";

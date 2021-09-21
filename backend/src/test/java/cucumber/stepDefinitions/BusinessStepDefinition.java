@@ -19,6 +19,7 @@ import org.junit.Assert;
 import org.seng302.datagenerator.ExampleDataFileReader;
 import org.seng302.leftovers.dto.business.BusinessType;
 import org.seng302.leftovers.entities.*;
+import org.seng302.leftovers.exceptions.ValidationResponseException;
 import org.seng302.leftovers.persistence.BusinessRepository;
 import org.seng302.leftovers.persistence.ImageRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -342,10 +343,30 @@ public class BusinessStepDefinition {
         var business = new Business.Builder()
                 .withName(name)
                 .withDescription("Sells stuff")
-                .withBusinessType(type)
+                .withBusinessType(stringToBusinessType(type))
                 .withAddress(Location.covertAddressStringToLocation(location))
                 .withPrimaryOwner(userContext.getLast())
                 .build();
         businessContext.save(business);
+    }
+
+    /**
+     * Converts businessType into DTO form
+     * @param type string
+     * @return type DTO
+     */
+    private BusinessType stringToBusinessType(String type) {
+        switch(type) {
+            case "Accommodation and Food Services":
+                return BusinessType.ACCOMMODATION_AND_FOOD_SERVICES;
+            case "Retail Trade":
+                return BusinessType.RETAIL_TRADE;
+            case "Charitable organisation":
+                return BusinessType.CHARITABLE;
+            case "Non-profit organisation":
+                return BusinessType.NON_PROFIT;
+            default:
+                throw new ValidationResponseException("BusinessType term " + type + " is invalid");
+        }
     }
 }

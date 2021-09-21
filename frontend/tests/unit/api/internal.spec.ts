@@ -7,12 +7,12 @@ import { is, Reason } from 'typescript-is';
 import {CreateUser, login, createUser} from "@/api/internal-user";
 import {CreateProduct, Product, createProduct, uploadProductImage, getProducts, modifyProduct} from "@/api/internal-product";
 import {InventoryItem} from "@/api/internal-inventory";
-import {Sale, getBusinessSales, setListingInterest} from "@/api/internal-sale";
+import {Sale, getBusinessSales, setListingInterest, getListingInterest } from "@/api/internal-sale";
 import {Message, getMessagesInConversation} from "@/api/internal-event";
 
 const api = {
   login, createUser, createProduct, uploadProductImage, getProducts, modifyProduct,
-  getBusinessSales, getMessagesInConversation, setListingInterest
+  getBusinessSales, getMessagesInConversation, setListingInterest, getListingInterest
 };
 
 jest.mock('axios', () => ({
@@ -324,7 +324,7 @@ const apiCalls: Partial<ApiCalls> = {
     usesServerMessage: true,
   },
   setListingInterest: {
-    parameters: [7, 3, false],
+    parameters: [7, {userId: 3, interested: false}],
     httpMethod: 'put',
     url: '/listings/7/interest',
     body: {
