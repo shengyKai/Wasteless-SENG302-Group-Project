@@ -265,7 +265,7 @@ public class SearchHelper {
      */
     private static Specification<Business> constructBusinessSpecificationFromSearchQuery(String searchQuery) {
         List<String> searchTokens = splitSearchStringIntoTerms(searchQuery);
-        List<String> fieldNames = Collections.singletonList("name");
+        List<String> fieldNames = Arrays.asList("name", "address.country", "address.city", "address.country", "address.region");
 
         SearchQuery<Business> searchSpecs = parseSearchTokens(searchTokens, fieldNames);
         return buildCompoundSpecification(searchSpecs);

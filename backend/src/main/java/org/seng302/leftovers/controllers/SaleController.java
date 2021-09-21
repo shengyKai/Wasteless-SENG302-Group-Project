@@ -11,10 +11,12 @@ import org.seng302.leftovers.dto.saleitem.SaleItemResponseDTO;
 import org.seng302.leftovers.dto.saleitem.SetSaleItemInterestDTO;
 import org.seng302.leftovers.entities.*;
 import org.seng302.leftovers.entities.event.InterestEvent;
+import org.seng302.leftovers.entities.event.PurchasedEvent;
 import org.seng302.leftovers.exceptions.DoesNotExistResponseException;
 import org.seng302.leftovers.exceptions.InsufficientPermissionResponseException;
 import org.seng302.leftovers.exceptions.ValidationResponseException;
 import org.seng302.leftovers.persistence.*;
+import org.seng302.leftovers.persistence.event.EventRepository;
 import org.seng302.leftovers.persistence.event.InterestEventRepository;
 import org.seng302.leftovers.tools.AuthenticationTokenManager;
 import org.seng302.leftovers.tools.SearchHelper;
@@ -41,16 +43,19 @@ public class SaleController {
     private final InventoryItemRepository inventoryItemRepository;
     private final InterestEventRepository interestEventRepository;
     private final BoughtSaleItemRepository boughtSaleItemRepository;
+    private final EventRepository eventRepository;
 
     public SaleController(UserRepository userRepository, BusinessRepository businessRepository,
                           SaleItemRepository saleItemRepository, InventoryItemRepository inventoryItemRepository,
-                          InterestEventRepository interestEventRepository, BoughtSaleItemRepository boughtSaleItemRepository) {
+                          InterestEventRepository interestEventRepository, BoughtSaleItemRepository boughtSaleItemRepository,
+                          EventRepository eventRepository) {
         this.userRepository = userRepository;
         this.businessRepository = businessRepository;
         this.saleItemRepository = saleItemRepository;
         this.inventoryItemRepository = inventoryItemRepository;
         this.interestEventRepository = interestEventRepository;
         this.boughtSaleItemRepository = boughtSaleItemRepository;
+        this.eventRepository = eventRepository;
     }
 
     private static final Set<String> VALID_ORDERINGS = Set.of("created", "closing", "productCode", "productName", "quantity", "price");
@@ -248,6 +253,9 @@ public class SaleController {
             var inventoryItem = saleItem.getInventoryItem();
             inventoryItem.sellQuantity(saleItem.getQuantity());
             inventoryItemRepository.save(inventoryItem);
+
+            PurchasedEvent purchasedEvent = new PurchasedEvent(purchaser, boughtSaleItem);
+            eventRepository.save(purchasedEvent);
 
             saleItemRepository.delete(saleItem);
 
