@@ -1,25 +1,22 @@
 package org.seng302.leftovers.entities.event;
 
-import org.hibernate.annotations.UpdateTimestamp;
 import org.seng302.leftovers.dto.event.EventDTO;
 import org.seng302.leftovers.dto.event.EventStatus;
 import org.seng302.leftovers.dto.event.EventTag;
 import org.seng302.leftovers.entities.User;
-import org.springframework.http.HttpStatus;
-import org.springframework.web.server.ResponseStatusException;
+import org.seng302.leftovers.exceptions.ValidationResponseException;
 
 import javax.persistence.*;
 import java.time.Instant;
-import java.time.LocalDateTime;
 
 /**
  * Abstract event entity for some component that will appear on a user's newsfeed
  */
 @Entity
-@Inheritance(strategy = InheritanceType.JOINED)
+@Inheritance(strategy = InheritanceType.TABLE_PER_CLASS)
 public abstract class Event {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
     @Column(nullable = false)
@@ -83,7 +80,7 @@ public abstract class Event {
      */
     public void setTag(EventTag eventTag) {
         if (eventTag == null) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Tag cannot be null");
+            throw new ValidationResponseException("Tag cannot be null");
         }
         this.eventTag = eventTag;
     }

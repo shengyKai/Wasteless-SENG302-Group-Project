@@ -13,11 +13,10 @@ import org.mockito.*;
 import org.mockito.internal.matchers.apachecommons.ReflectionEquals;
 import org.seng302.leftovers.entities.*;
 import org.seng302.leftovers.entities.event.InterestEvent;
-import org.seng302.leftovers.exceptions.AccessTokenException;
-import org.seng302.leftovers.persistence.BusinessRepository;
-import org.seng302.leftovers.persistence.InventoryItemRepository;
-import org.seng302.leftovers.persistence.SaleItemRepository;
-import org.seng302.leftovers.persistence.UserRepository;
+import org.seng302.leftovers.entities.event.PurchasedEvent;
+import org.seng302.leftovers.exceptions.AccessTokenResponseException;
+import org.seng302.leftovers.persistence.*;
+import org.seng302.leftovers.persistence.event.EventRepository;
 import org.seng302.leftovers.persistence.event.InterestEventRepository;
 import org.seng302.leftovers.tools.AuthenticationTokenManager;
 import org.seng302.leftovers.service.searchservice.SearchPageConstructor;
@@ -67,6 +66,10 @@ class SaleControllerTest {
     @Mock
     private InterestEventRepository interestEventRepository;
     @Mock
+    private BoughtSaleItemRepository boughtSaleItemRepository;
+    @Mock
+    private EventRepository eventRepository;
+    @Mock
     private Business business;
     @Mock
     private User user;
@@ -74,6 +77,10 @@ class SaleControllerTest {
     private InventoryItem inventoryItem;
     @Mock
     private SaleItem saleItem;
+    @Mock
+    private User businessPrimaryOwner;
+    @Mock
+    private Location businessAddress;
 
     private MockedStatic<AuthenticationTokenManager> authenticationTokenManager;
 
@@ -97,6 +104,8 @@ class SaleControllerTest {
 
         // Setup mock business
         when(business.getId()).thenReturn(1L);
+        when(business.getAddress()).thenReturn(businessAddress);
+        when(business.getPrimaryOwner()).thenReturn(businessPrimaryOwner);
 
         when(businessRepository.getBusinessById(1L)).thenReturn(business);
         when(businessRepository.getBusinessById(not(eq(1L)))).thenThrow(new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE));
@@ -106,9 +115,11 @@ class SaleControllerTest {
         when(inventoryItem.getExpires()).thenReturn(LocalDate.now());
         when(inventoryItem.getBusiness()).thenReturn(business);
 
-        when(inventoryItemRepository.getInventoryItemByBusinessAndId(any(Business.class), anyLong())).thenCallRealMethod();
+        when(inventoryItemRepository.findInventoryItemByBusinessAndId(any(Business.class), anyLong())).thenCallRealMethod();
         when(inventoryItemRepository.findById(2L)).thenReturn(Optional.of(inventoryItem));
         when(inventoryItemRepository.findById(not(eq(2L)))).thenReturn(Optional.empty());
+
+        when(saleItem.getInventoryItem()).thenReturn(inventoryItem);
 
         // Setup mock sale item repository
         when(saleItemRepository.save(any(SaleItem.class))).thenAnswer(x -> x.getArgument(0));
@@ -122,7 +133,8 @@ class SaleControllerTest {
         when(userRepository.findById(4L)).thenReturn(Optional.of(user));
         when(userRepository.findById(not(eq(4L)))).thenReturn(Optional.empty());
 
-        saleController = spy(new SaleController(userRepository, businessRepository, saleItemRepository, inventoryItemRepository, interestEventRepository));
+        saleController = spy(new SaleController(userRepository, businessRepository, saleItemRepository,
+                inventoryItemRepository, interestEventRepository, boughtSaleItemRepository, eventRepository));
         mockMvc = MockMvcBuilders.standaloneSetup(saleController).build();
     }
 
@@ -145,7 +157,7 @@ class SaleControllerTest {
     void addSaleItemToBusiness_noAuthToken_401Response() throws Exception {
         // Mock the AuthenticationTokenManager to respond as it would when the authentication token is missing or invalid
         authenticationTokenManager.when(() -> AuthenticationTokenManager.checkAuthenticationToken(any()))
-                    .thenThrow(new AccessTokenException());
+                    .thenThrow(new AccessTokenResponseException());
 
         // Verify that a 401 response is received in response to the POST request
         mockMvc.perform(post("/businesses/1/listings")
@@ -320,7 +332,7 @@ class SaleControllerTest {
     void getSaleItemsForBusiness_noAuthToken_401Response() throws Exception {
         // Mock the AuthenticationTokenManager to respond as it would when the authentication token is missing or invalid
         authenticationTokenManager.when(() -> AuthenticationTokenManager.checkAuthenticationToken(any()))
-                .thenThrow(new AccessTokenException());
+                .thenThrow(new AccessTokenResponseException());
 
         // Verify that a 401 response is received in response to the GET request
         mockMvc.perform(get("/businesses/1/listings"))
@@ -396,6 +408,7 @@ class SaleControllerTest {
             var inventoryItem = mock(InventoryItem.class);
             when(saleItem.getInventoryItem()).thenReturn(inventoryItem);
             when(inventoryItem.getProduct()).thenReturn(product);
+            when(product.getBusiness()).thenReturn(business);
             mockItems.add(saleItem);
         }
         // Ensure determinism
@@ -508,7 +521,7 @@ class SaleControllerTest {
     void setSaleItemInterest_notLoggedIn_401Response() throws Exception {
         // Mock the AuthenticationTokenManager to respond as it would when the authentication token is missing or invalid
         authenticationTokenManager.when(() -> AuthenticationTokenManager.checkAuthenticationToken(any()))
-                .thenThrow(new AccessTokenException());
+                .thenThrow(new AccessTokenResponseException());
 
         // Verify that a 401 response is received in response to the PUT request
         mockMvc.perform(put("/listings/1/interest")
@@ -713,4 +726,309 @@ class SaleControllerTest {
         mockMvc.perform(get("/businesses/listings/search"))
                 .andExpect(status().isUnauthorized());
     }
+
+    @Test
+    void getSaleItemsInterest_invalidUser_400Response() throws Exception {
+        authenticationTokenManager.when(() -> AuthenticationTokenManager.sessionCanSeePrivate(any(), any())).thenReturn(true);
+        MvcResult result = mockMvc.perform(get(String.format("/listings/%s/interest", saleItem.getId()))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .param("userId", "999"))
+                .andExpect(status().isBadRequest())
+                .andReturn();
+    }
+
+    @Test
+    void getSaleItemsInterest_invalidRequest_400Response() throws Exception {
+        authenticationTokenManager.when(() -> AuthenticationTokenManager.sessionCanSeePrivate(any(), any())).thenReturn(true);
+
+        // Verify that a 400 response is received in response to the PUT request
+        MvcResult result = mockMvc.perform(get(String.format("/listings/%s/interest", saleItem.getId()))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .param("userId", "user.name: Edward"))
+                        .andExpect(status().isBadRequest())
+                        .andReturn();
+    }
+
+    @Test
+    void getSaleItemsInterest_noAuthToken_401Response() throws Exception {
+        // Mock the AuthenticationTokenManager to respond as it would when the authentication token is missing or invalid
+        authenticationTokenManager.when(() -> AuthenticationTokenManager.checkAuthenticationToken(any()))
+                .thenThrow(new AccessTokenResponseException());
+
+        // Verify that a 401 response is received in response to the GET request
+        mockMvc.perform(get(String.format("/listings/%s/interest", saleItem.getId()))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .param("userId", "4"))
+                .andExpect(status().isUnauthorized())
+                .andReturn();
+        // Check that the authentication token manager was called
+        authenticationTokenManager.verify(() -> AuthenticationTokenManager.checkAuthenticationToken(any()));
+    }
+
+    @Test
+    void getSaleItemsInterest_userCannotUpdateInterest_403Response() throws Exception {
+        authenticationTokenManager.when(() -> AuthenticationTokenManager.sessionCanSeePrivate(any(), any())).thenReturn(false);
+
+        // Verify that a 403 response is received in response to the GET request
+        mockMvc.perform(get(String.format("/listings/%s/interest", saleItem.getId()))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .param("userId", "4"))
+                        .andExpect(status().isForbidden())
+                        .andReturn();
+
+        authenticationTokenManager.verify(() -> AuthenticationTokenManager.sessionCanSeePrivate(any(), eq(4L)));
+    }
+
+    @Test
+    void getSaleItemsInterest_invalidListing_406Response() throws Exception {
+        authenticationTokenManager.when(() -> AuthenticationTokenManager.sessionCanSeePrivate(any(), any())).thenReturn(true);
+            mockMvc.perform(get(String.format("/listings/999/interest"))
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .param("userId", "4"))
+                            .andExpect(status().isNotAcceptable())
+                            .andReturn();
+    }
+
+    @Test
+    void getSaleItemsInterest_validListing_200Response() throws Exception {
+        authenticationTokenManager.when(() -> AuthenticationTokenManager.sessionCanSeePrivate(any(), any())).thenReturn(true);
+        mockMvc.perform(get(String.format("/listings/%s/interest", saleItem.getId()))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .param("userId", "4"))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        verify(saleItemRepository, times(1)).findById(saleItem.getId());
+    }
+
+    @Test
+    void getSaleItemsInterest_validListingAndLiked_returnTrue() throws Exception {
+        when(saleItem.getInterestedUsers()).thenReturn(Set.of(user));
+        authenticationTokenManager.when(() -> AuthenticationTokenManager.sessionCanSeePrivate(any(), any())).thenReturn(true);
+        MvcResult result = mockMvc.perform(get(String.format("/listings/%s/interest", saleItem.getId()))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .param("userId", "4"))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        verify(saleItemRepository, times(1)).findById(saleItem.getId());
+
+        JSONParser parser = new JSONParser(JSONParser.MODE_PERMISSIVE);
+        Object response = parser.parse(result.getResponse().getContentAsString());
+
+        JSONObject expected = new JSONObject();
+        expected.appendField("isInterested", true);
+        assertEquals(expected, response);
+    }
+
+    @Test
+    void getSaleItemsInterest_validListingAndNotLiked_returnsFalse() throws Exception {
+        when(saleItem.getInterestedUsers()).thenReturn(Set.of());
+        authenticationTokenManager.when(() -> AuthenticationTokenManager.sessionCanSeePrivate(any(), any())).thenReturn(true);
+        MvcResult result = mockMvc.perform(get(String.format("/listings/%s/interest", saleItem.getId()))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .param("userId", "4"))
+                        .andExpect(status().isOk())
+                        .andReturn();
+
+        verify(saleItemRepository, times(1)).findById(saleItem.getId());
+
+        JSONParser parser = new JSONParser(JSONParser.MODE_PERMISSIVE);
+        Object response = parser.parse(result.getResponse().getContentAsString());
+
+        JSONObject expected = new JSONObject();
+        expected.appendField("isInterested", false);
+        assertEquals(expected, response);
+    }
+
+
+    @Test
+    void purchaseSaleItem_invalidRequestBodyFormat_400Response() throws Exception {
+        JSONObject invalidBody = new JSONObject();
+        invalidBody.put("id", 33);
+
+        mockMvc.perform(post(String.format("/listings/%d/purchase", saleItem.getId()))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(invalidBody.toString()))
+                .andExpect(status().isBadRequest());
+
+        // Sale item should not be deleted if request is not successful
+        verify(saleItemRepository, times(0)).delete(any());
+
+        // Record of purchase should not be created if request is not successful
+        verify(boughtSaleItemRepository, times(0)).save(any());
+
+        // Inventory item should not be updated if request is not successful
+        verify(inventoryItemRepository, times(0)).save(any());
+    }
+
+    @Test
+    void purchaseSaleItem_invalidAuthenticationToken_401Response() throws Exception {
+        // Mock the AuthenticationTokenManager to respond as it would when the authentication token is missing or invalid
+        authenticationTokenManager.when(() -> AuthenticationTokenManager.checkAuthenticationToken(any()))
+                .thenThrow(new AccessTokenResponseException());
+
+        JSONObject validBody = new JSONObject();
+        validBody.put("purchaserId", user.getUserID());
+
+        mockMvc.perform(post(String.format("/listings/%d/purchase", saleItem.getId()))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(validBody.toString()))
+                .andExpect(status().isUnauthorized());
+
+        // Sale item should not be deleted if request is not successful
+        verify(saleItemRepository, times(0)).delete(any());
+
+        // Record of purchase should not be created if request is not successful
+        verify(boughtSaleItemRepository, times(0)).save(any());
+
+        // Inventory item should not be updated if request is not successful
+        verify(inventoryItemRepository, times(0)).save(any());
+    }
+
+    @Test
+    void purchaseSaleItem_userDoesNotHavePermissionForPurchase_403Response() throws Exception {
+        // Mock the AuthenticationTokenManager to respond as it would when a user tries to purchase a sale item on behalf of another user
+        authenticationTokenManager.when(() -> AuthenticationTokenManager.sessionCanSeePrivate(any(), any())).thenReturn(false);
+
+        JSONObject validBody = new JSONObject();
+        validBody.put("purchaserId", user.getUserID());
+
+        mockMvc.perform(post(String.format("/listings/%d/purchase", saleItem.getId()))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(validBody.toString()))
+                .andExpect(status().isForbidden());
+
+        // Sale item should not be deleted if request is not successful
+        verify(saleItemRepository, times(0)).delete(any());
+
+        // Record of purchase should not be created if request is not successful
+        verify(boughtSaleItemRepository, times(0)).save(any());
+
+        // Inventory item should not be updated if request is not successful
+        verify(inventoryItemRepository, times(0)).save(any());
+    }
+
+    @Test
+    void purchaseSaleItem_saleItemDoesNotExist_406Response() throws Exception {
+        authenticationTokenManager.when(() -> AuthenticationTokenManager.sessionCanSeePrivate(any(), any())).thenReturn(true);
+        when(saleItemRepository.findById(saleItem.getId())).thenReturn(Optional.empty());
+
+        JSONObject validBody = new JSONObject();
+        validBody.put("purchaserId", user.getUserID());
+
+        mockMvc.perform(post(String.format("/listings/%d/purchase", saleItem.getId()))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(validBody.toString()))
+                .andExpect(status().isNotAcceptable());
+
+        // Sale item should not be deleted if request is not successful
+        verify(saleItemRepository, times(0)).delete(any());
+
+        // Record of purchase should not be created if request is not successful
+        verify(boughtSaleItemRepository, times(0)).save(any());
+
+        // Inventory item should not be updated if request is not successful
+        verify(inventoryItemRepository, times(0)).save(any());
+    }
+
+    @Test
+    void purchaseSaleItem_userDoesNotExist_406Response() throws Exception {
+        authenticationTokenManager.when(() -> AuthenticationTokenManager.sessionCanSeePrivate(any(), any())).thenReturn(true);
+        when(userRepository.findById(user.getUserID())).thenReturn(Optional.empty());
+
+        JSONObject validBody = new JSONObject();
+        validBody.put("purchaserId", user.getUserID());
+
+        mockMvc.perform(post(String.format("/listings/%d/purchase", saleItem.getId()))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(validBody.toString()))
+                .andExpect(status().isNotAcceptable());
+
+        // Sale item should not be deleted if request is not successful
+        verify(saleItemRepository, times(0)).delete(any());
+
+        // Record of purchase should not be created if request is not successful
+        verify(boughtSaleItemRepository, times(0)).save(any());
+
+        // Inventory item should not be updated if request is not successful
+        verify(inventoryItemRepository, times(0)).save(any());
+    }
+
+    @Test
+    void purchaseSaleItem_validRequest_200Response() throws Exception {
+        authenticationTokenManager.when(() -> AuthenticationTokenManager.sessionCanSeePrivate(any(), any())).thenReturn(true);
+
+        JSONObject validBody = new JSONObject();
+        validBody.put("purchaserId", user.getUserID());
+
+        mockMvc.perform(post(String.format("/listings/%d/purchase", saleItem.getId()))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(validBody.toString()))
+                .andExpect(status().isOk());
+
+        // Sale item should be deleted if request is successful
+        verify(saleItemRepository, times(1)).delete(saleItem);
+    }
+
+    @Test
+    void purchaseSaleItem_validRequest_purchaseRecordCreated() throws Exception {
+        authenticationTokenManager.when(() -> AuthenticationTokenManager.sessionCanSeePrivate(any(), any())).thenReturn(true);
+
+        var product = Mockito.mock(Product.class);
+        when(saleItem.getProduct()).thenReturn(product);
+
+        JSONObject validBody = new JSONObject();
+        validBody.put("purchaserId", user.getUserID());
+
+        mockMvc.perform(post(String.format("/listings/%d/purchase", saleItem.getId()))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(validBody.toString()))
+                .andExpect(status().isOk());
+
+        // Record of purchase should be created if request is successful
+        var boughtSaleItemCaptor = ArgumentCaptor.forClass(BoughtSaleItem.class);
+        verify(boughtSaleItemRepository, times(1)).save(boughtSaleItemCaptor.capture());
+        assertEquals(user, boughtSaleItemCaptor.getValue().getBuyer());
+        assertEquals(product, boughtSaleItemCaptor.getValue().getProduct());
+    }
+
+    @Test
+    void purchaseSaleItem_validRequest_invItemUpdated() throws Exception {
+        authenticationTokenManager.when(() -> AuthenticationTokenManager.sessionCanSeePrivate(any(), any())).thenReturn(true);
+
+        when(saleItem.getQuantity()).thenReturn(50);
+        when(inventoryItem.getQuantity()).thenReturn(120);
+
+        JSONObject validBody = new JSONObject();
+        validBody.put("purchaserId", user.getUserID());
+
+        mockMvc.perform(post(String.format("/listings/%d/purchase", saleItem.getId()))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(validBody.toString()))
+                .andExpect(status().isOk());
+
+        // Inventory item should be updated if request is successful
+        verify(inventoryItem, times(1)).sellQuantity(50);
+        var inventoryItemCaptor = ArgumentCaptor.forClass(InventoryItem.class);
+        verify(inventoryItemRepository, times(1)).save(inventoryItemCaptor.capture());
+        assertEquals(inventoryItem, inventoryItemCaptor.getValue());
+    }
+    @Test
+    void purchaseSaleItem_validRequest_purchaseEventCreated() throws Exception {
+        authenticationTokenManager.when(() -> AuthenticationTokenManager.sessionCanSeePrivate(any(), any())).thenReturn(true);
+        var product = Mockito.mock(Product.class);
+        JSONObject validBody = new JSONObject();
+        validBody.put("purchaserId", user.getUserID());
+
+        mockMvc.perform(post(String.format("/listings/%d/purchase", saleItem.getId()))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(validBody.toString()))
+                .andExpect(status().isOk());
+
+        var purchasedEventArgumentCaptor = ArgumentCaptor.forClass(PurchasedEvent.class);
+        verify(eventRepository, times(1)).save(purchasedEventArgumentCaptor.capture());
+        assertEquals(user, purchasedEventArgumentCaptor.getValue().getBoughtSaleItem().getBuyer());
+    }
+
 }

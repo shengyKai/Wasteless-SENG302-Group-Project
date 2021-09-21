@@ -6,8 +6,10 @@ import net.minidev.json.JSONObject;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.junit.jupiter.api.*;
-import org.seng302.leftovers.dto.InventoryItemDTO;
-import org.seng302.leftovers.dto.SaleItemDTO;
+import org.seng302.leftovers.dto.business.BusinessType;
+import org.seng302.leftovers.dto.inventory.InventoryItemResponseDTO;
+import org.seng302.leftovers.dto.saleitem.SaleItemResponseDTO;
+import org.seng302.leftovers.exceptions.ValidationResponseException;
 import org.seng302.leftovers.persistence.*;
 import org.seng302.leftovers.service.searchservice.SearchPageConstructor;
 import org.seng302.leftovers.service.searchservice.SearchSpecConstructor;
@@ -17,9 +19,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.http.HttpStatus;
-import org.springframework.web.server.ResponseStatusException;
 
+import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
@@ -72,7 +73,7 @@ class SaleItemTests {
         testUser = userRepository.save(testUser);
 
         testBusiness = new Business.Builder()
-                .withBusinessType("Accommodation and Food Services")
+                .withBusinessType(BusinessType.ACCOMMODATION_AND_FOOD_SERVICES)
                 .withAddress(Location.covertAddressStringToLocation("4,Rountree Street,Ashburton,Christchurch,New Zealand," +
                         "Canterbury,8041"))
                 .withDescription("Some description")
@@ -189,9 +190,8 @@ class SaleItemTests {
                 .withPrice("200.34")
                 .withQuantity(2);
 
-        var exception = assertThrows(ResponseStatusException.class, builder::build);
-        assertEquals(HttpStatus.BAD_REQUEST, exception.getStatus());
-        assertEquals("You cannot set close dates in the past", exception.getReason());
+        var exception = assertThrows(ValidationResponseException.class, builder::build);
+        assertEquals("You cannot set close dates in the past", exception.getMessage());
     }
 
     @Test
@@ -201,9 +201,8 @@ class SaleItemTests {
                     .withMoreInfo("This doesn't expire for a long time")
                     .withPrice("200.34")
                     .withQuantity(2);
-        var exception = assertThrows(ResponseStatusException.class, builder::build);
-        assertEquals(HttpStatus.BAD_REQUEST, exception.getStatus());
-        assertEquals("Cannot sell something that is not in your inventory", exception.getReason());
+        var exception = assertThrows(ValidationResponseException.class, builder::build);
+        assertEquals("Cannot sell something that is not in your inventory", exception.getMessage());
     }
 
     @Test
@@ -215,7 +214,7 @@ class SaleItemTests {
                 .withMoreInfo("This doesn't expire for a long time")
                 .withPrice("-200.34")
                 .withQuantity(2);
-        assertThrows(ResponseStatusException.class, saleItem::build);
+        assertThrows(ValidationResponseException.class, saleItem::build);
     }
 
     @Test
@@ -224,9 +223,9 @@ class SaleItemTests {
                 .withInventoryItem(inventoryItem)
                 .withCloses(LocalDate.now().plus(1000, ChronoUnit.DAYS).toString())
                 .withMoreInfo("This doesn't expire for a long time")
-                .withPrice(null)
+                .withPrice((BigDecimal) null)
                 .withQuantity(2);
-        assertThrows(ResponseStatusException.class, saleItem::build);
+        assertThrows(ValidationResponseException.class, saleItem::build);
     }
 
     @Test
@@ -235,12 +234,10 @@ class SaleItemTests {
                 .withInventoryItem(inventoryItem)
                 .withCloses(LocalDate.now().plus(1000, ChronoUnit.DAYS).toString())
                 .withMoreInfo("This doesn't expire for a long time")
-                .withPrice("three dollars")
                 .withQuantity(2);
 
-        var exception = assertThrows(ResponseStatusException.class, builder::build);
-        assertEquals(HttpStatus.BAD_REQUEST, exception.getStatus());
-        assertEquals("Please enter a valid number", exception.getReason());
+        var exception = assertThrows(ValidationResponseException.class, () -> builder.withPrice("three dollars"));
+        assertEquals("The price is not a number", exception.getMessage());
     }
 
     @Test
@@ -251,9 +248,8 @@ class SaleItemTests {
                 .withMoreInfo("This doesn't expire for a long time")
                 .withPrice("3.57");
 
-        var exception = assertThrows(ResponseStatusException.class, builder::build);
-        assertEquals(HttpStatus.BAD_REQUEST, exception.getStatus());
-        assertEquals("Quantity must be greater than 0", exception.getReason());
+        var exception = assertThrows(ValidationResponseException.class, builder::build);
+        assertEquals("Quantity must be greater than 0", exception.getMessage());
     }
 
     @Test
@@ -264,9 +260,8 @@ class SaleItemTests {
                 .withMoreInfo("This doesn't expire for a long time")
                 .withQuantity(0)
                 .withPrice("3.57");
-        var exception = assertThrows(ResponseStatusException.class, builder::build);
-        assertEquals(HttpStatus.BAD_REQUEST, exception.getStatus());
-        assertEquals("Quantity must be greater than 0", exception.getReason());
+        var exception = assertThrows(ValidationResponseException.class, builder::build);
+        assertEquals("Quantity must be greater than 0", exception.getMessage());
     }
 
     @Test
@@ -277,9 +272,8 @@ class SaleItemTests {
                 .withMoreInfo("This doesn't expire for a long time")
                 .withQuantity(2000)
                 .withPrice("3.57");
-        var exception = assertThrows(ResponseStatusException.class, builder::build);
-        assertEquals(HttpStatus.BAD_REQUEST, exception.getStatus());
-        assertEquals("Cannot sell more items than you have", exception.getReason());
+        var exception = assertThrows(ValidationResponseException.class, builder::build);
+        assertEquals("Cannot sell more items than you have", exception.getMessage());
     }
 
     @Test
@@ -325,7 +319,7 @@ class SaleItemTests {
                 .withMoreInfo("This doesn't expire for a long time")
                 .withQuantity(6)
                 .withPrice("3.57");
-        assertThrows(ResponseStatusException.class, saleItem2::build);
+        assertThrows(ValidationResponseException.class, saleItem2::build);
     }
 
     @Test
@@ -361,20 +355,16 @@ class SaleItemTests {
 
     @Test
     void editSaleItem_QuantityGreaterThanInventoryAvailable_NotUpdated() {
-        try {
-            SaleItem saleItem = new SaleItem.Builder()
+        var saleItem = new SaleItem.Builder()
                     .withInventoryItem(inventoryItem)
                     .withCloses(LocalDate.now().plus(1000, ChronoUnit.DAYS).toString())
                     .withMoreInfo("This doesn't expire for a long time")
                     .withQuantity(2)
                     .withPrice("3.57")
                     .build();
-            saleItemRepository.save(saleItem);
-            saleItem.setQuantity(5);
-        } catch (ResponseStatusException e) {
-            assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
-            assertEquals("Cannot sell more items than you have", e.getReason());
-        } catch (Exception unexpected) { Assertions.fail(); }
+        saleItemRepository.save(saleItem);
+        var exception = assertThrows(ValidationResponseException.class, () -> saleItem.setQuantity(5));
+        assertEquals("Cannot sell more items than you have", exception.getMessage());
     }
 
     @Test
@@ -384,7 +374,7 @@ class SaleItemTests {
                 .withCloses(LocalDate.now().plus(1000, ChronoUnit.DAYS).toString())
                 .withMoreInfo("This description is waaaaaay too long. This description is waaaaaay too long. This description is waaaaaay too long. This description is waaaaaay too long. This description is waaaaaay too long. This description is waaaaaay too long. This description is waaaaaay too long. ")
                 .withQuantity(2);
-        assertThrows(ResponseStatusException.class, saleItem::build);
+        assertThrows(ValidationResponseException.class, saleItem::build);
     }
 
     @Test
@@ -394,17 +384,16 @@ class SaleItemTests {
                 .withCloses(LocalDate.now().plus(1000, ChronoUnit.DAYS).toString())
                 .withMoreInfo("é树\n\t\uD83D\uDE02")
                 .withQuantity(2);
-        assertThrows(ResponseStatusException.class, saleItem::build);
+        assertThrows(ValidationResponseException.class, saleItem::build);
     }
 
     @Test
     void createSaleItem_CloseDateInvalidFormat_ObjectNotCreated() {
-        SaleItem.Builder saleItem = new SaleItem.Builder()
+        var builder = new SaleItem.Builder()
                 .withInventoryItem(inventoryItem)
-                .withCloses("In three seconds")
                 .withMoreInfo("What's the time, Mr Wolfy?")
                 .withQuantity(2);
-        assertThrows(DateTimeParseException.class, saleItem::build);
+        assertThrows(DateTimeParseException.class, () -> builder.withCloses("In three seconds"));
     }
 
     @Test
@@ -420,11 +409,11 @@ class SaleItemTests {
                 .build();
         saleItem = saleItemRepository.save(saleItem);
 
-        var object = objectMapper.convertValue(new SaleItemDTO(saleItem), JSONObject.class);
+        var object = objectMapper.convertValue(new SaleItemResponseDTO(saleItem), JSONObject.class);
 
         assertEquals(saleItem.getId(), object.get("id"));
         assertEquals(
-                objectMapper.readTree(objectMapper.writeValueAsString(new InventoryItemDTO(saleItem.getInventoryItem()))),
+                objectMapper.readTree(objectMapper.writeValueAsString(new InventoryItemResponseDTO(saleItem.getInventoryItem()))),
                 objectMapper.readTree(objectMapper.writeValueAsString(object.get("inventoryItem")))
         );
         assertEquals(saleItem.getQuantity(), object.get("quantity"));
@@ -432,7 +421,8 @@ class SaleItemTests {
         assertEquals(saleItem.getMoreInfo(), object.get("moreInfo"));
         assertEquals(saleItem.getCreated().toString(), object.get("created"));
         assertEquals(saleItem.getCloses().toString(), object.get("closes"));
-        assertEquals(7, object.size()); // No extra properties
+        assertEquals(saleItem.getLikeCount(), object.get("interestCount"));
+        assertEquals(8, object.size()); // No extra properties
     }
 
     @Test
@@ -447,12 +437,11 @@ class SaleItemTests {
                 .build();
         saleItem = saleItemRepository.save(saleItem);
 
-        var object = objectMapper.convertValue(new SaleItemDTO(saleItem), JSONObject.class);
-        System.out.println(object);
+        var object = objectMapper.convertValue(new SaleItemResponseDTO(saleItem), JSONObject.class);
         assertFalse(object.containsKey("moreInfo"));
 
 
-        assertEquals(6, object.size());
+        assertEquals(7, object.size());
     }
 
     @Test

@@ -2,12 +2,7 @@ package org.seng302.leftovers.entities;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import net.minidev.json.JSONArray;
-import net.minidev.json.JSONObject;
-import org.seng302.leftovers.dto.user.UserResponseDTO;
-import org.seng302.leftovers.tools.JsonTools;
-import org.springframework.http.HttpStatus;
-import org.springframework.web.server.ResponseStatusException;
+import org.seng302.leftovers.exceptions.ValidationResponseException;
 
 import javax.persistence.*;
 import java.time.Duration;
@@ -132,13 +127,13 @@ public class MarketplaceCard {
      */
     public void setTitle(String title) {
         if (title == null) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Card title must be provided");
+            throw new ValidationResponseException("Card title must be provided");
         }
         if (title.isEmpty() || title.length() > 50) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Card title must be between 1-50 characters long");
+            throw new ValidationResponseException("Card title must be between 1-50 characters long");
         }
         if (!title.matches("^[ \\d\\p{Punct}\\p{L}]*$")) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Card title must only contain letters, numbers, spaces and punctuation");
+            throw new ValidationResponseException("Card title must only contain letters, numbers, spaces and punctuation");
         }
         this.title = title;
     }
@@ -153,10 +148,10 @@ public class MarketplaceCard {
             return;
         }
         if (description.length() > 200) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Card description must not be longer than 200 characters");
+            throw new ValidationResponseException("Card description must not be longer than 200 characters");
         }
         if (!description.matches("^[\\p{Space}\\d\\p{Punct}\\p{L}]*$")) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Card description must only contain letters, numbers, whitespace and punctuation");
+            throw new ValidationResponseException("Card description must only contain letters, numbers, whitespace and punctuation");
         }
         this.description = description;
     }
@@ -167,10 +162,10 @@ public class MarketplaceCard {
      */
     public void setCloses(Instant closes) {
         if (closes == null) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Closing time cannot be null");
+            throw new ValidationResponseException("Closing time cannot be null");
         }
         if (closes.isBefore(Instant.now())) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Closing time cannot be before creation");
+            throw new ValidationResponseException("Closing time cannot be before creation");
         }
         this.closes = closes;
     }
@@ -181,7 +176,7 @@ public class MarketplaceCard {
      */
     public void delayCloses() {
         if (Instant.now().isBefore(closes.minus(1, ChronoUnit.DAYS))) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Too early to extend closing date");
+            throw new ValidationResponseException("Too early to extend closing date");
         }
         closes = closes.plus(DISPLAY_PERIOD);
         lastRenewed = Instant.now();
@@ -193,7 +188,7 @@ public class MarketplaceCard {
      */
     public void addKeyword(Keyword keyword) {
         if (keyword == null) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Keyword cannot be null");
+            throw new ValidationResponseException("Keyword cannot be null");
         }
         keywords.add(keyword);
     }
@@ -204,7 +199,7 @@ public class MarketplaceCard {
      */
     public void setKeywords(List<Keyword> keywords) {
         if (keywords.stream().anyMatch(Objects::isNull)) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Keyword cannot be null");
+            throw new ValidationResponseException("Keyword cannot be null");
         }
         this.keywords.clear();
         this.keywords.addAll(keywords);
@@ -216,32 +211,6 @@ public class MarketplaceCard {
      */
     public void removeKeyword(Keyword keyword) {
         keywords.remove(keyword);
-    }
-
-    /**
-     * Constructs the JSON representation of this card
-     * @return A JSONObject containing this cards data
-     */
-    public JSONObject constructJSONObject() {
-        JSONObject json = new JSONObject();
-
-        json.appendField("id", this.getID());
-        json.appendField("creator", new UserResponseDTO(this.creator));
-        json.appendField("section", this.section.getName());
-        json.appendField("created", this.created.toString());
-        json.appendField("lastRenewed", this.lastRenewed.toString());
-        json.appendField("displayPeriodEnd", this.closes.toString());
-        json.appendField("title", this.title);
-        json.appendField("description", this.description);
-
-        JSONArray keywordArray = new JSONArray();
-        // jsonify the keywords
-        for (Keyword keyword : this.getKeywords()) {
-            keywordArray.appendElement(keyword.constructJSONObject());
-        }
-        json.appendField("keywords", keywordArray);
-        JsonTools.removeNullsFromJson(json);
-        return json;
     }
 
     /**
@@ -297,7 +266,7 @@ public class MarketplaceCard {
                 return possibleSection;
             }
         }
-        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid section name");
+        throw new ValidationResponseException("Invalid section name");
     }
 
     /**
@@ -406,7 +375,7 @@ public class MarketplaceCard {
             var card = new MarketplaceCard();
 
             if (creator == null) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Card creator not provided");
+                throw new ValidationResponseException("Card creator not provided");
             }
             card.creator = creator;
             card.setSection(section);

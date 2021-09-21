@@ -8,9 +8,10 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mockito;
 import org.mockito.internal.matchers.apachecommons.ReflectionEquals;
 import org.seng302.leftovers.controllers.DGAAController;
-import org.seng302.leftovers.dto.ProductFilterOption;
+import org.seng302.leftovers.dto.business.BusinessType;
+import org.seng302.leftovers.dto.product.ProductFilterOption;
 import org.seng302.leftovers.entities.*;
-import org.seng302.leftovers.exceptions.SearchFormatException;
+import org.seng302.leftovers.exceptions.ValidationResponseException;
 import org.seng302.leftovers.persistence.*;
 import org.seng302.leftovers.service.searchservice.SearchPageConstructor;
 import org.seng302.leftovers.service.searchservice.SearchQueryParser;
@@ -374,11 +375,11 @@ class SearchServiceTest {
 
     /**
      * Verify that when constructUserSpecificationFromSearchQuery is called with an empty string as the argument,
-     * as SearchFormatException is thrown.
+     * as ValidationResponseException is thrown.
      */
     @Test
     void constructUserSpecificationFromSearchQueryEmptyStringTest() {
-        assertThrows(SearchFormatException.class, () -> SearchSpecConstructor.constructUserSpecificationFromSearchQuery(""));
+        assertThrows(ValidationResponseException.class, () -> SearchSpecConstructor.constructUserSpecificationFromSearchQuery(""));
     }
 
     /**
@@ -491,11 +492,11 @@ class SearchServiceTest {
 
     /**
      * Verify that when constructUserSpecificationFromSearchQuery is called with just the word 'and' as its argument,
-     * a SearchFormatException is thrown.
+     * a ValidationResponseException is thrown.
      */
     @Test
     void constructUserSpecificationFromSearchQueryJustAndTest() {
-        assertThrows(SearchFormatException.class, () -> SearchSpecConstructor.constructUserSpecificationFromSearchQuery("and"));
+        assertThrows(ValidationResponseException.class, () -> SearchSpecConstructor.constructUserSpecificationFromSearchQuery("and"));
     }
 
     @ParameterizedTest
@@ -511,11 +512,11 @@ class SearchServiceTest {
 
     /**
      * Verify that when constructUserSpecificationFromSearchQuery is called with just the word and 'OR' as its argument,
-     * a SearchFormatException is thrown.
+     * a ValidationResponseException is thrown.
      */
     @Test
     void constructUserSpecificationFromSearchQueryJustOrTest() {
-        assertThrows(SearchFormatException.class, () -> SearchSpecConstructor.constructUserSpecificationFromSearchQuery("OR"));
+        assertThrows(ValidationResponseException.class, () -> SearchSpecConstructor.constructUserSpecificationFromSearchQuery("OR"));
     }
 
     /**
@@ -552,11 +553,11 @@ class SearchServiceTest {
 
     /**
      * Verify that when constructUserSpecificationFromSearchQuery is called with a string containing an opening quote
-     * but no closing quote, a SearchFormatException is thrown.
+     * but no closing quote, a ValidationResponseException is thrown.
      */
     @Test
     void constructUserSpecificationFromSearchQueryOpeningQuoteTest() {
-        assertThrows(SearchFormatException.class, () -> SearchSpecConstructor.constructUserSpecificationFromSearchQuery("\"hello"));
+        assertThrows(ValidationResponseException.class, () -> SearchSpecConstructor.constructUserSpecificationFromSearchQuery("\"hello"));
     }
 
     /**
@@ -752,7 +753,7 @@ class SearchServiceTest {
         var testUser = userRepository.findAll().iterator().next();
         var testBusiness = new Business.Builder()
                 .withPrimaryOwner(testUser)
-                .withBusinessType("Accommodation and Food Services")
+                .withBusinessType(BusinessType.ACCOMMODATION_AND_FOOD_SERVICES)
                 .withDescription("DESCRIPTION")
                 .withName("BUSINESS_NAME")
                 .withAddress(Location.covertAddressStringToLocation("108,Albert Road,Ashburton,Christchurch,New Zealand,Canterbury,8041"))

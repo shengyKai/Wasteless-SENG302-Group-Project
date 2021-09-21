@@ -12,8 +12,10 @@ import org.junit.jupiter.api.TestInstance;
 import org.junit.runner.RunWith;
 import org.mockito.MockedConstruction;
 import org.mockito.Mockito;
+import org.seng302.leftovers.dto.business.BusinessType;
 import org.seng302.leftovers.dto.user.UserRole;
 import org.seng302.leftovers.entities.*;
+import org.seng302.leftovers.exceptions.ValidationResponseException;
 import org.seng302.leftovers.persistence.BusinessRepository;
 import org.seng302.leftovers.persistence.ImageRepository;
 import org.seng302.leftovers.persistence.ProductRepository;
@@ -24,15 +26,14 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
-import org.springframework.http.HttpStatus;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
-import org.springframework.web.server.ResponseStatusException;
 
 import javax.servlet.http.Cookie;
 import java.lang.reflect.Field;
+import java.math.BigDecimal;
 import java.text.ParseException;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
@@ -105,7 +106,7 @@ class ProductControllerTest {
     void createTestBusiness() {
         businessRepository.deleteAll();
         testBusiness1 = new Business.Builder()
-                .withBusinessType("Accommodation and Food Services")
+                .withBusinessType(BusinessType.ACCOMMODATION_AND_FOOD_SERVICES)
                 .withAddress(Location.covertAddressStringToLocation("4,Rountree Street,Ashburton,Christchurch,New Zealand," +
                         "Canterbury,8041"))
                 .withDescription("Some description")
@@ -125,8 +126,8 @@ class ProductControllerTest {
         Image image2 = new Image("apple.jpg", "apple_thumbnail.jpg");
         image1 = imageRepository.save(image1);
         image2 = imageRepository.save(image2);
-        product.addProductImage(image1);
-        product.addProductImage(image2);
+        product.addImage(image1);
+        product.addImage(image2);
         return productRepository.save(product);
     }
 
@@ -543,7 +544,7 @@ class ProductControllerTest {
 
         Business tempBusiness = businessRepository.save(
                 new Business.Builder()
-                        .withBusinessType("Accommodation and Food Services")
+                        .withBusinessType(BusinessType.ACCOMMODATION_AND_FOOD_SERVICES)
                     .withAddress(Location.covertAddressStringToLocation("4,Rountree Street,Ashburton,Christchurch,New Zealand," +
                         "Canterbury,8041"))
                         .withDescription("Some description2")
@@ -612,7 +613,7 @@ class ProductControllerTest {
             verify(mockBuilder).withName(productInfo.getAsString("name"));
             verify(mockBuilder).withDescription(productInfo.getAsString("description"));
             verify(mockBuilder).withManufacturer(productInfo.getAsString("manufacturer"));
-            verify(mockBuilder).withRecommendedRetailPrice(productInfo.getAsString("recommendedRetailPrice"));
+            verify(mockBuilder).withRecommendedRetailPrice(new BigDecimal(productInfo.getAsString("recommendedRetailPrice")));
             verify(mockBuilder).build();
         }
     }
@@ -623,7 +624,7 @@ class ProductControllerTest {
     @Test
     void postingProductFailsIfProductBuilderFails() {
         try (MockedConstruction<Product.Builder> ignored = Mockito.mockConstruction(Product.Builder.class, withSettings().defaultAnswer(RETURNS_SELF), (mock, context) ->
-                when(mock.build()).thenThrow(new ResponseStatusException(HttpStatus.BAD_REQUEST, "Failed for some reason"))
+                when(mock.build()).thenThrow(new ValidationResponseException("Failed for some reason"))
         )) {
             setCurrentUser(ownerUser.getUserID());
             var productInfo = generateProductCreationInfo();
@@ -1012,16 +1013,16 @@ class ProductControllerTest {
         addSeveralProductsToACatalogue();
         Product product = productRepository.getAllByBusiness(testBusiness1, templateRequest).getContent().get(0); // get product 1
         product = addImagesToProduct(product);
-        Image image1 = product.getProductImages().get(0);
-        Image image2 = product.getProductImages().get(1);
+        Image image1 = product.getImages().get(0);
+        Image image2 = product.getImages().get(1);
         mockMvc.perform(
                 put(String.format("/businesses/%d/products/%s/images/%d/makeprimary", testBusiness1.getId(), product.getProductCode(), image2.getID()))
                 .sessionAttrs(sessionAuthToken)
                 .cookie(authCookie))
                 .andExpect(status().isOk());
         product = productRepository.findByBusinessAndProductCode(testBusiness1, product.getProductCode()).orElseThrow();
-        assertEquals(image2.getID(), product.getProductImages().get(0).getID()); // they should have switched
-        assertEquals(image1.getID(), product.getProductImages().get(1).getID());
+        assertEquals(image2.getID(), product.getImages().get(0).getID()); // they should have switched
+        assertEquals(image1.getID(), product.getImages().get(1).getID());
 
     }
 
@@ -1035,7 +1036,7 @@ class ProductControllerTest {
         addSeveralProductsToACatalogue();
         Product product = productRepository.getAllByBusiness(testBusiness1, templateRequest).getContent().get(0); // get product 1
         product = addImagesToProduct(product);
-        Image image2 = product.getProductImages().get(1);
+        Image image2 = product.getImages().get(1);
         mockMvc.perform(
                 put(String.format("/businesses/%d/products/%s/images/%d/makeprimary", 9999, product.getProductCode(), image2.getID()))
                         .sessionAttrs(sessionAuthToken)
@@ -1052,7 +1053,7 @@ class ProductControllerTest {
         addSeveralProductsToACatalogue();
         Product product = productRepository.getAllByBusiness(testBusiness1, templateRequest).getContent().get(0); // get product 1
         product = addImagesToProduct(product);
-        Image image2 = product.getProductImages().get(1);
+        Image image2 = product.getImages().get(1);
         mockMvc.perform(
                 put(String.format("/businesses/%d/products/%s/images/%d/makeprimary", testBusiness1.getId(), "S0m3_Rand0m", image2.getID()))
                         .sessionAttrs(sessionAuthToken)
@@ -1070,7 +1071,7 @@ class ProductControllerTest {
         addSeveralProductsToACatalogue();
         Product product = productRepository.getAllByBusiness(testBusiness1, templateRequest).getContent().get(0); // get product 1
         product = addImagesToProduct(product);
-        Image image2 = product.getProductImages().get(1);
+        Image image2 = product.getImages().get(1);
         mockMvc.perform(
                 put(String.format("/businesses/%d/products/%s/images/%d/makeprimary", testBusiness1.getId(), product.getProductCode(), 99999))
                         .sessionAttrs(sessionAuthToken)
@@ -1182,7 +1183,7 @@ class ProductControllerTest {
         addSeveralProductsToACatalogue();
         Product product = productRepository.getAllByBusiness(testBusiness1, templateRequest).getContent().get(0); // get product 1
         product = addImagesToProduct(product);
-        Image image2 = product.getProductImages().get(1);
+        Image image2 = product.getImages().get(1);
         mockMvc.perform(
                 put(String.format("/businesses/%d/products/%s/images/%d/makeprimary", testBusiness1.getId(), product.getProductCode(), image2.getID()))
                         .sessionAttrs(sessionAuthToken)
@@ -1199,7 +1200,7 @@ class ProductControllerTest {
         addSeveralProductsToACatalogue();
         Product product = productRepository.getAllByBusiness(testBusiness1, templateRequest).getContent().get(0); // get product 1
         product = addImagesToProduct(product);
-        Image image2 = product.getProductImages().get(1);
+        Image image2 = product.getImages().get(1);
         mockMvc.perform(
                 put(String.format("/businesses/%d/products/%s/images/%d/makeprimary", testBusiness1.getId(), product.getProductCode(), image2.getID()))
                         .sessionAttrs(sessionAuthToken))
@@ -1217,7 +1218,7 @@ class ProductControllerTest {
 
         Product product = productRepository.getAllByBusiness(testBusiness1, templateRequest).getContent().get(0); // get product 1
         product = addImagesToProduct(product);
-        Image image2 = product.getProductImages().get(1);
+        Image image2 = product.getImages().get(1);
         mockMvc.perform(
                 put(String.format("/businesses/%d/products/%s/images/%d/makeprimary", testBusiness1.getId(), product.getProductCode(), image2.getID()))
                         .sessionAttrs(sessionAuthToken)
@@ -1236,7 +1237,7 @@ class ProductControllerTest {
         addSeveralProductsToACatalogue();
         Product product = productRepository.getAllByBusiness(testBusiness1, templateRequest).getContent().get(0); // get product 1
         product = addImagesToProduct(product);
-        Image image2 = product.getProductImages().get(1);
+        Image image2 = product.getImages().get(1);
         mockMvc.perform(
                 put(String.format("/businesses/%d/products/%s/images/%d/makeprimary", testBusiness1.getId(), product.getProductCode(), image2.getID()))
                         .sessionAttrs(sessionAuthToken)

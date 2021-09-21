@@ -2,7 +2,7 @@ package org.seng302.datagenerator;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.seng302.leftovers.entities.Business;
+import org.seng302.leftovers.dto.business.BusinessType;
 
 import java.sql.*;
 import java.time.Instant;
@@ -32,7 +32,7 @@ public class BusinessGenerator {
                             "VALUES (?, ?, ?, ?, ?, ?)",
                     Statement.RETURN_GENERATED_KEYS
             )) {
-            stmt.setObject(1, Business.getBusinessTypes().get(random.nextInt(Business.getBusinessTypes().size())));
+            stmt.setObject(1, random.nextInt(BusinessType.values().length));
             stmt.setObject(2, Instant.now()); //date created
             stmt.setObject(3, descriptionGenerator.randomDescription());
             stmt.setObject(4, commerceNameGenerator.randomBusinessName());

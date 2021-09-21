@@ -1,19 +1,15 @@
 package org.seng302.leftovers.entities;
 
 import lombok.NoArgsConstructor;
-import net.minidev.json.JSONObject;
 import org.hibernate.annotations.Formula;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
-import org.seng302.leftovers.tools.JsonTools;
-import org.springframework.http.HttpStatus;
-import org.springframework.web.server.ResponseStatusException;
+import org.seng302.leftovers.exceptions.ValidationResponseException;
 
 import javax.persistence.*;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -118,7 +114,7 @@ public class SaleItem {
         if (item != null) {
             this.inventoryItem = item;
         } else {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Cannot sell something that is not in your inventory");
+            throw new ValidationResponseException("Cannot sell something that is not in your inventory");
         }
     }
 
@@ -134,7 +130,7 @@ public class SaleItem {
      */
     public void setQuantity(int quantity) {
         if (quantity <= 0) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Quantity must be greater than 0");
+            throw new ValidationResponseException("Quantity must be greater than 0");
         }
 
         int diff = this.quantity - quantity;
@@ -150,18 +146,17 @@ public class SaleItem {
 
     /**
      * Defaults to single price * quantity
-     * @param price of sale item
+     * @param newPrice of sale item
      */
-    public void setPrice(String price) {
+    public void setPrice(BigDecimal newPrice) {
         try {
-            BigDecimal newPrice = new BigDecimal(price);
             if (newPrice.compareTo(BigDecimal.ZERO) >= 0) {
                 this.price = newPrice;
             } else {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Please enter a positive number");
+                throw new ValidationResponseException("Please enter a positive number");
             }
         } catch (Exception e) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Please enter a valid number");
+            throw new ValidationResponseException("Please enter a valid number");
         }
     }
 
@@ -192,10 +187,10 @@ public class SaleItem {
             return;
         }
         if (moreInfo.length() > 200) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Extra sale information must not be longer than 200 characters");
+            throw new ValidationResponseException("Extra sale information must not be longer than 200 characters");
         }
         if (!moreInfo.matches("^[\\p{Space}\\d\\p{Punct}\\p{L}]*$")) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Extra sale info must only contain letters, numbers, whitespace and punctuation");
+            throw new ValidationResponseException("Extra sale info must only contain letters, numbers, whitespace and punctuation");
         }
         this.moreInfo = moreInfo;
     }
@@ -218,23 +213,21 @@ public class SaleItem {
 
     /**
      * Defaults to expiry date of product
-     * @param closes date
+     * @param newCloses date
      */
-    public void setCloses(String closes) {
-        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ISO_LOCAL_DATE;
-        LocalDate closeDate = LocalDate.parse(closes, dateTimeFormatter);
+    public void setCloses(LocalDate newCloses) {
         if (inventoryItem.getExpires().isBefore(LocalDate.now())) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "This product is already expired");
-        } else if (closeDate.isAfter(LocalDate.now().minus(1, DAYS))) {
-            this.closes = closeDate;
+            throw new ValidationResponseException("This product is already expired");
+        } else if (newCloses.isAfter(LocalDate.now().minus(1, DAYS))) {
+            this.closes = newCloses;
         } else {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "You cannot set close dates in the past");
+            throw new ValidationResponseException("You cannot set close dates in the past");
         }
     }
 
     public void setCloses() {
         if (inventoryItem.getExpires().isBefore(LocalDate.now())) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "This product is already expired");
+            throw new ValidationResponseException("This product is already expired");
         }
         this.closes = inventoryItem.getExpires();
     }
@@ -261,9 +254,9 @@ public class SaleItem {
     public static class Builder {
         private InventoryItem inventoryItem;  // Item up for sale
         private int quantity;
-        private String price;
+        private BigDecimal price;
         private String moreInfo;
-        private String closes;
+        private LocalDate closes;
 
         /**
          * Sets the inventory item to be sold
@@ -291,6 +284,24 @@ public class SaleItem {
          * @return Builder with price set
          */
         public Builder withPrice(String price) {
+            if (price == null) {
+                this.price = null;
+                return this;
+            }
+            try {
+                this.price = new BigDecimal(price);
+            } catch (NumberFormatException ignored) {
+                throw new ValidationResponseException("The price is not a number");
+            }
+            return this;
+        }
+
+        /**
+         * Sets the price to sell the products at
+         * @param price of sale
+         * @return Builder with price set
+         */
+        public Builder withPrice(BigDecimal price) {
             this.price = price;
             return this;
         }
@@ -307,10 +318,24 @@ public class SaleItem {
 
         /**
          * Sets the close date of the sale, defaults to expiry date of product if not called
+         * @param closesString date
+         * @return Builder with close date set
+         */
+        public Builder withCloses(String closesString) {
+            if (closesString != null) {
+                this.closes = LocalDate.parse(closesString);
+            } else {
+                this.closes = null;
+            }
+            return this;
+        }
+
+        /**
+         * Sets the close date of the sale, defaults to expiry date of product if not called
          * @param closes date
          * @return Builder with close date set
          */
-        public Builder withCloses(String closes) {
+        public Builder withCloses(LocalDate closes) {
             this.closes = closes;
             return this;
         }

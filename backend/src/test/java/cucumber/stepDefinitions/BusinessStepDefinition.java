@@ -1,5 +1,6 @@
 package cucumber.stepDefinitions;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import cucumber.context.BusinessContext;
 import cucumber.context.ImageContext;
 import cucumber.context.RequestContext;
@@ -16,6 +17,7 @@ import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.junit.Assert;
 import org.seng302.datagenerator.ExampleDataFileReader;
+import org.seng302.leftovers.dto.business.BusinessType;
 import org.seng302.leftovers.entities.*;
 import org.seng302.leftovers.persistence.BusinessRepository;
 import org.seng302.leftovers.persistence.ImageRepository;
@@ -43,6 +45,8 @@ public class BusinessStepDefinition {
     @Value("${storage-directory}")
     private Path root;
 
+    @Autowired
+    private ObjectMapper objectMapper;
     @Autowired
     private BusinessContext businessContext;
     @Autowired
@@ -89,7 +93,7 @@ public class BusinessStepDefinition {
         var business = new Business.Builder()
                 .withName(name)
                 .withDescription("Sells stuff")
-                .withBusinessType("Retail Trade")
+                .withBusinessType(BusinessType.RETAIL_TRADE)
                 .withAddress(Location.covertAddressStringToLocation("1,Bob Street,Bob,Bob,Bob,Bob,1010"))
                 .withPrimaryOwner(userContext.getLast())
                 .build();
@@ -144,7 +148,7 @@ public class BusinessStepDefinition {
         var business = new Business.Builder()
                 .withName(name)
                 .withDescription("Sells stuff")
-                .withBusinessType(type)
+                .withBusinessType(objectMapper.convertValue(type, BusinessType.class))
                 .withAddress(Location.covertAddressStringToLocation("1,Bob Street,Bob,Bob,Bob,Bob,1010"))
                 .withPrimaryOwner(userContext.getLast())
                 .build();
@@ -190,7 +194,7 @@ public class BusinessStepDefinition {
         Business business = businessRepository.getBusinessById(businessContext.getLast().getId());
         assertEquals(modifyParameters.get("name"), business.getName());
         assertEquals(modifyParameters.get("description"), business.getDescription());
-        assertEquals(modifyParameters.get("businessType"), business.getBusinessType());
+        assertEquals(modifyParameters.get("businessType"), objectMapper.convertValue(business.getBusinessType(), String.class));
         assertEquals(modifyParameters.get("primaryAdministratorId"), business.getPrimaryOwner().getUserID());
 
         Map<String, Object> addressParams = (Map<String, Object>)modifyParameters.get("address");

@@ -16,6 +16,7 @@ import org.junit.Assert;
 import org.seng302.leftovers.dto.user.UserRole;
 import org.seng302.leftovers.entities.Location;
 import org.seng302.leftovers.entities.User;
+import org.seng302.leftovers.exceptions.ValidationResponseException;
 import org.seng302.leftovers.persistence.UserRepository;
 import org.seng302.leftovers.tools.PasswordAuthenticator;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,7 +25,6 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
-import org.springframework.web.server.ResponseStatusException;
 
 import javax.transaction.Transactional;
 import java.security.NoSuchAlgorithmException;
@@ -197,7 +197,7 @@ public class UserStepDefinition {
                     .withAddress(userAddress)
                     .build();
             userRepository.save(theUser);
-        } catch (ResponseStatusException | DataIntegrityViolationException ignored) {}
+        } catch (ValidationResponseException | DataIntegrityViolationException ignored) {}
     }
 
     @Then("a user with the email {string} exists")
@@ -425,5 +425,11 @@ public class UserStepDefinition {
         assertEquals(oldUser.getDob(), newUser.getDob());
         assertEquals(oldUser.getAuthenticationCode(), newUser.getAuthenticationCode());
     }
+
+    @Given("I am not logged in")
+    public void i_am_not_logged_in() {
+        requestContext.setLoggedInAccount(null);
+    }
+
 
 }

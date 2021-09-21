@@ -136,6 +136,7 @@ const testSaleItem: Sale = {
   quantity: 4,
   price: 1000,
   created: '1-1-1900',
+  interestCount: 8
 };
 
 const testMessage: Message = {
@@ -333,11 +334,33 @@ const apiCalls: Partial<ApiCalls> = {
     result: undefined,
     extraStatusMessages: {
       401: 'You have been logged out. Please login again and retry',
+      403: 'Operation not permitted',
+      406: 'Listing does not exist',
+    },
+    usesServerMessage: true,
+  },
+  getListingInterest: {
+    parameters: [7, 3],
+    httpMethod: 'get',
+    url: '/listings/7/interest',
+    body: {
+      params: {
+        userId: 3,
+      },
+    },
+    result:false,
+    apiResult: {
+      isInterested: false
+    },
+    extraStatusMessages: {
+      401: 'You have been logged out. Please login again and retry',
+      403: 'Operation not permitted',
       406: 'Listing does not exist',
     },
     usesServerMessage: true,
   }
 };
+
 
 describe('api', () => {
   // Makes sure the the mocks are clean

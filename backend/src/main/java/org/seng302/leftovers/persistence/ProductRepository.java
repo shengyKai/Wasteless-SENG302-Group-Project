@@ -2,14 +2,13 @@ package org.seng302.leftovers.persistence;
 
 import org.seng302.leftovers.entities.Business;
 import org.seng302.leftovers.entities.Product;
+import org.seng302.leftovers.exceptions.DoesNotExistResponseException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Repository;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import java.util.Optional;
@@ -45,8 +44,7 @@ public interface ProductRepository extends PagingAndSortingRepository<Product, L
         default Product getProduct(Business business, String productCode) {
                 Optional<Product> product = findByBusinessAndProductCode(business, productCode);
                 if (product.isEmpty()) {
-                        throw new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE,
-                                "the product does not exist");
+                        throw new DoesNotExistResponseException(Product.class);
                 }
                 return product.get();
                 // The product repo is not working as expected, the product can still be retrieved even when it does not exist

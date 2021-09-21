@@ -31,7 +31,7 @@
     </v-list-item>
   </div>
   <div v-else>
-    <SaleListingPage
+    <FullSaleListing
       :saleItem="saleItem"
       @goBack="showFullListing = false"
     />
@@ -41,12 +41,12 @@
 <script>
 import { currencyFromCountry } from "@/api/currency";
 import { formatDate } from '@/utils';
-import SaleListingPage from "@/components/SaleListing/FullSaleListing.vue";
+import FullSaleListing from "@/components/SaleListing/FullSaleListing.vue";
 
 export default {
   name: "SaleResult",
   components: {
-    SaleListingPage
+    FullSaleListing
   },
   data() {
     return {

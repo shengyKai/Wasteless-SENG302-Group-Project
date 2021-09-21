@@ -1,18 +1,14 @@
 package org.seng302.leftovers.entities;
 
 import lombok.NoArgsConstructor;
-import net.minidev.json.JSONObject;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
-import org.seng302.leftovers.tools.JsonTools;
-import org.springframework.http.HttpStatus;
-import org.springframework.web.server.ResponseStatusException;
+import org.seng302.leftovers.exceptions.ValidationResponseException;
 
 import javax.persistence.*;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.Objects;
 
@@ -133,8 +129,6 @@ public class InventoryItem {
         return remainingQuantity;
     }
 
-    public int getVersion() { return version; }
-
 
 //Setters
     /**
@@ -145,7 +139,7 @@ public class InventoryItem {
         if (product != null) {
             this.product = product;
         } else {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "No product was provided");
+            throw new ValidationResponseException("No product was provided");
         }
     }
     /**
@@ -153,21 +147,44 @@ public class InventoryItem {
      * @param quantity of item
      */
     public void setQuantity(Integer quantity) {
+        if (quantity == null) {
+            throw new ValidationResponseException("Quantity must be provided");
+        }
         if (this.quantity == null) {
             if (quantity > 0) {
                 this.quantity = quantity;
             } else {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "A quantity less than 1 was provided");
+                throw new ValidationResponseException("A quantity less than 1 was provided");
             }
         } else {
             if (quantity >= (this.quantity - this.remainingQuantity)) {
                 this.remainingQuantity = this.remainingQuantity - (this.quantity - quantity);
                 this.quantity = quantity;
             } else {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                throw new ValidationResponseException(
                         "The quantity cannot be lower than the amount used in the sale listings for this inventory item");
             }
         }
+    }
+
+    /**
+     * Reduce the quantity of the inventory item by the given amount, while keeping the remaining quantity the same.
+     * This method should only be used when inventory is sold, as when the quantity is modified the remaining quantity
+     * should also be updated.
+     * @param saleQuantity The amount of the sale item's quantity which has been sold.
+     * @return True if updating the quantity succeeds, false if there is an error in the quantity.
+     */
+    public void sellQuantity(Integer saleQuantity) {
+        if (saleQuantity < 1) {
+            throw new ValidationResponseException("Quantity sold must be at least 1");
+        }
+        if (this.quantity == null || this.quantity < saleQuantity) {
+            throw new ValidationResponseException("Quantity sold must not be greater than available quantity");
+        }
+        if (this.quantity - saleQuantity < this.remainingQuantity) {
+            throw new ValidationResponseException("Inventory item quantity cannot be less than remaining quantity");
+        }
+        this.quantity = this.quantity - saleQuantity;
     }
 
     /**
@@ -178,7 +195,7 @@ public class InventoryItem {
         if (remainingQuantity >= 0) {
             this.remainingQuantity = remainingQuantity;
         } else {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Cannot sell more items than you have");
+            throw new ValidationResponseException("Cannot sell more items than you have");
         }
     }
     /**
@@ -188,10 +205,10 @@ public class InventoryItem {
     public void setPricePerItem(BigDecimal pricePerItem) {
         if (pricePerItem != null) {
             if (pricePerItem.compareTo(BigDecimal.ZERO) < 0) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Price per item must not be less than 0");
+                throw new ValidationResponseException("Price per item must not be less than 0");
             }
             if (pricePerItem.compareTo(new BigDecimal(10000)) >= 0) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Price per item must be less that 100,00");
+                throw new ValidationResponseException("Price per item must be less that 100,00");
             }
         }
         this.pricePerItem = pricePerItem;
@@ -210,10 +227,10 @@ public class InventoryItem {
     public void setTotalPrice(BigDecimal totalPrice) {
         if (totalPrice != null) {
             if (totalPrice.compareTo(BigDecimal.ZERO) < 0) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Total price must not be less than 0 ");
+                throw new ValidationResponseException("Total price must not be less than 0 ");
             }
             if (totalPrice.compareTo(new BigDecimal(1000000)) >= 0) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Total price must be less than 1,000,000");
+                throw new ValidationResponseException("Total price must be less than 1,000,000");
             }
         }
         this.totalPrice = totalPrice;
@@ -226,36 +243,34 @@ public class InventoryItem {
      * @param bestBefore the date when the product will no longer be its best
      * @param expires the date when the product will expire and should be disposed of
      */
-    public void setDates(String manufactured, String sellBy, String bestBefore, String expires) {
-        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ISO_LOCAL_DATE;
+    public void setDates(LocalDate manufactured, LocalDate sellBy, LocalDate bestBefore, LocalDate expires) {
         //Checking expires is not null
         if (expires != null) { //Will thrown an exception
             //Case 1: no attributes are null
             if (sellBy != null && bestBefore != null) {
                 if ((sellBy.compareTo(bestBefore) > 0) || (bestBefore.compareTo(expires) > 0)) {
-                    throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    throw new ValidationResponseException(
                             "The best before date must be before the sell by date, and the expires date before the sell by.");
                 }
                 //Case 2: sell by is null and best before is not null
             } else if (sellBy == null && bestBefore != null) {
                 if (bestBefore.compareTo(expires) > 0) {
-                    throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    throw new ValidationResponseException(
                             "The best before date must be before the expires date.");
                 }
                 //Case 3: best before is null and sell by is not null
             } else if (sellBy != null && sellBy.compareTo(expires) > 0) {
-                    throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    throw new ValidationResponseException(
                             "The sell by date must be before the expires date.");
             }
         }
         //Case 4: best before is null and sell by is null, no validation needed
 
-        if (expires == null) { setExpires(null); } else { setExpires(LocalDate.parse(expires, dateTimeFormatter)); }
-        if (sellBy == null ) { setSellBy(null); } else { setSellBy(LocalDate.parse(sellBy, dateTimeFormatter)); }
-        if (bestBefore == null ) { setBestBefore(null); } else { setBestBefore(LocalDate.parse(bestBefore, dateTimeFormatter)); }
+        setExpires(expires);
+        setSellBy(sellBy);
+        setBestBefore(bestBefore);
         //Manufactured needs no extra validation as is the only date that can and must before today
-        if (manufactured == null ) { setManufactured(null); } else {setManufactured(LocalDate.parse(manufactured,
-                dateTimeFormatter)); }
+        setManufactured(manufactured);
     }
 
     /**
@@ -270,7 +285,7 @@ public class InventoryItem {
         LocalDate date = LocalDate.now();
         LocalDate acceptDate = date.minusDays(1);               //at least 1 day earlier
         if (manufactured.compareTo(acceptDate) > 0) {     //is in the future
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The manufactured date cannot be in the future");
+            throw new ValidationResponseException("The manufactured date cannot be in the future");
         }
         this.manufactured = manufactured;
     }
@@ -286,7 +301,7 @@ public class InventoryItem {
         LocalDate date = LocalDate.now();
         LocalDate acceptDate = date.plusDays(1);                //at least 1 day later
         if (sellBy.compareTo(acceptDate) < 0) {           //is in the past
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The Sell By date cannot be in the past");
+            throw new ValidationResponseException("The Sell By date cannot be in the past");
         }
 
         this.sellBy = sellBy;
@@ -303,12 +318,12 @@ public class InventoryItem {
         LocalDate date = LocalDate.now();
         LocalDate acceptDate = date.plusDays(1);                    //at least 1 day later
         if (bestBefore.compareTo(acceptDate) < 0) {          //is in the past
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The Best Before date cannot be in the past");
+            throw new ValidationResponseException("The Best Before date cannot be in the past");
         }
 
         //checks that the best before date is after the sell by date if it exists
         if (this.sellBy != null && bestBefore.compareTo(this.sellBy) < 0) { //checks if best before is before sell by
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                throw new ValidationResponseException(
                         "The best before date cannot be before the sell by date.");
         }
         this.bestBefore = bestBefore;
@@ -320,21 +335,21 @@ public class InventoryItem {
      */
     public void setExpires(LocalDate expires) {
         if(expires == null) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "No expiry date was provided");
+            throw new ValidationResponseException("No expiry date was provided");
         }
         LocalDate date = LocalDate.now();
         LocalDate acceptDate = date.plusDays(1);                    //at least 1 day later
         if (expires.compareTo(acceptDate) < 0) {              //is in the past
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The expires date cannot be in the past");
+            throw new ValidationResponseException("The expires date cannot be in the past");
         }
 
         //checks that the best before date and sell by date are before the expire date if they exist
         if (this.sellBy != null && expires.compareTo(this.sellBy) < 0) { //checks if expires is before sell by
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                throw new ValidationResponseException(
                         "The expires date cannot be before the sell by date.");
         }
         if (this.bestBefore != null && expires.compareTo(this.bestBefore) < 0) { //checks if expires is before best before
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                throw new ValidationResponseException(
                         "The expires date cannot be before the best before date.");
         }
         this.expires = expires;
@@ -360,7 +375,7 @@ public class InventoryItem {
     public static class Builder {
 
         private Product product;
-        private int quantity;
+        private Integer quantity;
         private BigDecimal pricePerItem;
         private BigDecimal totalPrice;
         private LocalDate manufactured;
@@ -401,8 +416,18 @@ public class InventoryItem {
             try {
                 this.pricePerItem = new BigDecimal(pricePerItem);
             } catch (NumberFormatException ignored) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The price per item is not a number");
+                throw new ValidationResponseException("The price per item is not a number");
             }
+            return this;
+        }
+
+        /**
+         * Sets the builder's price per item.
+         * @param pricePerItem the cost for each singular item for this product in the inventory
+         * @return Builder with the price per item set
+         */
+        public Builder withPricePerItem(BigDecimal pricePerItem) {
+            this.pricePerItem = pricePerItem;
             return this;
         }
 
@@ -419,8 +444,18 @@ public class InventoryItem {
             try {
                 this.totalPrice = new BigDecimal(totalPrice);
             } catch (NumberFormatException ignored) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The total price is not a number");
+                throw new ValidationResponseException("The total price is not a number");
             }
+            return this;
+        }
+
+        /**
+         * Set the builder's total price item.
+         * @param totalPrice the total price for the product in the item inventory
+         * @return Builder with the total price item set
+         */
+        public Builder withTotalPrice(BigDecimal totalPrice) {
+            this.totalPrice = totalPrice;
             return this;
         }
 
@@ -431,9 +466,18 @@ public class InventoryItem {
          */
         public Builder withManufactured(String manufacturedString) {
             if (manufacturedString != null) {
-                DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ISO_LOCAL_DATE;
-                this.manufactured = LocalDate.parse(manufacturedString, dateTimeFormatter);
+                this.manufactured = LocalDate.parse(manufacturedString);
             } else { this.manufactured = null; }
+            return this;
+        }
+
+        /**
+         * Sets the builder's sell by date
+         * @param manufactured the date when the product in the inventory was manufactured
+         * @return Builder with the manufactured date set
+         */
+        public Builder withManufactured(LocalDate manufactured) {
+            this.manufactured = manufactured;
             return this;
         }
 
@@ -444,9 +488,18 @@ public class InventoryItem {
          */
         public Builder withSellBy(String sellByString) {
             if (sellByString != null) {
-                DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ISO_LOCAL_DATE;
-                this.sellBy = LocalDate.parse(sellByString, dateTimeFormatter);
+                this.sellBy = LocalDate.parse(sellByString);
             } else { this.sellBy = null; }
+            return this;
+        }
+
+        /**
+         * Sets the builder's sell by date
+         * @param sellBy the date when the product in the inventory must sell by
+         * @return Builder with the sell by date set
+         */
+        public Builder withSellBy(LocalDate sellBy) {
+            this.sellBy = sellBy;
             return this;
         }
 
@@ -457,9 +510,18 @@ public class InventoryItem {
          */
         public Builder withBestBefore(String bestBeforeString) {
             if (bestBeforeString != null) {
-                DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ISO_LOCAL_DATE;
-                this.bestBefore = LocalDate.parse(bestBeforeString, dateTimeFormatter);
+                this.bestBefore = LocalDate.parse(bestBeforeString);
             } else { this.bestBefore = null; }
+            return this;
+        }
+
+        /**
+         * Sets the builder's best before date set
+         * @param bestBefore the date the product in the inventory is best before
+         * @return Builder with the best before date set
+         */
+        public Builder withBestBefore(LocalDate bestBefore) {
+            this.bestBefore = bestBefore;
             return this;
         }
 
@@ -469,11 +531,21 @@ public class InventoryItem {
          * @return Builder with the expires data set
          */
         public Builder withExpires(String expiresString) {
-            if (expiresString == null) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "No expiry date was provided");
+            if (expiresString != null) {
+                this.expires = LocalDate.parse(expiresString);
+            } else {
+                this.expires = null;
             }
-            DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ISO_LOCAL_DATE;
-            this.expires = LocalDate.parse(expiresString, dateTimeFormatter);
+            return this;
+        }
+
+        /**
+         * Sets the builder's expired date set. Required
+         * @param expires the date the product in the inventory expires. Must be disposed of after this date
+         * @return Builder with the expires data set
+         */
+        public Builder withExpires(LocalDate expires) {
+            this.expires = expires;
             return this;
         }
 
@@ -485,8 +557,8 @@ public class InventoryItem {
         public InventoryItem build() {
             InventoryItem inventoryItem = new InventoryItem();
             inventoryItem.setProduct(this.product);
-            inventoryItem.setRemainingQuantity(this.quantity);
             inventoryItem.setQuantity(this.quantity);
+            inventoryItem.setRemainingQuantity(this.quantity);
             if (pricePerItem != null) {
                 inventoryItem.setPricePerItem(this.pricePerItem);
             }

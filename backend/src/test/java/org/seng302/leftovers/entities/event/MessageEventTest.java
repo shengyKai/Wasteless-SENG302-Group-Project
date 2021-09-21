@@ -7,13 +7,12 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.seng302.leftovers.dto.ConversationDTO;
-import org.seng302.leftovers.dto.MessageDTO;
+import org.seng302.leftovers.dto.conversation.ConversationDTO;
+import org.seng302.leftovers.dto.conversation.MessageDTO;
 import org.seng302.leftovers.entities.*;
+import org.seng302.leftovers.exceptions.InternalErrorResponseException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.http.HttpStatus;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.time.Instant;
 
@@ -51,9 +50,7 @@ class MessageEventTest {
         when(buyer.getAddress()).thenReturn(address);
         when(seller.getAddress()).thenReturn(address);
 
-        var cardJson = new JSONObject();
-        cardJson.appendField("id", 520);
-        when(card.constructJSONObject()).thenReturn(cardJson);
+        when(card.getID()).thenReturn(520L);
 
         when(buyer.getUserID()).thenReturn(92L);
         when(seller.getUserID()).thenReturn(38L);
@@ -83,10 +80,9 @@ class MessageEventTest {
     }
 
     @Test
-    void messageEventConstructor_notifiedUserIsNotConversationParticipant_responseStatusExceptionThrown() {
-        var exception = assertThrows(ResponseStatusException.class, () -> new MessageEvent(bystander, firstMessage));
-        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, exception.getStatus());
-        assertEquals("Notification can only be sent to buyer or seller of card", exception.getReason());
+    void messageEventConstructor_notifiedUserIsNotConversationParticipant_InternalErrorResponseExceptionThrown() {
+        var exception = assertThrows(InternalErrorResponseException.class, () -> new MessageEvent(bystander, firstMessage));
+        assertEquals("Notification can only be sent to buyer or seller of card", exception.getMessage());
     }
 
     @Test
@@ -111,14 +107,13 @@ class MessageEventTest {
     }
 
     @Test
-    void setMessage_messageNotInConversation_responseStatusExceptionThrown() {
+    void setMessage_messageNotInConversation_InternalErrorResponseExceptionThrown() {
         when(secondMessage.getConversation()).thenReturn(otherConversation);
         var messageEvent = new MessageEvent(seller, firstMessage);
 
-        var exception = assertThrows(ResponseStatusException.class, () -> messageEvent.setMessage(secondMessage));
-        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, exception.getStatus());
+        var exception = assertThrows(InternalErrorResponseException.class, () -> messageEvent.setMessage(secondMessage));
         assertEquals("The message associated with a message event can only be changed to a new message in the " +
-                "original conversation.", exception.getReason());
+                "original conversation.", exception.getMessage());
     }
 
     @Test
@@ -126,7 +121,7 @@ class MessageEventTest {
         when(secondMessage.getConversation()).thenReturn(otherConversation);
         var messageEvent = new MessageEvent(seller, firstMessage);
 
-        assertThrows(ResponseStatusException.class, () -> messageEvent.setMessage(secondMessage));
+        assertThrows(InternalErrorResponseException.class, () -> messageEvent.setMessage(secondMessage));
         assertEquals(firstMessage, messageEvent.getMessage());
     }
 
@@ -136,7 +131,7 @@ class MessageEventTest {
         var messageEvent = new MessageEvent(seller, firstMessage);
         var createdBefore = messageEvent.getCreated();
 
-        assertThrows(ResponseStatusException.class, () -> messageEvent.setMessage(secondMessage));
+        assertThrows(InternalErrorResponseException.class, () -> messageEvent.setMessage(secondMessage));
         assertEquals(createdBefore, messageEvent.getCreated());
     }
 

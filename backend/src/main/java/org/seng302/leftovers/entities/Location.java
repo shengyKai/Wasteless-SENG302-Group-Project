@@ -3,16 +3,11 @@ package org.seng302.leftovers.entities;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
-import net.minidev.json.JSONObject;
-import org.seng302.leftovers.tools.JsonTools;
-import org.springframework.http.HttpStatus;
-import org.springframework.web.server.ResponseStatusException;
+import org.seng302.leftovers.exceptions.ValidationResponseException;
 
 import javax.persistence.*;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 @Data // generate setters and getters for all fields (lombok pre-processor)
 @NoArgsConstructor // generate a no-args constructor needed by JPA (lombok pre-processor)
@@ -63,23 +58,6 @@ public class Location {
         Builder locationBuilder = new Builder().atStreetNumber(streetNumber).onStreet(streetName)
                 .inCity(city).inRegion(region).inCountry(country).withPostCode(postCode).atDistrict(district);
         return locationBuilder.build();
-    }
-
-    /**
-     * Parses an address from JSON format into a Location object
-     * @param json JSON representation of the address
-     * @return A Location object representing the given address
-     */
-    public static Location parseLocationFromJson(JSONObject json) {
-        return new Builder()
-                .inCountry(json.getAsString("country"))
-                .inCity(json.getAsString("city"))
-                .inRegion(json.getAsString("region"))
-                .onStreet(json.getAsString("streetName"))
-                .atStreetNumber(json.getAsString("streetNumber"))
-                .withPostCode(json.getAsString("postcode"))
-                .atDistrict(json.getAsString("district"))
-                .build();
     }
 
     /**
@@ -235,7 +213,7 @@ public class Location {
         if (checkValidCountry(country)) {
             this.country = country;
         } else {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The country must not be empty, be less then 32 characters, and only contain letters.");
+            throw new ValidationResponseException("The country must not be empty, be less then 32 characters, and only contain letters.");
         }
     }
 
@@ -243,7 +221,7 @@ public class Location {
         if (checkValidCity(city)) {
             this.city = city;
         } else {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The city must not be empty, be less then 32 characters, and only contain letters.");
+            throw new ValidationResponseException("The city must not be empty, be less then 32 characters, and only contain letters.");
         }
     }
 
@@ -251,7 +229,7 @@ public class Location {
         if (checkValidRegion(region)) {
             this.region = region;
         } else {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The region must not be empty, be less then 32 characters, and only contain letters.");
+            throw new ValidationResponseException("The region must not be empty, be less then 32 characters, and only contain letters.");
         }
     }
 
@@ -259,7 +237,7 @@ public class Location {
         if (checkValidStreetName(streetName)) {
             this.streetName = streetName;
         } else {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The street name must not be empty, be less then 100 characters, and only contain letters.");
+            throw new ValidationResponseException("The street name must not be empty, be less then 100 characters, and only contain letters.");
         }
     }
 
@@ -267,7 +245,7 @@ public class Location {
         if (checkValidStreetNumber(streetNumber)) {
             this.streetNumber = streetNumber;
         } else {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The street number must not be empty, and be less than 10 characters.");
+            throw new ValidationResponseException("The street number must not be empty, and be less than 10 characters.");
         }
     }
 
@@ -275,7 +253,7 @@ public class Location {
         if (checkValidPostCode(postCode)) {
             this.postCode = postCode;
         } else {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The post code must be a letter or number, be " +
+            throw new ValidationResponseException("The post code must be a letter or number, be " +
                     "less than 16 characters long, and at least one character long.");
         }
     }
@@ -284,7 +262,7 @@ public class Location {
         if (checkValidDistrict(district)) {
             this.district = district;
         } else {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The district must not be more than 100 characters long.");
+            throw new ValidationResponseException("The district must not be more than 100 characters long.");
         }
     }
 

@@ -6,8 +6,7 @@ import org.seng302.leftovers.dto.event.MessageEventDTO;
 import org.seng302.leftovers.entities.Conversation;
 import org.seng302.leftovers.entities.Message;
 import org.seng302.leftovers.entities.User;
-import org.springframework.http.HttpStatus;
-import org.springframework.web.server.ResponseStatusException;
+import org.seng302.leftovers.exceptions.InternalErrorResponseException;
 
 import javax.persistence.*;
 import java.time.Instant;
@@ -56,7 +55,7 @@ public class MessageEvent extends Event {
         } else if (message.getConversation().getCard().getCreator().getUserID().equals(notifiedUser.getUserID())) {
             this.participantType = ParticipantType.SELLER;
         } else {
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Notification can only be sent to buyer " +
+            throw new InternalErrorResponseException("Notification can only be sent to buyer " +
                     "or seller of card");
         }
         this.message = message;
@@ -100,7 +99,7 @@ public class MessageEvent extends Event {
         if (this.conversation.getId().equals(message.getConversation().getId())) {
             this.message = message;
         } else {
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "The message associated with a message" +
+            throw new InternalErrorResponseException("The message associated with a message" +
                     " event can only be changed to a new message in the original conversation.");
         }
         setCreated(Instant.now());

@@ -513,8 +513,7 @@ class UserControllerTest {
                     .content(user.toString())
                     .contentType(MediaType.APPLICATION_JSON)
                     .accept(MediaType.APPLICATION_JSON))
-                    .andExpect(status().isBadRequest())
-                    .andExpect(status().reason("The first name must not be empty, be less then 16 characters, and only contain letters."));
+                    .andExpect(status().isBadRequest());
         }
     }
 
@@ -534,9 +533,7 @@ class UserControllerTest {
                     .content(userJSON.toString())
                     .contentType(MediaType.APPLICATION_JSON)
                     .accept(MediaType.APPLICATION_JSON))
-                    .andExpect(status().isBadRequest())
-                    .andExpect(status().reason("The middle name must not be empty, be less then 16 characters, and " +
-                            "only contain letters."));
+                    .andExpect(status().isBadRequest());
         }
     }
 
@@ -556,9 +553,7 @@ class UserControllerTest {
                     .content(userJSON.toString())
                     .contentType(MediaType.APPLICATION_JSON)
                     .accept(MediaType.APPLICATION_JSON))
-                    .andExpect(status().isBadRequest())
-                    .andExpect(status().reason("The last name must not be empty, be less then 16 characters, and only" +
-                            " contain letters."));
+                    .andExpect(status().isBadRequest());
         }
     }
 
@@ -578,9 +573,7 @@ class UserControllerTest {
                     .content(userJSON.toString())
                     .contentType(MediaType.APPLICATION_JSON)
                     .accept(MediaType.APPLICATION_JSON))
-                    .andExpect(status().isBadRequest())
-                    .andExpect(status().reason("The nickname must not be empty, be less then 16 characters, and only " +
-                            "contain letters."));
+                    .andExpect(status().isBadRequest());
         }
     }
 
@@ -601,8 +594,7 @@ class UserControllerTest {
                     .content(userJSON.toString())
                     .contentType(MediaType.APPLICATION_JSON)
                     .accept(MediaType.APPLICATION_JSON))
-                    .andExpect(status().isBadRequest())
-                    .andExpect(status().reason("The bio must be less than 200 characters long,and only contain letters, numbers, and valid special characters"));
+                    .andExpect(status().isBadRequest());
         }
     }
 
@@ -643,8 +635,7 @@ class UserControllerTest {
                     .content(userJSON.toString())
                     .contentType(MediaType.APPLICATION_JSON)
                     .accept(MediaType.APPLICATION_JSON))
-                    .andExpect(status().isBadRequest())
-                    .andExpect(status().reason("Your phone number has been entered incorrectly"));
+                    .andExpect(status().isBadRequest());
         }
     }
 

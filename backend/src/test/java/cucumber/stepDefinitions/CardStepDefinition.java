@@ -1,6 +1,7 @@
 package cucumber.stepDefinitions;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import cucumber.context.CardContext;
 import cucumber.context.EventContext;
@@ -18,13 +19,13 @@ import net.minidev.json.parser.ParseException;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.junit.jupiter.api.Assertions;
+import org.seng302.leftovers.dto.card.MarketplaceCardResponseDTO;
 import org.seng302.leftovers.entities.Keyword;
 import org.seng302.leftovers.entities.MarketplaceCard;
 import org.seng302.leftovers.entities.User;
 import org.seng302.leftovers.persistence.KeywordRepository;
 import org.seng302.leftovers.persistence.MarketplaceCardRepository;
 import org.seng302.leftovers.service.CardService;
-import org.seng302.leftovers.tools.JsonTools;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
@@ -46,9 +47,6 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 
 
 public class CardStepDefinition {
-
-    @Autowired
-    private ObjectMapper objectMapper;
 
     @Autowired
     private MarketplaceCardRepository marketplaceCardRepository;
@@ -73,6 +71,9 @@ public class CardStepDefinition {
 
     @Autowired
     private SessionFactory sessionFactory;
+
+    @Autowired
+    private ObjectMapper mapper;
 
     private JSONObject modifyParameters;
 
@@ -211,7 +212,9 @@ public class CardStepDefinition {
 
         try (Session session = sessionFactory.openSession()) {
             MarketplaceCard card = session.find(MarketplaceCard.class, cardContext.getLast().getID());
-            assertEquals(objectMapper.readTree(objectMapper.writeValueAsString(card.constructJSONObject())), objectMapper.readTree(cardJson.toJSONString()));
+
+            var expectedJson = mapper.convertValue(new MarketplaceCardResponseDTO(card), JSONObject.class);
+            assertEquals(mapper.readTree(mapper.writeValueAsString(expectedJson)), mapper.readTree(cardJson.toJSONString()));
         }
     }
 
@@ -413,9 +416,7 @@ public class CardStepDefinition {
         assertEquals(modifyParameters.getAsString("title"), updatedCard.getTitle());
         assertEquals(modifyParameters.getAsString("description"), updatedCard.getDescription());
 
-        Set<Long> expectedKeywordIds = Arrays.stream(JsonTools.parseLongArrayFromJsonField(modifyParameters, "keywordIds"))
-                .boxed()
-                .collect(Collectors.toSet());
+        Set<Long> expectedKeywordIds = mapper.convertValue(modifyParameters.get("keywordIds"), new TypeReference<>() {});
         Set<Long> actualKeywordIds = updatedCard.getKeywords().stream()
                 .map(Keyword::getID)
                 .collect(Collectors.toSet());

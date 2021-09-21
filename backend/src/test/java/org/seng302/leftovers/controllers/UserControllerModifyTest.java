@@ -16,8 +16,8 @@ import org.mockito.MockitoAnnotations;
 import org.seng302.leftovers.dto.LocationDTO;
 import org.seng302.leftovers.entities.Location;
 import org.seng302.leftovers.entities.User;
-import org.seng302.leftovers.exceptions.AccessTokenException;
-import org.seng302.leftovers.exceptions.InsufficientPermissionException;
+import org.seng302.leftovers.exceptions.AccessTokenResponseException;
+import org.seng302.leftovers.exceptions.InsufficientPermissionResponseException;
 import org.seng302.leftovers.persistence.UserRepository;
 import org.seng302.leftovers.tools.AuthenticationTokenManager;
 import org.seng302.leftovers.tools.PasswordAuthenticator;
@@ -465,7 +465,7 @@ class UserControllerModifyTest {
     @Test
     void modifyUser_invalidSession_userNotModified401() throws Exception {
         authenticationTokenManager.when(() -> AuthenticationTokenManager.checkAuthenticationToken(any()))
-                .thenThrow(new AccessTokenException());
+                .thenThrow(new AccessTokenResponseException());
         var jsonBody = createValidRequest();
 
         mockMvc.perform(MockMvcRequestBuilders
@@ -482,7 +482,7 @@ class UserControllerModifyTest {
     @Test
     void modifyUser_invalidPermission_userNotModified403() throws Exception {
         authenticationTokenManager.when(() -> AuthenticationTokenManager.sessionCanSeePrivate(any(), any()))
-                .thenThrow(new InsufficientPermissionException());
+                .thenThrow(new InsufficientPermissionResponseException());
         var jsonBody = createValidRequest();
 
         mockMvc.perform(MockMvcRequestBuilders

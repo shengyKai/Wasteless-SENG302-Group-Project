@@ -2,16 +2,18 @@ package org.seng302.leftovers.entities.event;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import net.minidev.json.JSONObject;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.seng302.leftovers.dto.card.KeywordDTO;
 import org.seng302.leftovers.dto.user.UserResponseDTO;
 import org.seng302.leftovers.entities.Keyword;
 import org.seng302.leftovers.entities.Location;
 import org.seng302.leftovers.entities.User;
-import org.seng302.leftovers.persistence.event.EventRepository;
 import org.seng302.leftovers.persistence.KeywordRepository;
 import org.seng302.leftovers.persistence.UserRepository;
+import org.seng302.leftovers.persistence.event.EventRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
@@ -28,8 +30,6 @@ class KeywordCreatedEventTest {
     private UserRepository userRepository;
     @Autowired
     private EventRepository eventRepository;
-    @Autowired
-    private ObjectMapper objectMapper;
 
     private Keyword keyword;
     private User user;
@@ -93,12 +93,11 @@ class KeywordCreatedEventTest {
                         "\"lastModified\":\"%s\"}",
                 event.getId(),
                 event.getCreated(),
-                keyword.constructJSONObject().toJSONString(),
+                mapper.convertValue(new KeywordDTO(keyword), JSONObject.class),
                 event.getStatus().toString().toLowerCase(),
                 event.isRead(),
-                objectMapper.writeValueAsString(new UserResponseDTO(user)),
+                mapper.writeValueAsString(new UserResponseDTO(user)),
                 event.getLastModified().toString());
-        System.out.println(expectedJsonString);
         String actualJsonString = mapper.writeValueAsString(event.asDTO());
         assertEquals(mapper.readTree(expectedJsonString), mapper.readTree(actualJsonString));
     }

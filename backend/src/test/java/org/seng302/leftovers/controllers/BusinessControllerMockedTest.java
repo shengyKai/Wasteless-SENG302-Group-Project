@@ -1,5 +1,6 @@
 package org.seng302.leftovers.controllers;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.SneakyThrows;
 import net.minidev.json.JSONObject;
 import org.junit.jupiter.api.AfterEach;
@@ -10,13 +11,15 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.junit.runner.RunWith;
 import org.mockito.*;
 import org.seng302.leftovers.dto.LocationDTO;
+import org.seng302.leftovers.dto.business.BusinessType;
 import org.seng302.leftovers.entities.*;
-import org.seng302.leftovers.exceptions.AccessTokenException;
+import org.seng302.leftovers.exceptions.AccessTokenResponseException;
 import org.seng302.leftovers.persistence.BusinessRepository;
 import org.seng302.leftovers.persistence.ImageRepository;
 import org.seng302.leftovers.persistence.UserRepository;
 import org.seng302.leftovers.service.ImageService;
 import org.seng302.leftovers.tools.AuthenticationTokenManager;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -46,11 +49,14 @@ class BusinessControllerMockedTest {
 
     private MockMvc mockMvc;
 
-    private long mockBusinessId = 6L;
-    private long mockOwnerId    = 7L;
-    private long mockNonOwnerId = 8L;
-    private long mockImageId = 9L;
-    private long mockPrimaryImageId = 10L;
+    private final long mockBusinessId = 6L;
+    private final long mockOwnerId    = 7L;
+    private final long mockNonOwnerId = 8L;
+    private final long mockImageId = 9L;
+    private final long mockPrimaryImageId = 10L;
+
+    @Autowired
+    private ObjectMapper objectMapper;
 
     @Mock
     private BusinessRepository businessRepository;
@@ -130,7 +136,7 @@ class BusinessControllerMockedTest {
         json.put("name", "New business name");
         json.put("description", "New business description");
         json.put("address", new LocationDTO(Location.covertAddressStringToLocation("4,Rountree Street,Ashburton,Christchurch,New Zealand,Canterbury,8041"), true));
-        json.put("businessType", Business.getBusinessTypes().get(0));
+        json.put("businessType", objectMapper.convertValue(BusinessType.ACCOMMODATION_AND_FOOD_SERVICES, String.class));
         json.put("updateProductCountry", true);
         return json;
     }
@@ -139,7 +145,7 @@ class BusinessControllerMockedTest {
     void modifyBusiness_notLoggedIn_401Response() throws Exception {
         // Mock the AuthenticationTokenManager to respond as it would when the authentication token is missing or invalid
         authenticationTokenManager.when(() -> AuthenticationTokenManager.checkAuthenticationToken(any()))
-                .thenThrow(new AccessTokenException());
+                .thenThrow(new AccessTokenResponseException());
 
         var json = createValidRequest();
         mockMvc.perform(
@@ -293,7 +299,9 @@ class BusinessControllerMockedTest {
         verify(mockBusiness, times(1)).setPrimaryOwner(mockNonOwner);
         verify(mockBusiness, times(1)).setName((String)json.get("name"));
         verify(mockBusiness, times(1)).setDescription((String)json.get("description"));
-        verify(mockBusiness, times(1)).setBusinessType((String)json.get("businessType"));
+
+        var businessType = objectMapper.convertValue(json.getAsString("businessType"), BusinessType.class);
+        verify(mockBusiness, times(1)).setBusinessType(businessType);
 
         var addressCaptor = ArgumentCaptor.forClass(Location.class);
         verify(mockBusiness, times(1)).setAddress(addressCaptor.capture());
@@ -381,7 +389,7 @@ class BusinessControllerMockedTest {
     void uploadImage_notLoggedIn_401Response() throws Exception {
         // Mock the AuthenticationTokenManager to respond as it would when the authentication token is missing or invalid
         authenticationTokenManager.when(() -> AuthenticationTokenManager.checkAuthenticationToken(any()))
-                .thenThrow(new AccessTokenException());
+                .thenThrow(new AccessTokenResponseException());
 
         mockMvc.perform(multipart("/businesses/" + mockBusinessId + "/images")
                 .file(createMockUpload()))
@@ -446,7 +454,7 @@ class BusinessControllerMockedTest {
     void makeImagePrimary_notLoggedIn_401Response() throws Exception {
         // Mock the AuthenticationTokenManager to respond as it would when the authentication token is missing or invalid
         authenticationTokenManager.when(() -> AuthenticationTokenManager.checkAuthenticationToken(any()))
-                .thenThrow(new AccessTokenException());
+                .thenThrow(new AccessTokenResponseException());
 
         mockMvc.perform(put("/businesses/" + mockBusinessId + "/images/" + mockImageId + "/makeprimary"))
                 .andExpect(status().isUnauthorized())

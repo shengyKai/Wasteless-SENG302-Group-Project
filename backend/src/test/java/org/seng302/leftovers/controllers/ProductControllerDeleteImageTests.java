@@ -5,6 +5,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.runner.RunWith;
+import org.seng302.leftovers.dto.business.BusinessType;
 import org.seng302.leftovers.dto.user.UserRole;
 import org.seng302.leftovers.entities.*;
 import org.seng302.leftovers.persistence.BusinessRepository;
@@ -113,7 +114,7 @@ class ProductControllerDeleteImageTests {
         testBusiness = new Business.Builder()
                 .withName("Help Industries")
                 .withAddress(Location.covertAddressStringToLocation("6,Help Street,Place,Dunedin,New Zelaand,Otago,6959"))
-                .withBusinessType("Accommodation and Food Services")
+                .withBusinessType(BusinessType.ACCOMMODATION_AND_FOOD_SERVICES)
                 .withDescription("Helps industries hopefully")
                 .withPrimaryOwner(testUser)
                 .build();
@@ -130,7 +131,7 @@ class ProductControllerDeleteImageTests {
                 .withRecommendedRetailPrice("3.20")
                 .withBusiness(testBusiness)
                 .build();
-        testProduct.setProductImages(Arrays.asList(testImage));
+        testProduct.setImages(Arrays.asList(testImage));
         productRepository.save(testProduct);
 
         testUser2 = new User.Builder()
@@ -150,7 +151,7 @@ class ProductControllerDeleteImageTests {
         testBusiness2 = new Business.Builder()
                 .withName("Help Industries")
                 .withAddress(Location.covertAddressStringToLocation("6,Help Street,Place,Dunedin,New Zelaand,Otago,6959"))
-                .withBusinessType("Accommodation and Food Services")
+                .withBusinessType(BusinessType.ACCOMMODATION_AND_FOOD_SERVICES)
                 .withDescription("Helps industries hopefully")
                 .withPrimaryOwner(testUser2)
                 .build();
@@ -206,7 +207,7 @@ class ProductControllerDeleteImageTests {
     void deleteProductImage_noImage_406Response() throws Exception {
         String url = String.format("/businesses/%d/products/%s/images/%d",
                 testBusiness.getId(), testProduct.getProductCode(), 999);
-        testProduct.setProductImages(Arrays.asList());
+        testProduct.setImages(Arrays.asList());
         productRepository.save(testProduct);
 
         setActiveUser(testUser.getUserID());
