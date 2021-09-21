@@ -2,7 +2,7 @@ import Vue from 'vue';
 import Vuetify from 'vuetify';
 import { createLocalVue, Wrapper, mount } from '@vue/test-utils';
 
-import BusinessImageUploader from "@/components/utils/BusinessImageUploader.vue";
+import ImageUploader from "@/components/utils/ImageUploader.vue";
 import { castMock, findButtonWithText, flushQueue } from './utils';
 import * as api from '@/api/internal';
 
@@ -16,11 +16,11 @@ Vue.use(Vuetify);
 
 const localVue = createLocalVue();
 
-describe('BusinessImageUploader.vue', () => {
-  // Container for the wrapper around BusinessImageUploader
+describe('ImageUploader.vue', () => {
+  // Container for the wrapper around ImageUploader
   let appWrapper: Wrapper<any>;
 
-  // Container for the BusinessImageUploader under test
+  // Container for the ImageUploader under test
   let wrapper: Wrapper<any>;
 
 
@@ -39,7 +39,7 @@ describe('BusinessImageUploader.vue', () => {
   });
 
   /**
-   * Sets up the test BusinessImageUploader instance
+   * Sets up the test ImageUploader instance
    *
    * Because the element we're testing has a v-dialog we need to take some extra sets to make it
    * work.
@@ -47,16 +47,16 @@ describe('BusinessImageUploader.vue', () => {
   beforeEach(() => {
     const vuetify = new Vuetify();
 
-    // Creating wrapper around BusinessImageUploader with data-app to appease vuetify
+    // Creating wrapper around ImageUploader with data-app to appease vuetify
     const App = localVue.component('App', {
-      components: { BusinessImageUploader },
+      components: { ImageUploader },
       template: `
       <div data-app>
-        <BusinessImageUploader v-model="file"/>
+        <ImageUploader v-model="file"/>
       </div>`,
     });
 
-    // Put the BusinessImageUploader component inside a div in the global document,
+    // Put the ImageUploader component inside a div in the global document,
     // this seems to make vuetify work correctly, but necessitates calling appWrapper.destroy
     const elem = document.createElement('div');
     document.body.appendChild(elem);
@@ -72,27 +72,27 @@ describe('BusinessImageUploader.vue', () => {
       }
     });
 
-    wrapper = appWrapper.getComponent(BusinessImageUploader);
+    wrapper = appWrapper.getComponent(ImageUploader);
   });
 
   /**
    * Executes after every test case.
    *
-   * This function makes sure that the BusinessImageUploader component is removed from the global document
+   * This function makes sure that the ImageUploader component is removed from the global document
    */
   afterEach(() => {
     appWrapper.destroy();
   });
 
   /**
-   * Finds the close button in the BusinessImageUploader form
+   * Finds the close button in the ImageUploader form
    *
    * @returns A Wrapper around the close button
    */
   const findCloseButton = () => findButtonWithText(wrapper, 'Close');
 
   /**
-   * Finds the create button in the BusinessImageUploader form
+   * Finds the create button in the ImageUploader form
    *
    * @returns A Wrapper around the create button
    */

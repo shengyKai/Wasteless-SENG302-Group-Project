@@ -3,7 +3,7 @@
     <v-form>
       <v-card>
         <v-card-title>
-          Upload Business Image
+          Upload Image
         </v-card-title>
         <v-card-text>
           <ImageSelector v-model="file"/>
@@ -37,8 +37,8 @@
 import ImageSelector from "@/components/utils/ImageSelector";
 
 export default {
-  name: "BusinessImageUploader",
-  components: {ImageSelector},
+  name: "ImageUploader",
+  components: { ImageSelector },
   props: {
     value: undefined,
   },

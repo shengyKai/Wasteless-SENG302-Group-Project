@@ -173,7 +173,7 @@
                     </v-icon>
                     Upload new image
                   </v-btn>
-                  <BusinessImageUploader
+                  <ImageUploader
                     v-model="imageFile"
                     v-if="showImageUploaderForm"
                     @closeDialog="showImageUploaderForm=false"
@@ -256,7 +256,7 @@
 
 <script>
 import LocationAutocomplete from '@/components/utils/LocationAutocomplete';
-import BusinessImageUploader from "@/components/utils/BusinessImageUploader";
+import ImageUploader from "@/components/utils/ImageUploader";
 import {
   alphabetExtendedMultilineRules,
   alphabetExtendedSingleLineRules, alphabetRules,
@@ -271,7 +271,7 @@ export default {
   name: 'ModifyBusiness',
   components: {
     LocationAutocomplete,
-    BusinessImageUploader,
+    ImageUploader,
     ImageCarousel
   },
   props: {
