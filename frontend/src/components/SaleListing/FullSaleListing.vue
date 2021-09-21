@@ -10,11 +10,11 @@
           <v-col cols="12" sm="8">
             <v-card flat>
               <v-card-text>
-                <p ref="productName" class="text-h4 text--primary d-inline-block">
+                <h2 ref="productName" class="text--primary font-weight-bold d-inline-block">
                   {{ product.name }}
-                </p>
-                <p class="ml-2 text-h5 text--secondary d-inline-block text-decoration-underline">FROM {{this.product.manufacturer}}</p>
-                <div class="text--primary  text-left">
+                </h2>
+                <h4 class="ml-2 d-inline-block text-decoration-underline">FROM {{this.product.manufacturer}}</h4>
+                <div class="text--primary mt-2">
                   {{ productDescription }}
                 </div>
               </v-card-text>
@@ -32,7 +32,7 @@
                 {{thumbMessage}} {{interestCount}}
                 <v-icon class="ml-1">{{thumbIcon}}</v-icon>
               </v-btn>
-              <!-- A return button for user to go back to business profile-->
+              <!-- A return button for user to hide full sale listing-->
               <v-btn class="ml-2 mr-1 pl-2 pr-1" color="secondary" @click="hideExpand">
                 Hide
                 <v-icon class="ml-1">mdi-arrow-left</v-icon>
@@ -42,86 +42,96 @@
           <!-- </v-col> -->
         </v-row>
       </div>
+      <v-alert
+        class="ma-2 flex-grow-0"
+        v-if="errorMessage !== undefined"
+        type="error"
+        dismissible
+        @input="errorMessage = undefined"
+      >
+        {{ errorMessage }}
+      </v-alert>
       <!-- Listing details -->
       <div>
-        <v-row no-gutters class="mt-3">
-          <v-col class="mt-2" cols="6" sm="2">
-            <label class="text-h6 font-weight-bold">Total Price:</label>
-          </v-col>
-          <v-col class="mt-2" cols="6" sm="4">
-            <label class="text-h6 font-weight-regular">${{ saleItem.price }}</label>
-          </v-col>
-          <v-col class="mt-2" cols="6" sm="2">
-            <label class="text-h6 font-weight-bold">Date Created:</label>
-          </v-col>
-          <v-col class="mt-2" cols="6" sm="4">
-            <label class="text-h6 font-weight-regular">{{ createdFormatted }}</label>
-          </v-col>
-          <v-col class="mt-2" cols="6" sm="2">
-            <label class="text-h6 font-weight-bold">Quantity:</label>
-          </v-col>
-          <v-col class="mt-2" cols="6" sm="4">
-            <label class="text-h6 font-weight-regular">{{ saleItem.quantity }}</label>
-          </v-col>
-          <v-col class="mt-2" cols="6" sm="2">
-            <label class="text-h6 font-weight-bold">Expiry Date:</label>
-          </v-col>
-          <v-col class="mt-2" cols="6" sm="4">
-            <label class="text-h6 font-weight-regular">{{ expiresFormatted }}</label>
-          </v-col>
-          <v-col class="mt-2" cols="6" sm="2">
-            <label class="text-h6 font-weight-bold">More Info:</label>
-          </v-col>
-          <v-col class="mt-2" cols="6" sm="4">
-            <label class="text-h6 font-weight-regular">
-              {{ saleItem.moreInfo }}
-            </label>
-          </v-col>
-          <v-col class="mt-2" cols="6" sm="2">
-            <label class="text-h6 font-weight-bold">Closing Date:</label>
-          </v-col>
-          <v-col class="mt-2" cols="6" sm="4">
-            <label class="text-h6 font-weight-regular">{{ createdFormatted }}</label>
-          </v-col>
-          <v-col class="column" cols="6" sm="4">
-            <label class="followingLabel">{{ closesFormatted }}</label>
-          </v-col>
-        </v-row>
-        <!-- Addtional listing details -->
-        <div>
-          <v-row no-gutters>
-            <v-col class="mt-2" cols="6" sm="2">
-              <label class="text-h6 font-weight-bold">Best Before Date:</label>
-            </v-col>
-            <v-col class="mt-2" cols="6" sm="4">
-              <label class="text-h6 font-weight-regular">{{ bestBeforeFormatted }}</label>
-            </v-col>
-            <v-col class="mt-2" cols="6" sm="2">
-              <label class="text-h6 font-weight-bold">Sell By Date:</label>
-            </v-col>
-            <v-col class="mt-2" cols="6" sm="4">
-              <label class="text-h6 font-weight-regular">{{ sellByFormatted }}</label>
-            </v-col>
-            <v-col class="mt-2" cols="6" sm="2">
-              <label class="text-h6 font-weight-bold">Country:</label>
-            </v-col>
-            <v-col class="mt-2" cols="6" sm="4">
-              <label class="text-h6 font-weight-regular">{{ product.countryOfSale }}</label>
-            </v-col>
-            <v-col class="mt-2" cols="6" sm="2">
-              <label class="text-h6 font-weight-bold">Manufacturer:</label>
-            </v-col>
-            <v-col class="mt-2" cols="6" sm="4">
-              <label class="text-h6 font-weight-regular">{{ product.manufacturer }}</label>
-            </v-col>
-            <v-col class="mt-2" cols="6" sm="2">
-              <label class="text-h6 font-weight-bold">Original Name:</label>
-            </v-col>
-            <v-col class="mt-2" cols="6" sm="4">
-              <label class="text-h6 font-weight-regular">{{ product.name }}</label>
-            </v-col>
-          </v-row>
-        </div>
+        <v-container>
+          <v-card color="grey lighten-2" class="pa-2 pl-4">
+            <v-row no-gutters class="mt-3">
+              <v-col cols="6" sm="2">
+                <h4 class="font-weight-bold">Total Price:</h4>
+              </v-col>
+              <v-col cols="6" sm="4">
+                <h4 class="font-weight-regular">${{ saleItem.price }}</h4>
+              </v-col>
+              <v-col cols="6" sm="2">
+                <h4 class=" font-weight-bold">Date Created:</h4>
+              </v-col>
+              <v-col cols="6" sm="4">
+                <h4 class=" font-weight-regular">{{ createdFormatted }}</h4>
+              </v-col>
+              <v-col cols="6" sm="2">
+                <h4 class=" font-weight-bold">Quantity:</h4>
+              </v-col>
+              <v-col cols="6" sm="4">
+                <h4 class=" font-weight-regular">{{ saleItem.quantity }}</h4>
+              </v-col>
+              <v-col cols="6" sm="2">
+                <h4 class=" font-weight-bold">Expiry Date:</h4>
+              </v-col>
+              <v-col cols="6" sm="4">
+                <h4 class=" font-weight-regular">{{ expiresFormatted }}</h4>
+              </v-col>
+              <v-col cols="6" sm="2">
+                <h4 class=" font-weight-bold">More Info:</h4>
+              </v-col>
+              <v-col cols="6" sm="4">
+                <h4 class=" font-weight-regular">
+                  {{ saleItem.moreInfo }}
+                </h4>
+              </v-col>
+              <v-col cols="6" sm="2">
+                <h4 class=" font-weight-bold">Closing Date:</h4>
+              </v-col>
+              <v-col class="column" cols="6" sm="4">
+                <h4 class="font-weight-regular">{{ closesFormatted }}</h4>
+              </v-col>
+            </v-row>
+            <!-- Addtional listing details -->
+            <div>
+              <v-row no-gutters>
+                <v-col cols="6" sm="2">
+                  <h4 class=" font-weight-bold">Best Before Date:</h4>
+                </v-col>
+                <v-col cols="6" sm="4">
+                  <h4 class=" font-weight-regular">{{ bestBeforeFormatted }}</h4>
+                </v-col>
+                <v-col cols="6" sm="2">
+                  <h4 class=" font-weight-bold">Sell By Date:</h4>
+                </v-col>
+                <v-col cols="6" sm="4">
+                  <h4 class=" font-weight-regular">{{ sellByFormatted }}</h4>
+                </v-col>
+                <v-col cols="6" sm="2">
+                  <h4 class=" font-weight-bold">Country:</h4>
+                </v-col>
+                <v-col cols="6" sm="4">
+                  <h4 class=" font-weight-regular">{{ product.countryOfSale }}</h4>
+                </v-col>
+                <v-col cols="6" sm="2">
+                  <h4 class=" font-weight-bold">Manufacturer:</h4>
+                </v-col>
+                <v-col cols="6" sm="4">
+                  <h4 class=" font-weight-regular">{{ product.manufacturer }}</h4>
+                </v-col>
+                <v-col cols="6" sm="2">
+                  <h4 class=" font-weight-bold">Original Name:</h4>
+                </v-col>
+                <v-col cols="6" sm="4">
+                  <h4 class=" font-weight-regular">{{ product.name }}</h4>
+                </v-col>
+              </v-row>
+            </div>
+          </v-card>
+        </v-container>
       </div>
     </v-card>
   </div>
@@ -264,16 +274,22 @@ export default {
         this.errorMessage = result;
       } else {
         this.errorMessage = undefined;
-        await this.computeIsInterested();
+        this.isInterested = !this.isInterested;
         if(this.isInterested) this.interestCount += 1;
         else this.interestCount -= 1;
       }
     },
     /**
-     * Compute the lising isInterested
+     * Get the user's interest status on the listing
      */
     async computeIsInterested() {
-      this.isInterested = await getListingInterest(this.saleItem.id, this.userId);
+      const result = await getListingInterest(this.saleItem.id, this.userId);
+      if (typeof result === 'string'){
+        this.errorMessage = result;
+      } else {
+        this.errorMessage = undefined;
+        this.isInterested = result;
+      }
     },
     /**
      * TODO in other task

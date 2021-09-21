@@ -144,7 +144,7 @@ describe('FullSaleListing.vue', () => {
     expect(wrapper.text()).toContain("Like 1");
   });
 
-  it.only("Update user status upon clicking on the like button", async () => {
+  it("Update user status upon clicking on the like button", async () => {
     const likeButton = wrapper.findComponent({ref:'likeButton'});
     expect(likeButton.exists()).toBeTruthy;
     await likeButton.trigger('click');

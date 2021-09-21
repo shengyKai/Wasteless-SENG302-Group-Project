@@ -1313,7 +1313,7 @@ export async function setListingInterest(listingId: number, userId: number, inte
   } catch (error) {
     let status: number | undefined = error.response?.status;
     if (status === undefined) return 'Failed to reach backend';
-    if (status === 400) return 'Invalid userID ' + error.response?.data.message;
+    if (status === 400) return 'Invalid user provided ';
     if (status === 401) return 'You have been logged out. Please login again and retry';
     if (status === 403) return 'Operation not permitted';
     if (status === 406) return 'Listing does not exist';
@@ -1337,7 +1337,7 @@ export async function getListingInterest(listingId: number, userId: number): Pro
   } catch (error) {
     let status: number | undefined = error.response?.status;
     if (status === undefined) return 'Failed to reach backend';
-    if (status === 400) return 'Invalid userID ' + error.response?.data.message;
+    if (status === 400) return 'Invalid user provided';
     if (status === 401) return 'You have been logged out. Please login again and retry';
     if (status === 403) return 'Operation not permitted';
     if (status === 406) return 'Listing does not exist';
