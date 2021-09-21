@@ -3,6 +3,7 @@ package org.seng302.leftovers.persistence;
 import org.seng302.leftovers.entities.Keyword;
 import org.seng302.leftovers.entities.MarketplaceCard;
 import org.seng302.leftovers.entities.User;
+import org.seng302.leftovers.exceptions.DoesNotExistResponseException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
@@ -62,7 +63,7 @@ public interface MarketplaceCardRepository extends CrudRepository<MarketplaceCar
      * @return Marketplace card with the given id
      */
     default MarketplaceCard getCard(Long id) {
-        return findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "No card exists with the given id"));
+        return findById(id).orElseThrow(() -> new DoesNotExistResponseException(MarketplaceCard.class));
     }
 
     /**

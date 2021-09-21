@@ -7,6 +7,7 @@ import org.seng302.leftovers.dto.ResultPageDTO;
 import org.seng302.leftovers.dto.conversation.SendMessageDTO;
 import org.seng302.leftovers.entities.Conversation;
 import org.seng302.leftovers.entities.Message;
+import org.seng302.leftovers.exceptions.InsufficientPermissionResponseException;
 import org.seng302.leftovers.persistence.ConversationRepository;
 import org.seng302.leftovers.persistence.MarketplaceCardRepository;
 import org.seng302.leftovers.persistence.MessageRepository;
@@ -19,7 +20,6 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ResponseStatusException;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
@@ -68,18 +68,18 @@ public class ConversationController {
 
         // Is the currently logged in user == senderId or an admin
         if (!AuthenticationTokenManager.sessionCanSeePrivate(request, senderId)) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You do not have permission to post to this conversation");
+            throw new InsufficientPermissionResponseException("You do not have permission to post to this conversation");
         }
         // Is the sender card creator or potential buyer or admin?
         if (!List.of(buyer, card.getCreator()).contains(sender) && !AuthenticationTokenManager.sessionIsAdmin(request)) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You do not have permission to post to this conversation");
+            throw new InsufficientPermissionResponseException("You do not have permission to post to this conversation");
         }
 
         var conversation = conversationRepository.findByCardAndBuyer(card, buyer).orElse(new Conversation(card, buyer));
 
         // The first message must be from the buyer
         if (conversation.getMessages().isEmpty() && sender.equals(card.getCreator())) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You cannot start a conversation with this person");
+            throw new InsufficientPermissionResponseException("You cannot start a conversation with this person");
         }
 
         logger.info("Posting a message to conversation about card {}, with sender {}", card.getID(), sender.getUserID());
@@ -116,7 +116,7 @@ public class ConversationController {
 
             if (!AuthenticationTokenManager.sessionCanSeePrivate(request, buyerId)
                     && !AuthenticationTokenManager.sessionCanSeePrivate(request, card.getCreator().getUserID())) {
-                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You do not have permission to view this conversation");
+                throw new InsufficientPermissionResponseException("You do not have permission to view this conversation");
             }
 
             var conversation = conversationRepository.getConversation(card, buyer);
@@ -124,7 +124,7 @@ public class ConversationController {
             var messages = messageRepository.findAllByConversation(conversation, pageRequest);
 
             return new ResultPageDTO<>(messages.map(MessageDTO::new));
-        } catch (ResponseStatusException e) {
+        } catch (Exception e) {
             logger.error(e.getMessage());
             throw e;
         }

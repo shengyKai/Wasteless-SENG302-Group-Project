@@ -102,8 +102,7 @@ class LoginControllerTest {
         mockMvc.perform(post("/login")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(loginBody))
-                .andExpect(status().isBadRequest())
-                .andExpect(status().reason("Password is incorrect"));
+                .andExpect(status().isBadRequest());
     }
 
     /**
@@ -118,8 +117,7 @@ class LoginControllerTest {
         mockMvc.perform(post("/login")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(loginBody))
-                .andExpect(status().isBadRequest())
-                .andExpect(status().reason("There is no account associated with this email"));
+                .andExpect(status().isBadRequest());
     }
 
     /**

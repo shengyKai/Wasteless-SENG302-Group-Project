@@ -8,6 +8,8 @@ import org.seng302.leftovers.dto.inventory.UpdateInventoryItemDTO;
 import org.seng302.leftovers.entities.Business;
 import org.seng302.leftovers.entities.InventoryItem;
 import org.seng302.leftovers.entities.Product;
+import org.seng302.leftovers.exceptions.DoesNotExistResponseException;
+import org.seng302.leftovers.exceptions.ValidationResponseException;
 import org.seng302.leftovers.persistence.BusinessRepository;
 import org.seng302.leftovers.persistence.InventoryItemRepository;
 import org.seng302.leftovers.persistence.ProductRepository;
@@ -17,9 +19,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ResponseStatusException;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
@@ -76,8 +76,8 @@ public class InventoryController {
                     .build();
 
             inventoryItemRepository.save(item);
-        } catch (ResponseStatusException exception) {
-            logger.warn(exception);
+        } catch (Exception exception) {
+            logger.error(exception.getMessage());
             throw exception;
         }
     }
@@ -100,11 +100,10 @@ public class InventoryController {
             business.checkSessionPermissions(request);
 
             InventoryItem invItem = inventoryItemRepository.findInventoryItemByBusinessAndId(business, invItemId)
-                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Inventory item does not exist for this business"));
+                    .orElseThrow(() -> new ValidationResponseException("Inventory item does not exist for this business"));
 
             Product product = productRepository.findByBusinessAndProductCode(business, invItemInfo.getProductId())
-                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                            "The product with the given id does not exist within the business's catalogue"));
+                    .orElseThrow(() -> new DoesNotExistResponseException(Product.class));
             invItem.setProduct(product);
             invItem.setQuantity(invItemInfo.getQuantity());
             invItem.setPricePerItem(invItemInfo.getPricePerItem());
@@ -166,7 +165,7 @@ public class InventoryController {
         if (orderBy == null) orderBy = "productCode";
         else if (!VALID_ORDERINGS.contains(orderBy)) {
             logger.error("Invalid inventory item ordering given: {}", orderBy);
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The provided ordering is invalid");
+            throw new ValidationResponseException("The provided ordering is invalid");
         }
 
         switch (orderBy) {

@@ -9,7 +9,7 @@ import org.seng302.leftovers.dto.product.ProductFilterOption;
 import org.seng302.leftovers.dto.saleitem.SaleListingSearchDTO;
 import org.seng302.leftovers.dto.user.UserRole;
 import org.seng302.leftovers.entities.*;
-import org.seng302.leftovers.exceptions.SearchFormatException;
+import org.seng302.leftovers.exceptions.ValidationResponseException;
 import org.seng302.leftovers.persistence.SpecificationsBuilder;
 import org.seng302.leftovers.persistence.UserRepository;
 import org.springframework.data.domain.PageRequest;
@@ -197,8 +197,9 @@ public class SearchHelper {
      */
     public static Specification<Business> constructSpecificationFromBusinessSearch(String searchQuery, BusinessType businessType) {
         if (searchQuery == null && businessType == null) {
-            SearchFormatException exception =
-                    new SearchFormatException("Provide either a search query or business type to find matching businesses");
+            var exception =
+                    new ValidationResponseException(
+            "Provide either a search query or business type to find matching businesses");
             logger.error(exception.getMessage());
             throw exception;
         }
@@ -436,7 +437,7 @@ public class SearchHelper {
         }
 
         if (searchSpecs.isEmpty()) {
-            SearchFormatException searchFormatException = new SearchFormatException("No valid search terms in query.");
+            var searchFormatException = new ValidationResponseException("No valid search terms in query.");
             logger.error(searchFormatException.getMessage());
             throw(searchFormatException);
         }
@@ -499,7 +500,7 @@ public class SearchHelper {
      */
     private static List<String> splitSearchStringIntoTerms(String searchString) {
         if (searchString.isBlank()) {
-            SearchFormatException searchFormatException = new SearchFormatException("Search query cannot be blank.");
+            var searchFormatException = new ValidationResponseException("Search query cannot be blank.");
             logger.error(searchFormatException.getMessage());
             throw(searchFormatException);
         }
@@ -556,7 +557,7 @@ public class SearchHelper {
                 termEndingIndex++;
             }
             if (!foundClosingQuote) {
-                SearchFormatException searchFormatException = new SearchFormatException("Search string contains opening quote but " +
+                var searchFormatException = new ValidationResponseException("Search string contains opening quote but " +
                         "no closing quote.");
                 logger.error(searchFormatException.getMessage());
                 throw(searchFormatException);

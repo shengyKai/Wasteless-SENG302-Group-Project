@@ -11,13 +11,14 @@ import org.seng302.leftovers.dto.event.EventTag;
 import org.seng302.leftovers.entities.User;
 import org.seng302.leftovers.entities.event.Event;
 import org.seng302.leftovers.entities.event.GlobalMessageEvent;
+import org.seng302.leftovers.exceptions.DoesNotExistResponseException;
+import org.seng302.leftovers.exceptions.InsufficientPermissionResponseException;
+import org.seng302.leftovers.exceptions.ValidationResponseException;
 import org.seng302.leftovers.persistence.UserRepository;
 import org.seng302.leftovers.persistence.event.EventRepository;
 import org.seng302.leftovers.tools.AuthenticationTokenManager;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ResponseStatusException;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -58,10 +59,10 @@ public class EventController {
         AuthenticationTokenManager.checkAuthenticationToken(request);
         try {
             Event event = eventRepository.findById(eventId)
-                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE, "Event not found"));
+                    .orElseThrow(() -> new DoesNotExistResponseException(Event.class));
 
             if (!AuthenticationTokenManager.sessionCanSeePrivate(request, event.getNotifiedUser().getUserID())) {
-                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Current user does not have permission to modify this event");
+                throw new InsufficientPermissionResponseException("Current user does not have permission to modify this event");
             }
 
             event.setTag(body.getValue());
@@ -84,10 +85,10 @@ public class EventController {
             LOGGER.info("Retrieving newsfeed events for user (id={})", userId);
             AuthenticationTokenManager.checkAuthenticationToken(request);
             if (!AuthenticationTokenManager.sessionCanSeePrivate(request, userId)) {
-                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Cannot retrieve events associated with another user");
+                throw new InsufficientPermissionResponseException("Cannot retrieve events associated with another user");
             }
 
-            User user = userRepository.findById(userId).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE, "User not found"));
+            User user = userRepository.findById(userId).orElseThrow(() -> new DoesNotExistResponseException(User.class));
 
             List<Event> events;
             if (modifiedSince != null) {
@@ -114,7 +115,7 @@ public class EventController {
         try {
             return Instant.parse(modifiedSince);
         } catch (DateTimeParseException e) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The modified since parameter must be in a valid " +
+            throw new ValidationResponseException("The modified since parameter must be in a valid " +
                     "datetime format which includes the date, time and timezone");
         }
     }
@@ -141,7 +142,7 @@ public class EventController {
         try {
             AuthenticationTokenManager.checkAuthenticationToken(request);
             if (!AuthenticationTokenManager.sessionIsAdmin(request)) {
-                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Insufficient permissions to send global message");
+                throw new InsufficientPermissionResponseException("Insufficient permissions to send global message");
             }
 
             userRepository.findAll()
@@ -165,10 +166,10 @@ public class EventController {
             // Check that authentication token is present and valid
             AuthenticationTokenManager.checkAuthenticationToken(request);
             Event event = eventRepository.findById(id)
-                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE, "Event not found, unable to delete"));
+                    .orElseThrow(() -> new DoesNotExistResponseException(Event.class));
 
             if (!AuthenticationTokenManager.sessionCanSeePrivate(request, event.getNotifiedUser().getUserID())) {
-                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Current user does not have permission to delete this event");
+                throw new InsufficientPermissionResponseException("Current user does not have permission to delete this event");
             }
 
             eventRepository.delete(event);
@@ -189,10 +190,10 @@ public class EventController {
         AuthenticationTokenManager.checkAuthenticationToken(request);
         try {
             Event event = eventRepository.findById(eventId)
-                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE, "Event not found"));
+                    .orElseThrow(() -> new DoesNotExistResponseException(Event.class));
 
             if (!AuthenticationTokenManager.sessionCanSeePrivate(request, event.getNotifiedUser().getUserID())) {
-                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Current user does not have permission to mark this event as read");
+                throw new InsufficientPermissionResponseException("Current user does not have permission to mark this event as read");
             }
 
             event.markAsRead();
@@ -214,14 +215,14 @@ public class EventController {
         AuthenticationTokenManager.checkAuthenticationToken(request);
         try {
             Event event = eventRepository.findById(eventId)
-                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE, "Event not found"));
+                    .orElseThrow(() -> new DoesNotExistResponseException(Event.class));
 
             if (!AuthenticationTokenManager.sessionCanSeePrivate(request, event.getNotifiedUser().getUserID())) {
-                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Current user does not have permission to modify this event");
+                throw new InsufficientPermissionResponseException("Current user does not have permission to modify this event");
             }
 
             if (event.getStatus().equals(EventStatus.ARCHIVED)) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The status of an archived event cannot be changed");
+                throw new ValidationResponseException("The status of an archived event cannot be changed");
             }
 
             event.updateEventStatus(body.getValue());
