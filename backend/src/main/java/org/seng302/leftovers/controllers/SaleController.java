@@ -252,12 +252,12 @@ public class SaleController {
             var boughtSaleItem = new BoughtSaleItem(saleItem, purchaser);
             boughtSaleItemRepository.save(boughtSaleItem);
 
-            PurchasedEvent purchasedEvent = new PurchasedEvent(purchaser, boughtSaleItem);
-            eventRepository.save(purchasedEvent);
-
             var inventoryItem = saleItem.getInventoryItem();
             inventoryItem.setQuantity(inventoryItem.getQuantity() - saleItem.getQuantity());
             inventoryItemRepository.save(inventoryItem);
+
+            PurchasedEvent purchasedEvent = new PurchasedEvent(purchaser, boughtSaleItem);
+            eventRepository.save(purchasedEvent);
 
             saleItemRepository.delete(saleItem);
 
