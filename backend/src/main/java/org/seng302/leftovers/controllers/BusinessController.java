@@ -133,17 +133,20 @@ public class BusinessController {
             business.setAddress(body.getAddress().createLocation());
             business.setBusinessType(body.getBusinessType());
 
-            Image image = imageRepository.getImageById(body.getPrimaryImageId());
-            var images = business.getImages();
-            // Ensure that the provided image belongs to this business. Otherwise, action is forbidden
-            if (!images.contains(image)) {
-                throw new InsufficientPermissionResponseException("You cannot modify this image");
+            Long imageId = body.getPrimaryImageId();
+            if (imageId != null) {
+                Image image = imageRepository.getImageById(imageId);
+                var images = business.getImages();
+                // Ensure that the provided image belongs to this business. Otherwise, action is forbidden
+                if (!images.contains(image)) {
+                    throw new InsufficientPermissionResponseException("You cannot modify this image");
+                }
+                if (!images.get(0).equals(image)) {
+                    throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "The primary image was not changed");
+                }
+                business.removeImage(image);
+                business.addImage(0, image);
             }
-            if (!images.get(0).equals(image)) {
-                throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "The primary image was not changed");
-            }
-            business.removeImage(image);
-            business.addImage(0, image);
 
             if (Boolean.TRUE.equals(body.getUpdateProductCountry())) {
                 List<Product> catalogue = business.getCatalogue();
