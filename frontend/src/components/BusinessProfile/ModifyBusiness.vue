@@ -148,7 +148,7 @@
                 <!-- INPUT: Update Currency -->
                 <v-checkbox
                   v-model="updateProductCountry"
-                  class="mt-n5"
+                  class="mt-n5 mb-3"
                   label="Update catalogue's currency"
                   color="primary"
                   hide-details
@@ -188,9 +188,72 @@
                 @closeDialog="showImageUploaderForm=false"
                 @uploadImage="addImage"/>
               <v-card-text v-if="allImageFiles.length > 0"> Images uploaded: {{ imageNames }} </v-card-text>
-              <p class="error-text" v-if ="errorMessage !== undefined"> {{errorMessage}} </p>
             </v-tab-item>
           </v-tabs-items>
+          <v-divider/>
+          <v-row>
+            <p class="error-text mt-1" v-if ="errorMessage !== undefined"> {{errorMessage}} </p>
+            <v-col class="text-right mt-3 mb-n3">
+              <!-- INPUT: Submit -->
+              <v-btn
+                type="submit"
+                color="primary"
+                @click.prevent="openCurrencyDialog"
+              >
+                Submit
+                <v-icon
+                  class="ml-1 mr-1"
+                  color="white"
+                >
+                  mdi-file-upload-outline
+                </v-icon>
+              </v-btn>
+              <!-- INPUT: Discard -->
+              <v-btn
+                color="secondary"
+                class="ml-2"
+                @click="discardButton"
+              > Discard
+                <v-icon
+                  color="white"
+                >
+                  mdi-file-cancel-outline
+                </v-icon>
+              </v-btn>
+            </v-col>
+          </v-row>
+          <v-dialog
+            ref="confirmDialog"
+            v-model="currencyConfirmDialog"
+            max-width="300px"
+          >
+            <!-- INPUT: Confirm Dialog -->
+            <v-card>
+              <v-card-title>
+                Are you sure?
+              </v-card-title>
+              <v-card-text>
+                Updating location for catalogue entries will change all of the listed product(s) currency accordingly
+              </v-card-text>
+              <v-card-actions>
+                <v-spacer/>
+                <v-btn
+                  color="primary"
+                  text
+                  @click="proceedWithModifyBusiness()"
+                >
+                  Save Change
+                </v-btn>
+                <v-btn
+                  color="primary"
+                  text
+                  @click="currencyConfirmDialog = false"
+                >
+                  Cancel
+                </v-btn>
+              </v-card-actions>
+            </v-card>
+          </v-dialog>
         </v-card-text>
       </v-card>
     </v-form>
