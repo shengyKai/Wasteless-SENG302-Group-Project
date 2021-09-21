@@ -4,12 +4,15 @@
       <v-card class="pb-2">
         <v-card-title class="primary-text">Modify Business Profile</v-card-title>
         <v-card-text>
+          <!-- Business Modifier Tab -->
           <v-tabs v-model="tab">
             <v-tab key="info">Info</v-tab>
             <v-tab key="address">Address</v-tab>
             <v-tab key="image">Image</v-tab>
           </v-tabs>
+          <!-- Have a v-model 'tab' that allows user to switch between different sections -->
           <v-tabs-items v-model="tab" class="pt-4" :eager="true">
+            <!-- Business information tab -->
             <v-tab-item key="info">
               <v-row no-gutters>
                 <v-col cols="12" sm="6">
@@ -49,6 +52,7 @@
                   />
                 </v-col>
               </v-row>
+              <!-- Sub section in info tab for admin modifying -->
               <div v-if="isPrimaryOwner | isSystemAdmin" class="mt-1">
                 <v-card-title>Change Primary Administrator</v-card-title>
                 <v-row>
@@ -75,6 +79,7 @@
                     </span>
                   </v-col>
                 </v-row>
+                <!-- Admin modifying error message -->
                 <v-row>
                   <v-alert v-if="showChangeAdminAlert" color="red" type="error" dense text>
                     {{ primaryAdminAlertMsg }}
@@ -82,6 +87,7 @@
                 </v-row>
               </div>
             </v-tab-item>
+            <!-- Business address tab -->
             <v-tab-item key="address" :eager="true">
               <v-row no-gutters>
                 <v-col cols="12" sm="6">
@@ -155,9 +161,10 @@
                 />
               </v-row>
             </v-tab-item>
+            <!-- Business image tab -->
             <v-tab-item key="image" :eager="true">
-              <!-- <v-card-title class="mt-n3">Image</v-card-title>
-              <v-card v-if="businessImages && businessImages.length > 0">
+              <!-- <v-card-title class="mt-n3">Image</v-card-title> -->
+              <!-- <v-card v-if="businessImages && businessImages.length > 0">
                 <ImageCarousel
                   :imagesList="businessImages"
                   :showMakePrimary="true"
@@ -181,17 +188,19 @@
                 </v-icon>
                 Upload new image
               </v-btn> -->
+              <!-- Image manager that handle all action for image modifying and rendering -->
               <ImageManager/>
-              <BusinessImageUploader
+              <!-- <BusinessImageUploader
                 v-model="imageFile"
                 v-if="showImageUploaderForm"
                 @closeDialog="showImageUploaderForm=false"
                 @uploadImage="addImage"/>
-              <v-card-text v-if="allImageFiles.length > 0"> Images uploaded: {{ imageNames }} </v-card-text>
+              <v-card-text v-if="allImageFiles.length > 0"> Images uploaded: {{ imageNames }} </v-card-text> -->
             </v-tab-item>
           </v-tabs-items>
           <v-divider/>
           <v-row>
+            <!-- Showing the error message if caught -->
             <p class="error-text mt-1" v-if ="errorMessage !== undefined"> {{errorMessage}} </p>
             <v-col class="text-right mt-3 mb-n3">
               <!-- INPUT: Submit -->
