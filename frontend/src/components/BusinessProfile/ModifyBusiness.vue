@@ -173,7 +173,7 @@
                     </v-icon>
                     Upload new image
                   </v-btn>
-                  <ImageManager/>
+                  <ImageManager :images="images"/>
                   <BusinessImageUploader
                     v-model="imageFile"
                     v-if="showImageUploaderForm"
