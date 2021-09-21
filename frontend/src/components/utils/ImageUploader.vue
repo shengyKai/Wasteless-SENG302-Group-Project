@@ -35,6 +35,7 @@
 
 <script>
 import ImageSelector from "@/components/utils/ImageSelector";
+import { uploadImage } from "@/api/images";
 
 export default {
   name: "ImageUploader",
@@ -46,15 +47,21 @@ export default {
     return {
       isLoading: false,
       errorMessage: undefined,
-      showDialog: true
+      showDialog: true,
+      file: undefined
     };
   },
   methods: {
-    /*
-     * Close the dialog and emit message to the parent to add file to uploaded images.
+    /**
+     * Uploads the image and if successful closes the dialog form
      */
-    uploadImage() {
-      this.$emit('uploadImage');
+    async uploadImage() {
+      const response = await uploadImage(this.file);
+      if (typeof response === 'string') {
+        this.errorMessage = response;
+      } else {
+        this.$emit('closeDialog');
+      }
     },
     /**
      * Closes the dialog and clears any selected files
@@ -65,7 +72,7 @@ export default {
     },
   },
   computed: {
-    file: {
+    image: {
       get() {
         return this.value;
       },

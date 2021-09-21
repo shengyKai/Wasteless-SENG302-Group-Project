@@ -71,10 +71,10 @@
       </v-col>
     </v-row>
     <ImageUploader
-      v-model="imageFile"
+      v-model="image"
       v-if="showImageUploader"
       @closeDialog="showImageUploader=false"
-      @uploadImage="addImage"/>
+    />
   </div>
 </template>
 
@@ -95,12 +95,7 @@ export default {
       'orange',
     ],
     showImageUploader: false,
-    imageFile: undefined,
+    image: undefined,
   }),
-  methods: {
-    addImage() {
-      // TODO
-    }
-  }
 };
 </script>
