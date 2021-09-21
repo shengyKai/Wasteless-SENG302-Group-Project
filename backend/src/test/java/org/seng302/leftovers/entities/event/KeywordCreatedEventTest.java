@@ -6,7 +6,7 @@ import net.minidev.json.JSONObject;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.seng302.leftovers.dto.KeywordDTO;
+import org.seng302.leftovers.dto.card.KeywordDTO;
 import org.seng302.leftovers.dto.user.UserResponseDTO;
 import org.seng302.leftovers.entities.Keyword;
 import org.seng302.leftovers.entities.Location;
@@ -98,7 +98,6 @@ class KeywordCreatedEventTest {
                 event.isRead(),
                 mapper.writeValueAsString(new UserResponseDTO(user)),
                 event.getLastModified().toString());
-        System.out.println(expectedJsonString);
         String actualJsonString = mapper.writeValueAsString(event.asDTO());
         assertEquals(mapper.readTree(expectedJsonString), mapper.readTree(actualJsonString));
     }

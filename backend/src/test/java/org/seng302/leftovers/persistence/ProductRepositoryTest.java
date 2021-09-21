@@ -7,10 +7,10 @@ import org.junit.jupiter.api.TestInstance;
 import org.junit.runner.RunWith;
 import org.seng302.leftovers.dto.business.BusinessType;
 import org.seng302.leftovers.entities.*;
+import org.seng302.leftovers.exceptions.DoesNotExistResponseException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.text.ParseException;
 import java.util.Arrays;
@@ -87,7 +87,7 @@ class ProductRepositoryTest {
                 .withRecommendedRetailPrice("3.20")
                 .withBusiness(testBusiness)
                 .build();
-        testProduct.setProductImages(Arrays.asList(testImage));
+        testProduct.setImages(Arrays.asList(testImage));
         productRepository.save(testProduct);
         testBusiness = businessRepository.save(testBusiness);
 
@@ -155,7 +155,7 @@ class ProductRepositoryTest {
     @Test
     void getProduct_productExistsInDifferentCatalogue_406ResponseException() {
         String productCode = testProduct.getProductCode();
-        assertThrows(ResponseStatusException.class, () -> {
+        assertThrows(DoesNotExistResponseException.class, () -> {
             productRepository.getProduct(testBusiness2, productCode);
         });
     }
@@ -168,7 +168,7 @@ class ProductRepositoryTest {
         productRepository.delete(testProduct);
         testBusiness = businessRepository.getBusinessById(testBusiness.getId());
         String productCode = testProduct.getProductCode();
-        assertThrows(ResponseStatusException.class, () -> {
+        assertThrows(DoesNotExistResponseException.class, () -> {
             productRepository.getProduct(testBusiness, productCode);
         });
     }

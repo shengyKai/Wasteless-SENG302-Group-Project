@@ -326,13 +326,34 @@ const apiCalls: Partial<ApiCalls> = {
     result: undefined,
     extraStatusMessages: {
       401: 'You have been logged out. Please login again and retry',
+      403: 'Operation not permitted',
+      406: 'Listing does not exist',
+    },
+    usesServerMessage: true,
+  },
+  getListingInterest: {
+    parameters: [7, 3],
+    httpMethod: 'get',
+    url: '/listings/7/interest',
+    body: {
+      params: {
+        userId: 3,
+      },
+    },
+    result:false,
+    apiResult: {
+      isInterested: false
+    },
+    extraStatusMessages: {
+      401: 'You have been logged out. Please login again and retry',
+      403: 'Operation not permitted',
       406: 'Listing does not exist',
     },
     usesServerMessage: true,
   },
   purchaseListing: {
     parameters: [6, 5],
-    httpMethod: 'put',
+    httpMethod: 'post',
     url: '/listings/6/purchase',
     body: {
       purchaserId: 5,
@@ -345,6 +366,7 @@ const apiCalls: Partial<ApiCalls> = {
     usesServerMessage: true,
   },
 };
+
 
 describe('api', () => {
   // Makes sure the the mocks are clean

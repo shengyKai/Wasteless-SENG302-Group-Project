@@ -14,6 +14,9 @@ import org.seng302.leftovers.entities.Business;
 import org.seng302.leftovers.entities.Image;
 import org.seng302.leftovers.entities.Product;
 import org.seng302.leftovers.entities.User;
+import org.seng302.leftovers.exceptions.DoesNotExistResponseException;
+import org.seng302.leftovers.exceptions.InsufficientPermissionResponseException;
+import org.seng302.leftovers.exceptions.ValidationResponseException;
 import org.seng302.leftovers.persistence.BusinessRepository;
 import org.seng302.leftovers.persistence.ImageRepository;
 import org.seng302.leftovers.persistence.UserRepository;
@@ -29,7 +32,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.server.ResponseStatusException;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
@@ -74,11 +76,9 @@ public class BusinessController {
             Optional<User> primaryOwner = userRepository.findById(body.getPrimaryAdministratorId());
 
             if (primaryOwner.isEmpty()) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                        "The given PrimaryBusinessOwner does not exist");
+                throw new ValidationResponseException("The given PrimaryBusinessOwner does not exist");
             } else if (!AuthenticationTokenManager.sessionCanSeePrivate(req, primaryOwner.get().getUserID())) {
-                throw new ResponseStatusException(HttpStatus.FORBIDDEN,
-                        "You don't have permission to set the provided Primary Owner");
+                throw new InsufficientPermissionResponseException("You don't have permission to set the provided Primary Owner");
             }
 
             // Build the business
@@ -112,16 +112,16 @@ public class BusinessController {
         AuthenticationTokenManager.checkAuthenticationToken(request);
         try {
             Business business = businessRepository.findById(id)
-                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE, "Business not found"));
+                    .orElseThrow(() -> new DoesNotExistResponseException(Business.class));
             business.checkSessionPermissions(request);
             Long newAdminID = body.getPrimaryAdministratorId();
             if(!business.getPrimaryOwner().getUserID().equals(newAdminID)) {
                 business.checkSessionPermissionsOwner(request);
 
                 User newOwner = userRepository.findById(newAdminID)  
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Updated primary administrator does not exist"));
+                .orElseThrow(() -> new ValidationResponseException("Updated primary administrator does not exist"));
                 User previousOwner = userRepository.findById(business.getPrimaryOwner().getUserID())
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Previous business owner account does not exist"));
+                .orElseThrow(() -> new ValidationResponseException("Previous business owner account does not exist"));
 
                 business.removeAdmin(newOwner);
                 business.setPrimaryOwner(newOwner);    
@@ -159,7 +159,7 @@ public class BusinessController {
         logger.info("Retrieving business with ID {}.", id);
         Optional<Business> business = businessRepository.findById(id);
         if (business.isEmpty()) {
-            ResponseStatusException notFoundException = new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE, String.format("No business with ID %d.", id));
+            var notFoundException = new DoesNotExistResponseException(Business.class);
             logger.error(notFoundException.getMessage());
             throw notFoundException;
         }
@@ -190,7 +190,7 @@ public class BusinessController {
             business.checkSessionPermissionsOwner(req);
 
             User user = userRepository.findById(userInfo.getUserId())
-                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "The given user does not exist"));
+                    .orElseThrow(() -> new ValidationResponseException("The given user does not exist"));
             LocalDate now = LocalDate.now();
             LocalDate minDate = now.minusYears(16);
             
@@ -199,7 +199,7 @@ public class BusinessController {
                 businessRepository.save(business);
                 logger.info(() -> String.format("Added user %d as admin of business %d", user.getUserID(), businessId));
             } else {
-                throw new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE, "The new business admin should be at least 16 years old");
+                throw new ValidationResponseException("The new business admin should be at least 16 years old");
             }
         } catch (Exception err) {
             logger.error(err.getMessage());
@@ -220,7 +220,7 @@ public class BusinessController {
             Business business = getBusiness(businessId); // Get the business
             business.checkSessionPermissionsOwner(req);
             User user = userRepository.findById(userInfo.getUserId())
-                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "The given user does not exist"));
+                    .orElseThrow(() -> new ValidationResponseException("The given user does not exist"));
 
             business.removeAdmin(user);
             businessRepository.save(business);
@@ -243,8 +243,7 @@ public class BusinessController {
         // check business exists
         Optional<Business> business = businessRepository.findById(businessId);
         if (business.isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE,
-                    "The given business does not exist");
+            throw new DoesNotExistResponseException(Business.class);
         }
         return business.get();
     }
@@ -279,7 +278,7 @@ public class BusinessController {
         try {
             businessType = objectMapper.convertValue(businessTypeString, new TypeReference<>() {});
         } catch (IllegalArgumentException e) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid business type provided", e);
+            throw new ValidationResponseException("Invalid business type provided");
         }
 
         Sort.Direction direction = SearchHelper.getSortDirection(reverse);
@@ -288,7 +287,7 @@ public class BusinessController {
         }
         if (!VALID_BUSINESS_ORDERINGS.contains(orderBy)) {
             logger.error("Invalid 'orderBy' parameter {} used", orderBy);
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid business ordering");
+            throw new ValidationResponseException("Invalid business ordering");
         }
 
         List<Sort.Order> sortOrder;
@@ -348,7 +347,7 @@ public class BusinessController {
             var images = business.getImages();
             // Ensure that the provided image belongs to this business. Otherwise, action is forbidden
             if (!images.contains(image)) {
-                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You cannot modify this image");
+                throw new InsufficientPermissionResponseException("You cannot modify this image");
             }
             if (images.get(0).equals(image)) {
                 return new ResponseEntity<>(HttpStatus.OK);

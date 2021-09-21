@@ -3,12 +3,11 @@ package org.seng302.leftovers.persistence;
 import org.seng302.leftovers.dto.user.UserRole;
 import org.seng302.leftovers.entities.User;
 import org.seng302.leftovers.entities.event.Event;
+import org.seng302.leftovers.exceptions.DoesNotExistResponseException;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
-import org.springframework.http.HttpStatus;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 
@@ -60,7 +59,7 @@ public interface UserRepository extends CrudRepository<User, Long>, JpaSpecifica
      * @return A found user
      */
     default User getUser(Long id) {
-        return findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE, "The given user does not exist"));
+        return findById(id).orElseThrow(() -> new DoesNotExistResponseException(User.class));
     }
 }
 

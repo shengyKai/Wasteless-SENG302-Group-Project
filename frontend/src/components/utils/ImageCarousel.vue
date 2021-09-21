@@ -1,6 +1,6 @@
 <template>
   <!-- use the v-dialog to show a pop up for the carousel -->
-  <v-dialog v-model="dialog" width="min(90vh, 100vw)">
+  <v-dialog v-model="dialog" width="min(90vh, 100vw)" v-if="imagesList !== undefined">
     <template v-slot:activator="{ on, attrs }">
       <!-- put an image over a link, such that now the image will be clickable to activate the pop up dialog -->
       <!--  The v-bind to attrs allows the v-dialog to use this link as the activator for the dialog box -->

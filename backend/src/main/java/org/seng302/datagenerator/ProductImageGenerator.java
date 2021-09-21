@@ -11,6 +11,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.sql.*;
+import java.time.Instant;
 import java.util.*;
 
 public class ProductImageGenerator {
@@ -110,14 +111,15 @@ public class ProductImageGenerator {
      * @throws SQLException
      */
     private long createInsertImageSQL(Long productId, String filename) throws SQLException {
-        try (PreparedStatement stmt = conn.prepareStatement("INSERT INTO image (filename, product_id, image_order, filename_thumbnail) " +
-                "VALUES (?,?,?,?)",
+        try (PreparedStatement stmt = conn.prepareStatement("INSERT INTO image (filename, product_id, image_order, filename_thumbnail, created) " +
+                "VALUES (?,?,?,?,?)",
                 Statement.RETURN_GENERATED_KEYS
         )) {
             stmt.setObject(1, filename);
             stmt.setObject(2, productId);
             stmt.setObject(3, 0);
             stmt.setObject(4, filename);
+            stmt.setObject(5, Instant.now());
 
             stmt.executeUpdate();
 
