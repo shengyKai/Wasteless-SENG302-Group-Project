@@ -21,7 +21,8 @@
                               class="ma-2"
                               color="primary"
                               v-bind="attrs"
-                              v-on="on">
+                              v-on="on"
+                              @click="showImageUploader = true">
                         mdi-upload
                       </v-icon>
                     </template>
@@ -69,11 +70,21 @@
         </v-carousel>
       </v-col>
     </v-row>
+    <ImageUploader
+      v-model="imageFile"
+      v-if="showImageUploader"
+      @closeDialog="showImageUploader=false"
+      @uploadImage="addImage"/>
   </div>
 </template>
 
 <script>
+import ImageUploader from "@/components/utils/ImageUploader";
+
 export default {
+  components: {
+    ImageUploader,
+  },
   data: () => ({
     model: 0,
     colors: [
@@ -83,6 +94,13 @@ export default {
       'red',
       'orange',
     ],
+    showImageUploader: false,
+    imageFile: undefined,
   }),
+  methods: {
+    addImage() {
+      // TODO
+    }
+  }
 };
 </script>
