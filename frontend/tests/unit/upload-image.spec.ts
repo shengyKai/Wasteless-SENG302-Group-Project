@@ -3,14 +3,14 @@ import Vuetify from 'vuetify';
 import { createLocalVue, Wrapper, mount } from '@vue/test-utils';
 
 import ImageUploader from "@/components/utils/ImageUploader.vue";
-import { castMock, findButtonWithText, flushQueue } from './utils';
-import * as api from '@/api/internal';
+import { castMock, findButtonWithText } from './utils';
+import { uploadImage } from "@/api/images";
 
-jest.mock('@/api/internal', () => ({
-  uploadBusinessImage: jest.fn(),
+jest.mock('@/api/images', () => ({
+  uploadImage: jest.fn(),
 }));
 
-const uploadBusinessImage = castMock(api.uploadBusinessImage);
+const uploadImageMock = castMock(uploadImage);
 
 Vue.use(Vuetify);
 
@@ -105,21 +105,31 @@ describe('ImageUploader.vue', () => {
 
   it('When the upload button is pressed then an image should be uploaded', async () => {
     const testFile = new File([], 'test_file');
-    appWrapper.vm.file = testFile;
-    await Vue.nextTick();
+    await wrapper.setData({
+      file: testFile
+    });
     await findUploadButton().trigger('click'); // Click upload button
-    expect(wrapper.emitted().uploadImage).toBeTruthy();
+    expect(uploadImageMock).toBeCalledTimes(1);
+  });
+
+  it('When the upload button is pressed then the dialog should be closed', async () => {
+    const testFile = new File([], 'test_file');
+    await wrapper.setData({
+      file: testFile
+    });
+    await findUploadButton().trigger('click'); // Click upload button
+    expect(wrapper.emitted().closeDialog).toBeTruthy();
   });
 
   it('When there is no image selected then the upload button should be disabled', async () => {
-    await Vue.nextTick();
     expect(findUploadButton().props().disabled).toBeTruthy();
   });
 
   it('When there is an image selected then the upload button should be enabled', async () => {
     const testFile = new File([], 'test_file');
-    appWrapper.vm.file = testFile;
-    await Vue.nextTick();
+    await wrapper.setData({
+      file: testFile
+    });
     expect(findUploadButton().props().disabled).toBeFalsy();
   });
 

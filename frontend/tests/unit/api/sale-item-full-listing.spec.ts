@@ -98,7 +98,6 @@ describe('FullSaleListing.vue', () => {
   });
 
   it("Must contain the product name and quantity", () => {
-    console.log(wrapper.text());
     expect(wrapper.text()).toContain("Watties Baked Beans - 420g can");
   });
 
