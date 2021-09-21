@@ -13,6 +13,7 @@ import org.seng302.leftovers.entities.event.InterestPurchasedEvent;
 import org.seng302.leftovers.dto.saleitem.CreateSaleItemDTO;
 import org.seng302.leftovers.dto.saleitem.SaleItemResponseDTO;
 import org.seng302.leftovers.dto.saleitem.SetSaleItemInterestDTO;
+
 import org.seng302.leftovers.entities.event.PurchasedEvent;
 import org.seng302.leftovers.exceptions.DoesNotExistResponseException;
 import org.seng302.leftovers.exceptions.InsufficientPermissionResponseException;
@@ -261,12 +262,12 @@ public class SaleController {
                 }
             }
 
-            PurchasedEvent purchasedEvent = new PurchasedEvent(purchaser, boughtSaleItem);
-            eventRepository.save(purchasedEvent);
-
             var inventoryItem = saleItem.getInventoryItem();
             inventoryItem.sellQuantity(saleItem.getQuantity());
             inventoryItemRepository.save(inventoryItem);
+
+            PurchasedEvent purchasedEvent = new PurchasedEvent(purchaser, boughtSaleItem);
+            eventRepository.save(purchasedEvent);
 
             saleItemRepository.delete(saleItem);
 

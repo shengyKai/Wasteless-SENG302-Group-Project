@@ -8,7 +8,7 @@ import lombok.ToString;
 import javax.validation.constraints.NotNull;
 
 /**
- * TODO
+ * DTO representing the request body of a POST /businesses/:id/listings request
  */
 @Getter
 @ToString

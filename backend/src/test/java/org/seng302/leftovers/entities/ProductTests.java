@@ -8,6 +8,7 @@ import org.hibernate.SessionFactory;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.seng302.leftovers.dto.ImageDTO;
 import org.seng302.leftovers.dto.business.BusinessType;
 import org.seng302.leftovers.dto.product.ProductResponseDTO;
 import org.seng302.leftovers.exceptions.DoesNotExistResponseException;
@@ -942,8 +943,8 @@ class ProductTests {
                .withBusiness(testBusiness1)
                .build();
        JSONArray images = new JSONArray();
-       for (Image image : testProduct.getProductImages()) {
-           images.add(image.constructJSONObject());
+       for (Image image : testProduct.getImages()) {
+           images.add(new ImageDTO(image));
        }
        String imageString = images.toString();
        var testJson = objectMapper.convertValue(new ProductResponseDTO(testProduct), JSONObject.class);
@@ -999,8 +1000,8 @@ class ProductTests {
                .withBusiness(testBusiness1)
                .build();
        JSONArray images = new JSONArray();
-       for (Image image : testProduct.getProductImages()) {
-           images.add(image.constructJSONObject());
+       for (Image image : testProduct.getImages()) {
+           images.add(new ImageDTO(image));
        }
        String imageString = images.toString();
        var testJson = objectMapper.convertValue(new ProductResponseDTO(testProduct), JSONObject.class);
