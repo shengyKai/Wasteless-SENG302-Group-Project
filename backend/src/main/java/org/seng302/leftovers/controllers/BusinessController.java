@@ -38,6 +38,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -102,6 +103,19 @@ public class BusinessController {
     }
 
     /**
+     * Converts of image ids into their respective image objects
+     * @param imageIds a list of image ids
+     * @return a list of image objects
+     */
+    public List<Image> getListOfImagesFromIds(List<Long> imageIds) {
+        List<Image> images = new ArrayList<Image>();
+        for (Long imageId: imageIds) {
+            images.add(imageRepository.findById(imageId).get());
+        }
+        return images;
+    }
+
+    /**
      * PUT endpoint for modifying an existing business.
      * Ensures that the given primary business owner is an existing User.
      * Adds the business to the database if all of the business information is valid.
@@ -133,20 +147,7 @@ public class BusinessController {
             business.setAddress(body.getAddress().createLocation());
             business.setBusinessType(body.getBusinessType());
 
-            Long imageId = body.getPrimaryImageId();
-            if (imageId != null) {
-                Image image = imageRepository.getImageById(imageId);
-                var images = business.getImages();
-                // Ensure that the provided image belongs to this business. Otherwise, action is forbidden
-                if (!images.contains(image)) {
-                    throw new InsufficientPermissionResponseException("You cannot modify this image");
-                }
-                if (!images.get(0).equals(image)) {
-                    throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "The primary image was not changed");
-                }
-                business.removeImage(image);
-                business.addImage(0, image);
-            }
+            business.setImages(getListOfImagesFromIds(body.getImageIds()));
 
             if (Boolean.TRUE.equals(body.getUpdateProductCountry())) {
                 List<Product> catalogue = business.getCatalogue();
