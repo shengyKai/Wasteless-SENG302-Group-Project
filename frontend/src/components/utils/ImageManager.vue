@@ -2,7 +2,10 @@
   <div>
     <v-row class="mt-5">
       <v-col>
-        <v-carousel v-if="images.length > 0" v-model="model">
+        <v-carousel
+          v-if="images.length > 0"
+          v-model="model"
+        >
           <v-carousel-item
             v-for="image in images"
             :key="image"
@@ -61,6 +64,7 @@
           :show-arrows="false"
           v-model="model"
           :hide-delimiter-background="true"
+          :max="4"
         >
           <v-sheet
             color="secondary"
@@ -101,9 +105,11 @@ export default {
   props: {
     images: Array
   },
-  data: () => ({
-    model: 0,
-  }),
+  data() {
+    return {
+      model: 0,
+    };
+  },
   methods: {
     imageUrl(filename) {
       return imageSrcFromFilename(filename);

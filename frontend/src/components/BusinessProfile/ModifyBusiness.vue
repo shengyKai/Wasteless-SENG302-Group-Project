@@ -149,7 +149,7 @@
                     </v-row>
                   </div>
                   <v-card-title class="mt-n3">Image</v-card-title>
-                  <v-card v-if="businessImages && businessImages.length > 0">
+                  <!-- <v-card v-if="businessImages && businessImages.length > 0">
                     <ImageCarousel
                       :imagesList="businessImages"
                       :showMakePrimary="true"
@@ -157,9 +157,9 @@
                       @change-primary-image="makeImagePrimary"
                       ref="businessImageCarousel"
                     />
-                  </v-card>
+                  </v-card> -->
                   <!-- INPUT: Image Uploader -->
-                  <v-btn
+                  <!-- <v-btn
                     class="upload-image"
                     color="primary"
                     outlined
@@ -172,14 +172,14 @@
                       mdi-upload
                     </v-icon>
                     Upload new image
-                  </v-btn>
+                  </v-btn> -->
                   <ImageManager :images="images"/>
-                  <BusinessImageUploader
+                  <!-- <BusinessImageUploader
                     v-model="imageFile"
                     v-if="showImageUploaderForm"
                     @closeDialog="showImageUploaderForm=false"
                     @uploadImage="addImage"/>
-                  <v-card-text v-if="allImageFiles.length > 0"> Images uploaded: {{ imageNames }} </v-card-text>
+                  <v-card-text v-if="allImageFiles.length > 0"> Images uploaded: {{ imageNames }} </v-card-text> -->
                   <p class="error-text" v-if ="errorMessage !== undefined"> {{errorMessage}} </p>
                 </v-container>
               </v-card-text>
@@ -257,7 +257,7 @@
 
 <script>
 import LocationAutocomplete from '@/components/utils/LocationAutocomplete';
-import BusinessImageUploader from "@/components/utils/BusinessImageUploader";
+// import BusinessImageUploader from "@/components/utils/BusinessImageUploader";
 import ImageManager from "@/components/utils/ImageManager";
 import {
   alphabetExtendedMultilineRules,
@@ -267,14 +267,14 @@ import {
   USER_ROLES
 } from "@/utils";
 import { modifyBusiness, uploadBusinessImage, makeBusinessImagePrimary, getUser } from '@/api/internal';
-import ImageCarousel from "@/components/utils/ImageCarousel";
+// import ImageCarousel from "@/components/utils/ImageCarousel";
 
 export default {
   name: 'ModifyBusiness',
   components: {
     LocationAutocomplete,
-    BusinessImageUploader,
-    ImageCarousel,
+    // BusinessImageUploader,
+    // ImageCarousel,
     ImageManager
   },
   props: {
