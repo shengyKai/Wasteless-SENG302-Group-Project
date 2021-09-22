@@ -18,6 +18,7 @@ import org.seng302.leftovers.entities.Location;
 import org.seng302.leftovers.entities.User;
 import org.seng302.leftovers.exceptions.AccessTokenResponseException;
 import org.seng302.leftovers.exceptions.InsufficientPermissionResponseException;
+import org.seng302.leftovers.persistence.ImageRepository;
 import org.seng302.leftovers.persistence.UserRepository;
 import org.seng302.leftovers.tools.AuthenticationTokenManager;
 import org.seng302.leftovers.tools.PasswordAuthenticator;
@@ -52,6 +53,8 @@ class UserControllerModifyTest {
 
     @Mock
     private UserRepository userRepository;
+    @Mock
+    private ImageRepository imageRepository;
 
     @Mock
     private User mockUser;
@@ -86,7 +89,7 @@ class UserControllerModifyTest {
                 PasswordAuthenticator.generateAuthenticationCode(validCurrentPassword));
         when(mockUser.getAddress()).thenReturn(mockLocation);
 
-        userController = new UserController(userRepository);
+        userController = new UserController(userRepository, imageRepository);
         mockMvc = MockMvcBuilders.standaloneSetup(userController).build();
     }
 
