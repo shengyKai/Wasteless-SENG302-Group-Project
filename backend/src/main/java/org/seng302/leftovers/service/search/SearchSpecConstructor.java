@@ -1,4 +1,4 @@
-package org.seng302.leftovers.service.searchservice;
+package org.seng302.leftovers.service.search;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.seng302.leftovers.dto.business.BusinessType;
@@ -289,7 +289,7 @@ public class SearchSpecConstructor {
     private static <T> Specification<T> buildExactMatchSpec(String searchTerm, List<String> fieldNames) {
         SpecificationsBuilder<T> builder = new SpecificationsBuilder<>();
         for (var field : fieldNames) {
-            builder.with(field, Pred.EQUAL, searchTerm, true);
+            builder.with(field, Pred.FULL_MATCH, searchTerm, true);
         }
         return builder.build();
     }
@@ -305,7 +305,7 @@ public class SearchSpecConstructor {
     public static <T> Specification<T> buildPartialMatchSpec(String searchTerm, List<String> fieldNames) {
         SpecificationsBuilder<T> builder = new SpecificationsBuilder<>();
         for (var field : fieldNames) {
-            builder.with(field, Pred.COLON, searchTerm, true);
+            builder.with(field, Pred.PARTIAL_MATCH, searchTerm, true);
         }
         return builder.build();
     }

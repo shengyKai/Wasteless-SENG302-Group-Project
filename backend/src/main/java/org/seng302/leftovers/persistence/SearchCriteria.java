@@ -8,8 +8,8 @@ public class SearchCriteria {
     public enum Pred {
         GREATER_THAN,
         LESS_THAN,
-        COLON,
-        EQUAL
+        PARTIAL_MATCH,
+        FULL_MATCH
     }
 
     private String column;
@@ -20,6 +20,11 @@ public class SearchCriteria {
 
     private boolean isOrPredicate = true;
 
+    /**
+     * @param column Name of database column to match
+     * @param operation The predicate to ues for matching
+     * @param value Value to match in DB
+     */
     public SearchCriteria(String column, Pred operation, Object value) {
         setKey(column);
         setOperation(operation);

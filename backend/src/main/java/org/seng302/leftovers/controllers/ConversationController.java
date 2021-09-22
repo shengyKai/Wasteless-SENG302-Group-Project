@@ -14,7 +14,7 @@ import org.seng302.leftovers.persistence.MessageRepository;
 import org.seng302.leftovers.persistence.UserRepository;
 import org.seng302.leftovers.service.MessageService;
 import org.seng302.leftovers.tools.AuthenticationTokenManager;
-import org.seng302.leftovers.service.searchservice.SearchPageConstructor;
+import org.seng302.leftovers.service.search.SearchPageConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;

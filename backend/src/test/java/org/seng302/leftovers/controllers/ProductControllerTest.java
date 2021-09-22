@@ -20,7 +20,7 @@ import org.seng302.leftovers.persistence.BusinessRepository;
 import org.seng302.leftovers.persistence.ImageRepository;
 import org.seng302.leftovers.persistence.ProductRepository;
 import org.seng302.leftovers.persistence.UserRepository;
-import org.seng302.leftovers.service.searchservice.SearchPageConstructor;
+import org.seng302.leftovers.service.search.SearchPageConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;

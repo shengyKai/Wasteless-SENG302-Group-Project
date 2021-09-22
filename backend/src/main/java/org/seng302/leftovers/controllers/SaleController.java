@@ -1,13 +1,11 @@
 package org.seng302.leftovers.controllers;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.ToString;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.seng302.leftovers.dto.business.BusinessType;
 import org.seng302.leftovers.dto.saleitem.*;
 import org.seng302.leftovers.dto.ResultPageDTO;
 import org.seng302.leftovers.entities.*;
@@ -20,9 +18,8 @@ import org.seng302.leftovers.persistence.*;
 import org.seng302.leftovers.persistence.event.EventRepository;
 import org.seng302.leftovers.persistence.event.InterestEventRepository;
 import org.seng302.leftovers.tools.AuthenticationTokenManager;
-import org.seng302.leftovers.service.searchservice.SearchPageConstructor;
-import org.seng302.leftovers.service.searchservice.SearchQueryParser;
-import org.seng302.leftovers.service.searchservice.SearchSpecConstructor;
+import org.seng302.leftovers.service.search.SearchPageConstructor;
+import org.seng302.leftovers.service.search.SearchSpecConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -32,13 +29,8 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.math.BigDecimal;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeParseException;
-import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -91,7 +83,7 @@ public class SaleController {
                 logger.error("Invalid sale item ordering given: {}", orderBy);
                 throw new ValidationResponseException("The provided ordering is invalid");
         }
-        return new Sort.Order(direction, orderBy).ignoreCase();
+        return new Sort.Order(direction, orderBy).ignoreCase().nullsLast();
     }
 
     /**
@@ -112,21 +104,13 @@ public class SaleController {
      */
     private List<Sort.Order> getSaleItemSearchOrder(String orderBy, Sort.Direction direction) {
         if (orderBy == null || orderBy.isEmpty()) orderBy = "created";
-        switch (orderBy) {
-            case "created": case "quantity": case "price":
-                return List.of(new Sort.Order(direction, orderBy).ignoreCase());
-            case "productName":
-                return List.of(new Sort.Order(direction, "inventoryItem.product.name").ignoreCase());
-            case "closing":
-                return List.of(new Sort.Order(direction, "closes").ignoreCase());
-            case "businessName":
-                return List.of(new Sort.Order(direction, "inventoryItem.product.business.name").ignoreCase());
-            case "businessLocation":
-                return List.of(new Sort.Order(direction, "inventoryItem.product.business.address.country"), new Sort.Order(direction, "inventoryItem.product.business.address.city"));
-            default:
-                logger.error("Invalid sale item ordering given: {}", orderBy);
-                throw new ValidationResponseException("The provided ordering is invalid");
+        if (orderBy.equals("businessName")) {
+            return List.of(new Sort.Order(direction, "inventoryItem.product.business.name").ignoreCase());
         }
+        if (orderBy.equals("businessLocation")) {
+            return List.of(new Sort.Order(direction, "inventoryItem.product.business.address.country"), new Sort.Order(direction, "inventoryItem.product.business.address.city"));
+        }
+        return (List.of(getSaleItemOrder(orderBy, direction)));
     }
 
     /**
@@ -183,7 +167,7 @@ public class SaleController {
             logger.info("Getting sales item for business (businessId={}).", id);
             Business business = businessRepository.getBusinessById(id);
 
-            Sort.Direction direction = SearchQueryParser.getSortDirection(reverse);
+            Sort.Direction direction = SearchPageConstructor.getSortDirection(reverse);
             List<Sort.Order> sortOrder = List.of(getSaleItemOrder(orderBy, direction));
 
             PageRequest pageRequest = SearchPageConstructor.getPageRequest(page, resultsPerPage, Sort.by(sortOrder));
@@ -214,7 +198,7 @@ public class SaleController {
             AuthenticationTokenManager.checkAuthenticationToken(request);
 
             // Check sort ordering
-            Sort.Direction direction = SearchQueryParser.getSortDirection(saleSearchDTO.getReverse());
+            Sort.Direction direction = SearchPageConstructor.getSortDirection(saleSearchDTO.getReverse());
             List<Sort.Order> sortOrder = getSaleItemSearchOrder(saleSearchDTO.getOrderBy(), direction);
 
             // Create page

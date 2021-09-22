@@ -25,7 +25,7 @@ import org.seng302.leftovers.persistence.SearchMarketplaceCardHelper;
 import org.seng302.leftovers.persistence.UserRepository;
 import org.seng302.leftovers.persistence.event.ExpiryEventRepository;
 import org.seng302.leftovers.tools.AuthenticationTokenManager;
-import org.seng302.leftovers.service.searchservice.SearchPageConstructor;
+import org.seng302.leftovers.service.search.SearchPageConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;

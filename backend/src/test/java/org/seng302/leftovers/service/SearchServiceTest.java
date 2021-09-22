@@ -8,14 +8,15 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mockito;
 import org.mockito.internal.matchers.apachecommons.ReflectionEquals;
 import org.seng302.leftovers.controllers.DGAAController;
+import org.seng302.leftovers.controllers.UserController;
 import org.seng302.leftovers.dto.business.BusinessType;
 import org.seng302.leftovers.dto.product.ProductFilterOption;
 import org.seng302.leftovers.entities.*;
 import org.seng302.leftovers.exceptions.ValidationResponseException;
 import org.seng302.leftovers.persistence.*;
-import org.seng302.leftovers.service.searchservice.SearchPageConstructor;
-import org.seng302.leftovers.service.searchservice.SearchQueryParser;
-import org.seng302.leftovers.service.searchservice.SearchSpecConstructor;
+import org.seng302.leftovers.service.search.SearchPageConstructor;
+import org.seng302.leftovers.service.search.SearchQueryParser;
+import org.seng302.leftovers.service.search.SearchSpecConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.Page;
@@ -89,10 +90,10 @@ class SearchServiceTest {
     @BeforeEach
     void setUp() throws IOException {
         SpecificationsBuilder<User> builder = new SpecificationsBuilder<User>()
-                .with("firstName", SearchCriteria.Pred.COLON, "andy", true)
-                .with("middleName", SearchCriteria.Pred.COLON, "andy", true)
-                .with("lastName", SearchCriteria.Pred.COLON, "andy", true)
-                .with("nickname", SearchCriteria.Pred.COLON, "andy", true);
+                .with("firstName", SearchCriteria.Pred.PARTIAL_MATCH, "andy", true)
+                .with("middleName", SearchCriteria.Pred.PARTIAL_MATCH, "andy", true)
+                .with("lastName", SearchCriteria.Pred.PARTIAL_MATCH, "andy", true)
+                .with("nickname", SearchCriteria.Pred.PARTIAL_MATCH, "andy", true);
         spec = builder.build();
 
         pagingUserList = readUserFile("UserSearchHelperTestData1.csv");
@@ -223,7 +224,7 @@ class SearchServiceTest {
      */
     @Test
     void getSortOrderByNullTest() {
-        Sort userSort = SearchQueryParser.getSort(null, null);
+        Sort userSort = UserController.getSort(null, null);
         List<User> queryResults = userRepository.findAll(spec, userSort);
         User firstUser = queryResults.get(0);
         Long previousId = firstUser.getUserID();
@@ -240,7 +241,7 @@ class SearchServiceTest {
      */
     @Test
     void getSortOrderByFirstNameTest() {
-        Sort userSort = SearchQueryParser.getSort("firstName", null);
+        Sort userSort = UserController.getSort("firstName", null);
         List<User> queryResults = userRepository.findAll(spec, userSort);
         User firstUser = queryResults.get(0);
         String previousFirstName = firstUser.getFirstName();
@@ -257,7 +258,7 @@ class SearchServiceTest {
      */
     @Test
     void getSortOrderByMiddleNameTest() {
-        Sort userSort = SearchQueryParser.getSort("middleName", null);
+        Sort userSort = UserController.getSort("middleName", null);
         List<User> queryResults = userRepository.findAll(spec, userSort);
         User firstUser = queryResults.get(0);
         String previousMiddleName = firstUser.getMiddleName();
@@ -274,7 +275,7 @@ class SearchServiceTest {
      */
     @Test
     void getSortOrderByLastNameTest() {
-        Sort userSort = SearchQueryParser.getSort("lastName", null);
+        Sort userSort = UserController.getSort("lastName", null);
         List<User> queryResults = userRepository.findAll(spec, userSort);
         User firstUser = queryResults.get(0);
         String previousLastName = firstUser.getLastName();
@@ -291,7 +292,7 @@ class SearchServiceTest {
      */
     @Test
     void getSortOrderByNicknameTest() {
-        Sort userSort = SearchQueryParser.getSort("nickname", null);
+        Sort userSort = UserController.getSort("nickname", null);
         List<User> queryResults = userRepository.findAll(spec, userSort);
         User firstUser = queryResults.get(0);
         String previousNickname = firstUser.getNickname();
@@ -308,7 +309,7 @@ class SearchServiceTest {
      */
     @Test
     void getSortOrderByEmailTest() {
-        Sort userSort = SearchQueryParser.getSort("email", null);
+        Sort userSort = UserController.getSort("email", null);
         List<User> queryResults = userRepository.findAll(spec, userSort);
         User firstUser = queryResults.get(0);
         String previousEmail = firstUser.getEmail();
@@ -326,7 +327,7 @@ class SearchServiceTest {
      */
     @Test
     void getSortOrderByFirstNameReverseTrueTest() {
-        Sort userSort = SearchQueryParser.getSort("firstName", true);
+        Sort userSort = UserController.getSort("firstName", true);
         List<User> queryResults = userRepository.findAll(spec, userSort);
         User firstUser = queryResults.get(0);
         String previousFirstName = firstUser.getFirstName();
@@ -344,7 +345,7 @@ class SearchServiceTest {
      */
     @Test
     void getSortOrderByEmailReverseFalseTest() {
-        Sort userSort = SearchQueryParser.getSort("email", false);
+        Sort userSort = UserController.getSort("email", false);
         List<User> queryResults = userRepository.findAll(spec, userSort);
         User firstUser = queryResults.get(0);
         String previousEmail = firstUser.getEmail();
@@ -362,7 +363,7 @@ class SearchServiceTest {
      */
     @Test
     void getSortOrderByInvalidOptionTest() {
-        Sort userSort = SearchQueryParser.getSort("dateOfBirth", null);
+        Sort userSort = UserController.getSort("dateOfBirth", null);
         List<User> queryResults = userRepository.findAll(spec, userSort);
         User firstUser = queryResults.get(0);
         Long previousId = firstUser.getUserID();

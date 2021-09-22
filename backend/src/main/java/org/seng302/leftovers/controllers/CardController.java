@@ -22,8 +22,7 @@ import org.seng302.leftovers.persistence.SearchMarketplaceCardHelper;
 import org.seng302.leftovers.persistence.UserRepository;
 import org.seng302.leftovers.persistence.event.ExpiryEventRepository;
 import org.seng302.leftovers.tools.AuthenticationTokenManager;
-import org.seng302.leftovers.service.searchservice.SearchPageConstructor;
-import org.seng302.leftovers.service.searchservice.SearchQueryParser;
+import org.seng302.leftovers.service.search.SearchPageConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -263,7 +262,7 @@ public class CardController {
      * @return Page request that contains ordering and pagination information
      */
     private PageRequest generatePageRequest(String orderBy, Integer page, Integer resultsPerPage, Boolean reverse) {
-        Sort.Direction direction = SearchQueryParser.getSortDirection(reverse);
+        Sort.Direction direction = SearchPageConstructor.getSortDirection(reverse);
         if (orderBy == null) {
             orderBy = DEFAULT_ORDERING;
         }

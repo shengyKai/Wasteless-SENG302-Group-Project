@@ -1,4 +1,4 @@
-package org.seng302.leftovers.service.searchservice;
+package org.seng302.leftovers.service.search;
 
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -88,5 +88,15 @@ public class SearchPageConstructor {
             page = requestedPage;
         }
         return page;
+    }
+
+    /**
+     * Gets the sort direction based on whether reverse is selected.
+     * If reverse is null then a default sort order is returned (Ascending)
+     * @param reverse Whether sort needs to be reversed from default
+     * @return Sort order based in reverse
+     */
+    public static Sort.Direction getSortDirection(Boolean reverse) {
+        return Boolean.TRUE.equals(reverse) ? Sort.Direction.DESC : Sort.Direction.ASC;
     }
 }

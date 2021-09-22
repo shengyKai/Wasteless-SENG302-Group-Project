@@ -46,12 +46,12 @@ public class SearchSpecification<T> implements Specification<T> {
             return builder.lessThanOrEqualTo(
                     key, criteria.getValue().toString());
         }
-        else if (criteria.getOperation().equals(Pred.COLON) &&
+        else if (criteria.getOperation().equals(Pred.PARTIAL_MATCH) &&
                     key.getJavaType() == String.class) {
                 return builder.like(
                         builder.lower(key), "%" + criteria.getValue().toString().toLowerCase() + "%");
         }
-        else if (criteria.getOperation().equals(Pred.EQUAL) &&
+        else if (criteria.getOperation().equals(Pred.FULL_MATCH) &&
                 key.getJavaType() == String.class) {
             return builder.like(
                     key, criteria.getValue().toString());

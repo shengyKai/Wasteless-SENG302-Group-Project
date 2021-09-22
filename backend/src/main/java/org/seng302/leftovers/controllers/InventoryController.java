@@ -13,9 +13,8 @@ import org.seng302.leftovers.exceptions.ValidationResponseException;
 import org.seng302.leftovers.persistence.BusinessRepository;
 import org.seng302.leftovers.persistence.InventoryItemRepository;
 import org.seng302.leftovers.persistence.ProductRepository;
-import org.seng302.leftovers.service.searchservice.SearchPageConstructor;
-import org.seng302.leftovers.service.searchservice.SearchQueryParser;
-import org.seng302.leftovers.service.searchservice.SearchSpecConstructor;
+import org.seng302.leftovers.service.search.SearchPageConstructor;
+import org.seng302.leftovers.service.search.SearchSpecConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -147,7 +146,7 @@ public class InventoryController {
             Business business = businessRepository.getBusinessById(businessId);
             business.checkSessionPermissions(request);
 
-        Sort.Direction direction = SearchQueryParser.getSortDirection(reverse);
+        Sort.Direction direction = SearchPageConstructor.getSortDirection(reverse);
         Sort.Order sortOrder = getInventoryItemOrder(orderBy, direction);
 
         PageRequest pageRequest = SearchPageConstructor.getPageRequest(page, resultsPerPage, Sort.by(sortOrder));

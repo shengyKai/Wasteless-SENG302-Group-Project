@@ -19,8 +19,7 @@ import org.seng302.leftovers.persistence.UserRepository;
 import org.seng302.leftovers.persistence.event.CreateKeywordEventRepository;
 import org.seng302.leftovers.service.KeywordService;
 import org.seng302.leftovers.tools.AuthenticationTokenManager;
-import org.seng302.leftovers.service.searchservice.SearchSpecConstructor;
-import org.springframework.http.HttpStatus;
+import org.seng302.leftovers.service.search.SearchSpecConstructor;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;

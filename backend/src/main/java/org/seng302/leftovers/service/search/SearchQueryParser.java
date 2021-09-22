@@ -1,8 +1,9 @@
-package org.seng302.leftovers.service.searchservice;
+package org.seng302.leftovers.service.search;
 
 import lombok.Data;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.seng302.leftovers.controllers.UserController;
 import org.seng302.leftovers.entities.User;
 import org.seng302.leftovers.exceptions.ValidationResponseException;
 import org.seng302.leftovers.persistence.UserRepository;
@@ -13,7 +14,6 @@ import java.util.*;
 
 public class SearchQueryParser {
 
-    private static final List<String> USER_ORDER_BY_OPTIONS = List.of("userID", "firstName", "middleName", "lastName", "nickname", "email");
     static final Logger logger = LogManager.getLogger(SearchQueryParser.class);
 
     enum PredicateType {
@@ -28,31 +28,6 @@ public class SearchQueryParser {
     static class SearchQuery<T> {
         private final List<Specification<T>> searchSpecs;
         private final List<PredicateType> predicateTypes;
-    }
-
-    /**
-     * Gets the sort direction based on whether reverse is selected.
-     * If reverse is null then a default sort order is returned (Ascending)
-     * @param reverse Whether sort needs to be reversed from default
-     * @return Sort order based in reverse
-     */
-    public static Sort.Direction getSortDirection(Boolean reverse) {
-        return Boolean.TRUE.equals(reverse) ? Sort.Direction.DESC : Sort.Direction.ASC;
-    }
-
-    /**
-     * This method constructs a Sort object to be passed into a query for searching the UserRepository. The attribute
-     * which Users should be sorted by and whether that order should be reversed are specified.
-     * @param orderBy The attribute which query results will be ordered by.
-     * @param reverse Results will be in descending order if true, ascending order if false or null.
-     * @return A Sort which can then be applied to queries of the UserRepository.
-     */
-    public static Sort getSort(String orderBy, Boolean reverse) {
-        if (orderBy == null || !USER_ORDER_BY_OPTIONS.contains(orderBy)) {
-            orderBy = "userID";
-        }
-
-        return Sort.by(getSortDirection(reverse), orderBy);
     }
 
     /**
@@ -265,7 +240,7 @@ public class SearchQueryParser {
      * @return List of users
      */
     public static List<User> getSearchResultsOrderedByRelevance(String originalSearchQuery, UserRepository userRepository, Boolean reverse) {
-        Sort idSort = getSort("userID", false);
+        Sort idSort = UserController.getSort("userID", false);
 
         String fullMatchSomeTermsQuery = getFullMatchesQueryString(originalSearchQuery);
         String fullMatchAllTermsQuery = getQueryStringWithoutOr(fullMatchSomeTermsQuery);
