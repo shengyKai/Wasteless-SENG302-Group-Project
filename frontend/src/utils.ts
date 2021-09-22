@@ -1,4 +1,4 @@
-import {MarketplaceCardSection} from "@/api/internal-marketplace";
+import {MarketplaceCardSection} from "@/api/marketplace";
 
 /**
  * Sets a cookie. Will expire in one year.

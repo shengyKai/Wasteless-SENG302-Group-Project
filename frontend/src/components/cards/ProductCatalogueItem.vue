@@ -159,7 +159,7 @@ import { currencyFromCountry } from "@/api/currency";
 import ProductImageUploader from "../utils/ProductImageUploader";
 import ProductForm from "../BusinessProfile/ProductForm.vue";
 import { formatDate, formatPrice, trimToLength } from '@/utils';
-import {deleteProductImage, makeProductImagePrimary} from "@/api/internal-product";
+import {deleteProductImage, makeProductImagePrimary} from "@/api/product";
 
 export default {
   name: "ProductCatalogueItem",

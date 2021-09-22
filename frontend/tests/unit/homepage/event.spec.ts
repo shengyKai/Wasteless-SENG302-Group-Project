@@ -8,15 +8,11 @@ import Vuex, {Store} from 'vuex';
 import {getStore, resetStoreForTesting, StoreData} from '@/store';
 import {castMock, makeTestUser} from '../utils';
 import synchronizedTime from '@/components/utils/Methods/synchronizedTime';
-import {deleteNotification as deleteNotification1} from "@/api/internal-event";
 
 Vue.use(Vuetify);
 
-jest.mock('@/api/internal-event', () => ({
-  deleteNotification: jest.fn(),
-}));
-
 jest.mock('@/api/events', () => ({
+  deleteNotification: jest.fn(),
   getEvents: jest.fn(),
   updateEventAsRead: jest.fn(),
   updateEventStatus: jest.fn(),
@@ -26,7 +22,7 @@ jest.mock('@/components/utils/Methods/synchronizedTime', () => ({
   now : new Date("2021-01-02T11:00:00Z")
 }));
 
-const deleteNotification = castMock(deleteNotification1);
+const deleteNotification = castMock(eventsApi.deleteNotification);
 const updateEventAsRead = castMock(eventsApi.updateEventAsRead);
 const updateEventStatus = castMock(eventsApi.updateEventStatus);
 const getEvents = castMock(eventsApi.getEvents);

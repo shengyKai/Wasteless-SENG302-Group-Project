@@ -6,7 +6,7 @@ import {
   modifyBusiness,
   searchBusinesses,
   uploadBusinessImage
-} from "@/api/internal-business";
+} from "@/api/business";
 
 jest.mock('axios', () => ({
   create: jest.fn(function () {

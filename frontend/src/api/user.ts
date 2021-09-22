@@ -1,6 +1,6 @@
 import {is} from 'typescript-is';
 import {Location, MaybeError, SearchResults, instance} from "@/api/internal";
-import {Business} from "@/api/internal-business";
+import {Business} from "@/api/business";
 
 export type UserRole = "user" | "globalApplicationAdmin" | "defaultGlobalApplicationAdmin"
 type UserOrderBy = 'userId' | 'relevance' | 'firstName' | 'middleName' | 'lastName' | 'nickname' | 'email';

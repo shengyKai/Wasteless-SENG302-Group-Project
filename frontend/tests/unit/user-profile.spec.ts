@@ -13,22 +13,22 @@ import {
   revokeAdmin as revokeAdmin1,
   UserRole,
   User
-} from "@/api/internal-user";
+} from "@/api/user";
 import {
   getBusiness as getBusiness1,
   makeBusinessAdmin as makeBusinessAdmin1,
   removeBusinessAdmin as removeBusinessAdmin1,
   Business
-} from "@/api/internal-business";
+} from "@/api/business";
 
 Vue.use(Vuetify);
 
-jest.mock('@/api/internal-user', () => ({
+jest.mock('@/api/user', () => ({
   getUser: jest.fn(),
   makeAdmin: jest.fn(),
   revokeAdmin: jest.fn(),
 }));
-jest.mock('@/api/internal-business', () => ({
+jest.mock('@/api/business', () => ({
   makeBusinessAdmin: jest.fn(),
   removeBusinessAdmin: jest.fn(),
   getBusiness: jest.fn(),

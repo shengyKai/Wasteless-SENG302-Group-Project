@@ -237,7 +237,7 @@ import {
   postCodeRules,
   streetNumRules,
 } from "@/utils";
-import {createUser} from "@/api/internal-user";
+import {createUser} from "@/api/user";
 
 export default {
   name: 'Register',

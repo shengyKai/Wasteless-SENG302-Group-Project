@@ -307,7 +307,7 @@ import {
   postCodeRules,
   streetNumRules,
 } from "@/utils";
-import {getUser, modifyUser} from "@/api/internal-user";
+import {getUser, modifyUser} from "@/api/user";
 
 export default {
   name: 'ModifyUserPage',

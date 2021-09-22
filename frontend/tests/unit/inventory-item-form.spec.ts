@@ -4,13 +4,11 @@ import Vuetify from "vuetify";
 import {createLocalVue, mount, Wrapper} from "@vue/test-utils";
 import InventoryItemForm from "@/components/BusinessProfile/InventoryItemForm.vue";
 import {castMock, flushQueue, todayPlusYears, findButtonWithText} from "./utils";
-import {getProducts as getProducts1} from "@/api/internal-product";
+import {getProducts as getProducts1} from "@/api/product";
 import {
   createInventoryItem as createInventoryItem1,
   modifyInventoryItem as modifyInventoryItem1
-} from "@/api/internal-inventory";
-import { getStore, resetStoreForTesting } from "@/store";
-import { assertEquals } from "typescript-is";
+} from "@/api/inventory";
 
 Vue.use(Vuetify);
 
@@ -23,14 +21,14 @@ jest.mock('@/api/currency', () => ({
   }),
 }));
 
-jest.mock('@/api/internal-inventory', () => ({
+jest.mock('@/api/inventory', () => ({
   createInventoryItem: jest.fn(),
   modifyInventoryItem: jest.fn(),
 }));
-jest.mock('@/api/internal-product', () => ({
+jest.mock('@/api/product', () => ({
   getProducts: jest.fn(),
 }));
-jest.mock('@/api/internal-business', () => ({
+jest.mock('@/api/business', () => ({
   getBusiness: jest.fn().mockReturnValue({address: {}}), // Makes sure that fetching the currency doesn't crash
 }));
 const createInventoryItem = castMock(createInventoryItem1);

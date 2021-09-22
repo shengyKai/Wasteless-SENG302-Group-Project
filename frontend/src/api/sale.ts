@@ -1,5 +1,5 @@
 import {is} from 'typescript-is';
-import {InventoryItem} from "@/api/internal-inventory";
+import {InventoryItem} from "@/api/inventory";
 import {MaybeError, SearchResults, instance} from "@/api/internal";
 
 export type SaleInterest = {

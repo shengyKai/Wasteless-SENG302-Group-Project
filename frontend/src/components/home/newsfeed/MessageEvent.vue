@@ -67,7 +67,7 @@
 import Event from './Event';
 import {mandatoryRules, maxCharRules} from '@/utils';
 import { formatDate, formatTime } from '@/utils';
-import {getMessagesInConversation, messageConversation} from "@/api/internal-event";
+import {getMessagesInConversation, messageConversation} from "@/api/marketplace";
 
 export default {
   name: "MessageEvent",

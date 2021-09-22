@@ -13,11 +13,11 @@ import {castMock, flushQueue} from './utils';
 import Vuex, {Store} from 'vuex';
 import {getStore, resetStoreForTesting, StoreData} from '@/store';
 import {trimToLength} from '@/utils';
-import {deleteProductImage} from "@/api/internal-product";
+import {deleteProductImage} from "@/api/product";
 
 Vue.use(Vuetify);
 
-jest.mock('@/api/internal-product', () => ({
+jest.mock('@/api/product', () => ({
   deleteProductImage: jest.fn(),
 }));
 

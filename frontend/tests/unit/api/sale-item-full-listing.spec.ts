@@ -3,9 +3,9 @@ import Vuetify from 'vuetify';
 import { createLocalVue, mount, Wrapper } from '@vue/test-utils';
 import FullSaleListing from "@/components/SaleListing/FullSaleListing.vue";
 import Vuex, { Store } from 'vuex';
-import { User } from '@/api/internal-user';
+import { User } from '@/api/user';
 import { getStore, resetStoreForTesting, StoreData } from '@/store';
-import { getListingInterest, setListingInterest } from '@/api/internal-sale';
+import { getListingInterest, setListingInterest } from '@/api/sale';
 import { castMock } from '../utils';
 
 Vue.use(Vuetify);
@@ -27,7 +27,7 @@ jest.mock('@/api/currency', () => ({
   })
 }));
 
-jest.mock('@/api/internal-sale', () => ({
+jest.mock('@/api/sale', () => ({
   getListingInterest: jest.fn(),
   setListingInterest: jest.fn(),
 }));

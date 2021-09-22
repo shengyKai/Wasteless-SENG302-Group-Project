@@ -7,8 +7,8 @@ import {createLocalVue, mount, Wrapper} from "@vue/test-utils";
 import ModifyUserPage from "@/components/UserProfile/ModifyUserPage.vue";
 import {getStore, resetStoreForTesting, StoreData} from "@/store";
 import {castMock, flushQueue} from "./utils";
-import {getUser as getUser1, modifyUser as modifyUser1, User} from "@/api/internal-user";
-import {Business} from "@/api/internal-business";
+import {getUser as getUser1, modifyUser as modifyUser1, User} from "@/api/user";
+import {Business} from "@/api/business";
 
 Vue.use(Vuetify);
 Vue.use(Vuex);

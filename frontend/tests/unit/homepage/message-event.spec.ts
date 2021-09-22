@@ -6,16 +6,16 @@ import MessageEvent from '@/components/home/newsfeed/MessageEvent.vue';
 import Vuex, {Store} from 'vuex';
 import {getStore, resetStoreForTesting, StoreData} from '@/store';
 import {castMock, makeTestUser, findButtonWithText} from '../utils';
-import {MarketplaceCard} from "@/api/internal-marketplace";
 import {
   getMessagesInConversation as getMessagesInConversation1,
+  MarketplaceCard,
   messageConversation as messageConversation1
-} from "@/api/internal-event";
+} from "@/api/marketplace";
 import * as events from '@/api/events';
 
 Vue.use(Vuetify);
 
-jest.mock('@/api/internal-event', () => ({
+jest.mock('@api/marketplace', () => ({
   messageConversation: jest.fn(),
   getMessagesInConversation: jest.fn(),
 }));

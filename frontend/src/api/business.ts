@@ -1,6 +1,6 @@
 import {is} from 'typescript-is';
 import {Image, Location, MaybeError, SearchResults, instance} from "@/api/internal";
-import {User} from "@/api/internal-user";
+import {User} from "@/api/user";
 
 export type BusinessType = 'Accommodation and Food Services' | 'Retail Trade' | 'Charitable organisation' | 'Non-profit organisation';
 export const BUSINESS_TYPES: BusinessType[] = ['Accommodation and Food Services', 'Retail Trade', 'Charitable organisation', 'Non-profit organisation'];

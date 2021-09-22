@@ -24,7 +24,7 @@
 import MarketplaceCard from '@/components/cards/MarketplaceCard';
 import Event from './Event';
 import synchronizedTime from '@/components/utils/Methods/synchronizedTime';
-import {extendMarketplaceCardExpiry} from "@/api/internal-marketplace";
+import {extendMarketplaceCardExpiry} from "@/api/marketplace";
 
 export default {
   name: 'ExpiryEvent',

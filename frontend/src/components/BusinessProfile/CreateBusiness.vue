@@ -123,7 +123,7 @@ import {
   mandatoryRules,
   maxCharRules, postCodeRules, streetNumRules
 } from "@/utils";
-import {createBusiness} from "@/api/internal-business";
+import {createBusiness} from "@/api/business";
 
 export default {
   name: 'CreateBusiness',

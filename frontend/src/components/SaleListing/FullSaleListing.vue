@@ -140,7 +140,7 @@
 <script>
 import ImageCarousel from "@/components/utils/ImageCarousel";
 import { currencyFromCountry } from "@/api/currency";
-import { setListingInterest, getListingInterest} from '../../api/internal-sale';
+import { setListingInterest, getListingInterest} from '../../api/sale';
 import { formatDate, formatPrice } from '@/utils';
 
 export default {

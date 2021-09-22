@@ -172,8 +172,7 @@
 <script>
 import synchronizedTime from '@/components/utils/Methods/synchronizedTime';
 import { formatDate, formatTime } from '@/utils';
-import {updateEventAsRead, updateEventStatus} from "@/api/events";
-import {setEventTag} from "@/api/internal-event";
+import {setEventTag, updateEventAsRead, updateEventStatus} from "@/api/events";
 
 export default {
   name: 'Event',

@@ -267,8 +267,8 @@ import {
   USER_ROLES
 } from "@/utils";
 import ImageCarousel from "@/components/utils/ImageCarousel";
-import {getUser} from "@/api/internal-user";
-import {makeBusinessImagePrimary, modifyBusiness, uploadBusinessImage} from "@/api/internal-business";
+import {getUser} from "@/api/user";
+import {makeBusinessImagePrimary, modifyBusiness, uploadBusinessImage} from "@/api/business";
 
 export default {
   name: 'ModifyBusiness',

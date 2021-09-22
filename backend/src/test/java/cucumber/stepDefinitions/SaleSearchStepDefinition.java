@@ -10,15 +10,13 @@ import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
 import net.minidev.json.parser.JSONParser;
 import net.minidev.json.parser.ParseException;
+import org.junit.Before;
 import org.seng302.leftovers.entities.*;
-import org.seng302.leftovers.persistence.BusinessRepository;
 import org.seng302.leftovers.persistence.InventoryItemRepository;
 import org.seng302.leftovers.persistence.ProductRepository;
 import org.seng302.leftovers.persistence.SaleItemRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
-import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 
 import java.io.UnsupportedEncodingException;
 import java.util.*;
@@ -29,11 +27,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 
 public class SaleSearchStepDefinition {
     @Autowired
-    private UserContext userContext;
-    @Autowired
     private BusinessContext businessContext;
-    @Autowired
-    private BusinessRepository businessRepository;
     @Autowired
     private ProductRepository productRepository;
     @Autowired
@@ -41,8 +35,6 @@ public class SaleSearchStepDefinition {
     @Autowired
     private SaleItemRepository saleItemRepository;
 
-    @Autowired
-    private MockMvc mockMvc;
     @Autowired
     private RequestContext requestContext;
 
@@ -59,6 +51,19 @@ public class SaleSearchStepDefinition {
     private String closeLower = "";
     private String closeUpper = "";
 
+
+    @Before
+    public void reset() {
+        this.basicSearch = "";
+        this.productSearch = "";
+        this.businessSearch = "";
+        this.locationSearch = "";
+        this.businessTypes = null;
+        this.priceLower = "";
+        this.priceUpper = "";
+        this.closeLower = "";
+        this.closeUpper = "";
+    }
 
     @And("the business has the following products on sale:")
     public void theBusinessHasTheFollowingProductsOnSale(io.cucumber.datatable.DataTable datatable) throws Exception {
@@ -162,19 +167,6 @@ public class SaleSearchStepDefinition {
                 .param("closeLower", this.closeLower)
                 .param("closeUpper", this.closeUpper)
         );
-        reset();
-    }
-
-    private void reset() {
-        this.basicSearch = "";
-        this.productSearch = "";
-        this.businessSearch = "";
-        this.locationSearch = "";
-        this.businessTypes = null;
-        this.priceLower = "";
-        this.priceUpper = "";
-        this.closeLower = "";
-        this.closeUpper = "";
     }
 
     @When("I search sale basic {string}")

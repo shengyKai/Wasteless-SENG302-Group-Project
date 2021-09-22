@@ -5,14 +5,14 @@ import {createLocalVue, mount, Wrapper} from '@vue/test-utils';
 import Marketplace from '@/components/marketplace/Marketplace.vue';
 import {castMock, flushQueue} from './utils';
 import {getStore, resetStoreForTesting} from '@/store';
-import {User} from "@/api/internal-user";
-import {getMarketplaceCardsBySection as getMarketplaceCardsBySection1, MarketplaceCard} from "@/api/internal-marketplace";
-import {searchKeywords} from "@/api/internal-keyword";
+import {User} from "@/api/user";
+import {getMarketplaceCardsBySection as getMarketplaceCardsBySection1, MarketplaceCard} from "@/api/marketplace";
+import {searchKeywords} from "@/api/keyword";
 
-jest.mock('@/api/internal-marketplace', () => ({
+jest.mock('@/api/marketplace', () => ({
   getMarketplaceCardsBySection: jest.fn(),
 }));
-jest.mock('@/api/internal-keyword', () => ({
+jest.mock('@/api/keyword', () => ({
   searchKeywords: jest.fn(),
 }));
 

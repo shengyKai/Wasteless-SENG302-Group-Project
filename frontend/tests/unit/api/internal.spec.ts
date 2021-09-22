@@ -4,11 +4,11 @@ import { AxiosResponse } from 'axios';
 import {SearchResults} from '@/api/internal';
 import { castMock } from '../utils';
 import { is, Reason } from 'typescript-is';
-import {CreateUser, login, createUser} from "@/api/internal-user";
-import {CreateProduct, Product, createProduct, uploadProductImage, getProducts, modifyProduct} from "@/api/internal-product";
-import {InventoryItem} from "@/api/internal-inventory";
-import {Sale, getBusinessSales, setListingInterest, getListingInterest } from "@/api/internal-sale";
-import {Message, getMessagesInConversation} from "@/api/internal-event";
+import {CreateUser, login, createUser} from "@/api/user";
+import {CreateProduct, Product, createProduct, uploadProductImage, getProducts, modifyProduct} from "@/api/product";
+import {InventoryItem} from "@/api/inventory";
+import {Sale, getBusinessSales, setListingInterest, getListingInterest } from "@/api/sale";
+import {getMessagesInConversation, Message} from "@/api/marketplace";
 
 const api = {
   login, createUser, createProduct, uploadProductImage, getProducts, modifyProduct,

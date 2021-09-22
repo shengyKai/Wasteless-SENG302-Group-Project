@@ -6,9 +6,9 @@ import ProductCatalogue from '@/components/ProductCatalogue.vue';
 import ProductCatalogueItem from '@/components/cards/ProductCatalogueItem.vue';
 import {SearchResults} from '@/api/internal';
 import {castMock, flushQueue, findButtonWithText} from './utils';
-import {getProducts as getProducts1, searchCatalogue as searchCatalogue1, Product} from "@/api/internal-product";
+import {getProducts as getProducts1, searchCatalogue as searchCatalogue1, Product} from "@/api/product";
 
-jest.mock('@/api/internal-product', () => ({
+jest.mock('@/api/product', () => ({
   getProducts: jest.fn(),
   searchCatalogue: jest.fn()
 }));

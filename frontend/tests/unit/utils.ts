@@ -1,5 +1,5 @@
-import {User, UserRole} from "@/api/internal-user";
-import {Business} from "@/api/internal-business";
+import {User, UserRole} from "@/api/user";
+import {Business} from "@/api/business";
 import { Wrapper } from "@vue/test-utils";
 
 /**

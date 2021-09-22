@@ -5,9 +5,9 @@ import {createLocalVue, mount, Wrapper} from '@vue/test-utils';
 import SearchResults from '@/components/SearchResults.vue';
 import SearchResultItem from '@/components/cards/SearchResultItem.vue';
 import {castMock, flushQueue} from './utils';
-import {userSearch as search1, User} from "@/api/internal-user";
+import {userSearch as search1, User} from "@/api/user";
 
-jest.mock('@/api/internal-user', () => ({
+jest.mock('@/api/user', () => ({
   userSearch: jest.fn(),
   getSearchCount: jest.fn(),
 }));

@@ -7,13 +7,13 @@ import ModifyBusiness from '@/components/BusinessProfile/ModifyBusiness.vue';
 import {castMock, findButtonWithText} from "./utils";
 import {Location} from '@/api/internal';
 import {getStore, resetStoreForTesting} from '@/store';
-import {getUser as getUser1, User} from "@/api/internal-user";
-import {modifyBusiness as modifyBusiness1, uploadBusinessImage as uploadBusinessImage1, Business} from "@/api/internal-business";
+import {getUser as getUser1, User} from "@/api/user";
+import {modifyBusiness as modifyBusiness1, uploadBusinessImage as uploadBusinessImage1, Business} from "@/api/business";
 
-jest.mock('@/api/internal-user', () => ({
+jest.mock('@/api/user', () => ({
   getUser: jest.fn(),
 }));
-jest.mock('@/api/internal-business', () => ({
+jest.mock('@/api/business', () => ({
   modifyBusiness: jest.fn(),
   uploadBusinessImage: jest.fn()
 }));

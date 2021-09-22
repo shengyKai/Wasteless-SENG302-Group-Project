@@ -1,6 +1,6 @@
 import {Image, SearchResults} from "@/api/internal";
 import axios, {AxiosInstance } from 'axios';
-import {getProducts, Product, searchCatalogue} from "@/api/internal-product";
+import {getProducts, Product, searchCatalogue} from "@/api/product";
 
 jest.mock('axios', () => ({
   create: jest.fn(function() {

@@ -35,7 +35,7 @@
 
 <script>
 import ImageSelector from "@/components/utils/ImageSelector";
-import {uploadProductImage} from "@/api/internal-product";
+import {uploadProductImage} from "@/api/product";
 export default {
   name: "ProductImageUploader",
   components: {ImageSelector},

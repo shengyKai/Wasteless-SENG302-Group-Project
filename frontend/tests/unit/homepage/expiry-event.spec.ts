@@ -8,11 +8,11 @@ import * as events from '@/api/events';
 import Vuex, {Store} from 'vuex';
 import {getStore, resetStoreForTesting, StoreData} from '@/store';
 import {castMock, makeTestUser, findButtonWithText} from '../utils';
-import {extendMarketplaceCardExpiry as extendMarketplaceCardExpiry1} from "@/api/internal-marketplace";
+import {extendMarketplaceCardExpiry as extendMarketplaceCardExpiry1} from "@/api/marketplace";
 
 Vue.use(Vuetify);
 
-jest.mock('@/api/internal-marketplace', () => ({
+jest.mock('@/api/marketplace', () => ({
   extendMarketplaceCardExpiry: jest.fn(),
 }));
 

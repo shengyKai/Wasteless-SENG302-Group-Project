@@ -1,12 +1,12 @@
 import axios, { AxiosInstance } from 'axios';
-import {User} from "@/api/internal-user";
+import {User} from "@/api/user";
 import {
   CreateMarketplaceCard,
   createMarketplaceCard,
   deleteMarketplaceCard,
   extendMarketplaceCardExpiry, getMarketplaceCardsBySectionAndKeywords,
   getMarketplaceCardsByUser, MarketplaceCard, ModifyMarketplaceCard, modifyMarketplaceCard
-} from "@/api/internal-marketplace";
+} from "@/api/marketplace";
 
 jest.mock('axios', () => ({
   create: jest.fn(function () {

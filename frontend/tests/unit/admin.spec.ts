@@ -5,11 +5,11 @@ import Admin from "@/components/admin/Admin.vue";
 import {castMock} from './utils';
 import Vuex, {Store} from 'vuex';
 import {StoreData} from '@/store';
-import {Keyword, searchKeywords as searchKeywords1} from "@/api/internal-keyword";
+import {Keyword, searchKeywords as searchKeywords1} from "@/api/keyword";
 
 Vue.use(Vuetify);
 
-jest.mock('@/api/internal-keyword', () => ({
+jest.mock('@/api/keyword', () => ({
   searchKeywords: jest.fn(),
 }));
 

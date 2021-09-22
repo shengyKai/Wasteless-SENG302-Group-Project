@@ -231,8 +231,8 @@
 <script>
 import Avatar from '@/components/utils/Avatar';
 import convertAddressToReadableText from '@/components/utils/Methods/convertAddressToReadableText';
-import {getUser, makeAdmin, revokeAdmin} from "@/api/internal-user";
-import {makeBusinessAdmin, removeBusinessAdmin} from "@/api/internal-business";
+import {getUser, makeAdmin, revokeAdmin} from "@/api/user";
+import {makeBusinessAdmin, removeBusinessAdmin} from "@/api/business";
 
 export default {
   name: 'UserProfile',

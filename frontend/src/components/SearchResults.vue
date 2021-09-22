@@ -73,7 +73,7 @@
 <script>
 import SearchResultItem from './cards/SearchResultItem';
 import { debounce } from '@/utils';
-import {userSearch} from "@/api/internal-user";
+import {userSearch} from "@/api/user";
 
 export default {
   name: 'SearchResults',

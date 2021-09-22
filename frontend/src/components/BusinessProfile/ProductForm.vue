@@ -109,8 +109,8 @@ import {
   alphabetExtendedSingleLineRules, mandatoryRules,
   maxCharRules, productCodeRules, smallPriceRules
 } from "@/utils";
-import {getBusiness} from "@/api/internal-business";
-import {createProduct, modifyProduct} from "@/api/internal-product";
+import {getBusiness} from "@/api/business";
+import {createProduct, modifyProduct} from "@/api/product";
 export default {
   name: 'ProductForm',
   props: {

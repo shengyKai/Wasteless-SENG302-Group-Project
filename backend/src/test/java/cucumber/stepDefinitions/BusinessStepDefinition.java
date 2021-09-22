@@ -1,5 +1,6 @@
 package cucumber.stepDefinitions;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import cucumber.context.BusinessContext;
 import cucumber.context.ImageContext;
@@ -340,33 +341,15 @@ public class BusinessStepDefinition {
 
     @And("the business {string} with the type {string} and location {string} exists")
     public void theBusinessWithTheTypeAndLocationExists(String name, String type, String location) {
+        ObjectMapper objectMapper = new ObjectMapper();
         var business = new Business.Builder()
                 .withName(name)
                 .withDescription("Sells stuff")
-                .withBusinessType(stringToBusinessType(type))
+                .withBusinessType(objectMapper.convertValue(type, new TypeReference<>() {}))
                 .withAddress(Location.covertAddressStringToLocation(location))
                 .withPrimaryOwner(userContext.getLast())
                 .build();
         businessContext.save(business);
     }
 
-    /**
-     * Converts businessType into DTO form
-     * @param type string
-     * @return type DTO
-     */
-    private BusinessType stringToBusinessType(String type) {
-        switch(type) {
-            case "Accommodation and Food Services":
-                return BusinessType.ACCOMMODATION_AND_FOOD_SERVICES;
-            case "Retail Trade":
-                return BusinessType.RETAIL_TRADE;
-            case "Charitable organisation":
-                return BusinessType.CHARITABLE;
-            case "Non-profit organisation":
-                return BusinessType.NON_PROFIT;
-            default:
-                throw new ValidationResponseException("BusinessType term " + type + " is invalid");
-        }
-    }
 }

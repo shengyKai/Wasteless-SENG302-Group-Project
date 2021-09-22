@@ -1,11 +1,10 @@
-import { AnyEvent, getEvents } from './api/events';
+import {AnyEvent, deleteNotification, getEvents} from './api/events';
 import Vuex, { Store, StoreOptions } from 'vuex';
 import { COOKIE, deleteCookie, getCookie, isTesting, setCookie } from './utils';
 import Vue from 'vue';
-import {getUser, login, User} from "@/api/internal-user";
-import {Business} from "@/api/internal-business";
-import {InventoryItem} from "@/api/internal-inventory";
-import {deleteNotification} from "@/api/internal-event";
+import {getUser, login, User} from "@/api/user";
+import {Business} from "@/api/business";
+import {InventoryItem} from "@/api/inventory";
 
 type UserRole = { type: "user" | "business", id: number };
 type SaleItemInfo = { businessId: number, inventoryItem: InventoryItem };

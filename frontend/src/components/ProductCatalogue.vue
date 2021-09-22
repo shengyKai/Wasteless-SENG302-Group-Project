@@ -120,7 +120,7 @@
 import ProductCatalogueItem from './cards/ProductCatalogueItem.vue';
 import ProductForm from '@/components/BusinessProfile/ProductForm.vue';
 import { debounce } from '@/utils';
-import {getProducts, searchCatalogue} from "@/api/internal-product";
+import {getProducts, searchCatalogue} from "@/api/product";
 
 export default {
   name: "ProductCatalogue",

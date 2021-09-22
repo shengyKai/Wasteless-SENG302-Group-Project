@@ -160,8 +160,8 @@
 <script>
 import { currencyFromCountry } from "@/api/currency";
 import {hugePriceRules, mandatoryRules, quantityRules, smallPriceRules} from "@/utils";
-import {getProducts} from "@/api/internal-product";
-import {createInventoryItem, modifyInventoryItem} from "@/api/internal-inventory";
+import {getProducts} from "@/api/product";
+import {createInventoryItem, modifyInventoryItem} from "@/api/inventory";
 
 export default {
   name: 'InventoryItemForm',

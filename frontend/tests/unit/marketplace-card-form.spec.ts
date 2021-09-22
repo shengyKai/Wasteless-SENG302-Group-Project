@@ -2,18 +2,16 @@ import Vue from 'vue';
 import Vuex from 'vuex';
 import Vuetify from 'vuetify';
 import {createLocalVue, mount, Wrapper} from '@vue/test-utils';
-import { ThisTypedComponentOptionsWithArrayProps } from 'vue/types/options';
 
 import MarketplaceCardForm from '@/components/marketplace/MarketplaceCardForm.vue';
 import {castMock, makeTestUser, findButtonWithText} from "./utils";
-import {createMarketplaceCard as createMarketplaceCard1, MarketplaceCard} from "@/api/internal-marketplace";
-import {searchKeywords as searchKeywords1} from "@/api/internal-keyword";
-import { getStore, resetStoreForTesting } from '@/store';
+import {createMarketplaceCard as createMarketplaceCard1, MarketplaceCard} from "@/api/marketplace";
+import {searchKeywords as searchKeywords1} from "@/api/keyword";
 
-jest.mock('@/api/internal-keyword', () => ({
+jest.mock('@/api/keyword', () => ({
   searchKeywords: jest.fn(),
 }));
-jest.mock('@/api/internal-marketplace', () => ({
+jest.mock('@/api/marketplace', () => ({
   createMarketplaceCard: jest.fn(),
 }));
 

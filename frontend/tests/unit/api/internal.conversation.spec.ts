@@ -1,5 +1,5 @@
 import axios, {AxiosInstance} from 'axios';
-import {messageConversation} from "@/api/internal-event";
+import {messageConversation} from "@/api/marketplace";
 
 jest.mock('axios', () => ({
   create: jest.fn(function () {

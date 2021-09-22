@@ -55,7 +55,7 @@
 
 <script>
 import SaleItem from "@/components/cards/SaleItem";
-import {getBusinessSales} from "@/api/internal-sale";
+import {getBusinessSales} from "@/api/sale";
 
 export default {
   name: "SalePage",

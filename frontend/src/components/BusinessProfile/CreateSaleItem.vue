@@ -95,7 +95,7 @@ import {
   quantityRules,
   smallPriceRules
 } from "@/utils";
-import {createSaleItem} from "@/api/internal-sale";
+import {createSaleItem} from "@/api/sale";
 
 export default {
   name: "CreateSaleItem",

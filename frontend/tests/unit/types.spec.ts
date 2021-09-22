@@ -1,7 +1,7 @@
 import { is } from 'typescript-is';
 
-import {User} from "@/api/internal-user";
-import {Business} from "@/api/internal-business";
+import {User} from "@/api/user";
+import {Business} from "@/api/business";
 
 it('Testing that 7 is a number', () => {
   expect(is<number>(7)).toBeTruthy();

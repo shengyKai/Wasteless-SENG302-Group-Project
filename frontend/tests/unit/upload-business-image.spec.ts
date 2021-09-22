@@ -3,10 +3,10 @@ import Vuetify from 'vuetify';
 import {createLocalVue, mount, Wrapper} from '@vue/test-utils';
 
 import BusinessImageUploader from "@/components/utils/BusinessImageUploader.vue";
-import {castMock, findButtonWithText, flushQueue} from './utils';
-import {uploadBusinessImage as uploadBusinessImage1} from "@/api/internal-business";
+import {castMock, findButtonWithText} from './utils';
+import {uploadBusinessImage as uploadBusinessImage1} from "@/api/business";
 
-jest.mock('@/api/internal-business', () => ({
+jest.mock('@/api/business', () => ({
   uploadBusinessImage: jest.fn(),
 }));
 

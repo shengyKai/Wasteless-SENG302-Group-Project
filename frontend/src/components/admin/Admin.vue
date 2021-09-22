@@ -67,7 +67,7 @@
 
 <script>
 import DeleteKeyword from "./DeleteKeyword.vue";
-import {searchKeywords} from "@/api/internal-keyword";
+import {searchKeywords} from "@/api/keyword";
 
 export default {
   data () {

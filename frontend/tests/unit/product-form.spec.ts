@@ -4,14 +4,13 @@ import {createLocalVue, mount, Wrapper} from '@vue/test-utils';
 
 import ProductForm from '@/components/BusinessProfile/ProductForm.vue';
 import {castMock, flushQueue, findButtonWithText} from './utils';
-import {createProduct as createProduct1, modifyProduct as modifyProduct1, Product} from "@/api/internal-product";
-import { currencyFromCountry } from '@/api/currency';
+import {createProduct as createProduct1, modifyProduct as modifyProduct1, Product} from "@/api/product";
 
-jest.mock('@/api/internal-product', () => ({
+jest.mock('@/api/product', () => ({
   createProduct: jest.fn(),
   modifyProduct: jest.fn(),
 }));
-jest.mock('@/api/internal-business', () => ({
+jest.mock('@/api/business', () => ({
   getBusiness: jest.fn(() => {
     return {
       address: {

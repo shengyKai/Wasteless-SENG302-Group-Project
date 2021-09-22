@@ -3,8 +3,6 @@ import Vuetify from 'vuetify';
 import { createLocalVue, mount, Wrapper } from '@vue/test-utils';
 import SaleItem from "@/components/cards/SaleItem.vue";
 import FullProductDescription from "@/components/utils/FullProductDescription.vue";
-
-import { castMock, flushQueue } from './utils';
 import Vuex, { Store } from 'vuex';
 import { getStore, resetStoreForTesting, StoreData } from '@/store';
 
