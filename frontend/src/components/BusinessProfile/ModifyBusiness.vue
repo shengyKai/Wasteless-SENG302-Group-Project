@@ -11,9 +11,9 @@
             <v-tab key="image">Image</v-tab>
           </v-tabs>
           <!-- Have a v-model 'tab' that allows user to switch between different sections -->
-          <v-tabs-items v-model="tab" class="pt-4" :eager="true">
+          <v-tabs-items v-model="tab" class="pt-10" :eager="true">
             <!-- Business information tab -->
-            <v-tab-item key="info">
+            <v-tab-item key="info" :eager="true">
               <v-row no-gutters>
                 <v-col cols="12" sm="6">
                   <!-- INPUT: Business Name -->
@@ -276,7 +276,7 @@
 import LocationAutocomplete from '@/components/utils/LocationAutocomplete';
 import { modifyBusiness, uploadBusinessImage, makeBusinessImagePrimary, getUser } from '@/api/internal';
 // import ImageCarousel from "@/components/utils/ImageCarousel";
-import BusinessImageUploader from "@/components/utils/BusinessImageUploader";
+// import BusinessImageUploader from "@/components/utils/BusinessImageUploader";
 import ImageManager from "@/components/utils/ImageManager";
 import {
   alphabetExtendedMultilineRules,
@@ -291,7 +291,7 @@ export default {
   name: 'ModifyBusiness',
   components: {
     LocationAutocomplete,
-    BusinessImageUploader,
+    // BusinessImageUploader,
     // ImageCarousel,
     ImageManager
   },
