@@ -173,7 +173,30 @@ public class SearchSpecConstructor {
     public static Specification<SaleItem> constructSaleItemSpecificationFromSearchQueries
             (String searchQuery, String productName, String businessName, String businessLocation) {
 
+        // build a match for specific fields
+        Specification<SaleItem> searchSpec = Specification.where(null);
+        if (searchQuery != null && !searchQuery.isBlank()) {
+            searchSpec = searchSpec.and(constructSaleItemSpecificationFromBasicQuery(searchQuery));
+        }
+        if (businessName != null && !businessName.isBlank()){
+            searchSpec = searchSpec.and(constructSaleItemSpecificationFromBusinessName(businessName));
+        }
+        if (productName != null && !productName.isBlank()) {
+            searchSpec = searchSpec.and(constructSaleItemSpecificationFromProductName(productName));
+        }
+        if (businessLocation != null && !businessLocation.isBlank()) {
+            searchSpec = searchSpec.and(constructSaleItemSpecificationFromBusinessLocation(businessLocation));
+        }
 
+        return searchSpec;
+    }
+
+    /**
+     * Returns a specifications which matches sale items with a given product name
+     * @param basicQuery The term to search for
+     * @return Specification for SaleItem
+     */
+    private static Specification<SaleItem> constructSaleItemSpecificationFromBasicQuery(String basicQuery) {
         var allFieldNames = List.of(
                 "inventoryItem.product.name",
                 "inventoryItem.product.business.name",
@@ -183,26 +206,10 @@ public class SearchSpecConstructor {
                 "inventoryItem.product.manufacturer",
                 "inventoryItem.product.description",
                 "moreInfo");
-        // build a match for all fields
-        Specification<SaleItem> generalSpec = Specification.where(null);
-        if (searchQuery != null && !searchQuery.isBlank()) {
-            var searchTokens = SearchQueryParser.splitSearchStringIntoTerms(searchQuery);
-            SearchQueryParser.SearchQuery<SaleItem> searchSpecs = SearchQueryParser.parseSearchTokens(searchTokens, allFieldNames);
-            generalSpec = generalSpec.or(buildCompoundSpecification(searchSpecs));
-        }
-        // build a match for specific fields
-        Specification<SaleItem> advancedSpec = Specification.where(null);
-        if (businessName != null && !businessName.isBlank()){
-            advancedSpec = advancedSpec.and(constructSaleItemSpecificationFromBusinessName(businessName));
-        }
-        if (productName != null && !productName.isBlank()) {
-            advancedSpec = advancedSpec.and(constructSaleItemSpecificationFromProductName(productName));
-        }
-        if (businessLocation != null && !businessLocation.isBlank()) {
-            advancedSpec = advancedSpec.and(constructSaleItemSpecificationFromBusinessLocation(businessLocation));
-        }
+        List<String> searchTokens = SearchQueryParser.splitSearchStringIntoTerms(basicQuery);
 
-        return generalSpec.and(advancedSpec);
+        SearchQueryParser.SearchQuery<SaleItem> searchSpecs = SearchQueryParser.parseSearchTokens(searchTokens, allFieldNames);
+        return buildCompoundSpecification(searchSpecs);
     }
 
     /**
@@ -394,6 +401,7 @@ public class SearchSpecConstructor {
                 and(constructSaleListingSpecificationFromClosingDate(
                         saleListingSearchDTO.getClosingDateLowerBound(), saleListingSearchDTO.getClosingDateUpperBound())).
                 and(constructSaleListingSpecificationFromBusinessType(
-                        saleListingSearchDTO.getBusinessTypes()));
+                        saleListingSearchDTO.getBusinessTypes())).
+                and(constructSaleItemSpecificationFromSearchQueries(saleListingSearchDTO.getBasicSearchQuery(), saleListingSearchDTO.getProductSearchQuery(), saleListingSearchDTO.getBusinessSearchQuery(), saleListingSearchDTO.getLocationSearchQuery()));
     }
 }

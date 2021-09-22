@@ -606,45 +606,80 @@ class SearchServiceSaleListingTest {
      */
     private Stream<Arguments> generateDataForconstructSaleListingSpecificationForSearch() {
         LocalDate today = LocalDate.now();
+
+        var listing1 = new SaleListingSearchDTO();
+        listing1.setPriceLowerBound(new BigDecimal("0.0"));
+        listing1.setPriceUpperBound(new BigDecimal("0.0"));
+        listing1.setClosingDateLowerBound(today.plus(Integer.parseInt("0"), ChronoUnit.DAYS));
+        listing1.setClosingDateUpperBound(today.plus(Integer.parseInt("0"), ChronoUnit.DAYS));
+        listing1.setBusinessTypes(List.of());
+
+        var listing2 = new SaleListingSearchDTO();
+        listing2.setPriceLowerBound(new BigDecimal("0.0"));
+        listing2.setPriceUpperBound(new BigDecimal("5.0"));
+        listing2.setClosingDateLowerBound(today.plus(Integer.parseInt("0"), ChronoUnit.DAYS));
+        listing2.setClosingDateUpperBound(today.plus(Integer.parseInt("5"), ChronoUnit.DAYS));
+        listing2.setBusinessTypes(List.of(BusinessType.ACCOMMODATION_AND_FOOD_SERVICES));
+
+        var listing3 = new SaleListingSearchDTO();
+        listing3.setPriceLowerBound(new BigDecimal("6.0"));
+        listing3.setPriceUpperBound(new BigDecimal("10.0"));
+        listing3.setClosingDateLowerBound(today.plus(Integer.parseInt("6"), ChronoUnit.DAYS));
+        listing3.setClosingDateUpperBound(today.plus(Integer.parseInt("10"), ChronoUnit.DAYS));
+        listing3.setBusinessTypes(List.of(BusinessType.ACCOMMODATION_AND_FOOD_SERVICES, BusinessType.CHARITABLE));
+
+        var listing4 = new SaleListingSearchDTO();
+        listing4.setPriceLowerBound(new BigDecimal("11.0"));
+        listing4.setPriceUpperBound(new BigDecimal("15.0"));
+        listing4.setClosingDateLowerBound(today.plus(Integer.parseInt("11"), ChronoUnit.DAYS));
+        listing4.setClosingDateUpperBound(today.plus(Integer.parseInt("15"), ChronoUnit.DAYS));
+        listing4.setBusinessTypes(List.of(BusinessType.ACCOMMODATION_AND_FOOD_SERVICES, BusinessType.CHARITABLE, BusinessType.NON_PROFIT));
+
+        var listing5 = new SaleListingSearchDTO();
+        listing5.setPriceLowerBound(new BigDecimal("0.0"));
+        listing5.setPriceUpperBound(new BigDecimal("15.0"));
+        listing5.setClosingDateLowerBound(today.plus(Integer.parseInt("0"), ChronoUnit.DAYS));
+        listing5.setClosingDateUpperBound(today.plus(Integer.parseInt("15"), ChronoUnit.DAYS));
+        listing5.setBusinessTypes(List.of(BusinessType.ACCOMMODATION_AND_FOOD_SERVICES, BusinessType.CHARITABLE, BusinessType.NON_PROFIT, BusinessType.RETAIL_TRADE));
+
+        var listing6 = new SaleListingSearchDTO();
+        listing6.setPriceLowerBound(new BigDecimal("0.0"));
+        listing6.setPriceUpperBound(new BigDecimal("14.0"));
+        listing6.setClosingDateLowerBound(today.plus(Integer.parseInt("2"), ChronoUnit.DAYS));
+        listing6.setClosingDateUpperBound(today.plus(Integer.parseInt("15"), ChronoUnit.DAYS));
+        listing6.setBusinessTypes(List.of(BusinessType.ACCOMMODATION_AND_FOOD_SERVICES, BusinessType.CHARITABLE));
+
+        var listing7 = new SaleListingSearchDTO();
+        listing7.setPriceLowerBound(new BigDecimal("2.0"));
+        listing7.setPriceUpperBound(new BigDecimal("14.0"));
+        listing7.setClosingDateLowerBound(today.plus(Integer.parseInt("3"), ChronoUnit.DAYS));
+        listing7.setClosingDateUpperBound(today.plus(Integer.parseInt("12"), ChronoUnit.DAYS));
+        listing7.setBusinessTypes(List.of());
+
+        var listing8 = new SaleListingSearchDTO();
+        listing8.setPriceLowerBound(new BigDecimal("2.0"));
+        listing8.setClosingDateLowerBound(today.plus(Integer.parseInt("3"), ChronoUnit.DAYS));
+        listing8.setBusinessTypes(List.of());
+
+        var listing9 = new SaleListingSearchDTO();
+        listing9.setPriceUpperBound(new BigDecimal("14.0"));
+        listing9.setClosingDateUpperBound(today.plus(Integer.parseInt("12"), ChronoUnit.DAYS));
+        listing9.setBusinessTypes(List.of());
+
+        var listing10 = new SaleListingSearchDTO();
+        listing9.setBusinessTypes(List.of());
+
         return Stream.of(
-                Arguments.of(new SaleListingSearchDTO(new BigDecimal("0.0"), new BigDecimal("0.0"),
-                        today.plus(Integer.parseInt("0"), ChronoUnit.DAYS),
-                        today.plus(Integer.parseInt("0"), ChronoUnit.DAYS),
-                        List.of()), 0),
-                Arguments.of(new SaleListingSearchDTO(new BigDecimal("0.0"), new BigDecimal("5.0"),
-                        today.plus(Integer.parseInt("0"), ChronoUnit.DAYS),
-                        today.plus(Integer.parseInt("5"), ChronoUnit.DAYS),
-                        List.of(BusinessType.ACCOMMODATION_AND_FOOD_SERVICES)), 1),
-                Arguments.of(new SaleListingSearchDTO(new BigDecimal("6.0"), new BigDecimal("10.0"),
-                        today.plus(Integer.parseInt("6"), ChronoUnit.DAYS),
-                        today.plus(Integer.parseInt("10"), ChronoUnit.DAYS),
-                        List.of(BusinessType.ACCOMMODATION_AND_FOOD_SERVICES, BusinessType.CHARITABLE)), 1),
-                Arguments.of(new SaleListingSearchDTO(new BigDecimal("11.0"), new BigDecimal("15.0"),
-                        today.plus(Integer.parseInt("11"), ChronoUnit.DAYS),
-                        today.plus(Integer.parseInt("15"), ChronoUnit.DAYS),
-                        List.of(BusinessType.ACCOMMODATION_AND_FOOD_SERVICES, BusinessType.CHARITABLE, BusinessType.NON_PROFIT)), 1),
-                Arguments.of(new SaleListingSearchDTO(new BigDecimal("0.0"), new BigDecimal("15.0"),
-                        today.plus(Integer.parseInt("0"), ChronoUnit.DAYS),
-                        today.plus(Integer.parseInt("15"), ChronoUnit.DAYS),
-                        List.of(BusinessType.ACCOMMODATION_AND_FOOD_SERVICES, BusinessType.CHARITABLE, BusinessType.NON_PROFIT, BusinessType.RETAIL_TRADE)), 7),
-                Arguments.of(new SaleListingSearchDTO(new BigDecimal("0.0"), new BigDecimal("14.0"),
-                        today.plus(Integer.parseInt("2"), ChronoUnit.DAYS),
-                        today.plus(Integer.parseInt("15"), ChronoUnit.DAYS),
-                        List.of(BusinessType.ACCOMMODATION_AND_FOOD_SERVICES, BusinessType.CHARITABLE)), 3),
-                Arguments.of(new SaleListingSearchDTO(new BigDecimal("2.0"), new BigDecimal("14.0"),
-                        today.plus(Integer.parseInt("3"), ChronoUnit.DAYS),
-                        today.plus(Integer.parseInt("12"), ChronoUnit.DAYS),
-                        List.of()), 5),
-                Arguments.of(new SaleListingSearchDTO(new BigDecimal("2.0"), null,
-                        today.plus(Integer.parseInt("3"), ChronoUnit.DAYS),
-                        null,
-                        List.of()), 6),
-                Arguments.of(new SaleListingSearchDTO(null, new BigDecimal("14.0"),
-                        null, today.plus(Integer.parseInt("12"), ChronoUnit.DAYS),
-                        List.of()), 6),
-                Arguments.of(new SaleListingSearchDTO(null, null,
-                        null, null,
-                        List.of()), 7)
+                Arguments.of(listing1, 0),
+                Arguments.of(listing2, 1),
+                Arguments.of(listing3, 1),
+                Arguments.of(listing4, 1),
+                Arguments.of(listing5, 7),
+                Arguments.of(listing6, 3),
+                Arguments.of(listing7, 5),
+                Arguments.of(listing8, 6),
+                Arguments.of(listing9, 6),
+                Arguments.of(listing10, 7)
         );
     }
 

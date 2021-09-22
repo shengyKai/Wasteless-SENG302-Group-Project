@@ -213,36 +213,17 @@ public class SaleController {
             logger.info("Get sale items to match parameters.");
             AuthenticationTokenManager.checkAuthenticationToken(request);
 
-            logger.info(saleSearchDTO);
-
             // Check sort ordering
             Sort.Direction direction = SearchQueryParser.getSortDirection(saleSearchDTO.getReverse());
             List<Sort.Order> sortOrder = getSaleItemSearchOrder(saleSearchDTO.getOrderBy(), direction);
 
-            // Check filter options
-            List<BusinessType> convertedBusinessTypes = saleSearchDTO.getBusinessTypes();
-
-            LocalDate convertedCloseLower = null;
-            LocalDate convertedCloseUpper = null;
-            DateTimeFormatter formatter = DateTimeFormatter.ISO_LOCAL_DATE;
-            if (saleSearchDTO.getCloseLower() != null && !saleSearchDTO.getCloseLower().isEmpty()) {
-                convertedCloseLower = LocalDate.parse(saleSearchDTO.getCloseLower(), formatter);
-            }
-            if (saleSearchDTO.getCloseUpper() != null && !saleSearchDTO.getCloseUpper().isEmpty()) {
-                convertedCloseUpper = LocalDate.parse(saleSearchDTO.getCloseUpper(), formatter);
-            }
-
             // Create page
             PageRequest pageablePage = SearchPageConstructor.getPageRequest(saleSearchDTO.getPage(), saleSearchDTO.getResultsPerPage(), Sort.by(sortOrder));
-            Specification<SaleItem> specification = Specification.where(
-                    SearchSpecConstructor.constructSaleItemSpecificationFromSearchQueries(saleSearchDTO.getBasicSearchQuery(), saleSearchDTO.getProductSearchQuery(), saleSearchDTO.getBusinessSearchQuery(), saleSearchDTO.getLocationSearchQuery()))
-                            .and(SearchSpecConstructor.constructSaleListingSpecificationForSearch(new SaleListingSearchDTO(saleSearchDTO.getPriceLower(), saleSearchDTO.getPriceUpper(), convertedCloseLower, convertedCloseUpper, convertedBusinessTypes)));
+            Specification<SaleItem> specification = SearchSpecConstructor.constructSaleListingSpecificationForSearch(
+                    new SaleListingSearchDTO(saleSearchDTO));
             Page<SaleItem> result = saleItemRepository.findAll(specification, pageablePage);
 
             return new ResultPageDTO<>(result.map(SaleItemResponseDTO::new));
-
-        } catch (DateTimeParseException badDate) {
-            throw new ValidationResponseException("Close date parameters were not in date format");
         } catch (Exception error) {
             logger.error(error.getMessage());
             throw error;

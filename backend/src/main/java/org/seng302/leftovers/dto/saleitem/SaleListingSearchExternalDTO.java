@@ -25,7 +25,7 @@ public class SaleListingSearchExternalDTO {
     private Integer resultsPerPage;
     private Boolean reverse;
     private String orderBy;
-    private List<BusinessType> businessTypes;
+    private List<String> businessTypes;
     private BigDecimal priceLower;
     private BigDecimal priceUpper;
     private String closeLower;
