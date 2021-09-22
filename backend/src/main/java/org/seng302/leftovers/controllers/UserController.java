@@ -110,7 +110,7 @@ public class UserController {
                 user.setAuthenticationCodeFromPassword(body.getNewPassword());
             }
 
-            user.setImages(imageRepository.findAllByIdIn(body.getImageIds()));
+            user.setImages(imageRepository.getImagesByIds(body.getImageIds()));
 
             user.setFirstName(body.getFirstName());
             user.setMiddleName(body.getMiddleName());

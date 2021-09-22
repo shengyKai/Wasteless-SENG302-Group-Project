@@ -7,6 +7,7 @@ import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -57,5 +58,11 @@ public interface ImageRepository extends CrudRepository<Image, Long> {
 
     }
 
-    List<Image> findAllByIdIn(List<Long> ids);
+    default List<Image> getImagesByIds(List<Long> ids) {
+        List<Image> images = new ArrayList<>();
+        for (var id: ids) {
+            images.add(getImageById(id));
+        }
+        return images;
+    }
 }

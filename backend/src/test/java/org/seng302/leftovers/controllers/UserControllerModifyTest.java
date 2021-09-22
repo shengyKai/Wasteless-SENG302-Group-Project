@@ -2,6 +2,7 @@ package org.seng302.leftovers.controllers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.SneakyThrows;
+import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -14,9 +15,11 @@ import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.seng302.leftovers.dto.LocationDTO;
+import org.seng302.leftovers.entities.Image;
 import org.seng302.leftovers.entities.Location;
 import org.seng302.leftovers.entities.User;
 import org.seng302.leftovers.exceptions.AccessTokenResponseException;
+import org.seng302.leftovers.exceptions.DoesNotExistResponseException;
 import org.seng302.leftovers.exceptions.InsufficientPermissionResponseException;
 import org.seng302.leftovers.persistence.ImageRepository;
 import org.seng302.leftovers.persistence.UserRepository;
@@ -34,6 +37,8 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 import static org.mockito.Mockito.*;
@@ -113,6 +118,7 @@ class UserControllerModifyTest {
         jsonBody.put("lastName", "Ella");
         jsonBody.put("dateOfBirth", "1999-06-26");
         jsonBody.put("homeAddress", new LocationDTO(address, true));
+        jsonBody.put("imageIds", new JSONArray());
         return jsonBody;
     }
 
@@ -496,6 +502,46 @@ class UserControllerModifyTest {
                 .andReturn();
 
         authenticationTokenManager.verify(() -> AuthenticationTokenManager.sessionCanSeePrivate(any(),any()));
+        verify(userRepository, times(0)).save(mockUser);
+    }
+
+    @Test
+    void modifyUser_modifyImages_imagesUpdated() throws Exception {
+        var jsonBody = createValidRequest();
+        var ids = List.of(1L,2L,3L);
+        jsonBody.put("imageIds", ids);
+        Image image1 = Mockito.mock(Image.class);
+        Image image2 = Mockito.mock(Image.class);
+        Image image3 = Mockito.mock(Image.class);
+        when(imageRepository.getImagesByIds(any())).thenReturn(List.of(image1,image2,image3));
+        mockMvc.perform(MockMvcRequestBuilders
+                .put("/users/" + mockUserId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(jsonBody.toString()))
+                .andExpect(status().isOk());
+
+        var expected = List.of(image1, image2, image3);
+        verify(imageRepository, times(1)).getImagesByIds(ids);
+        verify(mockUser, times(1)).setImages(expected);
+        verify(userRepository, times(1)).save(mockUser);
+    }
+
+    @Test
+    void modifyUser_modifyImagesInvalidId_imagesNotUpdated() throws Exception {
+        var jsonBody = createValidRequest();
+        var ids = List.of(1L);
+        jsonBody.put("imageIds", ids);
+        Image image1 = Mockito.mock(Image.class);
+        when(imageRepository.getImagesByIds(any())).thenCallRealMethod();
+        when(imageRepository.getImageById(1L)).thenThrow(new DoesNotExistResponseException(Image.class));
+        mockMvc.perform(MockMvcRequestBuilders
+                .put("/users/" + mockUserId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(jsonBody.toString()))
+                .andExpect(status().isNotAcceptable());
+
+        verify(imageRepository, times(1)).getImagesByIds(ids);
+        verify(mockUser, times(0)).setImages(any());
         verify(userRepository, times(0)).save(mockUser);
     }
 }

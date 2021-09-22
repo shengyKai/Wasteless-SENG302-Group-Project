@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.ToString;
+import org.seng302.leftovers.dto.ImageDTO;
 import org.seng302.leftovers.dto.LocationDTO;
 import org.seng302.leftovers.dto.business.BusinessResponseDTO;
 import org.seng302.leftovers.entities.Business;
@@ -37,6 +38,7 @@ public class UserResponseDTO {
     protected LocationDTO homeAddress;
 
     protected List<BusinessResponseDTO> businessesAdministered;
+    protected List<ImageDTO> images;
 
     // Private fields
     protected LocalDate dateOfBirth;
@@ -73,6 +75,7 @@ public class UserResponseDTO {
         this.nickname = user.getNickname();
         this.bio = user.getBio();
         this.homeAddress = new LocationDTO(user.getAddress(), includePrivateInfo);
+        this.images = user.getImages().stream().map(ImageDTO::new).collect(Collectors.toList());
 
         if (includePrivateInfo) {
             this.dateOfBirth = user.getDob();
