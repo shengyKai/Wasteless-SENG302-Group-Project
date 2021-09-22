@@ -96,6 +96,9 @@ export default {
     advancedSearch() {
       //TODO implement when linked to endpoint
     },
+    /**
+     * Fetches a new set of results
+     */
     async updateResults() {
       this.resultsPage = (await getBusinessSales(1, 1, 1, "created", false));
     },
