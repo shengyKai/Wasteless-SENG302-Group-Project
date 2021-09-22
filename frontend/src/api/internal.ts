@@ -87,7 +87,8 @@ export type CreateUser = BaseUser & {
 
 export type ModifyUser = BaseUser & {
   password?: string,
-  newPassword?: string
+  newPassword?: string,
+  imageIds: number[]
 }
 
 export type BusinessType = 'Accommodation and Food Services' | 'Retail Trade' | 'Charitable organisation' | 'Non-profit organisation';
