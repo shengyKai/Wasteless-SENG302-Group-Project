@@ -8,9 +8,14 @@ import org.hamcrest.Matchers;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.junit.runner.RunWith;
 import org.mockito.*;
 import org.mockito.internal.matchers.apachecommons.ReflectionEquals;
+import org.seng302.leftovers.dto.business.BusinessType;
+import org.seng302.leftovers.dto.saleitem.SaleListingSearchDTO;
 import org.seng302.leftovers.entities.*;
 import org.seng302.leftovers.entities.event.InterestEvent;
 import org.seng302.leftovers.entities.event.PurchasedEvent;
@@ -18,6 +23,7 @@ import org.seng302.leftovers.exceptions.AccessTokenResponseException;
 import org.seng302.leftovers.persistence.*;
 import org.seng302.leftovers.persistence.event.EventRepository;
 import org.seng302.leftovers.persistence.event.InterestEventRepository;
+import org.seng302.leftovers.service.search.SearchQueryParser;
 import org.seng302.leftovers.tools.AuthenticationTokenManager;
 import org.seng302.leftovers.service.search.SearchPageConstructor;
 import org.seng302.leftovers.service.search.SearchSpecConstructor;
@@ -94,6 +100,9 @@ class SaleControllerTest {
     @Captor
     ArgumentCaptor<PageRequest> pageRequestArgumentCaptor;
 
+    private MockedStatic<SearchPageConstructor> searchPageConstructor;
+    private MockedStatic<SearchSpecConstructor> searchSpecConstructor;
+
 
     @BeforeEach
     public void setUp() throws ParseException {
@@ -101,6 +110,16 @@ class SaleControllerTest {
 
         // By default this will mock checkAuthenticationToken method to do nothing, which simulates a valid authentication token
         authenticationTokenManager = Mockito.mockStatic(AuthenticationTokenManager.class);
+        searchPageConstructor = Mockito.mockStatic(SearchPageConstructor.class);
+        searchSpecConstructor = Mockito.mockStatic(SearchSpecConstructor.class);
+
+        searchPageConstructor.when(() -> SearchPageConstructor.getSortDirection(any())).thenReturn(Sort.Direction.DESC);
+        searchPageConstructor.when(() -> SearchPageConstructor.getPageRequest(any(), any(), any()))
+                .thenReturn(PageRequest.of(1, 1, Sort.unsorted()));
+        searchSpecConstructor.when(() -> SearchSpecConstructor.constructSaleListingSpecificationForSearch(any()))
+                .thenReturn(Specification.where(null));
+        searchSpecConstructor.when(() -> SearchSpecConstructor.constructSpecificationFromSaleItemsFilter(any()))
+                .thenReturn(Specification.where(null));
 
         // Setup mock business
         when(business.getId()).thenReturn(1L);
@@ -151,6 +170,8 @@ class SaleControllerTest {
     @AfterEach
     public void tearDown() {
         authenticationTokenManager.close();
+        searchPageConstructor.close();
+        searchSpecConstructor.close();
     }
 
     @Test
@@ -696,10 +717,47 @@ class SaleControllerTest {
                 .andExpect(status().isOk());
     }
 
+    @ParameterizedTest
+    @CsvSource({"true,true", "false,false"})
+    void saleSearch_reverseQuery_PageConstructorCalledExpected(String input, Boolean reverse) throws Exception {
+        var items = generateMockSaleItems();
+        when(saleItemRepository.findAll(any(), any(PageRequest.class))).thenReturn(new PageImpl<>(items));
+        ArgumentCaptor<Boolean> reverseArgCaptor = ArgumentCaptor.forClass(Boolean.class);
+        searchPageConstructor.when(() -> SearchPageConstructor.getSortDirection(reverseArgCaptor.capture())).thenCallRealMethod();
+        mockMvc.perform(get("/businesses/listings/search").param("reverse", input))
+                    .andExpect(status().isOk());
+        assertEquals(reverse, reverseArgCaptor.getValue());
+    }
+
+    @Test
+    void saleSearch_pageRequest_PageConstructorCalledExpected() throws Exception {
+        var items = generateMockSaleItems();
+        when(saleItemRepository.findAll(any(), any(PageRequest.class))).thenReturn(new PageImpl<>(items));
+        ArgumentCaptor<Integer> pageArgCaptor = ArgumentCaptor.forClass(Integer.class);
+        ArgumentCaptor<Integer> resultNumArgCaptor = ArgumentCaptor.forClass(Integer.class);
+        ArgumentCaptor<Sort> orderArgCaptor = ArgumentCaptor.forClass(Sort.class);
+
+        searchPageConstructor.when(() -> SearchPageConstructor.getPageRequest(pageArgCaptor.capture(), resultNumArgCaptor.capture(), orderArgCaptor.capture())).thenReturn(PageRequest.of(1, 1, Sort.unsorted()));
+
+        mockMvc.perform(get("/businesses/listings/search")
+                .param("page", "5")
+                .param("resultsPerPage", "12")
+                .param("orderBy", "productName"))
+                .andExpect(status().isOk());
+
+        Sort expectedSort = Sort.by(new Sort.Order(Sort.Direction.DESC, "inventoryItem.product.name").ignoreCase().nullsLast());
+        assertEquals(5, pageArgCaptor.getValue());
+        assertEquals(12, resultNumArgCaptor.getValue());
+        assertEquals(expectedSort, orderArgCaptor.getValue());
+    }
+
     @Test
     void saleSearch_severalParameters_200() throws Exception {
         var items = generateMockSaleItems();
         when(saleItemRepository.findAll(any(), any(PageRequest.class))).thenReturn(new PageImpl<>(items));
+
+        ArgumentCaptor<SaleListingSearchDTO> specArgCaptor = ArgumentCaptor.forClass(SaleListingSearchDTO.class);
+        searchSpecConstructor.when(() -> SearchSpecConstructor.constructSaleListingSpecificationForSearch(specArgCaptor.capture())).thenReturn(Specification.where(null));
 
         mockMvc.perform(get("/businesses/listings/search")
                 .param("productSearchQuery", "Cheese")
@@ -707,14 +765,39 @@ class SaleControllerTest {
                 .param("locationSearchQuery", "Here")
                 .param("priceLower", "2.00")
                 .param("priceUpper", "25.00")
+                .param("closeLower", "2022-09-09")
                 .param("businessTypes", "Retail Trade"))
                 .andExpect(status().isOk());
+
+        assertEquals("Cheese", specArgCaptor.getValue().getProductSearchQuery());
+        assertEquals("Lactose and Co", specArgCaptor.getValue().getBusinessSearchQuery());
+        assertEquals("Here", specArgCaptor.getValue().getLocationSearchQuery());
+        assertEquals(new BigDecimal("2.00"), specArgCaptor.getValue().getPriceLowerBound());
+        assertEquals(new BigDecimal("25.00"), specArgCaptor.getValue().getPriceUpperBound());
+        assertEquals(LocalDate.parse("2022-09-09"), specArgCaptor.getValue().getClosingDateLowerBound());
+        assertEquals(List.of(BusinessType.RETAIL_TRADE), specArgCaptor.getValue().getBusinessTypes());
+        assertNull(specArgCaptor.getValue().getBasicSearchQuery());
+        assertNull(specArgCaptor.getValue().getClosingDateUpperBound());
     }
 
     @Test
-    void saleSearch_invalidSearchParameters_400() throws Exception {
+    void saleSearch_invalidSearchParametersType_400() throws Exception {
         mockMvc.perform(get("/businesses/listings/search")
                 .param("businessTypes", "Meat Farm"))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void saleSearch_invalidSearchParametersPrice_400() throws Exception {
+        mockMvc.perform(get("/businesses/listings/search")
+                .param("priceUpper", "Meat Farm"))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void saleSearch_invalidSearchParametersClose_400() throws Exception {
+        mockMvc.perform(get("/businesses/listings/search")
+                .param("closeUpper", "Meat Farm"))
                 .andExpect(status().isBadRequest());
     }
 
