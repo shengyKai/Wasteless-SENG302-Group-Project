@@ -13,10 +13,13 @@ import net.minidev.json.parser.JSONParser;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.junit.Assert;
+import org.opentest4j.AssertionFailedError;
 import org.seng302.leftovers.dto.user.UserRole;
+import org.seng302.leftovers.entities.Image;
 import org.seng302.leftovers.entities.Location;
 import org.seng302.leftovers.entities.User;
 import org.seng302.leftovers.exceptions.ValidationResponseException;
+import org.seng302.leftovers.persistence.ImageRepository;
 import org.seng302.leftovers.persistence.UserRepository;
 import org.seng302.leftovers.tools.PasswordAuthenticator;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,8 +39,11 @@ import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -55,6 +61,8 @@ public class UserStepDefinition {
     private UserRepository userRepository;
     @Autowired
     private SessionFactory sessionFactory;
+    @Autowired
+    private ImageRepository imageRepository;
 
     private JSONObject modifyParameters;
 
@@ -373,8 +381,18 @@ public class UserStepDefinition {
     public void i_try_to_updated_the_fields_of_the_user_to(String name, Map<String, Object> dataTable) {
         modifyParameters = new JSONObject();
         for (var entry : dataTable.entrySet()) {
-            List<String> path = Arrays.asList(entry.getKey().split("\\."));
-            CucumberUtils.setValueAtPath(modifyParameters, path, entry.getValue());
+            var key = entry.getKey();
+            var value = entry.getValue();
+            if (key.equals("imageIds")) {
+               List<String> names = Arrays.asList((Optional.ofNullable((String) value)).orElse("").split(","));
+               names.remove("");
+               value = names.stream()
+                       .map(imageName -> imageRepository.findByFilename(imageName)
+                               .get().getID())
+                       .collect(Collectors.toList());
+            }
+            List<String> path = Arrays.asList(key.split("\\."));
+            CucumberUtils.setValueAtPath(modifyParameters, path, value);
         }
 
         User user = userContext.getByName(name);
