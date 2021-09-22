@@ -999,7 +999,7 @@ class SaleControllerTest {
     }
 
     @Test
-    void purchaseSaleItem_userSetInterestInSaleItemBoughtByAnotherUser_eventCreatedForTheInterestedUser() throws Exception {
+    void purchaseSaleItem_userLikedSaleItemBoughtByAnotherUser_eventCreatedForTheInterestedUser() throws Exception {
         when(saleItem.getInterestedUsers()).thenReturn(Set.of(interestedUser1));
         authenticationTokenManager.when(() -> AuthenticationTokenManager.sessionCanSeePrivate(any(), any())).thenReturn(true);
         JSONObject validBody = new JSONObject();
@@ -1017,7 +1017,7 @@ class SaleControllerTest {
     }
 
     @Test
-    void purchaseSaleItem_noUsersSetInterestInSaleItemBoughtByAnotherUser_noEventsCreated() throws Exception {
+    void purchaseSaleItem_noUserLikedSaleItemBoughtByAnotherUser_noEventsCreated() throws Exception {
         when(saleItem.getInterestedUsers()).thenReturn(Set.of());
         authenticationTokenManager.when(() -> AuthenticationTokenManager.sessionCanSeePrivate(any(), any())).thenReturn(true);
         JSONObject validBody = new JSONObject();
@@ -1034,7 +1034,7 @@ class SaleControllerTest {
     }
 
     @Test
-    void purchaseSaleItem_multipleUsersSetInterestInSaleItemBoughtByAnotherUser_eventsCreatedForTheInterestedUsers() throws Exception {
+    void purchaseSaleItem_multipleUsersLikedSaleItemBoughtByAnotherUser_eventsCreatedForTheInterestedUsers() throws Exception {
         when(saleItem.getInterestedUsers()).thenReturn(Set.of(interestedUser1, interestedUser2, interestedUser3));
         authenticationTokenManager.when(() -> AuthenticationTokenManager.sessionCanSeePrivate(any(), any())).thenReturn(true);
         JSONObject validBody = new JSONObject();
