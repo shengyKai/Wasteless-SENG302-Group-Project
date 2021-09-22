@@ -1,16 +1,15 @@
 package org.seng302.leftovers.controllers;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.ToString;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.seng302.leftovers.dto.business.BusinessType;
-import org.seng302.leftovers.dto.saleitem.SaleListingSearchDTO;
+import org.seng302.leftovers.dto.saleitem.*;
 import org.seng302.leftovers.dto.ResultPageDTO;
-import org.seng302.leftovers.dto.saleitem.CreateSaleItemDTO;
-import org.seng302.leftovers.dto.saleitem.SaleItemResponseDTO;
-import org.seng302.leftovers.dto.saleitem.SetSaleItemInterestDTO;
 import org.seng302.leftovers.entities.*;
 import org.seng302.leftovers.entities.event.InterestEvent;
 import org.seng302.leftovers.entities.event.PurchasedEvent;
@@ -24,11 +23,11 @@ import org.seng302.leftovers.tools.AuthenticationTokenManager;
 import org.seng302.leftovers.service.searchservice.SearchPageConstructor;
 import org.seng302.leftovers.service.searchservice.SearchQueryParser;
 import org.seng302.leftovers.service.searchservice.SearchSpecConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
@@ -41,10 +40,12 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 @RestController
 public class SaleController {
+    @Autowired
+    private ObjectMapper objectMapper;
+
     private static final Logger logger = LogManager.getLogger(SaleController.class);
 
     private final UserRepository userRepository;
@@ -201,107 +202,51 @@ public class SaleController {
 
     /**
      * REST GET method to return sale items that match search criteria
-     * @param basicSearchQuery string to match any field in basic search
-     * @param productSearchQuery string to match to product name or description
-     * @param businessSearchQuery string to match to business name
-     * @param locationSearchQuery string to match to business location
-     * @param page page to return
-     * @param resultsPerPage amount of results to put on each page
-     * @param reverse highest to lowest or lowest to highest
-     * @param orderBy field to order results by
-     * @param businessTypes list of types of business to restrict results to
-     * @param priceLower all products must be above this price
-     * @param priceUpper all products must be below this price
-     * @param closeLower all products must close after this date
-     * @param closeUpper all products must close before this date
+     * Takes SaleListingSearchDTO with all params
      * @return JSON page of sale items
      */
     @GetMapping("/businesses/listings/search")
     public ResultPageDTO<SaleItemResponseDTO> searchSaleItems(HttpServletRequest request,
-                                                      @RequestParam(required = false) String basicSearchQuery,
-                                                      @RequestParam(required = false) String productSearchQuery,
-                                                      @RequestParam(required = false) String businessSearchQuery,
-                                                      @RequestParam(required = false) String locationSearchQuery,
-                                                      @RequestParam(required = false) Integer page,
-                                                      @RequestParam(required = false) Integer resultsPerPage,
-                                                      @RequestParam(required = false) Boolean reverse,
-                                                      @RequestParam(required = false) String orderBy,
-                                                      @RequestParam(required = false) List<String> businessTypes,
-                                                      @RequestParam(required = false) String priceLower,
-                                                      @RequestParam(required = false) String priceUpper,
-                                                      @RequestParam(required = false) String closeLower,
-                                                      @RequestParam(required = false) String closeUpper) {
+                                                              SaleListingSearchExternalDTO saleSearchDTO) {
         try {
             // Check auth
             logger.info("Get sale items to match parameters.");
             AuthenticationTokenManager.checkAuthenticationToken(request);
 
+            logger.info(saleSearchDTO);
+
             // Check sort ordering
-            Sort.Direction direction = SearchQueryParser.getSortDirection(reverse);
-            List<Sort.Order> sortOrder = getSaleItemSearchOrder(orderBy, direction);
+            Sort.Direction direction = SearchQueryParser.getSortDirection(saleSearchDTO.getReverse());
+            List<Sort.Order> sortOrder = getSaleItemSearchOrder(saleSearchDTO.getOrderBy(), direction);
 
             // Check filter options
-            List<BusinessType> types = null;
-            if (businessTypes != null && !businessTypes.isEmpty()) {
-                types = stringToBusinessType(businessTypes);
+            List<BusinessType> convertedBusinessTypes = saleSearchDTO.getBusinessTypes();
+
+            LocalDate convertedCloseLower = null;
+            LocalDate convertedCloseUpper = null;
+            DateTimeFormatter formatter = DateTimeFormatter.ISO_LOCAL_DATE;
+            if (saleSearchDTO.getCloseLower() != null && !saleSearchDTO.getCloseLower().isEmpty()) {
+                convertedCloseLower = LocalDate.parse(saleSearchDTO.getCloseLower(), formatter);
+            }
+            if (saleSearchDTO.getCloseUpper() != null && !saleSearchDTO.getCloseUpper().isEmpty()) {
+                convertedCloseUpper = LocalDate.parse(saleSearchDTO.getCloseUpper(), formatter);
             }
 
-            BigDecimal minPrice = null;
-            BigDecimal maxPrice = null;
-            if (priceLower != null && !priceLower.isEmpty()) minPrice = new BigDecimal(priceLower);
-            if (priceUpper != null && !priceUpper.isEmpty()) maxPrice = new BigDecimal(priceUpper);
-
-            LocalDate minDate = null;
-            LocalDate maxDate = null;
-            DateTimeFormatter formatter = DateTimeFormatter.ISO_LOCAL_DATE;
-            if (closeLower != null && !closeLower.isEmpty()) minDate = LocalDate.parse(closeLower, formatter);
-            if (closeUpper != null && !closeUpper.isEmpty()) maxDate = LocalDate.parse(closeUpper, formatter);
-
             // Create page
-            PageRequest pageablePage = SearchPageConstructor.getPageRequest(page, resultsPerPage, Sort.by(sortOrder));
+            PageRequest pageablePage = SearchPageConstructor.getPageRequest(saleSearchDTO.getPage(), saleSearchDTO.getResultsPerPage(), Sort.by(sortOrder));
             Specification<SaleItem> specification = Specification.where(
-                    SearchSpecConstructor.constructSaleItemSpecificationFromSearchQueries(basicSearchQuery, productSearchQuery, businessSearchQuery, locationSearchQuery))
-                            .and(SearchSpecConstructor.constructSaleListingSpecificationForSearch(new SaleListingSearchDTO(minPrice, maxPrice, minDate, maxDate, types)));
+                    SearchSpecConstructor.constructSaleItemSpecificationFromSearchQueries(saleSearchDTO.getBasicSearchQuery(), saleSearchDTO.getProductSearchQuery(), saleSearchDTO.getBusinessSearchQuery(), saleSearchDTO.getLocationSearchQuery()))
+                            .and(SearchSpecConstructor.constructSaleListingSpecificationForSearch(new SaleListingSearchDTO(saleSearchDTO.getPriceLower(), saleSearchDTO.getPriceUpper(), convertedCloseLower, convertedCloseUpper, convertedBusinessTypes)));
             Page<SaleItem> result = saleItemRepository.findAll(specification, pageablePage);
 
             return new ResultPageDTO<>(result.map(SaleItemResponseDTO::new));
 
         } catch (DateTimeParseException badDate) {
             throw new ValidationResponseException("Close date parameters were not in date format");
-        } catch (NumberFormatException badPrice) {
-            throw new ValidationResponseException("Price parameters were not valid numbers");
         } catch (Exception error) {
             logger.error(error.getMessage());
             throw error;
         }
-    }
-
-    /**
-     * Turns list of strings into BusinessType DTOs
-     * @param businessTypes String of business types
-     * @return List of BusinessType DTOs
-     */
-    private List<BusinessType> stringToBusinessType(List<String> businessTypes) {
-        List<BusinessType> types = new ArrayList<>();
-        for (String type : businessTypes) {
-            switch(type) {
-                case "Accommodation and Food Services":
-                    types.add(BusinessType.ACCOMMODATION_AND_FOOD_SERVICES);
-                    break;
-                case "Retail Trade":
-                    types.add(BusinessType.RETAIL_TRADE);
-                    break;
-                case "Charitable organisation":
-                    types.add(BusinessType.CHARITABLE);
-                    break;
-                case "Non-profit organisation":
-                    types.add(BusinessType.NON_PROFIT);
-                    break;
-                default:
-                    throw new ValidationResponseException("BusinessType term " + type + " is invalid");
-            }
-        }
-        return types;
     }
 
     /**
