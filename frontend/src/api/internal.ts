@@ -1416,3 +1416,67 @@ export async function getDummySaleItemSearchResult() : Promise<SearchResults<Sal
     ]
   };
 }
+
+export async function basicSearchSaleitem(query: string, orderBy: UserOrderBy, reverse: boolean): Promise<MaybeError<SearchResults<Sale>>> {
+  let response;
+  try {
+    response = await instance.get('/somebasicsearch/saleitem', {
+      params: {
+        searchQuery: query,
+        orderBy,
+        reverse: reverse.toString(),
+      }
+    });
+  } catch (error) {
+    let status: number | undefined = error.response?.status;
+
+    if (status === undefined) return 'Failed to reach backend';
+    if (status === 400) return 'Invalid user provided';
+    if (status === 401) return 'You have been logged out. Please login again and retry';
+    if (status === 403) return 'Operation not permitted';
+    if (status === 406) return 'Sale Item hahah';
+
+    return error.response?.data.message;
+  }
+
+  if (!is<SearchResults<Sale>>(response.data)) {
+    return 'Response is not Sale Item Listing array';
+  }
+
+  return response.data;
+}
+
+export async function advanceSearchSaleitem(query: string, businessQuery: string, locationQuery: string, closesBefore: string, closesAfter:string, businessTypes: BusinessType[], lowestPrice: string, highestPrice: string, reverse: boolean): Promise<MaybeError<SearchResults<Sale>>> {
+  let response;
+  try {
+    response = await instance.get('/someadvancesearch/saleitem', {
+      params: {
+        searchQuery: query,
+        businessQuery: businessQuery,
+        locationQuery: locationQuery,
+        closesBefore: closesBefore,
+        closesAfter: closesAfter,
+        businessTypes: businessTypes,
+        lowestPrice: lowestPrice,
+        highestPrice: highestPrice,
+        reverse: reverse.toString(),
+      }
+    });
+  } catch (error) {
+    let status: number | undefined = error.response?.status;
+
+    if (status === undefined) return 'Failed to reach backend';
+    if (status === 400) return 'Invalid user provided';
+    if (status === 401) return 'You have been logged out. Please login again and retry';
+    if (status === 403) return 'Operation not permitted';
+    if (status === 406) return 'Sale Item hahah';
+
+    return error.response?.data.message;
+  }
+
+  if (!is<SearchResults<Sale>>(response.data)) {
+    return 'Response is not Sale Item Listing array';
+  }
+
+  return response.data;
+}
