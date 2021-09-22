@@ -54,12 +54,16 @@
             </v-row>
           </v-carousel-item>
         </v-carousel>
+        <!-- This is needed because the above does not account for the scenario that the associated entity does not have
+        images related to it, of which the upload button will not be present. -->
         <v-carousel
           v-else
+          :show-arrows="false"
           v-model="model"
+          :hide-delimiter-background="true"
         >
           <v-sheet
-            color="primary"
+            color="secondary"
             height="100%"
             tile
           >
@@ -73,10 +77,10 @@
                   <v-icon center
                           outlined
                           class="ma-2"
-                          color="secondary"
+                          color="primary"
                           v-bind="attrs"
                           v-on="on"
-                          x-large>
+                          size="80">
                     mdi-upload
                   </v-icon>
                 </template>
