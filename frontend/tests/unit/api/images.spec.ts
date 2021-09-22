@@ -23,20 +23,16 @@ const instance: Mocked<Pick<AxiosInstance, 'post' >> = axios.instance;
 describe('POST /media/images endpoint', () => {
   const testFile = new File([], 'test_file');
 
-  it.only('When the API request is successfully resolved, response image is returned', async ()=>{
+  it('When the API request is successfully resolved, response image is returned', async ()=>{
     const image: Image = {
       id: 69,
       filename: "cremebrulee.png",
       thumbnailFilename: "spagettiboligne.jpg"
     };
-    /*instance.post.mockResolvedValueOnce({
-      response: {
-        status: 201,
-        data: image
-      }
-    });*/
-
-    instance.post.mockImplementationOnce(() => console.log('called') as any);
+    instance.post.mockResolvedValueOnce({
+      status: 201,
+      data: image
+    });
 
     const response = await uploadImage(testFile);
     expect(response).toEqual(image);
@@ -48,10 +44,8 @@ describe('POST /media/images endpoint', () => {
       thumbnailFilename: "spagettiboligne.jpg"
     };
     instance.post.mockResolvedValueOnce({
-      response: {
-        status: 201,
-        data: image
-      }
+      status: 201,
+      data: image
     });
     const response = await uploadImage(testFile);
     expect(response).toEqual("Image was not received");
@@ -62,7 +56,7 @@ describe('POST /media/images endpoint', () => {
       response: {
         status: 400,
         data: {
-          messsage: "Lasagne"
+          message: "Lasagne"
         }
       }
     });
