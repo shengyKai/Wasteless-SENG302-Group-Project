@@ -350,7 +350,54 @@ const apiCalls: Partial<ApiCalls> = {
       406: 'Listing does not exist',
     },
     usesServerMessage: true,
-  }
+  },
+  basicSearchSaleitem: {
+    parameters: ["deezNuts", "name", false],
+    httpMethod: 'get',
+    url: '/somebasicsearch/saleitem',
+    body: {
+      params: {
+        searchQuery: "deezNuts",
+        orderBy: 'name',
+        reverse: "false",
+      }
+    },
+    result: searchResult([testSaleItem]),
+    failedTypeCheckResponse: 'Response is not Sale Item Listing array',
+    extraStatusMessages: {
+      401: 'You have been logged out. Please login again and retry',
+      403: 'Operation not permitted',
+      406: 'Sale Item hahah',
+    },
+    usesServerMessage: true,
+  },
+  advanceSearchSaleitem: {
+    parameters: ["deezNuts", "deezBusiness", "deezLocation", "21/01/2030", "11/01/2030", "name", ["Retail Trade"], "1", "99", false],
+    httpMethod: 'get',
+    url: '/someadvancesearch/saleitem',
+    body: {
+      params: {
+        searchQuery: "deezNuts",
+        businessQuery: "deezBusiness",
+        locationQuery: "deezLocation",
+        closesBefore: "21/01/2030",
+        closesAfter: "11/01/2030",
+        orderBy: "name",
+        businessTypes: ["Retail Trade"],
+        lowestPrice: "1",
+        highestPrice: "99",
+        reverse: "false",
+      }
+    },
+    result: searchResult([testSaleItem]),
+    failedTypeCheckResponse: 'Response is not Sale Item Listing array',
+    extraStatusMessages: {
+      401: 'You have been logged out. Please login again and retry',
+      403: 'Operation not permitted',
+      406: 'Sale Item hahah',
+    },
+    usesServerMessage: true,
+  },
 };
 
 

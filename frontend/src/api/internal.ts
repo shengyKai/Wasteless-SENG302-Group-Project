@@ -234,6 +234,7 @@ type BusinessOrderBy = 'created' | 'name' | 'location' | 'businessType';
 export type SearchResults<T> = { results: T[], count: number }
 
 export type ProductSearchBy = 'name' | 'description' | 'manufacturer' | 'productCode';
+export type SaleListingOrderBy = "name" | "price" | "businessName" | "businessLocation" | "expiry" | "closes" | "created" | "quantity";
 
 /**
  * Sends a search query to the backend.
@@ -1417,7 +1418,7 @@ export async function getDummySaleItemSearchResult() : Promise<SearchResults<Sal
   };
 }
 
-export async function basicSearchSaleitem(query: string, orderBy: UserOrderBy, reverse: boolean): Promise<MaybeError<SearchResults<Sale>>> {
+export async function basicSearchSaleitem(query: string, orderBy: SaleListingOrderBy, reverse: boolean): Promise<MaybeError<SearchResults<Sale>>> {
   let response;
   try {
     response = await instance.get('/somebasicsearch/saleitem', {
@@ -1429,7 +1430,6 @@ export async function basicSearchSaleitem(query: string, orderBy: UserOrderBy, r
     });
   } catch (error) {
     let status: number | undefined = error.response?.status;
-
     if (status === undefined) return 'Failed to reach backend';
     if (status === 400) return 'Invalid user provided';
     if (status === 401) return 'You have been logged out. Please login again and retry';
@@ -1446,7 +1446,7 @@ export async function basicSearchSaleitem(query: string, orderBy: UserOrderBy, r
   return response.data;
 }
 
-export async function advanceSearchSaleitem(query: string, businessQuery: string, locationQuery: string, closesBefore: string, closesAfter:string, businessTypes: BusinessType[], lowestPrice: string, highestPrice: string, reverse: boolean): Promise<MaybeError<SearchResults<Sale>>> {
+export async function advanceSearchSaleitem(query: string, businessQuery: string, locationQuery: string, closesBefore: string, closesAfter:string, orderBy: SaleListingOrderBy, businessTypes: BusinessType[], lowestPrice: string, highestPrice: string, reverse: boolean): Promise<MaybeError<SearchResults<Sale>>> {
   let response;
   try {
     response = await instance.get('/someadvancesearch/saleitem', {
@@ -1456,6 +1456,7 @@ export async function advanceSearchSaleitem(query: string, businessQuery: string
         locationQuery: locationQuery,
         closesBefore: closesBefore,
         closesAfter: closesAfter,
+        orderBy: orderBy,
         businessTypes: businessTypes,
         lowestPrice: lowestPrice,
         highestPrice: highestPrice,
@@ -1464,7 +1465,6 @@ export async function advanceSearchSaleitem(query: string, businessQuery: string
     });
   } catch (error) {
     let status: number | undefined = error.response?.status;
-
     if (status === undefined) return 'Failed to reach backend';
     if (status === 400) return 'Invalid user provided';
     if (status === 401) return 'You have been logged out. Please login again and retry';
