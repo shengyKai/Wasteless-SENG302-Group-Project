@@ -7,7 +7,7 @@ import * as api from '@/api/internal';
 import { User } from '@/api/internal';
 import { getStore, resetStoreForTesting, StoreData } from '@/store';
 import {createSaleItem} from '@/api/internal';
-import { castMock } from '../utils';
+import { castMock, findButtonWithText } from './utils';
 
 Vue.use(Vuetify);
 
@@ -31,10 +31,12 @@ jest.mock('@/api/currency', () => ({
 jest.mock('@/api/internal', () => ({
   getListingInterest: jest.fn(),
   setListingInterest: jest.fn(),
+  purchaseListing: jest.fn(),
 }));
 
 const getListingInterest = castMock(api.getListingInterest);
 const setListingInterest = castMock(api.getListingInterest);
+const purchaseListing = castMock(api.purchaseListing);
 
 describe('FullSaleListing.vue', () => {
   let wrapper: Wrapper<any>;
@@ -42,6 +44,7 @@ describe('FullSaleListing.vue', () => {
   let store: Store<StoreData>;
 
   beforeEach(async () => {
+    jest.clearAllMocks();
     const localVue = createLocalVue();
     vuetify = new Vuetify();
 
@@ -153,4 +156,30 @@ describe('FullSaleListing.vue', () => {
     expect(getListingInterest).toBeCalled();
   });
 
+  it('When buy button is pressed and purchase succeeds a request is made and a refresh occurs', async () => {
+    purchaseListing.mockResolvedValue(undefined);
+
+    const buyButton = findButtonWithText(wrapper, 'Buy');
+    expect(buyButton.exists()).toBeTruthy();
+    await buyButton.trigger('click');
+
+    await Vue.nextTick();
+
+    expect(purchaseListing).toBeCalledWith(57, testUser.id);
+    expect(wrapper.emitted().refresh).toBeTruthy();
+  });
+
+  it('When buy button is pressed and purchase fails a request is made and the error is shown', async () => {
+    purchaseListing.mockResolvedValue('test_error_message');
+
+    const buyButton = findButtonWithText(wrapper, 'Buy');
+    expect(buyButton.exists()).toBeTruthy();
+    await buyButton.trigger('click');
+
+    await Vue.nextTick();
+
+    expect(purchaseListing).toBeCalledWith(57, testUser.id);
+    expect(wrapper.emitted().refresh).toBeFalsy();
+    expect(wrapper.text()).toContain('test_error_message');
+  });
 });
