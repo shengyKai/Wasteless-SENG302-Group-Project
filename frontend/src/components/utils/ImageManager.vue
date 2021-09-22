@@ -54,23 +54,37 @@
             </v-row>
           </v-carousel-item>
         </v-carousel>
-        <div v-else>
-          <p class="text-justify">
-            You do not have any images relating to this business
-          </p>
-          <v-btn
+        <v-carousel
+          v-else
+          v-model="model"
+        >
+          <v-sheet
             color="primary"
-            outlined
+            height="100%"
+            tile
           >
-            <v-icon
-              class="expand-icon"
-              color="primary"
+            <v-row
+              class="fill-height"
+              justify="center"
+              align="center"
             >
-              mdi-upload
-            </v-icon>
-            Upload new image
-          </v-btn>
-        </div>
+              <v-tooltip bottom>
+                <template v-slot:activator="{ on, attrs }">
+                  <v-icon center
+                          outlined
+                          class="ma-2"
+                          color="secondary"
+                          v-bind="attrs"
+                          v-on="on"
+                          x-large>
+                    mdi-upload
+                  </v-icon>
+                </template>
+                <span>Upload a new image</span>
+              </v-tooltip>
+            </v-row>
+          </v-sheet>
+        </v-carousel>
       </v-col>
     </v-row>
   </div>

@@ -158,6 +158,21 @@
                       ref="businessImageCarousel"
                     />
                   </v-card>
+                  <!-- INPUT: Image Uploader -->
+                  <v-btn
+                    class="upload-image"
+                    color="primary"
+                    outlined
+                    @click="showImageUploaderForm=true"
+                  >
+                    <v-icon
+                      class="expand-icon"
+                      color="primary"
+                    >
+                      mdi-upload
+                    </v-icon>
+                    Upload new image
+                  </v-btn>
                   <ImageManager :images="images"/>
                   <BusinessImageUploader
                     v-model="imageFile"
