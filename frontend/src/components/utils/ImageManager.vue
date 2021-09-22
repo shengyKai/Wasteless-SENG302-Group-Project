@@ -2,7 +2,7 @@
   <div>
     <v-row class="mt-5">
       <v-col>
-        <v-carousel v-model="model">
+        <v-carousel v-if="images.length > 0" v-model="model">
           <v-carousel-item
             v-for="image in images"
             :key="image"
@@ -54,6 +54,23 @@
             </v-row>
           </v-carousel-item>
         </v-carousel>
+        <div v-else>
+          <p class="text-justify">
+            You do not have any images relating to this business
+          </p>
+          <v-btn
+            color="primary"
+            outlined
+          >
+            <v-icon
+              class="expand-icon"
+              color="primary"
+            >
+              mdi-upload
+            </v-icon>
+            Upload new image
+          </v-btn>
+        </div>
       </v-col>
     </v-row>
   </div>
