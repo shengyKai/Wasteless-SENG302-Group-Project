@@ -14,7 +14,12 @@
     <v-list three-line v-if="resultsPage">
       <template v-for="(sale, index) in resultsPage.results">
         <v-divider v-if="sale === undefined" :key="'divider-'+index"/>
-        <SaleResult v-else :key="sale.id" :saleItem="sale"/>
+        <SaleResult
+          v-else
+          :key="sale.id"
+          :saleItem="sale"
+          @refresh="updateResults"
+        />
       </template>
     </v-list>
     <!--paginate results-->
@@ -91,6 +96,9 @@ export default {
     advancedSearch() {
       //TODO implement when linked to endpoint
     },
+    async updateResults() {
+      this.resultsPage = (await getBusinessSales(1, 1, 1, "created", false));
+    },
   },
   watch: {
     /**
@@ -104,7 +112,7 @@ export default {
     }
   },
   async beforeMount() {
-    this.resultsPage = (await getBusinessSales(3, 1, 1, "created", false));
+    this.updateResults();
   }
 };
 </script>

@@ -34,6 +34,7 @@
     <FullSaleListing
       :saleItem="saleItem"
       @goBack="showFullListing = false"
+      @refresh="$emit('refresh')"
     />
   </div>
 </template>
