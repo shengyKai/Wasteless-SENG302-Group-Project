@@ -236,6 +236,7 @@ describe('Test PUT /businesses/${businessId} endpoint', () => {
 });
 
 describe("POST /businesses/{businessId}/images", ()=>{
+  // TODO delete
   const demoFIle = new File([], 'test_file');
 
   it('When the API request is successfully resolved, nothing is returned', async ()=>{
