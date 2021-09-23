@@ -195,7 +195,7 @@ class SaleItemGeneratorTest {
     }
 
     @Test
-    void generateSaleItems_inventoryQuantityUpdated() throws SQLException, IllegalAccessException, NoSuchFieldException {
+    void generateSaleItems_inventoryQuantityUpdated() throws SQLException {
         List<Long> invItemIds = generateUserBusinessProductAndInvItems(1, 1, 1, 1);
         var currentQuantity = getInventoryItemQuantity(invItemIds.get(0));
 
