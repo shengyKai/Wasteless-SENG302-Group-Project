@@ -17,6 +17,7 @@
                 <v-tooltip bottom>
                   <template v-slot:activator="{ on, attrs }">
                     <v-icon center
+                            ref="upload"
                             outlined
                             class="ma-2 img-button"
                             color="primary"
@@ -32,6 +33,7 @@
                   <template v-slot:activator="{ on, attrs }">
                     <v-icon center
                             outlined
+                            ref="trashCan"
                             class="ma-2 img-button"
                             color="primary"
                             v-bind="attrs"
@@ -45,6 +47,7 @@
                   <template v-slot:activator="{ on, attrs }">
                     <v-icon center
                             outlined
+                            ref="makePrimary"
                             class="ma-2 img-button"
                             color="primary"
                             v-bind="attrs"
@@ -81,6 +84,7 @@
                 <template v-slot:activator="{ on, attrs }">
                   <v-icon center
                           outlined
+                          ref="uploadWithNoImages"
                           class="ma-2"
                           color="primary"
                           v-bind="attrs"
