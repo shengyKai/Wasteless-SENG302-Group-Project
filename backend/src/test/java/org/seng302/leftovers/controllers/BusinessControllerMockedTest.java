@@ -110,7 +110,7 @@ class BusinessControllerMockedTest {
 
         when(imageService.create(any())).thenReturn(mockImage);
         when(imageRepository.getImageById(mockImageId)).thenReturn(mockImage);
-
+        when(imageRepository.findById(mockImageId)).thenReturn(Optional.of(mockImage));
 
         BusinessController businessController = new BusinessController(businessRepository, userRepository, imageService, imageRepository);
         mockMvc = MockMvcBuilders.standaloneSetup(businessController).build();
@@ -522,13 +522,15 @@ class BusinessControllerMockedTest {
         var json = createValidRequest();
         json.put("imageIds", Collections.singletonList(mockImageId));
 
+        System.out.println(json);
+
         mockMvc.perform(put("/businesses/" + mockBusinessId)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(json.toString()))
                 .andExpect(status().isOk())
                 .andReturn();
 
-        verify(imageRepository, times(1)).getImageById(mockImageId);
+        verify(imageRepository, times(1)).findById(mockImageId);
         verify(mockBusiness, times(1)).setImages(any()); //Maybe change to include mockImage
         verify(businessRepository, times(1)).save(mockBusiness);
     }
