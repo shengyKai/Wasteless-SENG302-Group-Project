@@ -192,6 +192,8 @@ public class Business implements ImageAttachment {
 
     public int getPoints(){return this.points;}
 
+    public void setPoints(int points){this.points = points;}
+
     /**
      * Sets primary owner of the business
      * If the requested user is less than 16 years of age, a 403 forbidden status is thrown.
