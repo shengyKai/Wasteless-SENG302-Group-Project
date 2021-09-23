@@ -21,7 +21,8 @@
                             class="ma-2"
                             color="primary"
                             v-bind="attrs"
-                            v-on="on">
+                            v-on="on"
+                            @click="showImageUploader = true">
                       mdi-upload
                     </v-icon>
                   </template>
@@ -84,7 +85,8 @@
                           color="primary"
                           v-bind="attrs"
                           v-on="on"
-                          size="80">
+                          size="80"
+                          @click="showImageUploader = true">
                     mdi-upload
                   </v-icon>
                 </template>
@@ -95,22 +97,34 @@
         </v-carousel>
       </v-col>
     </v-row>
+    <ImageUploader
+      v-model="image"
+      v-if="showImageUploader"
+      @closeDialog="upload"
+    />
   </div>
 </template>
 
 <script>
+import ImageUploader from "@/components/utils/ImageUploader";
 import {imageSrcFromFilename} from "@/utils";
 
 export default {
+  components: {
+    ImageUploader,
+  },
   props: {
     images: Array
   },
-  data() {
-    return {
-      model: 0,
-    };
-  },
+  data: () => ({
+    model: 0,
+    showImageUploader: false,
+    image: undefined,
+  }),
   methods: {
+    upload() {
+      this.showImageUploader = false;
+    },
     imageUrl(filename) {
       return imageSrcFromFilename(filename);
     }

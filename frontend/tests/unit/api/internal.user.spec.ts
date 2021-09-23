@@ -1,5 +1,5 @@
-import { modifyUser, ModifyUser } from "@/api/internal";
 import axios, { AxiosInstance } from 'axios';
+import {ModifyUser, modifyUser} from "@/api/user";
 
 jest.mock('axios', () => ({
   create: jest.fn(function () {

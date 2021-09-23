@@ -66,8 +66,8 @@
 </template>
 
 <script>
-import { searchKeywords } from "../../api/internal.ts";
 import DeleteKeyword from "./DeleteKeyword.vue";
+import {searchKeywords} from "@/api/keyword";
 
 export default {
   data () {

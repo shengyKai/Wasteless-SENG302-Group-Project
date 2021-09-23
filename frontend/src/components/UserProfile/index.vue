@@ -229,9 +229,10 @@
 </template>
 
 <script>
-import { getUser, makeBusinessAdmin, removeBusinessAdmin, makeAdmin, revokeAdmin } from '../../api/internal';
 import Avatar from '@/components/utils/Avatar';
 import convertAddressToReadableText from '@/components/utils/Methods/convertAddressToReadableText';
+import {getUser, makeAdmin, revokeAdmin} from "@/api/user";
+import {makeBusinessAdmin, removeBusinessAdmin} from "@/api/business";
 
 export default {
   name: 'UserProfile',

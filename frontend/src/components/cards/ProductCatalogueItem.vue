@@ -158,8 +158,8 @@ import ImageCarousel from "../utils/ImageCarousel.vue";
 import { currencyFromCountry } from "@/api/currency";
 import ProductImageUploader from "../utils/ProductImageUploader";
 import ProductForm from "../BusinessProfile/ProductForm.vue";
-import { makeProductImagePrimary, deleteImage } from "@/api/internal";
 import { formatDate, formatPrice, trimToLength } from '@/utils';
+import {deleteProductImage, makeProductImagePrimary} from "@/api/product";
 
 export default {
   name: "ProductCatalogueItem",
@@ -232,7 +232,7 @@ export default {
      * @param imageId Image to delete
      */
     async deleteImage(imageId) {
-      let response = await deleteImage(this.businessId, this.product.id, imageId);
+      let response = await deleteProductImage(this.businessId, this.product.id, imageId);
       if (typeof response === 'string') {
         this.$store.commit('setError', response);
         return;

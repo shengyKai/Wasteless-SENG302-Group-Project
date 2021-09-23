@@ -11,7 +11,8 @@ import org.seng302.leftovers.dto.inventory.InventoryItemResponseDTO;
 import org.seng302.leftovers.dto.saleitem.SaleItemResponseDTO;
 import org.seng302.leftovers.exceptions.ValidationResponseException;
 import org.seng302.leftovers.persistence.*;
-import org.seng302.leftovers.tools.SearchHelper;
+import org.seng302.leftovers.service.search.SearchPageConstructor;
+import org.seng302.leftovers.service.search.SearchSpecConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.Page;
@@ -119,7 +120,7 @@ class SaleItemTests {
     @BeforeAll
     void initialise() {
         Sort.Order expectedOrder = new Sort.Order(Sort.Direction.ASC, "price").ignoreCase();
-        templatePageRequest = SearchHelper.getPageRequest(null,null, Sort.by(expectedOrder));
+        templatePageRequest = SearchPageConstructor.getPageRequest(null,null, Sort.by(expectedOrder));
         clearDatabase();
     }
 
@@ -453,9 +454,9 @@ class SaleItemTests {
                 .build();
         saleItem = saleItemRepository.save(saleItem);
 
-        PageRequest pageRequest = SearchHelper.getPageRequest(null, null, Sort.by("created"));
+        PageRequest pageRequest = SearchPageConstructor.getPageRequest(null, null, Sort.by("created"));
 
-        Specification<SaleItem> specification = SearchHelper.constructSpecificationFromSaleItemsFilter(testBusiness);
+        Specification<SaleItem> specification = SearchSpecConstructor.constructSpecificationFromSaleItemsFilter(testBusiness);
         Page<SaleItem> foundItems = saleItemRepository.findAll(specification, pageRequest);
 
         assertEquals(1, foundItems.getTotalElements());
@@ -497,9 +498,9 @@ class SaleItemTests {
             }
         }
 
-        PageRequest pageRequest = SearchHelper.getPageRequest(null, null, Sort.by("created"));
+        PageRequest pageRequest = SearchPageConstructor.getPageRequest(null, null, Sort.by("created"));
 
-        Specification<SaleItem> specification = SearchHelper.constructSpecificationFromSaleItemsFilter(testBusiness);
+        Specification<SaleItem> specification = SearchSpecConstructor.constructSpecificationFromSaleItemsFilter(testBusiness);
         Page<SaleItem> foundItems = saleItemRepository.findAll(specification, pageRequest);
 
         for (SaleItem foundItem : foundItems) {
@@ -546,9 +547,9 @@ class SaleItemTests {
             }
         }
 
-        PageRequest pageRequest = SearchHelper.getPageRequest(null, null, Sort.by("created"));
+        PageRequest pageRequest = SearchPageConstructor.getPageRequest(null, null, Sort.by("created"));
 
-        Specification<SaleItem> specification = SearchHelper.constructSpecificationFromSaleItemsFilter(testBusiness);
+        Specification<SaleItem> specification = SearchSpecConstructor.constructSpecificationFromSaleItemsFilter(testBusiness);
         Page<SaleItem> foundItems = saleItemRepository.findAll(specification, pageRequest);
         
         for (SaleItem foundItem : foundItems) {
