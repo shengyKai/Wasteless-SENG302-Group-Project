@@ -109,8 +109,10 @@ public class BusinessController {
      */
     public List<Image> getListOfImagesFromIds(List<Long> imageIds) {
         List<Image> images = new ArrayList<Image>();
-        for (Long imageId: imageIds) {
-            images.add(imageRepository.findById(imageId).get());
+        for (Long imageId : imageIds) {
+            Image image = imageRepository.findById(imageId)
+                    .orElseThrow(() -> new DoesNotExistResponseException(Image.class));
+            images.add(image);
         }
         return images;
     }
