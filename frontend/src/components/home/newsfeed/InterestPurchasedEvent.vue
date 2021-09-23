@@ -31,15 +31,27 @@ export default {
     },
   },
   computed: {
+    /**
+     * Text describing the item that was sold
+     */
     itemBought() {
       return this.boughtSaleItem.quantity + "x " + this.boughtSaleItem.product.name;
     },
+    /**
+     * The listing that was bought
+     */
     boughtSaleItem() {
       return this.event.boughtSaleItem;
     },
+    /**
+     * Product that comprised the listing
+     */
     product() {
       return this.boughtSaleItem.product;
     },
+    /**
+     * Business selling the listing
+     */
     business() {
       return this.product.business;
     },
