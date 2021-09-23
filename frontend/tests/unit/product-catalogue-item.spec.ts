@@ -7,7 +7,6 @@ import Vue from 'vue';
 import Vuetify from 'vuetify';
 import {createLocalVue, mount, Wrapper} from '@vue/test-utils';
 import ProductCatalogueItem from '@/components/cards/ProductCatalogueItem.vue';
-// import ImageCarousel from "@/components/utils/ImageCarousel.vue";
 import FullProductDescription from "@/components/utils/FullProductDescription.vue";
 import {castMock, flushQueue} from './utils';
 import Vuex, {Store} from 'vuex';

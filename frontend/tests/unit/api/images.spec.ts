@@ -1,5 +1,4 @@
-import { uploadImage } from "@/api/images";
-import { Image } from "@/api/internal";
+import { uploadImage, Image } from "@/api/images";
 import axios, { AxiosInstance } from 'axios';
 
 jest.mock('axios', () => ({

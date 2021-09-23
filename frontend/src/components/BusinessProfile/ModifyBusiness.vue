@@ -243,7 +243,8 @@ import {
   maxCharRules, postCodeRules, streetNumRules,
   USER_ROLES
 } from "@/utils";
-import { modifyBusiness, getUser } from '@/api/internal';
+import { modifyBusiness } from '@/api/business';
+import { getUser } from '@/api/user';
 
 export default {
   name: 'ModifyBusiness',

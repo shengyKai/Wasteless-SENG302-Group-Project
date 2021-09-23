@@ -4,7 +4,6 @@ import Vuex, { Store } from 'vuex';
 import {createLocalVue, mount, Wrapper, RouterLinkStub} from '@vue/test-utils';
 import BusinessProfile from '@/components/BusinessProfile/index.vue';
 import VueRouter from "vue-router";
-import {makeBusinessImagePrimary} from "@/api/business";
 Vue.use(Vuetify);
 Vue.use(Vuex);
 import { getStore, resetStoreForTesting, StoreData } from '@/store';

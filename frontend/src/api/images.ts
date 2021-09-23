@@ -1,14 +1,12 @@
 import axios from 'axios';
 import { is } from 'typescript-is';
-import { MaybeError, Image } from './internal';
+import { MaybeError, instance } from './internal';
 
-const SERVER_URL = process.env.VUE_APP_SERVER_ADD;
-
-const instance = axios.create({
-  baseURL: SERVER_URL,
-  timeout: 5 * 1000,
-  withCredentials: true,
-});
+export type Image = {
+  id: number,
+  filename: string,
+  thumbnailFilename: string,
+};
 
 /**
  * Upload an image to the application. Response will contain the location of the uploaded image and its associated id.
