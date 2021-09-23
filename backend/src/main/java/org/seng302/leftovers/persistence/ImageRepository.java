@@ -58,6 +58,12 @@ public interface ImageRepository extends CrudRepository<Image, Long> {
 
     }
 
+    /**
+     * Fetches a list of Images given a list of Image IDS
+     * If one or more ImageIds are invalid, a NOT_ACCEPTABLE exception is raised
+     * @param ids List of Image IDs
+     * @return List of Images
+     */
     default List<Image> getImagesByIds(List<Long> ids) {
         List<Image> images = new ArrayList<>();
         for (var id: ids) {
