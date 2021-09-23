@@ -3,6 +3,7 @@ import Vuetify from 'vuetify';
 import {createLocalVue, mount, Wrapper} from '@vue/test-utils';
 
 import ImageManager from "@/components/utils/ImageManager.vue";
+import ImageUploader from "@/components/utils/ImageUploader.vue";
 import { castMock } from './utils';
 import { uploadImage } from "@/api/images";
 
@@ -17,7 +18,6 @@ Vue.use(Vuetify);
 const localVue = createLocalVue();
 
 describe('ImageManager.vue', () => {
-  let appWrapper: Wrapper<any>;
   let wrapper: Wrapper<any>;
 
   /**
@@ -37,44 +37,42 @@ describe('ImageManager.vue', () => {
   beforeEach(() => {
     const vuetify = new Vuetify();
 
-    const App = localVue.component('App', {
-      components: { ImageManager },
-      template: `
-      <div data-app>
-        <ImageManager :images="images"/>
-      </div>`,
-    });
-
-    const elem = document.createElement('div');
-    document.body.appendChild(elem);
-
-    appWrapper = mount(App, {
+    wrapper = mount(ImageManager, {
       localVue,
       vuetify,
-      attachTo: elem,
-      data() {
-        return {
-          images: []
-        };
+      stubs: {
+        ImageUploader
+      },
+      propsData: {
+        images: [  
+          {
+            id: 1,
+            filename: "some test file",
+            thumbnailFilename: "some thumbnail"
+          }
+        ]
       }
     });
-
-    wrapper = appWrapper.getComponent(ImageManager);
   });
 
   afterEach(() => {
-    appWrapper.destroy();
+    wrapper.destroy();
   });
 
-  it("Only shows the single upload button if the images prop array length is lesser than 1", async () => {
-    const uploadWithNoImagesIcons = wrapper.findAllComponents({ ref: "uploadWithNoImages" });
-    const uploadIcons = wrapper.findAllComponents({ ref: "upload" });
-    const trashCanIcons = wrapper.findAllComponents({ ref: "trashCan" })
-    const makePrimaryIcons = wrapper.findAllComponents({ ref: "makePrimary" })
+  it("Only shows the single upload icon if the images prop array length is lesser than 1", async () => {
+    await wrapper.setProps({
+      images: []
+    });
+    expect(wrapper.findComponent({ref: "uploadWithNoImages"}).exists()).toBe(true);
+    expect(wrapper.findComponent({ref: "upload"}).exists()).toBe(false);
+    expect(wrapper.findComponent({ref: "trashCan"}).exists()).toBe(false);
+    expect(wrapper.findComponent({ref: "makePrimary"}).exists()).toBe(false);
+  });
 
-    expect(uploadWithNoImagesIcons.length).toEqual(1);
-    expect(uploadIcons.length).toEqual(0);
-    expect(trashCanIcons.length).toEqual(0);
-    expect(makePrimaryIcons.length).toEqual(0);
+  it("Shows the upload, trash can and make primary icon if the images prop array length is more than or equal to 1", async () => {
+    expect(wrapper.findComponent({ref: "uploadWithNoImages"}).exists()).toBe(false);
+    expect(wrapper.findComponent({ref: "upload"}).exists()).toBe(true);
+    expect(wrapper.findComponent({ref: "trashCan"}).exists()).toBe(true);
+    expect(wrapper.findComponent({ref: "makePrimary"}).exists()).toBe(true);
   });
 });

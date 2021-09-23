@@ -124,8 +124,12 @@ export default {
     model: 0,
     showImageUploader: false,
     uploadedImage: undefined,
-    toBeSubmittedImages: []
   }),
+  computed: {
+    toBeSubmittedImages() {
+      return Array.from(this.images);
+    }
+  },
   methods: {
     /**
      * Method to push the uploaded image to the end of the image array, so that it can be shown to the user.
@@ -143,10 +147,6 @@ export default {
       return imageSrcFromFilename(filename);
     },
   },
-  mounted() {
-    // Cloning because we cannot mutate a prop. Cant do this in the data() section for some reason.
-    this.toBeSubmittedImages = Array.from(this.images);
-  }
 };
 </script>
 
