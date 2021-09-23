@@ -149,14 +149,8 @@
                     </v-row>
                   </div>
                   <v-card-title class="mt-n3">Image</v-card-title>
-                  <!-- INPUT: Image Uploader -->
+                  <!-- INPUT: Business images -->
                   <ImageManager/>
-                  <ImageUploader
-                    v-model="imageFile"
-                    v-if="showImageUploaderForm"
-                    @closeDialog="showImageUploaderForm=false"
-                    @uploadImage="addImage"/>
-                  <v-card-text v-if="allImageFiles.length > 0"> Images uploaded: {{ imageNames }} </v-card-text>
                   <p class="error-text" v-if ="errorMessage !== undefined"> {{errorMessage}} </p>
                 </v-container>
               </v-card-text>
@@ -234,7 +228,6 @@
 
 <script>
 import LocationAutocomplete from '@/components/utils/LocationAutocomplete';
-import ImageUploader from "@/components/utils/ImageUploader";
 import ImageManager from "@/components/utils/ImageManager";
 import {
   alphabetExtendedMultilineRules,
@@ -250,7 +243,6 @@ export default {
   name: 'ModifyBusiness',
   components: {
     LocationAutocomplete,
-    ImageUploader,
     ImageManager
   },
   props: {
@@ -272,7 +264,6 @@ export default {
       region: this.business.address.region,
       country: this.business.address.country,
       postcode: this.business.address.postcode,
-      images: this.business.images || [],
       businessTypes: [
         'Accommodation and Food Services',
         'Charitable organisation',
@@ -281,13 +272,10 @@ export default {
       ],
       updateProductCountry: false,
       valid: false,
-      showImageUploaderForm: false,
       showAlert: false,
       showChangeAdminAlert: false,
       primaryAdminAlertMsg: "",
       primaryAdministratorId: this.business.primaryAdministratorId,
-      imageFile: undefined,
-      allImageFiles: [],
       maxCharRules: () => maxCharRules(100),
       maxCharDescriptionRules: ()=> maxCharRules(200),
       mandatoryRules: ()=> mandatoryRules,
@@ -314,12 +302,6 @@ export default {
     isPrimaryOwner() {
       return this.$store.state.user.id === this.business.primaryAdministratorId;
     },
-    imageNames() {
-      return this.allImageFiles.map((image) => image.name).join(", ");
-    },
-    businessImages() {
-      return this.business.images;
-    }
   },
   methods: {
     /**
@@ -422,13 +404,3 @@ export default {
   },
 };
 </script>
-
-<style scoped>
-.expand-icon {
-  padding-right: 10px;
-}
-
-.upload-image {
-  margin-top: 25px;
-}
-</style>
