@@ -346,11 +346,11 @@ public class User extends Account implements ImageAttachment {
     }
 
     /**
-     * Adds an image to this user
-     * @param image Image to add
+     * Sets the list of images for the user
+     * @param images Images to set
      */
-    public void addImage(Image image) {
-        this.images.add(image);
+    public void setImages(List<Image> images) {
+        this.images = images;
     }
 
 

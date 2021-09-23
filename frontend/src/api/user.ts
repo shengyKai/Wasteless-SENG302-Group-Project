@@ -39,7 +39,8 @@ export type CreateUser = BaseUser & {
 
 export type ModifyUser = BaseUser & {
   password?: string,
-  newPassword?: string
+  newPassword?: string,
+  imageIds: number[]
 }
 
 /**
