@@ -3,6 +3,7 @@ package org.seng302.datagenerator;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.Map;
@@ -35,5 +36,18 @@ public class Main {
         int days = (int) ChronoUnit.DAYS.between(start, end);
         long randomDays = random.nextInt(days);
         return start.plusDays(randomDays);
+    }
+
+    /**
+     * Generates a random instant between a lower and upper bound
+     * @param start The earliest instant that can be randomly generated
+     * @param end The latest instant that can be randomly generated (exclusive)
+     * @return Randomly generated instant
+     */
+    public static Instant randomInstant(Instant start, Instant end) {
+        long min = start.getEpochSecond();
+        long max = end.getEpochSecond();
+        int offset = random.nextInt((int)(max - min)); // Seconds since the start
+        return Instant.ofEpochSecond(min + offset);
     }
 }
