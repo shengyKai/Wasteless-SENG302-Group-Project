@@ -1,5 +1,5 @@
 <template>
-  <Event :event="event" title="An item you have liked has been purchased" :error="errorMessage">
+  <Event :event="event" title="An item you have liked has been purchased">
     <v-card-text class="pb-1">
       <strong>{{itemBought}}</strong>
       from
