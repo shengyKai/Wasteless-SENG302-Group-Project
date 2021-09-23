@@ -77,7 +77,7 @@
 <script>
 import InventoryItem from "./cards/InventoryItem.vue";
 import InventoryItemForm from "./BusinessProfile/InventoryItemForm.vue";
-import {getInventory} from "@/api/internal";
+import {getInventory} from "@/api/inventory";
 
 export default {
   name: "Inventory",

@@ -140,7 +140,7 @@
 <script>
 import ImageCarousel from "@/components/utils/ImageCarousel";
 import { currencyFromCountry } from "@/api/currency";
-import { setListingInterest, getListingInterest, purchaseListing} from '../../api/internal';
+import { setListingInterest, getListingInterest, purchaseListing} from '../../api/sale';
 import { formatDate, formatPrice } from '@/utils';
 
 export default {
@@ -269,7 +269,7 @@ export default {
     /** Change the user interest status on the listing (toggle)
      */
     async changeInterest() {
-      const result = await setListingInterest(this.saleItem.id, this.userId, !this.isInterested);
+      const result = await setListingInterest(this.saleItem.id, {userId: this.userId, interested: !this.isInterested});
       if (typeof result === 'string'){
         this.errorMessage = result;
       } else {

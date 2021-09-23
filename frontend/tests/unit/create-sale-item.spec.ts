@@ -1,11 +1,11 @@
 import Vue from "vue";
 import Vuex from "vuex";
 import Vuetify from "vuetify";
-import { createLocalVue, Wrapper, mount } from "@vue/test-utils";
+import {createLocalVue, mount, Wrapper} from "@vue/test-utils";
 import CreateSaleItem from "@/components/BusinessProfile/CreateSaleItem.vue";
-import { castMock, findButtonWithText, flushQueue, todayPlusYears } from "./utils";
-import { getStore, resetStoreForTesting } from "@/store";
-import * as api from "@/api/internal";
+import {castMock, todayPlusYears, findButtonWithText, flushQueue} from "./utils";
+import {getStore, resetStoreForTesting} from "@/store";
+import {createSaleItem as createSaleItem1} from "@/api/sale";
 
 Vue.use(Vuetify);
 
@@ -17,10 +17,10 @@ jest.mock('@/api/currency', () => ({
   }),
 }));
 
-jest.mock('@/api/internal', () => ({
+jest.mock('@/api/sale', () => ({
   createSaleItem: jest.fn(),
 }));
-const createSaleItem = castMock(api.createSaleItem);
+const createSaleItem = castMock(createSaleItem1);
 
 // Characters that are in the set of number, decimal, number with decimal
 const validPriceCharacters = [

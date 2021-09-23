@@ -1,4 +1,5 @@
-import { Business, User, UserRole } from "@/api/internal";
+import {User, UserRole} from "@/api/user";
+import {Business} from "@/api/business";
 import { Wrapper } from "@vue/test-utils";
 
 /**
@@ -72,7 +73,7 @@ export function makeTestBusiness(businessId: number, administrators?: number[]):
  *
  * @param userId The user id to use
  * @param businesses The businesses for this user to administer
- * @param applicationAdmin True if you want the user to be an system administrator
+ * @param role Role of the user
  * @returns The generated user
  */
 export function makeTestUser(userId: number, businesses?: number[], role?: UserRole): User {

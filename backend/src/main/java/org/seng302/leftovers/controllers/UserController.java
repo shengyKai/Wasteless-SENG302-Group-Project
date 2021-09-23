@@ -15,7 +15,9 @@ import org.seng302.leftovers.exceptions.InsufficientPermissionResponseException;
 import org.seng302.leftovers.persistence.UserRepository;
 import org.seng302.leftovers.tools.AuthenticationTokenManager;
 import org.seng302.leftovers.tools.PasswordAuthenticator;
-import org.seng302.leftovers.tools.SearchHelper;
+import org.seng302.leftovers.service.search.SearchPageConstructor;
+import org.seng302.leftovers.service.search.SearchQueryParser;
+import org.seng302.leftovers.service.search.SearchSpecConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -26,16 +28,33 @@ import org.springframework.web.bind.annotation.*;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
+import java.util.List;
 import java.util.Optional;
 
 @RestController
 public class UserController {
+    private static final List<String> USER_ORDER_BY_OPTIONS = List.of("userID", "firstName", "middleName", "lastName", "nickname", "email");
     private final UserRepository userRepository;
     private static final Logger logger = LogManager.getLogger(UserController.class.getName());
 
     public UserController(UserRepository userRepository) {
 
         this.userRepository = userRepository;
+    }
+
+    /**
+     * This method constructs a Sort object to be passed into a query for searching the UserRepository. The attribute
+     * which Users should be sorted by and whether that order should be reversed are specified.
+     * @param orderBy The attribute which query results will be ordered by.
+     * @param reverse Results will be in descending order if true, ascending order if false or null.
+     * @return A Sort which can then be applied to queries of the UserRepository.
+     */
+    public static Sort getSort(String orderBy, Boolean reverse) {
+        if (orderBy == null || !USER_ORDER_BY_OPTIONS.contains(orderBy)) {
+            orderBy = "userID";
+        }
+
+        return Sort.by(SearchPageConstructor.getSortDirection(reverse), orderBy);
     }
 
     /**
@@ -171,12 +190,12 @@ public class UserController {
         logger.info(() -> String.format("Performing search for \"%s\"", searchQuery));
         Page<User> results;
         if (orderBy == null || orderBy.equals("relevance")) {
-            var users = SearchHelper.getSearchResultsOrderedByRelevance(searchQuery, userRepository, reverse);
-            results = new PageImpl<>(SearchHelper.getPageInResults(users, page, resultsPerPage), Pageable.unpaged(), users.size());
+            var users = SearchQueryParser.getSearchResultsOrderedByRelevance(searchQuery, userRepository, reverse);
+            results = new PageImpl<>(SearchPageConstructor.getPageInResults(users, page, resultsPerPage), Pageable.unpaged(), users.size());
         } else {
-            Specification<User> spec = SearchHelper.constructUserSpecificationFromSearchQuery(searchQuery);
-            Sort userSort = SearchHelper.getSort(orderBy, reverse);
-            results = userRepository.findAll(spec, SearchHelper.getPageRequest(page, resultsPerPage, userSort));
+            Specification<User> spec = SearchSpecConstructor.constructUserSpecificationFromSearchQuery(searchQuery);
+            Sort userSort = getSort(orderBy, reverse);
+            results = userRepository.findAll(spec, SearchPageConstructor.getPageRequest(page, resultsPerPage, userSort));
         }
 
         return new ResultPageDTO<>(
@@ -187,6 +206,7 @@ public class UserController {
                 )
         );
     }
+
 
 
     /**
@@ -233,4 +253,6 @@ public class UserController {
             userRepository.save(user.get());
         }
     }
+
+
 }

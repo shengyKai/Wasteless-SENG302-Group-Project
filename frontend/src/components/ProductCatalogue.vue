@@ -119,8 +119,8 @@
 <script>
 import ProductCatalogueItem from './cards/ProductCatalogueItem.vue';
 import ProductForm from '@/components/BusinessProfile/ProductForm.vue';
-import { getProducts, searchCatalogue } from '../api/internal';
-import { debounce } from '../utils';
+import { debounce } from '@/utils';
+import {getProducts, searchCatalogue} from "@/api/product";
 
 export default {
   name: "ProductCatalogue",

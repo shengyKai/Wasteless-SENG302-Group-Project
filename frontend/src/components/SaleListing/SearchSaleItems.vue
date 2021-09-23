@@ -40,7 +40,7 @@
 import AdvancedSearchBar from './AdvancedSearchBar.vue';
 import SimpleSearchBar from './SimpleSearchBar.vue';
 import SaleResult from './SaleResult.vue';
-import {getBusinessSales} from "@/api/internal";
+import {getBusinessSales} from "@/api/sale";
 
 export default {
   name: "SearchSaleItems",
