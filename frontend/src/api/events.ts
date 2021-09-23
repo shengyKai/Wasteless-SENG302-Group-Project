@@ -1,4 +1,4 @@
-import { BoughtSaleItem as BoughtSale, Keyword, MarketplaceCard, MarketplaceCardSection, MaybeError, Message, Sale, User} from "./internal";
+import { BoughtSale, Keyword, MarketplaceCard, MarketplaceCardSection, MaybeError, Message, Sale, User} from "./internal";
 import axios from 'axios';
 import { is } from 'typescript-is';
 
