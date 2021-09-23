@@ -67,9 +67,9 @@ public class BusinessStepDefinition {
     private JSONObject modifyParameters;
 
     @SneakyThrows
-    private JSONObject createValidRequest() {
+    private JSONObject createValidRequest(long ownerId) {
         var json = new JSONObject();
-        json.put("primaryAdministratorId", 1);
+        json.put("primaryAdministratorId", ownerId);
         json.put("name", "New business name");
         json.put("description", "New business description");
         json.put("address", new LocationDTO(Location.covertAddressStringToLocation("4,Rountree Street,Ashburton,Christchurch,New Zealand,Canterbury,8041"), true));
@@ -332,7 +332,7 @@ public class BusinessStepDefinition {
         assertFalse(business.getImages().isEmpty());
         assertNotEquals(image, business.getImages().get(0));
 
-        var json = createValidRequest();
+        var json = createValidRequest(business.getPrimaryOwner().getUserID());
         json.put("imageIds", Collections.singletonList(image.getID()));
 
         requestContext.performRequest(
