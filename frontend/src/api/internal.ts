@@ -53,8 +53,6 @@ export type Location = {
   postcode?: string
 };
 
-  newPassword?: string,
-  imageIds: number[]
 export type Image = {
   id: number,
   filename: string,
