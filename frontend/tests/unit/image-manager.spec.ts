@@ -4,37 +4,14 @@ import {createLocalVue, mount, Wrapper} from '@vue/test-utils';
 
 import ImageManager from "@/components/utils/ImageManager.vue";
 import ImageUploader from "@/components/utils/ImageUploader.vue";
-import { castMock } from './utils';
-import { uploadImage } from "@/api/images";
-
-jest.mock('@/api/images', () => ({
-  uploadImage: jest.fn(),
-}));
-
-const uploadImageMock = castMock(uploadImage);
 
 Vue.use(Vuetify);
 
 const localVue = createLocalVue();
 
-let imageUrlSpy = jest.spyOn((ImageManager as any).methods, 'imageUrl');
 
 describe('ImageManager.vue', () => {
   let wrapper: Wrapper<any>;
-
-  /**
-   * Executes before all the tests.
-   *
-   * The jsdom environment doesn't declare URL.createObjectURL function, hence we need to implement it
-   * ourselves to make the uploader not crash.
-   */
-  beforeAll(() => {
-    globalThis.URL = {
-      createObjectURL(object: any) {
-        return 'obj_url:' + object;
-      }
-    } as any;
-  });
 
   beforeEach(() => {
     const vuetify = new Vuetify();

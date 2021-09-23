@@ -126,6 +126,11 @@ export default {
     uploadedImage: undefined,
   }),
   computed: {
+    /**
+     * An cloned array of images from the images prop. This is needed because we cannot mutate props and we want to show a carousel of 
+     * images which contains the confirmed and not confirmed images relating to an entity. Confirmed in this case refers to whether
+     * an image is tied to an entity or not.
+     */
     toBeSubmittedImages() {
       return Array.from(this.images);
     }

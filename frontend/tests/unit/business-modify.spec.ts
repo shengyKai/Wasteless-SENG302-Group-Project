@@ -520,8 +520,43 @@ describe('modifyBusiness.vue', () => {
     });
   });
 
-  it("imageIds will be updated after an emit call from ImageManager", () => {
+  it("With one uploaded image, imageIds will be updated after an emit call from ImageManager", () => {
+    const images = [  
+      {
+        id: 1,
+        filename: "some test file",
+        thumbnailFilename: "some thumbnail"
+      }
+    ];
     const imageManagerWrapper = wrapper.findComponent(ImageManager);
-    expect(wrapper.findComponent(ImageManager).exists()).toBeTruthy();
+    expect(imageManagerWrapper.exists()).toBeTruthy();
+    expect(wrapper.vm.imageIds.length).toEqual(0);
+    imageManagerWrapper.vm.$emit("updateImages", images);
+    expect(wrapper.vm.imageIds.length).toEqual(1);
+  });
+
+  it("With multiple uploaded images, imageIds will be updated after an emit call from ImageManager", () => {
+    const images = [  
+      {
+        id: 1,
+        filename: "some test file1",
+        thumbnailFilename: "some thumbnail"
+      },
+      {
+        id: 2,
+        filename: "some test file2",
+        thumbnailFilename: "some thumbnail"
+      },
+      {
+        id: 3,
+        filename: "some test file3",
+        thumbnailFilename: "some thumbnail"
+      }
+    ];
+    const imageManagerWrapper = wrapper.findComponent(ImageManager);
+    expect(imageManagerWrapper.exists()).toBeTruthy();
+    expect(wrapper.vm.imageIds.length).toEqual(0);
+    imageManagerWrapper.vm.$emit("updateImages", images);
+    expect(wrapper.vm.imageIds.length).toEqual(3);
   });
 });
