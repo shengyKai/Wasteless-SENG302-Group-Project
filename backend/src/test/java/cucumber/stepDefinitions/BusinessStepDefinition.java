@@ -9,6 +9,7 @@ import cucumber.utils.CucumberUtils;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
+import lombok.SneakyThrows;
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
 import net.minidev.json.parser.JSONParser;
@@ -17,6 +18,7 @@ import org.hibernate.SessionFactory;
 import org.junit.Assert;
 import org.seng302.datagenerator.ExampleDataFileReader;
 import org.seng302.leftovers.controllers.BusinessController;
+import org.seng302.leftovers.dto.LocationDTO;
 import org.seng302.leftovers.dto.business.BusinessType;
 import org.seng302.leftovers.entities.*;
 import org.seng302.leftovers.persistence.BusinessRepository;
@@ -32,10 +34,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Path;
 import java.text.ParseException;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -66,6 +65,18 @@ public class BusinessStepDefinition {
 
 
     private JSONObject modifyParameters;
+
+    @SneakyThrows
+    private JSONObject createValidRequest() {
+        var json = new JSONObject();
+        json.put("primaryAdministratorId", 1);
+        json.put("name", "New business name");
+        json.put("description", "New business description");
+        json.put("address", new LocationDTO(Location.covertAddressStringToLocation("4,Rountree Street,Ashburton,Christchurch,New Zealand,Canterbury,8041"), true));
+        json.put("businessType", objectMapper.convertValue(BusinessType.ACCOMMODATION_AND_FOOD_SERVICES, String.class));
+        json.put("updateProductCountry", true);
+        return json;
+    }
 
     /**
      * Method to save multiple products into the latest business saved in the businessContext
@@ -311,6 +322,7 @@ public class BusinessStepDefinition {
         assertTrue(business.getImages().contains(image));
 
     }
+
     @Transactional
     @When("I try to set the primary image for {string} to {string}")
     public void i_try_set_primary_image_to(String businessName, String imageName) {
@@ -320,12 +332,14 @@ public class BusinessStepDefinition {
         assertFalse(business.getImages().isEmpty());
         assertNotEquals(image, business.getImages().get(0));
 
+        var json = createValidRequest();
+        json.put("imageIds", Collections.singletonList(image.getID()));
+
         requestContext.performRequest(
                 put("/businesses/"
-                        + business.getId()
-                        + "/images/"
-                        + image.getID()
-                        + "/makeprimary"));
+                        + business.getId())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json.toString()));
 
     }
 
