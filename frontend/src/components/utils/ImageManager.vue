@@ -125,6 +125,7 @@ export default {
   methods: {
     upload() {
       this.toBeSubmittedImages.push(this.uploadedImage);
+      this.$emit("updateImages", this.toBeSubmittedImages);
       this.showImageUploader = false;
     },
     imageUrl(filename) {

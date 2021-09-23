@@ -150,7 +150,7 @@
                   </div>
                   <v-card-title class="mt-n3">Image</v-card-title>
                   <!-- INPUT: Business images -->
-                  <ImageManager :images="business.images"/>
+                  <ImageManager :images="business.images" @updateImages="updateBusinessImages"/>
                   <p class="error-text" v-if ="errorMessage !== undefined"> {{errorMessage}} </p>
                 </v-container>
               </v-card-text>
@@ -284,6 +284,7 @@ export default {
       streetRules: ()=> streetNumRules,
       postcodeRules: ()=> postCodeRules,
       isLoading: false,
+      imageIds: this.business.images.map(image => image.id)
     };
   },
   computed: {
@@ -355,7 +356,8 @@ export default {
           postcode: this.postcode
         },
         businessType: this.businessType,
-        updateProductCountry: this.updateProductCountry
+        updateProductCountry: this.updateProductCountry,
+        imageIds: this.imageIds
       };
       const result = await modifyBusiness(this.business.id, modifiedFields);
 
@@ -400,6 +402,9 @@ export default {
       }
       this.primaryAdministratorId = admin.id;
     },
+    updateBusinessImages(uploadedImages) {
+      this.imageIds = uploadedImages.map(image => image.id);
+    }
   },
 };
 </script>

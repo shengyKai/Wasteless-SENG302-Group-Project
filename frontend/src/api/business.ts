@@ -33,7 +33,8 @@ export type ModifyBusiness = {
   description?: string,
   address: Location,
   businessType: BusinessType,
-  updateProductCountry: boolean
+  updateProductCountry: boolean,
+  imageIds?: Array<number>
 }
 
 /**
