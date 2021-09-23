@@ -1,18 +1,21 @@
-
 import Vue from 'vue';
 import Vuetify from 'vuetify';
-import { createLocalVue, mount, Wrapper } from '@vue/test-utils';
+import {createLocalVue, mount, Wrapper} from '@vue/test-utils';
 import MessageEvent from '@/components/home/newsfeed/MessageEvent.vue';
-import * as api from '@/api/internal';
-import * as events from '@/api/events';
 
-import Vuex, { Store } from 'vuex';
-import { getStore, resetStoreForTesting, StoreData } from '@/store';
-import { castMock, findButtonWithText, makeTestUser } from '../utils';
+import Vuex, {Store} from 'vuex';
+import {getStore, resetStoreForTesting, StoreData} from '@/store';
+import {castMock, makeTestUser, findButtonWithText} from '../utils';
+import {
+  getMessagesInConversation as getMessagesInConversation1,
+  MarketplaceCard,
+  messageConversation as messageConversation1
+} from "@/api/marketplace";
+import * as events from '@/api/events';
 
 Vue.use(Vuetify);
 
-jest.mock('@/api/internal', () => ({
+jest.mock('@/api/marketplace', () => ({
   messageConversation: jest.fn(),
   getMessagesInConversation: jest.fn(),
 }));
@@ -22,14 +25,14 @@ jest.mock('@/api/events', () => ({
   updateEventAsRead: jest.fn(),
 }));
 
-const messageConversation = castMock(api.messageConversation);
-const getMessagesInConversation = castMock(api.getMessagesInConversation);
+const messageConversation = castMock(messageConversation1);
+const getMessagesInConversation = castMock(getMessagesInConversation1);
 const getEvents = castMock(events.getEvents);
 
 const sellerUser = makeTestUser(100);
 const buyerUser = makeTestUser(50);
 
-const testCard: api.MarketplaceCard = {
+const testCard: MarketplaceCard = {
   id: 1,
   creator: sellerUser,
   section: 'ForSale',

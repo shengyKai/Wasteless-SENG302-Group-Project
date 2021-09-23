@@ -2,14 +2,17 @@ import Vue from "vue";
 import Vuetify from "vuetify";
 import {createLocalVue, mount, Wrapper} from "@vue/test-utils";
 import Vuex from "vuex";
-import * as api from '@/api/internal';
+import {Business} from "@/api/business";
+import {Product} from "@/api/product";
+import {InventoryItem} from "@/api/inventory";
+import {Sale} from "@/api/sale";
 import * as events from '@/api/events';
 import InterestEvent from "@/components/home/newsfeed/InterestEvent.vue";
 import FullSaleListing from "@/components/SaleListing/FullSaleListing.vue";
 
 Vue.use(Vuetify);
 
-const business: api.Business = {
+const business: Business = {
   "images":[],
   "primaryAdministratorId":2,
   "address":{
@@ -25,18 +28,18 @@ const business: api.Business = {
   "id":1,
   "businessType":"Accommodation and Food Services"
 };
-const product: api.Product = {
+const product: Product = {
   "countryOfSale":"Iceland",
   "images":[],
   "recommendedRetailPrice":842.92,
-  business,
+  "business":business,
   "created":"2021-09-14T01:29:16.497456Z",
   "name":"Complex Omelette",
   "description":"D quam  consequuntur! Commodi minima excepturi repudiandae velit hic maxime doloremque. Quaerat provident commodi consectetur veniam similique ad earum omnis ipsum saepe, volu.",
   "id":"FOXLVWMOW603801",
   "manufacturer":"Hoffman Incorporated"
 };
-const inventoryItem: api.InventoryItem = {
+const inventoryItem: InventoryItem = {
   "remainingQuantity":25,
   product,
   "expires":"2022-04-25",
@@ -50,7 +53,7 @@ const inventoryItem: api.InventoryItem = {
 };
 
 
-const saleItem: api.Sale = {
+const saleItem: Sale = {
   inventoryItem,
   "quantity":1,
   "price":240.30,

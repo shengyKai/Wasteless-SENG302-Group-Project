@@ -20,7 +20,7 @@ import org.seng302.leftovers.persistence.BusinessRepository;
 import org.seng302.leftovers.persistence.ImageRepository;
 import org.seng302.leftovers.persistence.ProductRepository;
 import org.seng302.leftovers.persistence.UserRepository;
-import org.seng302.leftovers.tools.SearchHelper;
+import org.seng302.leftovers.service.search.SearchPageConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -135,7 +135,7 @@ class ProductControllerTest {
     void setUp() throws ParseException {
 
         Sort.Order expectedOrder = new Sort.Order(Sort.Direction.ASC, "created").ignoreCase();
-        templateRequest = SearchHelper.getPageRequest(null,null, Sort.by(expectedOrder));
+        templateRequest = SearchPageConstructor.getPageRequest(null,null, Sort.by(expectedOrder));
 
         setUpAuthCode();
 
@@ -1229,7 +1229,7 @@ class ProductControllerTest {
     /**
      * Tests using the make image primary method to see if a user who is a business administrator for that business
      * can perform this action
-     * @throws Exception
+     * @throws Exception From database calls
      */
     @Test
     void makeImagePrimary_isBusinessAdmin_200Response() throws Exception {

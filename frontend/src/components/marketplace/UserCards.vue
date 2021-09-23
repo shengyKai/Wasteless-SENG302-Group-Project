@@ -53,7 +53,8 @@
 
 <script>
 import MarketplaceCard from "../cards/MarketplaceCard";
-import {getUser, getMarketplaceCardsByUser} from "../../api/internal.ts";
+import {getUser} from "@/api/user";
+import {getMarketplaceCardsByUser} from "@/api/marketplace";
 
 export default {
   name: 'UserCards',

@@ -6,7 +6,6 @@ import SimpleSearchBar from "@/components/SaleListing/SimpleSearchBar.vue";
 
 describe('AdvancedSearchBar.vue', () => {
 
-
   Vue.use(Vuetify);
 
   const localVue = createLocalVue();

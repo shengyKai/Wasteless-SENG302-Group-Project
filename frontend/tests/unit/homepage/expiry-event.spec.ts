@@ -1,19 +1,18 @@
-
 import Vue from 'vue';
 import Vuetify from 'vuetify';
-import { createLocalVue, mount, Wrapper } from '@vue/test-utils';
+import {createLocalVue, mount, Wrapper} from '@vue/test-utils';
 import ExpiryEvent from '@/components/home/newsfeed/ExpiryEvent.vue';
 import MarketplaceCard from "@/components/cards/MarketplaceCard.vue";
-import * as api from '@/api/internal';
 import * as events from '@/api/events';
 
-import Vuex, { Store } from 'vuex';
-import { getStore, resetStoreForTesting, StoreData } from '@/store';
-import { castMock, findButtonWithText, makeTestUser } from '../utils';
+import Vuex, {Store} from 'vuex';
+import {getStore, resetStoreForTesting, StoreData} from '@/store';
+import {castMock, makeTestUser, findButtonWithText} from '../utils';
+import {extendMarketplaceCardExpiry as extendMarketplaceCardExpiry1} from "@/api/marketplace";
 
 Vue.use(Vuetify);
 
-jest.mock('@/api/internal', () => ({
+jest.mock('@/api/marketplace', () => ({
   extendMarketplaceCardExpiry: jest.fn(),
 }));
 
@@ -26,7 +25,7 @@ jest.mock('@/components/utils/Methods/synchronizedTime', () => ({
   now : new Date("2021-01-02T11:00:00Z")
 }));
 
-const extendMarketplaceCardExpiry = castMock(api.extendMarketplaceCardExpiry);
+const extendMarketplaceCardExpiry = castMock(extendMarketplaceCardExpiry1);
 const getEvents = castMock(events.getEvents);
 
 describe('ExpiryEvent.vue', () => {

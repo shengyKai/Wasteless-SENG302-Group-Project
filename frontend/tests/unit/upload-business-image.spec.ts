@@ -1,16 +1,16 @@
 import Vue from 'vue';
 import Vuetify from 'vuetify';
-import { createLocalVue, Wrapper, mount } from '@vue/test-utils';
+import {createLocalVue, mount, Wrapper} from '@vue/test-utils';
 
 import BusinessImageUploader from "@/components/utils/BusinessImageUploader.vue";
-import { castMock, findButtonWithText, flushQueue } from './utils';
-import * as api from '@/api/internal';
+import {castMock, findButtonWithText} from './utils';
+import {uploadBusinessImage as uploadBusinessImage1} from "@/api/business";
 
-jest.mock('@/api/internal', () => ({
+jest.mock('@/api/business', () => ({
   uploadBusinessImage: jest.fn(),
 }));
 
-const uploadBusinessImage = castMock(api.uploadBusinessImage);
+const uploadBusinessImage = castMock(uploadBusinessImage1);
 
 Vue.use(Vuetify);
 
