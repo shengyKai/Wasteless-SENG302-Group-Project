@@ -8,6 +8,7 @@ import io.cucumber.java.en.And;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
+import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
 import net.minidev.json.parser.JSONParser;
 import org.hibernate.Session;
@@ -36,10 +37,7 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -381,19 +379,23 @@ public class UserStepDefinition {
     public void i_try_to_updated_the_fields_of_the_user_to(String name, Map<String, Object> dataTable) {
         modifyParameters = new JSONObject();
         for (var entry : dataTable.entrySet()) {
-            var key = entry.getKey();
-            var value = entry.getValue();
-            if (key.equals("imageIds")) {
-               List<String> names = Arrays.asList((Optional.ofNullable((String) value)).orElse("").split(","));
-               names.remove("");
-               value = names.stream()
-                       .map(imageName -> imageRepository.findByFilename(imageName)
-                               .get().getID())
-                       .collect(Collectors.toList());
-            }
-            List<String> path = Arrays.asList(key.split("\\."));
-            CucumberUtils.setValueAtPath(modifyParameters, path, value);
+            List<String> path = Arrays.asList(entry.getKey().split("\\."));
+            CucumberUtils.setValueAtPath(modifyParameters, path, entry.getValue());
         }
+
+        var imageNamesString = Optional.ofNullable(modifyParameters.get("imageIds"));
+        if (imageNamesString.isPresent()) {
+            List<String> names = Arrays.asList(imageNamesString.get().toString().split(","));
+            var value = names.stream()
+                    .map(imageName -> imageRepository.findByFilename(imageName)
+                            .get().getID())
+                    .collect(Collectors.toList());
+            modifyParameters.put("imageIds", value);
+        } else {
+            modifyParameters.put("imageIds", new JSONArray());
+        }
+
+
 
         User user = userContext.getByName(name);
         requestContext.performRequest(put("/users/" + user.getUserID())

@@ -27,7 +27,7 @@ Feature: U10 - Modifying Users
       | email                    | dave@jones.com    |
       | password                 | superSecret1      |
       | newPassword              | confidential101   |
-      | imageIds                 | apple.png,banana.png,orange.png            |
+      | imageIds                 | apple.png,banana.png,orange.png|
     Then The request succeeds
     And The user is updated
     
@@ -52,7 +52,7 @@ Feature: U10 - Modifying Users
         | email                    | dave@jones.com    |
         | password                 | superSecret1      |
         | newPassword              | confidential101   |
-        | imageIds                 |                   |
+        | imageIds                 | apple.png,banana.png,orange.png|
       Then The request fails due to forbidden
       And The user is not updated
 
