@@ -3,12 +3,12 @@
     <v-row class="mt-5">
       <v-col>
         <v-carousel
-          v-if="images.length > 0"
+          v-if="toBeSubmittedImages.length > 0"
           v-model="model"
         >
           <v-carousel-item
-            v-for="image in images"
-            :key="image"
+            v-for="(image, enumerator) in toBeSubmittedImages"
+            :key="enumerator"
             :src="imageUrl(image.filename)"
             contain
           >
@@ -98,7 +98,7 @@
       </v-col>
     </v-row>
     <ImageUploader
-      v-model="image"
+      v-model="uploadedImage"
       v-if="showImageUploader"
       @closeDialog="upload"
     />
@@ -119,15 +119,20 @@ export default {
   data: () => ({
     model: 0,
     showImageUploader: false,
-    image: undefined,
+    uploadedImage: undefined,
+    toBeSubmittedImages: []
   }),
   methods: {
     upload() {
+      this.toBeSubmittedImages.push(this.uploadedImage);
       this.showImageUploader = false;
     },
     imageUrl(filename) {
       return imageSrcFromFilename(filename);
-    }
+    },
+  },
+  mounted() {
+    this.toBeSubmittedImages = Array.from(this.images);
   }
 };
 </script>
