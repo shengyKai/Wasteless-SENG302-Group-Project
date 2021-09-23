@@ -411,6 +411,9 @@ export default {
       }
       this.primaryAdministratorId = admin.id;
     },
+    /**
+     * Method to update the imageIds from the uploadedImages received from ImageManager to be sent for business modification.
+     */
     updateBusinessImages(uploadedImages) {
       this.imageIds = uploadedImages.map(image => image.id);
     }

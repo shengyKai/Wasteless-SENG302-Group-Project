@@ -18,7 +18,7 @@
                   <template v-slot:activator="{ on, attrs }">
                     <v-icon center
                             outlined
-                            class="ma-2"
+                            class="ma-2 img-button"
                             color="primary"
                             v-bind="attrs"
                             v-on="on"
@@ -32,7 +32,7 @@
                   <template v-slot:activator="{ on, attrs }">
                     <v-icon center
                             outlined
-                            class="ma-2"
+                            class="ma-2 img-button"
                             color="primary"
                             v-bind="attrs"
                             v-on="on">
@@ -45,7 +45,7 @@
                   <template v-slot:activator="{ on, attrs }">
                     <v-icon center
                             outlined
-                            class="ma-2"
+                            class="ma-2 img-button"
                             color="primary"
                             v-bind="attrs"
                             v-on="on">
@@ -123,16 +123,24 @@ export default {
     toBeSubmittedImages: []
   }),
   methods: {
+    /**
+     * Method to push the uploaded image to the end of the image array, so that it can be shown to the user.
+     * Emits an event "updateImages" along with the images which are uploaded to the parent to submit the form for modification.
+     */
     upload() {
       this.toBeSubmittedImages.push(this.uploadedImage);
       this.$emit("updateImages", this.toBeSubmittedImages);
       this.showImageUploader = false;
     },
+    /**
+     * Method to call another method to get the image source from the image file name
+     */
     imageUrl(filename) {
       return imageSrcFromFilename(filename);
     },
   },
   mounted() {
+    // Cloning because we cannot mutate a prop. Cant do this in the data() section for some reason.
     this.toBeSubmittedImages = Array.from(this.images);
   }
 };
