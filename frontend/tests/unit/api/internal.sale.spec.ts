@@ -1,5 +1,5 @@
-import { createSaleItem, getBusinessSales } from '@/api/internal';
 import axios, {AxiosInstance } from 'axios';
+import {createSaleItem, getBusinessSales} from "@/api/sale";
 jest.mock('axios', () => ({
   create: jest.fn(function () {
     // @ts-ignore

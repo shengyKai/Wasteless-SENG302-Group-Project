@@ -1,11 +1,13 @@
 package cucumber.stepDefinitions;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import cucumber.context.BusinessContext;
 import cucumber.context.ImageContext;
 import cucumber.context.RequestContext;
 import cucumber.context.UserContext;
 import cucumber.utils.CucumberUtils;
+import io.cucumber.java.en.And;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
@@ -21,6 +23,7 @@ import org.seng302.leftovers.controllers.BusinessController;
 import org.seng302.leftovers.dto.LocationDTO;
 import org.seng302.leftovers.dto.business.BusinessType;
 import org.seng302.leftovers.entities.*;
+import org.seng302.leftovers.exceptions.ValidationResponseException;
 import org.seng302.leftovers.persistence.BusinessRepository;
 import org.seng302.leftovers.persistence.ImageRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -352,4 +355,18 @@ public class BusinessStepDefinition {
         assertFalse(business.getImages().isEmpty());
         assertEquals(image, business.getImages().get(0)); // index zero is primary image
     }
+
+    @And("the business {string} with the type {string} and location {string} exists")
+    public void theBusinessWithTheTypeAndLocationExists(String name, String type, String location) {
+        ObjectMapper objectMapper = new ObjectMapper();
+        var business = new Business.Builder()
+                .withName(name)
+                .withDescription("Sells stuff")
+                .withBusinessType(objectMapper.convertValue(type, new TypeReference<>() {}))
+                .withAddress(Location.covertAddressStringToLocation(location))
+                .withPrimaryOwner(userContext.getLast())
+                .build();
+        businessContext.save(business);
+    }
+
 }

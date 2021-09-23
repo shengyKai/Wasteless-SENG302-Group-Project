@@ -4,6 +4,7 @@ import org.springframework.data.jpa.domain.Specification;
 
 import javax.persistence.Transient;
 import javax.persistence.criteria.*;
+import org.seng302.leftovers.persistence.SearchCriteria.Pred;
 
 /**
  * Defines a specification for type User
@@ -37,21 +38,20 @@ public class SearchSpecification<T> implements Specification<T> {
         if (criteria == null) {
             return builder.conjunction();
         }
-        else if (criteria.getOperation().equalsIgnoreCase(">")) {
+        else if (criteria.getOperation().equals(Pred.GREATER_THAN)) {
             return builder.greaterThanOrEqualTo(
                     key, criteria.getValue().toString());
         }
-        else if (criteria.getOperation().equalsIgnoreCase("<")) {
+        else if (criteria.getOperation().equals(Pred.LESS_THAN)) {
             return builder.lessThanOrEqualTo(
                     key, criteria.getValue().toString());
         }
-        else if (criteria.getOperation().equalsIgnoreCase(":")) {
-            if (key.getJavaType() == String.class) {
+        else if (criteria.getOperation().equals(Pred.PARTIAL_MATCH) &&
+                    key.getJavaType() == String.class) {
                 return builder.like(
                         builder.lower(key), "%" + criteria.getValue().toString().toLowerCase() + "%");
-            }
         }
-        else if (criteria.getOperation().equalsIgnoreCase("=") &&
+        else if (criteria.getOperation().equals(Pred.FULL_MATCH) &&
                 key.getJavaType() == String.class) {
             return builder.like(
                     key, criteria.getValue().toString());

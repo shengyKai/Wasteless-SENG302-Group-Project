@@ -1,4 +1,4 @@
-package org.seng302.leftovers.dto;
+package org.seng302.leftovers.dto.conversation;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.EqualsAndHashCode;

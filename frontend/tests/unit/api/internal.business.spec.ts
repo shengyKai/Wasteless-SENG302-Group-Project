@@ -1,5 +1,12 @@
-import { Business, searchBusinesses, ModifyBusiness, modifyBusiness, uploadBusinessImage } from '@/api/internal';
 import axios, { AxiosInstance } from 'axios';
+import {
+  Business,
+  makeBusinessImagePrimary,
+  ModifyBusiness,
+  modifyBusiness,
+  searchBusinesses,
+  uploadBusinessImage
+} from "@/api/business";
 
 jest.mock('axios', () => ({
   create: jest.fn(function () {
@@ -85,7 +92,7 @@ describe('Test GET businesses/search endpoint', () => {
       }
     });
     const response = await searchBusinesses('Query', 'Accommodation and Food Services', 2, 10, "created", false);
-    expect(response).toEqual({results:[],count:0});
+    expect(response).toEqual(responseData);
   });
 
   it('When API request is unsuccessfully resolved with a 400 status code, returns an error with the message received from the backend', async () => {

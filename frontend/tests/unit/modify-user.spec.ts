@@ -1,22 +1,20 @@
 import Vue from "vue";
-import Vuex, { Store } from "vuex";
-import Vuetify, { UserVuetifyPreset } from "vuetify";
+import Vuex, {Store} from "vuex";
+import Vuetify from "vuetify";
 
-import { createLocalVue, mount, Wrapper } from "@vue/test-utils";
-import * as api from '@/api/internal';
+import {createLocalVue, mount, Wrapper} from "@vue/test-utils";
 
 import ModifyUserPage from "@/components/UserProfile/ModifyUserPage.vue";
-import { getStore, resetStoreForTesting, StoreData } from "@/store";
-import { Business, BUSINESS_TYPES, User } from "@/api/internal";
-import { castMock, flushQueue } from "./utils";
-import { USER_ROLES } from "@/utils";
+import {getStore, resetStoreForTesting, StoreData} from "@/store";
+import {castMock, flushQueue} from "./utils";
+import {getUser as getUser1, modifyUser as modifyUser1, User} from "@/api/user";
+import {Business} from "@/api/business";
 
 Vue.use(Vuetify);
 Vue.use(Vuex);
 /**
  * Creates a list of unique test users
  *
- * @param count Number of users to create
  * @returns List of test users
  */
 function createTestBusinesses() {
@@ -31,7 +29,7 @@ function createTestBusinesses() {
   return result;
 }
 
-jest.mock('@/api/internal', () => ({
+jest.mock('@/api/user', () => ({
   modifyUser: jest.fn(),
   getUser: jest.fn()
 }));
@@ -40,8 +38,8 @@ jest.mock("@/components/utils/Methods/autocomplete", () => ({
   insertResultsFromAPI: jest.fn().mockResolvedValue(undefined),
 }));
 
-const modifyUser = castMock(api.modifyUser);
-const getUser = castMock(api.getUser);
+const modifyUser = castMock(modifyUser1);
+const getUser = castMock(getUser1);
 
 describe("ModifyUserPage.vue", () => {
   let wrapper: Wrapper<any>;

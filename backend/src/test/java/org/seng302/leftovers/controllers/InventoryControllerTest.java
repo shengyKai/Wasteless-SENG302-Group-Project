@@ -18,7 +18,8 @@ import org.seng302.leftovers.persistence.BusinessRepository;
 import org.seng302.leftovers.persistence.InventoryItemRepository;
 import org.seng302.leftovers.persistence.ProductRepository;
 import org.seng302.leftovers.tools.AuthenticationTokenManager;
-import org.seng302.leftovers.tools.SearchHelper;
+import org.seng302.leftovers.service.search.SearchPageConstructor;
+import org.seng302.leftovers.service.search.SearchSpecConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -372,8 +373,8 @@ class InventoryControllerTest {
                 MockMvcRequestBuilders.get("/businesses/1/inventory").param("page", "1").param("resultsPerPage", "2"))
                 .andExpect(status().isOk()).andReturn();
 
-        Specification<InventoryItem> expectedSpecification = SearchHelper.constructSpecificationFromInventoryItemsFilter(testBusiness);
-        PageRequest expectedPageRequest = SearchHelper.getPageRequest(1, 2, Sort.by(new Sort.Order(Direction.ASC, "product.productCode").ignoreCase()));
+        Specification<InventoryItem> expectedSpecification = SearchSpecConstructor.constructSpecificationFromInventoryItemsFilter(testBusiness);
+        PageRequest expectedPageRequest = SearchPageConstructor.getPageRequest(1, 2, Sort.by(new Sort.Order(Direction.ASC, "product.productCode").ignoreCase()));
 
         verify(inventoryItemRepository, times(1)).findAll(specificationArgumentCaptor.capture(), pageRequestArgumentCaptor.capture());
         assertTrue(new ReflectionEquals(expectedSpecification).matches(specificationArgumentCaptor.getValue()));
@@ -387,9 +388,9 @@ class InventoryControllerTest {
                 MockMvcRequestBuilders.get("/businesses/1/inventory").param("page", "2").param("resultsPerPage", "2"))
                 .andExpect(status().isOk()).andReturn();
 
-        Specification<InventoryItem> expectedSpecification = SearchHelper.constructSpecificationFromInventoryItemsFilter(testBusiness);
+        Specification<InventoryItem> expectedSpecification = SearchSpecConstructor.constructSpecificationFromInventoryItemsFilter(testBusiness);
 
-        PageRequest expectedPageRequest = SearchHelper.getPageRequest(2, 2, Sort.by(new Sort.Order(Direction.ASC, "product.productCode").ignoreCase()));
+        PageRequest expectedPageRequest = SearchPageConstructor.getPageRequest(2, 2, Sort.by(new Sort.Order(Direction.ASC, "product.productCode").ignoreCase()));
 
         verify(inventoryItemRepository, times(1)).findAll(specificationArgumentCaptor.capture(), pageRequestArgumentCaptor.capture());
         assertTrue(new ReflectionEquals(expectedSpecification).matches(specificationArgumentCaptor.getValue()));
@@ -417,9 +418,9 @@ class InventoryControllerTest {
         mockMvc.perform(MockMvcRequestBuilders.get("/businesses/1/inventory").param("orderBy", orderBy))
                 .andExpect(status().isOk()).andReturn();
 
-        Specification<InventoryItem> expectedSpecification = SearchHelper.constructSpecificationFromInventoryItemsFilter(testBusiness);
+        Specification<InventoryItem> expectedSpecification = SearchSpecConstructor.constructSpecificationFromInventoryItemsFilter(testBusiness);
 
-        PageRequest expectedPageRequest = SearchHelper.getPageRequest(null, null, Sort.by(new Sort.Order(Direction.ASC, ordering).ignoreCase()));
+        PageRequest expectedPageRequest = SearchPageConstructor.getPageRequest(null, null, Sort.by(new Sort.Order(Direction.ASC, ordering).ignoreCase()));
 
         verify(inventoryItemRepository, times(1)).findAll(specificationArgumentCaptor.capture(), pageRequestArgumentCaptor.capture());
         assertTrue(new ReflectionEquals(expectedSpecification).matches(specificationArgumentCaptor.getValue()));
@@ -433,9 +434,9 @@ class InventoryControllerTest {
                 MockMvcRequestBuilders.get("/businesses/1/inventory").param("reverse", "true").param("orderBy", "name"))
                 .andExpect(status().isOk()).andReturn();
 
-        Specification<InventoryItem> expectedSpecification = SearchHelper.constructSpecificationFromInventoryItemsFilter(testBusiness);
+        Specification<InventoryItem> expectedSpecification = SearchSpecConstructor.constructSpecificationFromInventoryItemsFilter(testBusiness);
 
-        PageRequest expectedPageRequest = SearchHelper.getPageRequest(null, null, Sort.by(new Sort.Order(Direction.DESC, "product.name").ignoreCase()));
+        PageRequest expectedPageRequest = SearchPageConstructor.getPageRequest(null, null, Sort.by(new Sort.Order(Direction.DESC, "product.name").ignoreCase()));
 
         verify(inventoryItemRepository, times(1)).findAll(specificationArgumentCaptor.capture(), pageRequestArgumentCaptor.capture());
         assertTrue(new ReflectionEquals(expectedSpecification).matches(specificationArgumentCaptor.getValue()));
@@ -446,7 +447,7 @@ class InventoryControllerTest {
      * Creates several inventory items based on a product. These items have
      * differing attributes to identify them.
      * 
-     * @throws Exception
+     * @throws Exception Exception
      */
     public void addSeveralInventoryItemsToAnInventory(List<InventoryItem> inventory) throws Exception {
         inventory.add(new InventoryItem.Builder().withProduct(testProduct).withQuantity(1).withExpires("2028-01-01")

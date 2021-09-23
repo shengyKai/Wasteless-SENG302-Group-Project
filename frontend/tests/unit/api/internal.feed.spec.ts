@@ -1,5 +1,5 @@
-import { deleteNotification, setEventTag} from "@/api/internal";
 import axios, { AxiosInstance } from 'axios';
+import {deleteNotification, setEventTag} from "@/api/events";
 
 jest.mock('axios', () => ({
   create: jest.fn(function () {

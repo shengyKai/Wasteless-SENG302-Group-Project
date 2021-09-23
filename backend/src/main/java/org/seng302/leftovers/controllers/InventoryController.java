@@ -13,7 +13,8 @@ import org.seng302.leftovers.exceptions.ValidationResponseException;
 import org.seng302.leftovers.persistence.BusinessRepository;
 import org.seng302.leftovers.persistence.InventoryItemRepository;
 import org.seng302.leftovers.persistence.ProductRepository;
-import org.seng302.leftovers.tools.SearchHelper;
+import org.seng302.leftovers.service.search.SearchPageConstructor;
+import org.seng302.leftovers.service.search.SearchSpecConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -145,13 +146,13 @@ public class InventoryController {
             Business business = businessRepository.getBusinessById(businessId);
             business.checkSessionPermissions(request);
 
-            Sort.Direction direction = SearchHelper.getSortDirection(reverse);
-            Sort.Order sortOrder = getInventoryItemOrder(orderBy, direction);
+        Sort.Direction direction = SearchPageConstructor.getSortDirection(reverse);
+        Sort.Order sortOrder = getInventoryItemOrder(orderBy, direction);
 
-            PageRequest pageRequest = SearchHelper.getPageRequest(page, resultsPerPage, Sort.by(sortOrder));
+        PageRequest pageRequest = SearchPageConstructor.getPageRequest(page, resultsPerPage, Sort.by(sortOrder));
 
-            Specification<InventoryItem> specification = SearchHelper.constructSpecificationFromInventoryItemsFilter(business);
-            Page<InventoryItem> result = inventoryItemRepository.findAll(specification, pageRequest);
+        Specification<InventoryItem> specification = SearchSpecConstructor.constructSpecificationFromInventoryItemsFilter(business);
+        Page<InventoryItem> result = inventoryItemRepository.findAll(specification, pageRequest);
 
             return new ResultPageDTO<>(result.map(InventoryItemResponseDTO::new));
 
@@ -168,26 +169,23 @@ public class InventoryController {
             throw new ValidationResponseException("The provided ordering is invalid");
         }
 
-        switch (orderBy) {
-            case "productCode":
-                orderBy = "product.productCode";
-                break;
-            case "name":
-                orderBy = "product.name";
-                break;
-            case "description":
-                orderBy = "product.description";
-                break;
-            case "manufacturer":
-                orderBy = "product.manufacturer";
-                break;
-            case "recommendedRetailPrice":
-                orderBy = "product.recommendedRetailPrice";
-                break;
-            case "created":
-                orderBy = "product.created";
-                break;
-            default:
+        if (orderBy.equals("productCode")) {
+            orderBy = "product.productCode";
+        }
+        else if (orderBy.equals("name")) {
+            orderBy = "product.name";
+        }
+        else if (orderBy.equals("description")) {
+            orderBy = "product.description";
+        }
+        else if (orderBy.equals("manufacturer")) {
+            orderBy = "product.manufacturer";
+        }
+        else if (orderBy.equals("recommendedRetailPrice")) {
+            orderBy = "product.recommendedRetailPrice";
+        }
+        else if (orderBy.equals("created")) {
+            orderBy = "product.created";
         }
         return new Sort.Order(direction, orderBy).ignoreCase();
     }
