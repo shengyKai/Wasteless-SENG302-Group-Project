@@ -433,6 +433,7 @@ class UserControllerTest {
         userRepository.deleteAll();
         userRepository.saveAll(userList);
 
+        System.out.println(sessionAuthToken.get("role"));
         MvcResult result = mockMvc.perform(get("/users/search")
                 .param("searchQuery", "andy")
                 .sessionAttrs(sessionAuthToken)
@@ -585,6 +586,7 @@ class UserControllerTest {
     void testRegisteringUserWithInvalidBio() throws Exception {
         userRepository.deleteAll();
         List<JSONObject> userList = readJSONFromTestFile("UsersControllerTestDataInvalidBio.csv");
+
 
         for (JSONObject userJSON : userList) {
             mockMvc.perform( MockMvcRequestBuilders

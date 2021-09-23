@@ -95,7 +95,6 @@
 
 <script>
 import ModifyBusiness from '@/components/BusinessProfile/ModifyBusiness';
-import {getBusiness} from '../../api/internal';
 import convertAddressToReadableText from '@/components/utils/Methods/convertAddressToReadableText';
 import {
   alphabetExtendedMultilineRules,
@@ -104,6 +103,7 @@ import {
   maxCharRules, postCodeRules, streetNumRules
 } from "@/utils";
 import ImageCarousel from "@/components/utils/ImageCarousel";
+import {getBusiness} from "@/api/business";
 export default {
   name: 'BusinessProfile',
   components: {

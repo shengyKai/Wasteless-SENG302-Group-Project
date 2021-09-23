@@ -1,5 +1,5 @@
 <template>
-  <div  class="d-flex flex-column" no-gutters>
+  <div class="d-flex flex-column" no-gutters>
     <v-row justify="center">
       <v-col cols="10">
         <v-card max-width=1800px>
@@ -423,26 +423,6 @@ export default {
 </script>
 
 <style scoped>
-.body {
-    padding: 16px;
-    width: 100%;
-    margin-top: 140px;
-}
-
-.top-section {
-  display: flex;
-  flex-wrap: wrap;
-}
-
-.business-modify {
-  margin-top: 20px;
-}
-
-.modify-business-button {
-  display: block;
-  margin-right: 48%;
-}
-
 .expand-icon {
   padding-right: 10px;
 }
