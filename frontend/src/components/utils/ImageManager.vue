@@ -73,7 +73,7 @@
     <ImageUploader
       v-model="image"
       v-if="showImageUploader"
-      @closeDialog="showImageUploader=false"
+      @closeDialog="upload"
     />
   </div>
 </template>
@@ -97,5 +97,10 @@ export default {
     showImageUploader: false,
     image: undefined,
   }),
+  methods: {
+    upload() {
+      this.showImageUploader = false;
+    }
+  }
 };
 </script>

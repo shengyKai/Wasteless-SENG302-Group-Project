@@ -149,30 +149,7 @@
                     </v-row>
                   </div>
                   <v-card-title class="mt-n3">Image</v-card-title>
-                  <v-card v-if="businessImages && businessImages.length > 0">
-                    <ImageCarousel
-                      :imagesList="businessImages"
-                      :showMakePrimary="true"
-                      :showDelete="false"
-                      @change-primary-image="makeImagePrimary"
-                      ref="businessImageCarousel"
-                    />
-                  </v-card>
                   <!-- INPUT: Image Uploader -->
-                  <v-btn
-                    class="upload-image"
-                    color="primary"
-                    outlined
-                    @click="showImageUploaderForm=true"
-                  >
-                    <v-icon
-                      class="expand-icon"
-                      color="primary"
-                    >
-                      mdi-upload
-                    </v-icon>
-                    Upload new image
-                  </v-btn>
                   <ImageManager/>
                   <ImageUploader
                     v-model="imageFile"
@@ -266,15 +243,13 @@ import {
   maxCharRules, postCodeRules, streetNumRules,
   USER_ROLES
 } from "@/utils";
-import { modifyBusiness, uploadBusinessImage, makeBusinessImagePrimary, getUser } from '@/api/internal';
-import ImageCarousel from "@/components/utils/ImageCarousel";
+import { modifyBusiness, getUser } from '@/api/internal';
 
 export default {
   name: 'ModifyBusiness',
   components: {
     LocationAutocomplete,
     ImageUploader,
-    ImageCarousel,
     ImageManager
   },
   props: {
@@ -371,18 +346,6 @@ export default {
       this.$emit('discardModifyBusiness');
     },
     /**
-     * Sets the given image as primary image to be displayed
-     * @param imageId ID of the Image to set
-     */
-    async makeImagePrimary(imageId) {
-      this.errorMessage = undefined;
-      const result = await makeBusinessImagePrimary(this.business.id, imageId);
-      if (typeof result === 'string') {
-        this.errorMessage = result;
-        this.$refs.businessImageCarousel.forceClose();
-      }
-    },
-    /**
      * Action(s) of modifying a business
      * Get the street number and name from the street address field.
      * Check existence of new selected primary owner, update to new owner or remain unchange
@@ -423,11 +386,6 @@ export default {
       if (typeof result === 'string') {
         this.errorMessage = result;
       }
-      for (let image of this.allImageFiles) {
-        if (this.errorMessage === undefined) {
-          await this.uploadImage(image);
-        }
-      }
 
       // Updates the $store.state.user.businessesAdministered property if we are administering this business
       if (this.administrators.some(admin => admin.id === this.$store.state.user.id)) {
@@ -460,17 +418,6 @@ export default {
       }
       this.primaryAdministratorId = admin.id;
     },
-    addImage() {
-      this.showImageUploaderForm = false;
-      this.allImageFiles.push(this.imageFile);
-      this.imageFile = undefined;
-    },
-    async uploadImage(image) {
-      const result = await uploadBusinessImage(this.business.id, image);
-      if (typeof result === 'string') {
-        this.errorMessage = result;
-      }
-    }
   },
 };
 </script>

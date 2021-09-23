@@ -23,7 +23,6 @@ export async function uploadImage(image: File): Promise<MaybeError<Image>> {
         'Content-Type': 'multipart/form-data'
       }
     });
-    console.log(response.data);
     if (!is<Image>(response.data)) {
       return 'Image was not received';
     }

@@ -60,6 +60,7 @@ export default {
       if (typeof response === 'string') {
         this.errorMessage = response;
       } else {
+        this.image = response;
         this.$emit('closeDialog');
       }
     },
