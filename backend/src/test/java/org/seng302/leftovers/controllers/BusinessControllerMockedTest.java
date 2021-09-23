@@ -472,7 +472,7 @@ class BusinessControllerMockedTest {
                 .andReturn();
 
         verify(businessRepository, times(1)).findById(9999L);
-        verify(mockBusiness, times(0)).removeImage(any());
+        verify(mockBusiness, times(0)).setImages(any());
         verify(businessRepository, times(0)).save(any());
     }
 
@@ -484,7 +484,7 @@ class BusinessControllerMockedTest {
                 .andReturn();
 
         verify(businessRepository, times(1)).findById(mockBusinessId);
-        verify(mockBusiness, times(0)).removeImage(any());
+        verify(mockBusiness, times(0)).setImages(any());
         verify(businessRepository, times(0)).save(any());
     }
 
@@ -497,7 +497,7 @@ class BusinessControllerMockedTest {
                 .andReturn();
 
         verify(mockBusiness, times(1)).checkSessionPermissions(any());
-        verify(mockBusiness, times(0)).removeImage(any());
+        verify(mockBusiness, times(0)).setImages(any());
         verify(businessRepository, times(0)).save(any());
     }
 
@@ -508,8 +508,7 @@ class BusinessControllerMockedTest {
                 .andReturn();
 
         verify(imageRepository, times(1)).getImageById(mockImageId);
-        verify(mockBusiness, times(1)).removeImage(mockImage);
-        verify(mockBusiness, times(1)).addImage(0, mockImage);
+        verify(mockBusiness, times(1)).setImages(any()); //Maybe change to include mockImage
         verify(businessRepository, times(1)).save(mockBusiness);
     }
 

@@ -340,6 +340,18 @@ public class Business implements ImageAttachment {
         this.images = images;
     }
 
+    /**
+     * Returns the ids of all the images associated with the business
+     * @return the ids of all the images associated with the business
+     */
+    public List<Long> getIdsOfImages() {
+        List<Long> imageIds = new ArrayList<Long>();
+        for (Image image: this.images) {
+            imageIds.add(image.getID());
+        }
+        return imageIds;
+    }
+
     @Override
     public String toString() {
         return this.name;

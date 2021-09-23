@@ -16,6 +16,7 @@ import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.junit.Assert;
 import org.seng302.datagenerator.ExampleDataFileReader;
+import org.seng302.leftovers.controllers.BusinessController;
 import org.seng302.leftovers.dto.business.BusinessType;
 import org.seng302.leftovers.entities.*;
 import org.seng302.leftovers.persistence.BusinessRepository;
@@ -44,6 +45,8 @@ public class BusinessStepDefinition {
     @Value("${storage-directory}")
     private Path root;
 
+    @Autowired
+    private BusinessController businessController;
     @Autowired
     private ObjectMapper objectMapper;
     @Autowired
@@ -288,12 +291,12 @@ public class BusinessStepDefinition {
         Business business = businessContext.getByName(businessName);
         Image image = new Image(imageName, imageName + "_thumbnail.png");
         image = imageContext.save(image);
-        business.addImage(0, image);
+        List<Long> imageIds = business.getIdsOfImages();
+        imageIds.add(0, image.getID());
+        business.setImages(businessController.getListOfImagesFromIds(imageIds));
         business = businessContext.save(business);
-
         assertFalse(business.getImages().isEmpty());
         assertEquals(image, business.getImages().get(0));
-
     }
 
     @Given("The business {string} has image {string}")
