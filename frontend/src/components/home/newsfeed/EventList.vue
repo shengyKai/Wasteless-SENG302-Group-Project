@@ -57,10 +57,11 @@ import GlobalMessage from "./GlobalMessage.vue";
 import KeywordCreated from './KeywordCreated.vue';
 import MessageEvent from './MessageEvent.vue';
 import InterestEvent from "@/components/home/newsfeed/InterestEvent";
+import InterestPurchasedEvent from './InterestPurchasedEvent.vue';
 
 export default {
   name: 'EventList',
-  components: {InterestEvent, DeleteEvent, ExpiryEvent, GlobalMessage, KeywordCreated, MessageEvent},
+  components: {InterestEvent, DeleteEvent, ExpiryEvent, GlobalMessage, KeywordCreated, MessageEvent, InterestPurchasedEvent},
   props: ['events', 'isFiltered'],
   data() {
     return {

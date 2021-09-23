@@ -1,7 +1,17 @@
 <template>
   <Event :event="event" title="An item you have liked has been purchased" :error="errorMessage">
     <v-card-text class="pb-1">
-      <strong>{{itemBought}}</strong> from <strong><router-link :to="`/business/${business.id}`">{{seller}}</router-link></strong> has been sold.
+      <strong>{{itemBought}}</strong>
+      from
+      <strong>
+        <router-link
+          class="text--secondary"
+          :to="`/business/${business.id}`"
+        >
+          {{business.name}}
+        </router-link>
+      </strong>
+      has been sold.
     </v-card-text>
   </Event>
 </template>
@@ -22,7 +32,7 @@ export default {
   },
   computed: {
     itemBought() {
-      return this.event.saleItem.quantity + " " + this.event.saleItem.inventoryItem.product.name;
+      return this.boughtSaleItem.quantity + "x " + this.boughtSaleItem.product.name;
     },
     boughtSaleItem() {
       return this.event.boughtSaleItem;

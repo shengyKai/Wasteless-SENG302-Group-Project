@@ -171,6 +171,17 @@ export type Sale = {
   interestCount: number
 };
 
+export type BoughtSaleItem = {
+  id: number,
+  buyer: User | null,
+  product: Product,
+  interestCount: number,
+  price: number,
+  quantity: number,
+  saleDate: string,
+  listingDate: string,
+}
+
 export type InventoryItem = {
   id: number,
   product: Product,

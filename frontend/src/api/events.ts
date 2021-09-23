@@ -1,4 +1,4 @@
-import { Keyword, MarketplaceCard, MarketplaceCardSection, MaybeError, Message, Sale, User} from "./internal";
+import { BoughtSaleItem as BoughtSale, Keyword, MarketplaceCard, MarketplaceCardSection, MaybeError, Message, Sale, User} from "./internal";
 import axios from 'axios';
 import { is } from 'typescript-is';
 
@@ -10,7 +10,7 @@ const instance = axios.create({
   withCredentials: true,
 });
 
-export type AnyEvent = GlobalMessageEvent | ExpiryEvent | DeleteEvent | KeywordCreatedEvent | MessageEvent | InterestEvent;
+export type AnyEvent = GlobalMessageEvent | ExpiryEvent | DeleteEvent | KeywordCreatedEvent | MessageEvent | InterestEvent | InterestPurchasedEvent;
 
 export type EventTag = 'none' | 'red' | 'orange' | 'yellow' | 'green' | 'blue' | 'purple'
 export type EventStatus = 'normal' | 'starred' | 'archived'
@@ -54,6 +54,9 @@ export type MessageEvent = BaseEvent<'MessageEvent'> & {
 export type InterestEvent = BaseEvent<'InterestEvent'> & {
   saleItem: Sale,
   interested: boolean,
+}
+export type InterestPurchasedEvent = BaseEvent<'InterestPurchasedEvent'> & {
+  boughtSaleItem: BoughtSale,
 }
 
 /**
