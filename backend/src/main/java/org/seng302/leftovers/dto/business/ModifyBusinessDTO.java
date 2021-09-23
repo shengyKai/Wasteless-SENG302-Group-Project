@@ -16,6 +16,5 @@ import java.util.List;
 public class ModifyBusinessDTO extends CreateBusinessDTO {
     @NotNull
     private Boolean updateProductCountry;
-    @NotNull
-    private List<Long> imageIds;
+    private List<Long> imageIds = List.of();
 }

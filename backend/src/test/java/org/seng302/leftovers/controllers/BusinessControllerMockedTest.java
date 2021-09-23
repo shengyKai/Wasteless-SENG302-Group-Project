@@ -348,8 +348,6 @@ class BusinessControllerMockedTest {
         
         var addressCaptor = ArgumentCaptor.forClass(Location.class);
         verify(mockBusiness, times(1)).setAddress(addressCaptor.capture());
-        String country = addressCaptor.getValue().getCountry();
-
         verify(mockBusiness, times(1)).getCatalogue();
         verify(mockProduct1, times(1)).setCountryOfSale("New Zealand");
     }
