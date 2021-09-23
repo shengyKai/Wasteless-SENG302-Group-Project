@@ -521,7 +521,7 @@ describe('modifyBusiness.vue', () => {
   });
 
   it("With one uploaded image, imageIds will be updated after an emit call from ImageManager", () => {
-    const images = [  
+    const images = [
       {
         id: 1,
         filename: "some test file",
@@ -536,7 +536,7 @@ describe('modifyBusiness.vue', () => {
   });
 
   it("With multiple uploaded images, imageIds will be updated after an emit call from ImageManager", () => {
-    const images = [  
+    const images = [
       {
         id: 1,
         filename: "some test file1",

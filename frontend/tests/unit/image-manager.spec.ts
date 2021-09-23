@@ -27,7 +27,7 @@ describe('ImageManager.vue', () => {
         ImageUploader
       },
       propsData: {
-        images: [  
+        images: [
           {
             id: 1,
             filename: "some test file",
