@@ -137,3 +137,9 @@ export default {
   }
 };
 </script>
+
+<style scoped>
+.img-button {
+  text-shadow: 0px 0px 14px #000000;
+}
+</style>

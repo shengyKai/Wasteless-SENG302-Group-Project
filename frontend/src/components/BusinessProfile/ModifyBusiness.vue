@@ -284,7 +284,8 @@ export default {
       streetRules: ()=> streetNumRules,
       postcodeRules: ()=> postCodeRules,
       isLoading: false,
-      imageIds: this.business.images.map(image => image.id)
+      imageIds: this.business.images.map(image => image.id),
+      primaryImageId: null,
     };
   },
   computed: {
@@ -329,6 +330,13 @@ export default {
       this.$emit('discardModifyBusiness');
     },
     /**
+     * Sets the given image as primary image to be displayed
+     * @param imageId ID of the Image to set
+     */
+    async makeImagePrimary(imageId) {
+      this.primaryImageId = imageId;
+    },
+    /**
      * Action(s) of modifying a business
      * Get the street number and name from the street address field.
      * Check existence of new selected primary owner, update to new owner or remain unchange
@@ -357,7 +365,8 @@ export default {
         },
         businessType: this.businessType,
         updateProductCountry: this.updateProductCountry,
-        imageIds: this.imageIds
+        imageIds: this.imageIds,
+        primaryImageId: this.primaryImageId,
       };
       const result = await modifyBusiness(this.business.id, modifiedFields);
 
@@ -408,3 +417,17 @@ export default {
   },
 };
 </script>
+
+<style scoped>
+.expand-icon {
+  padding-right: 10px;
+}
+
+.upload-image {
+  margin-top: 25px;
+}
+
+.image-title {
+  margin-bottom: -25px;
+}
+</style>

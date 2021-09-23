@@ -148,7 +148,6 @@ describe('Test GET businesses/search endpoint', () => {
 
 describe('Test PUT /businesses/${businessId} endpoint', () => {
   let business: ModifyBusiness = {
-    imageIds: [1],
     primaryAdministratorId: 50,
     name: "Valid business",
     address: {
@@ -161,6 +160,8 @@ describe('Test PUT /businesses/${businessId} endpoint', () => {
     },
     businessType: "Accommodation and Food Services",
     updateProductCountry: true,
+    imageIds: [1],
+    primaryImageId: 1
   };
 
   it('When API request is successfully resolved, returns undefined', async () => {
