@@ -9,6 +9,7 @@ import {Location} from '@/api/internal';
 import {getStore, resetStoreForTesting} from '@/store';
 import {getUser as getUser1, User} from "@/api/user";
 import {modifyBusiness as modifyBusiness1, Business} from "@/api/business";
+import ImageManager from "@/components/utils/ImageManager.vue";
 
 jest.mock('@/api/user', () => ({
   getUser: jest.fn(),
@@ -147,6 +148,9 @@ describe('modifyBusiness.vue', () => {
       vuetify,
       attachTo: elem,
       store: store,
+      components: {
+        ImageManager
+      },
       data() {
         return {
           thingy: business
@@ -516,5 +520,8 @@ describe('modifyBusiness.vue', () => {
     });
   });
 
-  
+  it("imageIds will be updated after an emit call from ImageManager", () => {
+    const imageManagerWrapper = wrapper.findComponent(ImageManager);
+    expect(wrapper.findComponent(ImageManager).exists()).toBeTruthy();
+  });
 });
