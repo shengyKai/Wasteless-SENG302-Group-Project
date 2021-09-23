@@ -5,19 +5,30 @@ package org.seng302.leftovers.persistence;
  */
 public class SearchCriteria {
 
+    public enum Pred {
+        GREATER_THAN,
+        LESS_THAN,
+        PARTIAL_MATCH,
+        FULL_MATCH
+    }
+
     private String column;
 
-    private String operation;
+    private Pred operation;
 
     private Object value;
 
     private boolean isOrPredicate = true;
 
-    public SearchCriteria(String column, String operation, Object value) {
+    /**
+     * @param column Name of database column to match
+     * @param operation The predicate to ues for matching
+     * @param value Value to match in DB
+     */
+    public SearchCriteria(String column, Pred operation, Object value) {
         setKey(column);
         setOperation(operation);
         setValue(value);
-
     }
 
     /**
@@ -27,7 +38,7 @@ public class SearchCriteria {
      * @param value The value to compare against
      * @param isOrPredicate Determines if predicate will be AND / OR
      */
-    public SearchCriteria(String column, String operation, Object value, boolean isOrPredicate) {
+    public SearchCriteria(String column, Pred operation, Object value, boolean isOrPredicate) {
         setKey(column);
         setOperation(operation);
         setValue(value);
@@ -43,11 +54,9 @@ public class SearchCriteria {
         return this.column;
     }
 
-    public void setOperation(String operation) {
-        this.operation = operation;
-    }
+    public void setOperation(Pred operation) { this.operation = operation; }
 
-    public String getOperation() {
+    public Pred getOperation() {
         return this.operation;
     }
 

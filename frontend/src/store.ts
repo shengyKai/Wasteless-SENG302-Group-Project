@@ -1,8 +1,10 @@
-import { User, Business, getUser, login, InventoryItem, deleteNotification } from './api/internal';
-import { AnyEvent, getEvents } from './api/events';
+import {AnyEvent, deleteNotification, getEvents} from './api/events';
 import Vuex, { Store, StoreOptions } from 'vuex';
 import { COOKIE, deleteCookie, getCookie, isTesting, setCookie } from './utils';
 import Vue from 'vue';
+import {getUser, login, User} from "@/api/user";
+import {Business} from "@/api/business";
+import {InventoryItem} from "@/api/inventory";
 
 type UserRole = { type: "user" | "business", id: number };
 type SaleItemInfo = { businessId: number, inventoryItem: InventoryItem };
@@ -144,7 +146,7 @@ function createOptions(): StoreOptions<StoreData> {
        * Creates a modal create inventory dialog for adding a sale item to the provided business
        *
        * @param state Current store state
-       * @param businessId Business to create the sale item for
+       * @param saleItemInfo sale item details
        */
       showCreateSaleItem(state, saleItemInfo: SaleItemInfo) {
         state.createSaleItemDialog = saleItemInfo;

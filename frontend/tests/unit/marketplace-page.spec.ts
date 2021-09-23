@@ -1,20 +1,23 @@
 import Vue from 'vue';
 import Vuetify from 'vuetify';
-import Vuex, { Store } from 'vuex';
-import { createLocalVue, Wrapper, mount } from '@vue/test-utils';
+import Vuex from 'vuex';
+import {createLocalVue, mount, Wrapper} from '@vue/test-utils';
 import Marketplace from '@/components/marketplace/Marketplace.vue';
-import * as api from '@/api/internal';
-import { User, MarketplaceCard } from '@/api/internal';
-import { castMock, flushQueue } from './utils';
-import { getStore, resetStoreForTesting } from '@/store';
+import {castMock, flushQueue} from './utils';
+import {getStore, resetStoreForTesting} from '@/store';
+import {User} from "@/api/user";
+import {getMarketplaceCardsBySection as getMarketplaceCardsBySection1, MarketplaceCard} from "@/api/marketplace";
+import {searchKeywords} from "@/api/keyword";
 
-jest.mock('@/api/internal', () => ({
+jest.mock('@/api/marketplace', () => ({
   getMarketplaceCardsBySection: jest.fn(),
+}));
+jest.mock('@/api/keyword', () => ({
   searchKeywords: jest.fn(),
 }));
 
-const getMarketplaceCardsBySection = castMock(api.getMarketplaceCardsBySection);
-const getKeywords = castMock(api.searchKeywords);
+const getMarketplaceCardsBySection = castMock(getMarketplaceCardsBySection1);
+const getKeywords = castMock(searchKeywords);
 Vue.use(Vuetify);
 
 const localVue = createLocalVue();

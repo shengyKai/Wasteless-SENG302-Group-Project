@@ -4,12 +4,11 @@ import { createLocalVue, Wrapper, mount } from '@vue/test-utils';
 
 import AdvancedSearchBar from "@/components/SaleListing/AdvancedSearchBar.vue";
 
-jest.mock('@/api/internal', () => ({
+jest.mock('@/api/business', () => ({
   BUSINESS_TYPES: ['Type 1', 'Type 2', 'Type 3'],
 }));
 
 describe('AdvancedSearchBar.vue', () => {
-
 
   Vue.use(Vuetify);
 
