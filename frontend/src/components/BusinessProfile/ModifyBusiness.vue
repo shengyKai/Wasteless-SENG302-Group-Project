@@ -422,15 +422,4 @@ export default {
 </script>
 
 <style scoped>
-.expand-icon {
-  padding-right: 10px;
-}
-
-.upload-image {
-  margin-top: 25px;
-}
-
-.image-title {
-  margin-bottom: -25px;
-}
 </style>
