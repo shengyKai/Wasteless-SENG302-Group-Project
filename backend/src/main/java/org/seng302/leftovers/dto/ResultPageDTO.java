@@ -10,7 +10,7 @@ import java.util.List;
 
 /**
  * Data Transfer Object for fetching a page of results.
- * @param <T> Page transfer element type (DTO or JSONObject).
+ * @param <T> Page transfer element type DTO.
  */
 @Getter
 @ToString

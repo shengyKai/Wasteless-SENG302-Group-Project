@@ -35,7 +35,7 @@
 import AdvancedSearchBar from './AdvancedSearchBar.vue';
 import SimpleSearchBar from './SimpleSearchBar.vue';
 import SaleResult from './SaleResult.vue';
-import {getDummySaleItemSearchResult} from "@/api/internal";
+import {getBusinessSales} from "@/api/internal";
 
 export default {
   name: "SearchSaleItems",
@@ -104,7 +104,7 @@ export default {
     }
   },
   async beforeMount() {
-    this.resultsPage = (await getDummySaleItemSearchResult());
+    this.resultsPage = (await getBusinessSales(3, 1, 1, "created", false));
   }
 };
 </script>

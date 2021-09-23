@@ -8,10 +8,10 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mockito;
 import org.mockito.internal.matchers.apachecommons.ReflectionEquals;
 import org.seng302.leftovers.controllers.DGAAController;
-import org.seng302.leftovers.dto.product.ProductFilterOption;
 import org.seng302.leftovers.dto.business.BusinessType;
+import org.seng302.leftovers.dto.product.ProductFilterOption;
 import org.seng302.leftovers.entities.*;
-import org.seng302.leftovers.exceptions.SearchFormatException;
+import org.seng302.leftovers.exceptions.ValidationResponseException;
 import org.seng302.leftovers.persistence.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -375,11 +375,11 @@ class SearchHelperTest {
 
     /**
      * Verify that when constructUserSpecificationFromSearchQuery is called with an empty string as the argument,
-     * as SearchFormatException is thrown.
+     * as ValidationResponseException is thrown.
      */
     @Test
     void constructUserSpecificationFromSearchQueryEmptyStringTest() {
-        assertThrows(SearchFormatException.class, () -> {
+        assertThrows(ValidationResponseException.class, () -> {
             SearchHelper.constructUserSpecificationFromSearchQuery("");
         });
     }
@@ -494,11 +494,11 @@ class SearchHelperTest {
 
     /**
      * Verify that when constructUserSpecificationFromSearchQuery is called with just the word 'and' as its argument,
-     * a SearchFormatException is thrown.
+     * a ValidationResponseException is thrown.
      */
     @Test
     void constructUserSpecificationFromSearchQueryJustAndTest() {
-        assertThrows(SearchFormatException.class, () -> {
+        assertThrows(ValidationResponseException.class, () -> {
             SearchHelper.constructUserSpecificationFromSearchQuery("and");
         });
     }
@@ -516,11 +516,11 @@ class SearchHelperTest {
 
     /**
      * Verify that when constructUserSpecificationFromSearchQuery is called with just the word and 'OR' as its argument,
-     * a SearchFormatException is thrown.
+     * a ValidationResponseException is thrown.
      */
     @Test
     void constructUserSpecificationFromSearchQueryJustOrTest() {
-        assertThrows(SearchFormatException.class, () -> {
+        assertThrows(ValidationResponseException.class, () -> {
             SearchHelper.constructUserSpecificationFromSearchQuery("OR");
         });
     }
@@ -559,11 +559,11 @@ class SearchHelperTest {
 
     /**
      * Verify that when constructUserSpecificationFromSearchQuery is called with a string containing an opening quote
-     * but no closing quote, a SearchFormatException is thrown.
+     * but no closing quote, a ValidationResponseException is thrown.
      */
     @Test
     void constructUserSpecificationFromSearchQueryOpeningQuoteTest() {
-        assertThrows(SearchFormatException.class, () -> {
+        assertThrows(ValidationResponseException.class, () -> {
             SearchHelper.constructUserSpecificationFromSearchQuery("\"hello");
         });
     }

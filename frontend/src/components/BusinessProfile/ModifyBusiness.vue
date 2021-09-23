@@ -173,6 +173,7 @@
                     </v-icon>
                     Upload new image
                   </v-btn>
+                  <ImageManager/>
                   <BusinessImageUploader
                     v-model="imageFile"
                     v-if="showImageUploaderForm"
@@ -257,6 +258,7 @@
 <script>
 import LocationAutocomplete from '@/components/utils/LocationAutocomplete';
 import BusinessImageUploader from "@/components/utils/BusinessImageUploader";
+import ImageManager from "@/components/utils/ImageManager";
 import {
   alphabetExtendedMultilineRules,
   alphabetExtendedSingleLineRules, alphabetRules,
@@ -272,7 +274,8 @@ export default {
   components: {
     LocationAutocomplete,
     BusinessImageUploader,
-    ImageCarousel
+    ImageCarousel,
+    ImageManager
   },
   props: {
     business: Object

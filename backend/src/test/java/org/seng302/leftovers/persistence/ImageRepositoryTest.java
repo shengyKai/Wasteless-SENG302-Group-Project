@@ -6,10 +6,10 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.runner.RunWith;
 import org.seng302.leftovers.entities.Image;
+import org.seng302.leftovers.exceptions.DoesNotExistResponseException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.web.server.ResponseStatusException;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -52,7 +52,7 @@ class ImageRepositoryTest {
     void getImage_ImageDoesNotExist_406ResponseException() {
         imageRepository.delete(testImage);
         long id = testImage.getID();
-        assertThrows(ResponseStatusException.class, () -> {
+        assertThrows(DoesNotExistResponseException.class, () -> {
             imageRepository.getImageById(id);
         });
     }

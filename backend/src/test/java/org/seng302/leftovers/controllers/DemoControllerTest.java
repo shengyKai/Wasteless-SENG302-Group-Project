@@ -9,7 +9,8 @@ import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.seng302.leftovers.dto.business.BusinessType;
 import org.seng302.leftovers.entities.*;
-import org.seng302.leftovers.exceptions.AccessTokenException;
+import org.seng302.leftovers.exceptions.AccessTokenResponseException;
+import org.seng302.leftovers.exceptions.InsufficientPermissionResponseException;
 import org.seng302.leftovers.persistence.*;
 import org.seng302.leftovers.tools.AuthenticationTokenManager;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,7 +18,6 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.web.server.ResponseStatusException;
 
 import javax.persistence.EntityManager;
 import javax.servlet.http.HttpServletRequest;
@@ -89,7 +89,7 @@ class DemoControllerTest {
     void loadDemoData_noAuthToken_401ResponseTest() throws Exception {
         // Mock the AuthenticationTokenManager to respond as it would when the authentication token is missing or invalid
         try (MockedStatic<AuthenticationTokenManager> authenticationTokenManager = Mockito.mockStatic(AuthenticationTokenManager.class)) {
-            authenticationTokenManager. when(() -> AuthenticationTokenManager.checkAuthenticationToken(any())).thenThrow(new AccessTokenException());
+            authenticationTokenManager. when(() -> AuthenticationTokenManager.checkAuthenticationToken(any())).thenThrow(new AccessTokenResponseException());
 
             // Verify that a 401 response is received in response to the PUT request
             mockMvc.perform(put("/demo/load"))
@@ -105,9 +105,9 @@ class DemoControllerTest {
     @Test
     void loadDemoData_noAuthToken_dataNotLoadedTest() {
         try (MockedStatic<AuthenticationTokenManager> authenticationTokenManager = Mockito.mockStatic(AuthenticationTokenManager.class)) {
-            authenticationTokenManager. when(() -> AuthenticationTokenManager.checkAuthenticationToken(any())).thenThrow(new AccessTokenException());
+            authenticationTokenManager. when(() -> AuthenticationTokenManager.checkAuthenticationToken(any())).thenThrow(new AccessTokenResponseException());
 
-            assertThrows(ResponseStatusException.class, () -> demoController.loadDemoData(request));
+            assertThrows(AccessTokenResponseException.class, () -> demoController.loadDemoData(request));
         }
         verify(userRepository, times(0)).save(any(User.class));
         verify(businessRepository, times(0)).save(any(Business.class));
@@ -146,7 +146,7 @@ class DemoControllerTest {
             authenticationTokenManager. when(() -> AuthenticationTokenManager.checkAuthenticationToken(any())).then(invocation -> null);
             authenticationTokenManager. when(() -> AuthenticationTokenManager.sessionIsAdmin(any())).thenReturn(false);
 
-            assertThrows(ResponseStatusException.class, () -> demoController.loadDemoData(request));
+            assertThrows(InsufficientPermissionResponseException.class, () -> demoController.loadDemoData(request));
         }
         // Verify that entities were not loaded to the database
         verify(userRepository, times(0)).save(any(User.class));

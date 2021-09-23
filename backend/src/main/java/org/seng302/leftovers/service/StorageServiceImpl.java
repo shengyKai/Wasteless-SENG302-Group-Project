@@ -2,13 +2,13 @@ package org.seng302.leftovers.service;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.seng302.leftovers.exceptions.InternalErrorResponseException;
+import org.seng302.leftovers.exceptions.ValidationResponseException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.util.FileSystemUtils;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -45,7 +45,7 @@ public class StorageServiceImpl implements StorageService {
             
         } catch (Exception e) {
             logger.error(e);
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Failed to store file");
+            throw new InternalErrorResponseException("Failed to store file", e);
         }
     }
 
@@ -88,7 +88,7 @@ public class StorageServiceImpl implements StorageService {
     @Override
     public void deleteOne(String filename) {
         if (filename.isEmpty() || filename.isBlank()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Filename not given for deletion");
+            throw new ValidationResponseException("Filename not given for deletion");
         }
         Path path = root.resolve(filename);
 
