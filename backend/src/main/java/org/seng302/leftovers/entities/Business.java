@@ -22,7 +22,7 @@ public class Business implements ImageAttachment {
 
     //Minimum age to create a business
     private static final int MINIMUM_AGE = 16;
-    private static final int POINTS_PER_SALE_LISTING = 1;
+    private static int POINTS_PER_SALE_LISTING = 1;
     private static final String TEXT_REGEX = "[ \\p{L}0-9\\p{Punct}]*";
 
     @Id
@@ -184,14 +184,22 @@ public class Business implements ImageAttachment {
     }
 
     /**
-     * Increments the business' points value
+     * Increments the business' points in response to selling a listing
      */
     public void incrementPoints() {
         this.points += POINTS_PER_SALE_LISTING;
     }
 
+    /**
+     * Gets business' points total
+     * @return Business points
+     */
     public int getPoints(){return this.points;}
 
+    /**
+     * Sets the business' points total
+     * @param points Value to set points
+     */
     public void setPoints(int points){this.points = points;}
 
     /**
