@@ -1,6 +1,8 @@
 import {is} from 'typescript-is';
 import {InventoryItem} from "@/api/inventory";
 import {MaybeError, SearchResults, instance} from "@/api/internal";
+import { User } from './user';
+import { Product } from './product';
 
 export type SaleInterest = {
   userId: number,
@@ -25,6 +27,17 @@ export type Sale = {
   closes?: string,
   interestCount?: number,
 };
+
+export type BoughtSale = {
+  id: number,
+  buyer: User | null,
+  product: Product,
+  interestCount: number,
+  price: number,
+  quantity: number,
+  saleDate: string,
+  listingDate: string,
+}
 
 type SalesOrderBy = 'created' | 'closing' | 'productCode' | 'productName' | 'quantity' | 'price'
 
