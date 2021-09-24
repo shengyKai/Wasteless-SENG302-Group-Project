@@ -15,7 +15,7 @@ const instance = axios.create({
   withCredentials: true,
 });
 
-export type AnyEvent = GlobalMessageEvent | ExpiryEvent | DeleteEvent | KeywordCreatedEvent | MessageEvent | InterestEvent | PurchasedEvent | InterestPurchaedEvent;
+export type AnyEvent = GlobalMessageEvent | ExpiryEvent | DeleteEvent | KeywordCreatedEvent | MessageEvent | InterestEvent | PurchasedEvent | InterestPurchasedEvent;
 
 export type EventTag = 'none' | 'red' | 'orange' | 'yellow' | 'green' | 'blue' | 'purple'
 export type EventStatus = 'normal' | 'starred' | 'archived'
