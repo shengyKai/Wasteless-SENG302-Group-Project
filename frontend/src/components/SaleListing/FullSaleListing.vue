@@ -292,7 +292,7 @@ export default {
       }
     },
     /**
-     * TODO in other task
+     * Purchases the sale listing and if successful triggers a refresh otherwise shows an error message
      */
     async buy() {
       let response = await purchaseListing(this.saleItem.id, this.userId);

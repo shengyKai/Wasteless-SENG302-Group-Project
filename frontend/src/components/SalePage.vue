@@ -38,10 +38,14 @@
       </v-row>
     </v-container>
     <v-container class="grey lighten-2">
-      <v-row justify="space-between">
-        <v-col v-for="sale in salesList" v-bind:key="sale.id" cols="auto">
-          <SaleItem :business-id="businessId" :sale-item="sale"/>
-        </v-col>
+      <v-row>
+        <SaleItem
+          v-for="sale in salesList"
+          :key="sale.id"
+          :business-id="businessId"
+          :sale-item="sale"
+          @refresh="populateSales"
+        />
       </v-row>
       <v-row justify="center">
         <v-pagination
