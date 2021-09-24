@@ -29,13 +29,16 @@ public class BoughtSaleItemDTO {
     @JsonFormat(shape=JsonFormat.Shape.STRING)
     private Instant listingDate;
 
+
     /**
-     * Converts a BoughtSaleItem to its JSON form
+     * Converts a BoughtSaleItem to its JSON form, with the buyer
      * @param item BroughtSaleItem to serialize
      */
-    public BoughtSaleItemDTO(BoughtSaleItem item) {
+    public BoughtSaleItemDTO(BoughtSaleItem item, boolean withBuyer) {
         this.id = item.getId();
-        this.buyer = new UserResponseDTO(item.getBuyer());
+        if (withBuyer) {
+            this.buyer = new UserResponseDTO(item.getBuyer());
+        }
         this.product = new ProductResponseDTO(item.getProduct());
         this.interestCount = item.getInterestCount();
         this.price = item.getPrice();
