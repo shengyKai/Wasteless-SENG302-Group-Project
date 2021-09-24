@@ -2,13 +2,15 @@ import Vue from "vue";
 import Vuetify from "vuetify";
 import {createLocalVue, mount, Wrapper} from "@vue/test-utils";
 import Vuex from "vuex";
-import * as api from '@/api/internal';
-import * as events from '@/api/events';
 import InterestPurchasedEvent from "@/components/home/newsfeed/InterestPurchasedEvent.vue";
+import { Business } from "@/api/business";
+import { Product } from "@/api/product";
+import { BoughtSale } from "@/api/sale";
+import * as events from '@/api/events';
 
 Vue.use(Vuetify);
 
-const business: api.Business = {
+const business: Business = {
   images:[],
   primaryAdministratorId:2,
   address:{
@@ -24,7 +26,7 @@ const business: api.Business = {
   id:1,
   businessType:"Accommodation and Food Services"
 };
-const product: api.Product = {
+const product: Product = {
   countryOfSale: "Iceland",
   images:[],
   recommendedRetailPrice:842.92,
@@ -36,7 +38,7 @@ const product: api.Product = {
   manufacturer:"Hoffman Incorporated"
 };
 
-const boughtSaleItem: api.BoughtSaleItem = {
+const boughtSaleItem: BoughtSale = {
   id: 2,
   buyer: null,
   interestCount: 100,
@@ -48,14 +50,16 @@ const boughtSaleItem: api.BoughtSaleItem = {
 };
 
 const event: events.InterestPurchasedEvent = {
-  id:1,
-  type:"InterestPurchasedEvent",
-  created:"2021-09-14T01:29:19.731330Z",
-  tag:"none","status":"normal",
-  lastModified:"2021-09-14T01:29:41.214058Z",
+  id: 1,
+  type: "InterestPurchasedEvent",
+  created: "2021-09-14T01:29:19.731330Z",
+  tag: "none",
+  status: "normal",
+  lastModified: "2021-09-14T01:29:41.214058Z",
   read: true,
   boughtSaleItem,
 };
+
 describe("InterestEvent.vue", () => {
   let wrapper: Wrapper<any>;
   let vuetify: Vuetify;

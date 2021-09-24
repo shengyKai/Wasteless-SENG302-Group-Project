@@ -22,7 +22,8 @@ import org.seng302.leftovers.persistence.ImageRepository;
 import org.seng302.leftovers.persistence.UserRepository;
 import org.seng302.leftovers.service.ImageService;
 import org.seng302.leftovers.tools.AuthenticationTokenManager;
-import org.seng302.leftovers.tools.SearchHelper;
+import org.seng302.leftovers.service.search.SearchPageConstructor;
+import org.seng302.leftovers.service.search.SearchSpecConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -281,7 +282,7 @@ public class BusinessController {
             throw new ValidationResponseException("Invalid business type provided");
         }
 
-        Sort.Direction direction = SearchHelper.getSortDirection(reverse);
+        Sort.Direction direction = SearchPageConstructor.getSortDirection(reverse);
         if (orderBy == null) {
             orderBy = "created";
         }
@@ -297,8 +298,8 @@ public class BusinessController {
             sortOrder = List.of(new Sort.Order(direction, orderBy).ignoreCase());
         }
 
-        PageRequest pageRequest = SearchHelper.getPageRequest(page, resultsPerPage, Sort.by(sortOrder));
-        Specification<Business> specification = SearchHelper.constructSpecificationFromBusinessSearch(searchQuery, businessType);
+        PageRequest pageRequest = SearchPageConstructor.getPageRequest(page, resultsPerPage, Sort.by(sortOrder));
+        Specification<Business> specification = SearchSpecConstructor.constructSpecificationFromBusinessSearch(searchQuery, businessType);
 
         Page<Business> results = businessRepository.findAll(specification, pageRequest);
         return new ResultPageDTO<>(results.map(BusinessResponseDTO::withoutAdmins));

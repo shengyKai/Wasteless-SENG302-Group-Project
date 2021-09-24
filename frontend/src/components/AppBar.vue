@@ -2,8 +2,15 @@
   <v-app-bar max-height="64px">
     <div class="container-outer flex-center">
       <h1 v-if="homeEndpoint" class="link" @click="showHome">LEFT_OVERS</h1>
-      <h1 v-else class="link" @click="showHome">&lt; LEFT_OVERS</h1>
-
+      <v-tooltip v-else bottom>
+        <template #activator="{ on, attrs }">
+          <h1 class="link" @click="showHome" v-bind="attrs" v-on="on">
+            <v-icon x-large color="black" class="mb-2 hidden-sm-and-down">mdi-arrow-left</v-icon>
+            LEFT_OVERS
+          </h1>
+        </template>
+        <span>Return to Homepage</span>
+      </v-tooltip>
       <!-- Space between the app name and the controls -->
       <div class="spacer"/>
 
