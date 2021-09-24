@@ -62,7 +62,7 @@ import InterestPurchasedEvent from './InterestPurchasedEvent.vue';
 
 export default {
   name: 'EventList',
-  components: {InterestEvent, DeleteEvent, ExpiryEvent, GlobalMessage, KeywordCreated, MessageEvent, PurchasedEvent, InterestPurchasedEvent},
+  components: {Event, InterestEvent, DeleteEvent, ExpiryEvent, GlobalMessage, KeywordCreated, MessageEvent, PurchasedEvent, InterestPurchasedEvent},
   props: ['events', 'isFiltered'],
   data() {
     return {

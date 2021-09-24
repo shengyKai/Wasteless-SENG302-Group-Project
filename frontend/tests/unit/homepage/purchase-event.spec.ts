@@ -3,37 +3,24 @@ import Vuetify from 'vuetify';
 import { createLocalVue, mount, Wrapper } from '@vue/test-utils';
 import PurchaseEvent from '@/components/home/newsfeed/PurchasedEvent.vue';
 
-import Vuex, { Store } from 'vuex';
-import { getStore, resetStoreForTesting, StoreData } from '@/store';
-import { makeTestUser } from '../utils';
-import router from "@/plugins/vue-router";
+import Vuex from 'vuex';
+
 
 Vue.use(Vuetify);
 
 describe('PurchasedEvent.vue', () => {
   let wrapper: Wrapper<any>;
   let vuetify: Vuetify;
-  // The global store to be used
-  let store: Store<StoreData>;
 
   beforeEach(async () => {
     const localVue = createLocalVue();
     vuetify = new Vuetify();
 
     localVue.use(Vuex);
-    resetStoreForTesting();
-    store = getStore();
-    store.state.user = makeTestUser(1);
-
-    const app = document.createElement("div");
-    app.setAttribute("data-app", "true");
-    document.body.append(app);
 
     wrapper = mount(PurchaseEvent, {
       localVue,
       vuetify,
-      store,
-      router,
       propsData: {
         event: {
           "id": 1,
@@ -79,13 +66,13 @@ describe('PurchasedEvent.vue', () => {
                 "businessType": "Retail Trade",
                 "id": 1,
                 "images": [{
-                  "thumbnailFilename": "/media/images/94c830e8-2c42-4c96-86e6-4db28a754793.jpg",
-                  "filename": "/media/images/94c830e8-2c42-4c96-86e6-4db28a754793.jpg",
+                  "thumbnailFilename": "testImage.jpg",
+                  "filename": "testImage.jpg",
                   "id": 2
                 }],
                 "created": "2021-09-20T02:17:58.234314Z"}, "images": [{
-                "thumbnailFilename": "/media/images/74f5e155-358b-4775-ae3b-abe981e721ef.jpg",
-                "filename": "/media/images/74f5e155-358b-4775-ae3b-abe981e721ef.jpg",
+                "thumbnailFilename": "testImage.jpg",
+                "filename": "testImage.jpg",
                 "id": 1
               }],
               "countryOfSale": "Malaysia"
@@ -99,26 +86,27 @@ describe('PurchasedEvent.vue', () => {
           "read": false
         }
       },
+      stubs: ['router-link'],
     });
   });
 
   it("Title has quantity and name", () => {
-    expect(wrapper.vm.title).toBe("Purchased 27x Humongous Vinegar");
+    expect(wrapper.text()).toContain("Purchased 27x Humongous Vinegar");
   });
 
   it("Body has quantity and name", () => {
-    expect(wrapper.vm.itemBought).toBe("27x Humongous Vinegar");
+    expect(wrapper.text()).toContain("27x Humongous Vinegar");
   });
 
   it("Body has price", () => {
-    expect(wrapper.vm.price).toBe(791.33);
+    expect(wrapper.text()).toContain("791.33");
   });
 
   it("Body has business name", () => {
-    expect(wrapper.vm.seller).toBe("Marywil Crescent Haberdashery");
+    expect(wrapper.text()).toContain("Marywil Crescent Haberdashery");
   });
 
   it("Body has location", () => {
-    expect(wrapper.vm.location).toBe("161 Clyde Road, Beaver County, Tapanui, Ulster, Malaysia");
+    expect(wrapper.text()).toContain("161 Clyde Road, Beaver County, Tapanui, Ulster, Malaysia");
   });
 });

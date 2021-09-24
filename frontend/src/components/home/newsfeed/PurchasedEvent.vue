@@ -31,14 +31,12 @@ export default {
       required: true,
     },
   },
-  data() {
-    return {
-      address: this.event.boughtSaleItem.product.business.address
-    };
-  },
   computed: {
     title() {
       return "Purchased " + this.itemBought;
+    },
+    address() {
+      return this.event.boughtSaleItem.product.business.address;
     },
     itemBought() {
       return this.event.boughtSaleItem.quantity + "x " + this.event.boughtSaleItem.product.name;
