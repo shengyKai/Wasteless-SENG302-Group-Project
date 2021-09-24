@@ -1,5 +1,5 @@
-import { modifyUser, ModifyUser } from "@/api/internal";
 import axios, { AxiosInstance } from 'axios';
+import {ModifyUser, modifyUser} from "@/api/user";
 
 jest.mock('axios', () => ({
   create: jest.fn(function () {
@@ -33,7 +33,8 @@ describe('Test PUT /users/{userId} endpoint', () => {
       city: "Christchurch",
       region: "Canterbury",
       country: "New Zealand"
-    }
+    },
+    imageIds: [1, 2, 3]
   };
 
   it('When API request is successfully resolved, returns undefined', async () => {

@@ -1,15 +1,15 @@
-
 import Vue from 'vue';
 import Vuetify from 'vuetify';
 import Vuex from 'vuex';
 import { createLocalVue, mount, Wrapper } from '@vue/test-utils';
 import MarketplaceCard from '@/components/cards/MarketplaceCard.vue';
 
-import { deleteMarketplaceCard, messageConversation, MarketplaceCardSection, User } from '@/api/internal';
-import { findButtonWithText, flushQueue } from './utils';
+import { findButtonWithText } from './utils';
 import { SECTION_NAMES } from '@/utils';
+import {User} from "@/api/user";
+import {deleteMarketplaceCard, MarketplaceCardSection, messageConversation} from "@/api/marketplace";
 
-jest.mock('@/api/internal', () => ({
+jest.mock('@/api/marketplace', () => ({
   deleteMarketplaceCard: jest.fn(),
   messageConversation: jest.fn(),
 }));

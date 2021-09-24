@@ -1,4 +1,4 @@
-package org.seng302.leftovers.tools;
+package org.seng302.leftovers.service;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
@@ -12,6 +12,7 @@ import org.seng302.leftovers.entities.User;
 import org.seng302.leftovers.exceptions.ValidationResponseException;
 import org.seng302.leftovers.persistence.BusinessRepository;
 import org.seng302.leftovers.persistence.UserRepository;
+import org.seng302.leftovers.service.search.SearchSpecConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.jpa.domain.Specification;
@@ -21,7 +22,7 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
-class SearchHelperBusinessTest {
+class SearchServiceBusinessTest {
 
     @Autowired
     private BusinessRepository businessRepository;
@@ -82,7 +83,7 @@ class SearchHelperBusinessTest {
     @CsvSource({"joe,2", "garage,1", "steve,1"})
     void constructSpecificationFromBusinessSearch_validSearchTerm_matchesBusinessName(String query, int numMatches) {
         createBusinesses();
-        var specification = SearchHelper.constructSpecificationFromBusinessSearch(query, null);
+        var specification = SearchSpecConstructor.constructSpecificationFromBusinessSearch(query, null);
         var businesses = businessRepository.findAll(specification);
         assertEquals(numMatches, businesses.size());
     }
@@ -90,7 +91,7 @@ class SearchHelperBusinessTest {
     @Test
     void constructSpecificationFromBusinessSearch_randomSearchTerm_matchesNoBusinesses() {
         createBusinesses();
-        var specification = SearchHelper.constructSpecificationFromBusinessSearch("thereAreNoBusinessesWithThisInTheirName", null);
+        var specification = SearchSpecConstructor.constructSpecificationFromBusinessSearch("thereAreNoBusinessesWithThisInTheirName", null);
         var businesses = businessRepository.findAll(specification);
         assertEquals(0, businesses.size());
     }
@@ -99,22 +100,20 @@ class SearchHelperBusinessTest {
     @CsvSource({"JOE,2", "joe,2"})
     void constructSpecificationFromBusinessSearch_caseIsIgnored(String query, int numMatches) {
         createBusinesses();
-        var specification = SearchHelper.constructSpecificationFromBusinessSearch(query, null);
+        var specification = SearchSpecConstructor.constructSpecificationFromBusinessSearch(query, null);
         var businesses = businessRepository.findAll(specification);
         assertEquals(numMatches, businesses.size());
     }
 
     @Test
     void constructSpecificationFromBusinessSearch_EmptyStringTest() {
-        assertThrows(ValidationResponseException.class, () -> {
-            SearchHelper.constructSpecificationFromBusinessSearch("", null);
-        });
+        assertThrows(ValidationResponseException.class, () -> SearchSpecConstructor.constructSpecificationFromBusinessSearch("", null));
     }
 
     @Test
     void constructSpecificationFromBusinessSearch_DoubleQuotesExactMatchTest() {
         createBusinesses();
-        Specification<Business> specification = SearchHelper.constructSpecificationFromBusinessSearch("\"Joe's Garage\"", null);
+        Specification<Business> specification = SearchSpecConstructor.constructSpecificationFromBusinessSearch("\"Joe's Garage\"", null);
         List<Business> matches = businessRepository.findAll(specification);
         assertEquals(1, matches.size());
         assertEquals("Joe's Garage", matches.get(0).getName());
@@ -123,7 +122,7 @@ class SearchHelperBusinessTest {
     @Test
     void constructSpecificationFromBusinessSearch_SingleQuotesExactMatchTest() {
         createBusinesses();
-        Specification<Business> specification = SearchHelper.constructSpecificationFromBusinessSearch("'Steves Workshop'", null);
+        Specification<Business> specification = SearchSpecConstructor.constructSpecificationFromBusinessSearch("'Steves Workshop'", null);
         List<Business> matches = businessRepository.findAll(specification);
         assertEquals(1, matches.size());
         assertEquals("Steves Workshop", matches.get(0).getName());
@@ -152,7 +151,7 @@ class SearchHelperBusinessTest {
     })
     void constructSpecificationFromBusinessSearch_variousQueries_correctResultNumberReturned(String query, int expectedMatches) {
         createBusinesses();
-        Specification<Business> specification = SearchHelper.constructSpecificationFromBusinessSearch(query, null);
+        Specification<Business> specification = SearchSpecConstructor.constructSpecificationFromBusinessSearch(query, null);
         List<Business> matches = businessRepository.findAll(specification);
         assertEquals(expectedMatches, matches.size());
     }
@@ -160,7 +159,7 @@ class SearchHelperBusinessTest {
     @Test
     void constructSpecificationFromBusinessSearch_NoQuotesExactMatchTest() {
         createBusinesses();
-        Specification<Business> specification = SearchHelper.constructSpecificationFromBusinessSearch("Joe's Garage", null);
+        Specification<Business> specification = SearchSpecConstructor.constructSpecificationFromBusinessSearch("Joe's Garage", null);
         List<Business> matches = businessRepository.findAll(specification);
         assertEquals(1, matches.size());
         for (Business business : matches) {
@@ -171,7 +170,7 @@ class SearchHelperBusinessTest {
     @Test
     void constructSpecificationFromBusinessSearch_NoQuotesPartialMatchTest() {
         createBusinesses();
-        Specification<Business> specification = SearchHelper.constructSpecificationFromBusinessSearch("Joe", null);
+        Specification<Business> specification = SearchSpecConstructor.constructSpecificationFromBusinessSearch("Joe", null);
         List<Business> matches = businessRepository.findAll(specification);
         assertEquals(2, matches.size());
         for (Business business : matches) {
@@ -182,7 +181,7 @@ class SearchHelperBusinessTest {
     @Test
     void constructSpecificationFromBusinessSearch_NoQuotesDifferentCaseMatchTest() {
         createBusinesses();
-        Specification<Business> specification = SearchHelper.constructSpecificationFromBusinessSearch("JOE", null);
+        Specification<Business> specification = SearchSpecConstructor.constructSpecificationFromBusinessSearch("JOE", null);
         List<Business> matches = businessRepository.findAll(specification);
         assertEquals(2, matches.size());
         for (Business business : matches) {
@@ -196,23 +195,17 @@ class SearchHelperBusinessTest {
      */
     @Test
     void constructSpecificationFromBusinessSearch_JustAndTest() {
-        assertThrows(ValidationResponseException.class, () -> {
-            SearchHelper.constructSpecificationFromBusinessSearch("and", null);
-        });
+        assertThrows(ValidationResponseException.class, () -> SearchSpecConstructor.constructSpecificationFromBusinessSearch("and", null));
     }
 
     @Test
     void constructSpecificationFromBusinessSearch_JustOrTest() {
-        assertThrows(ValidationResponseException.class, () -> {
-            SearchHelper.constructSpecificationFromBusinessSearch("OR", null);
-        });
+        assertThrows(ValidationResponseException.class, () -> SearchSpecConstructor.constructSpecificationFromBusinessSearch("OR", null));
     }
 
     @Test
     void constructSpecificationFromBusinessSearch_OpeningQuoteTest() {
-        assertThrows(ValidationResponseException.class, () -> {
-            SearchHelper.constructSpecificationFromBusinessSearch("\"hello", null);
-        });
+        assertThrows(ValidationResponseException.class, () -> SearchSpecConstructor.constructSpecificationFromBusinessSearch("\"hello", null));
     }
 
     @ParameterizedTest
@@ -222,7 +215,7 @@ class SearchHelperBusinessTest {
     })
     void constructSpecificationFromBusinessSearch_onlyBusinessTypeProvided_specificationMatchesGivenType(BusinessType type, int numMatches) {
         createBusinesses();
-        var specification= SearchHelper.constructSpecificationFromBusinessSearch(null, type);
+        var specification= SearchSpecConstructor.constructSpecificationFromBusinessSearch(null, type);
         var businesses = businessRepository.findAll(specification);
         assertEquals(numMatches, businesses.size());
 
@@ -232,16 +225,14 @@ class SearchHelperBusinessTest {
     @ValueSource(strings = {"CHARITABLE","NON_PROFIT"})
     void constructSpecificationFromBusinessSearch_onlyBusinessTypeProvided_specificationDoesNotMatchOtherType(BusinessType type) {
         createBusinesses();
-        var specification= SearchHelper.constructSpecificationFromBusinessSearch(null, type);
+        var specification= SearchSpecConstructor.constructSpecificationFromBusinessSearch(null, type);
         var businesses = businessRepository.findAll(specification);
         assertEquals(0, businesses.size());
     }
 
     @Test
     void constructSpecificationFromBusinessSearch_queryAndTypeNotProvided_exceptionThrown() {
-        assertThrows(ValidationResponseException.class, () -> {
-            SearchHelper.constructSpecificationFromBusinessSearch(null, null);
-        });
+        assertThrows(ValidationResponseException.class, () -> SearchSpecConstructor.constructSpecificationFromBusinessSearch(null, null));
     }
 
     @ParameterizedTest
@@ -251,7 +242,7 @@ class SearchHelperBusinessTest {
     })
     void constructSpecificationFromBusinessSearch_queryAndTypeProvided_specificationMatchesIfBothMatch(BusinessType type, String query, int numMatches) {
         createBusinesses();
-        var specification= SearchHelper.constructSpecificationFromBusinessSearch(query, type);
+        var specification= SearchSpecConstructor.constructSpecificationFromBusinessSearch(query, type);
         var businesses = businessRepository.findAll(specification);
         assertEquals(numMatches, businesses.size());
     }
@@ -263,7 +254,7 @@ class SearchHelperBusinessTest {
     })
     void constructSpecificationFromBusinessSearch_queryAndTypeProvided_specificationDoesNotMatchIfOnlyQueryMatches(BusinessType type, String query) {
         createBusinesses();
-        var specification= SearchHelper.constructSpecificationFromBusinessSearch(query, type);
+        var specification= SearchSpecConstructor.constructSpecificationFromBusinessSearch(query, type);
         var businesses = businessRepository.findAll(specification);
         assertEquals(0, businesses.size());
     }
@@ -275,7 +266,7 @@ class SearchHelperBusinessTest {
     })
     void constructSpecificationFromBusinessSearch_queryAndTypeProvided_specificationDoesNotMatchIfOnlyTypeMatches(BusinessType type, String query) {
         createBusinesses();
-        var specification= SearchHelper.constructSpecificationFromBusinessSearch(query, type);
+        var specification= SearchSpecConstructor.constructSpecificationFromBusinessSearch(query, type);
         var businesses = businessRepository.findAll(specification);
         assertEquals(0, businesses.size());
     }
@@ -287,7 +278,7 @@ class SearchHelperBusinessTest {
     })
     void constructSpecificationFromBusinessSearch_queryAndTypeProvided_specificationDoesNotMatchIfNeitherMatches(BusinessType type, String query) {
         createBusinesses();
-        var specification= SearchHelper.constructSpecificationFromBusinessSearch(query, type);
+        var specification= SearchSpecConstructor.constructSpecificationFromBusinessSearch(query, type);
         var businesses = businessRepository.findAll(specification);
         assertEquals(0, businesses.size());
     }

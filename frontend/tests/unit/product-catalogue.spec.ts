@@ -1,14 +1,14 @@
 import Vue from 'vue';
 import Vuetify from 'vuetify';
-import Vuex, { Store } from 'vuex';
-import { createLocalVue, Wrapper, mount } from '@vue/test-utils';
+import Vuex from 'vuex';
+import {createLocalVue, mount, Wrapper} from '@vue/test-utils';
 import ProductCatalogue from '@/components/ProductCatalogue.vue';
 import ProductCatalogueItem from '@/components/cards/ProductCatalogueItem.vue';
-import { Product } from '@/api/internal';
-import * as api from '@/api/internal';
-import { castMock, findButtonWithText, flushQueue } from './utils';
+import {SearchResults} from '@/api/internal';
+import {castMock, flushQueue, findButtonWithText} from './utils';
+import {getProducts as getProducts1, searchCatalogue as searchCatalogue1, Product} from "@/api/product";
 
-jest.mock('@/api/internal', () => ({
+jest.mock('@/api/product', () => ({
   getProducts: jest.fn(),
   searchCatalogue: jest.fn()
 }));
@@ -18,8 +18,8 @@ jest.mock('@/utils', () => ({
   debounce: (func: (() => void)) => func,
 }));
 
-const getProducts = castMock(api.getProducts);
-const searchCatalogue = castMock(api.searchCatalogue);
+const getProducts = castMock(getProducts1);
+const searchCatalogue = castMock(searchCatalogue1);
 
 Vue.use(Vuetify);
 
@@ -35,7 +35,7 @@ const RESULTS_PER_PAGE = 10;
  * @returns List of test products
  */
 function createTestProducts(count: number) {
-  let result: api.SearchResults<Product> = {
+  let result: SearchResults<Product> = {
     results : [],
     count   : count,
   };
@@ -106,7 +106,7 @@ describe('ProductCatalogue.vue', () => {
    *
    * @param products Products on the current page to use for the mock results
    */
-  function setResults(products: api.SearchResults<Product>) {
+  function setResults(products: SearchResults<Product>) {
     getProducts.mockResolvedValue(products);
     searchCatalogue.mockResolvedValue(products);
   }

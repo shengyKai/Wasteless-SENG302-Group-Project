@@ -97,7 +97,8 @@
 </template>
 
 <script>
-import {createMarketplaceCard, createNewKeyword, searchKeywords, modifyMarketplaceCard} from '@/api/internal';
+import {createMarketplaceCard, modifyMarketplaceCard} from "@/api/marketplace";
+import {createNewKeyword, searchKeywords} from "@/api/keyword";
 
 export default {
   name: "MarketplaceCard",

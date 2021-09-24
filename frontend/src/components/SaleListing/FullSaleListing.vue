@@ -9,14 +9,18 @@
         <v-row>
           <v-col cols="12" sm="8">
             <v-card flat>
-              <v-card-text>
-                <h2 ref="productName" class="text--primary font-weight-bold d-inline-block">
-                  {{ product.name }}
-                </h2>
-                <h4 class="ml-2 d-inline-block text-decoration-underline">FROM {{this.product.manufacturer}}</h4>
-                <div class="text--primary mt-2">
-                  {{ productDescription }}
-                </div>
+              <v-card-text class="ml-2">
+                <v-row class="mt-1">
+                  <h2 ref="productName" class="text--primary font-weight-bold">
+                    {{ product.name }}
+                  </h2>
+                  <h4 class="ml-4 mt-1 text-decoration-underline">FROM {{this.business.name}}</h4>
+                </v-row>
+                <v-row>
+                  <div class="text--primary mt-3">
+                    {{ productDescription }}
+                  </div>
+                </v-row>
               </v-card-text>
             </v-card>
           </v-col>
@@ -140,7 +144,7 @@
 <script>
 import ImageCarousel from "@/components/utils/ImageCarousel";
 import { currencyFromCountry } from "@/api/currency";
-import { setListingInterest, getListingInterest} from '../../api/internal';
+import { setListingInterest, getListingInterest} from '../../api/sale';
 import { formatDate, formatPrice } from '@/utils';
 
 export default {
@@ -165,8 +169,12 @@ export default {
   },
   mounted() {
     this.interestCount = this.saleItem.interestCount;
+    console.log(this.business);
   },
   computed: {
+    business() {
+      return this.product.business;
+    },
     /**
      * Stay consistent with other folder by the name imageList and easier access to the product images list
      */
@@ -269,7 +277,7 @@ export default {
     /** Change the user interest status on the listing (toggle)
      */
     async changeInterest() {
-      const result = await setListingInterest(this.saleItem.id, this.userId, !this.isInterested);
+      const result = await setListingInterest(this.saleItem.id, {userId: this.userId, interested: !this.isInterested});
       if (typeof result === 'string'){
         this.errorMessage = result;
       } else {

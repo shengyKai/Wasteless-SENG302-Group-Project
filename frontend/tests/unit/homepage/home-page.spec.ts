@@ -3,11 +3,13 @@ import Vuex, { Store } from 'vuex';
 import Vuetify from 'vuetify';
 import {createLocalVue, mount, Wrapper} from '@vue/test-utils';
 
-import {User, MarketplaceCard, Keyword } from '@/api/internal';
 import HomePage from '@/components/home/HomePage.vue';
 import { getStore, resetStoreForTesting, StoreData } from '@/store';
 
 import * as events from '@/api/events';
+import {User} from "@/api/user";
+import {MarketplaceCard} from "@/api/marketplace";
+import {Keyword} from "@/api/keyword";
 import { castMock } from '../utils';
 
 Vue.use(Vuetify);
