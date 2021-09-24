@@ -1,12 +1,14 @@
 import Vue from "vue";
 import Vuex from "vuex";
 import Vuetify from "vuetify";
-import { createLocalVue, Wrapper, mount } from "@vue/test-utils";
+import {createLocalVue, mount, Wrapper} from "@vue/test-utils";
 import InventoryItemForm from "@/components/BusinessProfile/InventoryItemForm.vue";
-import { castMock, findButtonWithText, flushQueue, todayPlusYears } from "./utils";
-import { getStore, resetStoreForTesting } from "@/store";
-import * as api from '@/api/internal';
-import { assertEquals } from "typescript-is";
+import {castMock, flushQueue, todayPlusYears, findButtonWithText} from "./utils";
+import {getProducts as getProducts1} from "@/api/product";
+import {
+  createInventoryItem as createInventoryItem1,
+  modifyInventoryItem as modifyInventoryItem1
+} from "@/api/inventory";
 
 Vue.use(Vuetify);
 
@@ -19,15 +21,19 @@ jest.mock('@/api/currency', () => ({
   }),
 }));
 
-jest.mock('@/api/internal', () => ({
+jest.mock('@/api/inventory', () => ({
   createInventoryItem: jest.fn(),
   modifyInventoryItem: jest.fn(),
+}));
+jest.mock('@/api/product', () => ({
   getProducts: jest.fn(),
+}));
+jest.mock('@/api/business', () => ({
   getBusiness: jest.fn().mockReturnValue({address: {}}), // Makes sure that fetching the currency doesn't crash
 }));
-const createInventoryItem = castMock(api.createInventoryItem);
-const modifyInventoryItem = castMock(api.modifyInventoryItem);
-const getProducts = castMock(api.getProducts);
+const createInventoryItem = castMock(createInventoryItem1);
+const modifyInventoryItem = castMock(modifyInventoryItem1);
+const getProducts = castMock(getProducts1);
 
 // Characters that are in the set of letters, numbers, spaces and punctuation.
 const validQuantityCharacters = [

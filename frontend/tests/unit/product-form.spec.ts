@@ -1,15 +1,16 @@
 import Vue from 'vue';
 import Vuetify from 'vuetify';
-import { createLocalVue, Wrapper, mount } from '@vue/test-utils';
+import {createLocalVue, mount, Wrapper} from '@vue/test-utils';
 
 import ProductForm from '@/components/BusinessProfile/ProductForm.vue';
-import { castMock, findButtonWithText, flushQueue } from './utils';
-import * as api from '@/api/internal';
-import { currencyFromCountry } from '@/api/currency';
+import {castMock, flushQueue, findButtonWithText} from './utils';
+import {createProduct as createProduct1, modifyProduct as modifyProduct1, Product} from "@/api/product";
 
-jest.mock('@/api/internal', () => ({
+jest.mock('@/api/product', () => ({
   createProduct: jest.fn(),
   modifyProduct: jest.fn(),
+}));
+jest.mock('@/api/business', () => ({
   getBusiness: jest.fn(() => {
     return {
       address: {
@@ -31,8 +32,8 @@ jest.mock('@/api/currency', () => ({
 }));
 
 
-const createProduct = castMock(api.createProduct);
-const modifyProduct = castMock(api.modifyProduct);
+const createProduct = castMock(createProduct1);
+const modifyProduct = castMock(modifyProduct1);
 
 Vue.use(Vuetify);
 
@@ -390,7 +391,7 @@ describe('ProductForm.vue - Modify', () => {
   // Container for the ProductForm under test
   let wrapper: Wrapper<any>;
 
-  const previousProduct: api.Product = {
+  const previousProduct: Product = {
     id: 'TEST-ID',
     name: 'Test product name',
     description: 'Test product description',

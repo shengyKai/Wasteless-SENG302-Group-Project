@@ -5,24 +5,22 @@
 //and ImageCarousel for more details.
 import Vue from 'vue';
 import Vuetify from 'vuetify';
-import { createLocalVue, mount, Wrapper } from '@vue/test-utils';
+import {createLocalVue, mount, Wrapper} from '@vue/test-utils';
 import ProductCatalogueItem from '@/components/cards/ProductCatalogueItem.vue';
-// import ImageCarousel from "@/components/utils/ImageCarousel.vue";
 import FullProductDescription from "@/components/utils/FullProductDescription.vue";
-
-import * as api from "@/api/internal";
-import { castMock, flushQueue } from './utils';
-import Vuex, { Store } from 'vuex';
-import { getStore, resetStoreForTesting, StoreData } from '@/store';
-import { trimToLength } from '@/utils';
+import {castMock, flushQueue} from './utils';
+import Vuex, {Store} from 'vuex';
+import {getStore, resetStoreForTesting, StoreData} from '@/store';
+import {trimToLength} from '@/utils';
+import {deleteProductImage} from "@/api/product";
 
 Vue.use(Vuetify);
 
-jest.mock('@/api/internal', () => ({
-  deleteImage: jest.fn(),
+jest.mock('@/api/product', () => ({
+  deleteProductImage: jest.fn(),
 }));
 
-const deleteImage = castMock(api.deleteImage);
+const deleteImage = castMock(deleteProductImage);
 
 jest.mock('@/api/currency', () => ({
   currencyFromCountry: jest.fn(() => {

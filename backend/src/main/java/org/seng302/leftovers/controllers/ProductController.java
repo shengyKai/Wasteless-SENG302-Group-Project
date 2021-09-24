@@ -18,7 +18,8 @@ import org.seng302.leftovers.persistence.ImageRepository;
 import org.seng302.leftovers.persistence.ProductRepository;
 import org.seng302.leftovers.service.ImageService;
 import org.seng302.leftovers.tools.AuthenticationTokenManager;
-import org.seng302.leftovers.tools.SearchHelper;
+import org.seng302.leftovers.service.search.SearchPageConstructor;
+import org.seng302.leftovers.service.search.SearchSpecConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -81,7 +82,7 @@ public class ProductController {
         List<Sort.Order> sortOrder = getSortOrder(orderBy, reverse);
 
         business.checkSessionPermissions(request);
-        PageRequest pageablePage = SearchHelper.getPageRequest(page, resultsPerPage, Sort.by(sortOrder));
+        PageRequest pageablePage = SearchPageConstructor.getPageRequest(page, resultsPerPage, Sort.by(sortOrder));
         Page<Product> catalogue = productRepository.getAllByBusiness(business, pageablePage);
         return new ResultPageDTO<>(catalogue.map(ProductResponseDTO::new));
     }
@@ -126,8 +127,8 @@ public class ProductController {
 
         business.checkSessionPermissions(request);
         List<Sort.Order> sortOrder = getSortOrder(orderBy, reverse);
-        PageRequest pageablePage = SearchHelper.getPageRequest(page, resultsPerPage, Sort.by(sortOrder));
-        Specification<Product> prodSpec = SearchHelper.constructSpecificationFromProductSearch(business, searchQuery, searchSet);
+        PageRequest pageablePage = SearchPageConstructor.getPageRequest(page, resultsPerPage, Sort.by(sortOrder));
+        Specification<Product> prodSpec = SearchSpecConstructor.constructSpecificationFromProductSearch(business, searchQuery, searchSet);
 
         Page<Product> catalogue = productRepository.findAll(prodSpec, pageablePage);
         return new ResultPageDTO<>(catalogue.map(ProductResponseDTO::new));
@@ -146,7 +147,7 @@ public class ProductController {
         }
 
         List<Sort.Order> sortOrder;
-        Sort.Direction direction = SearchHelper.getSortDirection(reverse);
+        Sort.Direction direction = SearchPageConstructor.getSortDirection(reverse);
         sortOrder = List.of(new Sort.Order(direction, orderBy ).ignoreCase());
         return sortOrder;
     }

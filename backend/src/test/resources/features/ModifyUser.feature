@@ -2,6 +2,10 @@ Feature: U10 - Modifying Users
 
   Background:
     Given A user exists with name "Dave" and password "superSecret1"
+    And The following images exist:
+    |apple.png|
+    |banana.png|
+    |orange.png|
 
   Scenario: AC1 - As a user, I can update any of my attributes.
     Given I am logged into "Dave" account
@@ -23,6 +27,7 @@ Feature: U10 - Modifying Users
       | email                    | dave@jones.com    |
       | password                 | superSecret1      |
       | newPassword              | confidential101   |
+      | imageIds                 | apple.png,banana.png,orange.png|
     Then The request succeeds
     And The user is updated
     
@@ -47,6 +52,7 @@ Feature: U10 - Modifying Users
         | email                    | dave@jones.com    |
         | password                 | superSecret1      |
         | newPassword              | confidential101   |
+        | imageIds                 | apple.png,banana.png,orange.png|
       Then The request fails due to forbidden
       And The user is not updated
 
@@ -69,6 +75,7 @@ Feature: U10 - Modifying Users
       | email                    | dave@jones.com    |
       | password                 | superSecret1      |
       | newPassword              | confidential101   |
+      | imageIds                 |                   |
     Then The request fails due to not authorised
 
   Scenario: AC2: All validation rules still apply.
@@ -91,6 +98,7 @@ Feature: U10 - Modifying Users
       | email                    | davejones.com     |
       | password                 | superSecret1      |
       | newPassword              | confident         |
+      | imageIds                 |                   |
     Then The request fails due to bad request
     And The user is not updated
 

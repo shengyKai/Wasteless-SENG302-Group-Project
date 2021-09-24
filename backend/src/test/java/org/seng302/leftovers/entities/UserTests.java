@@ -637,6 +637,7 @@ class UserTests {
         json.remove("dateOfBirth");
         json.remove("homeAddress");
         json.remove("businessesAdministered");
+        json.remove("images");
         assertTrue(json.isEmpty());
     }
 
@@ -726,6 +727,7 @@ class UserTests {
         json.remove("phoneNumber");
         json.remove("dateOfBirth");
         json.remove("role");
+        json.remove("images");
         assertTrue(json.isEmpty());
     }
 

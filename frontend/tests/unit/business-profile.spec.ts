@@ -4,12 +4,11 @@ import Vuex, { Store } from 'vuex';
 import {createLocalVue, mount, Wrapper, RouterLinkStub} from '@vue/test-utils';
 import BusinessProfile from '@/components/BusinessProfile/index.vue';
 import VueRouter from "vue-router";
-import * as api from '@/api/internal';
 Vue.use(Vuetify);
 Vue.use(Vuex);
 import { getStore, resetStoreForTesting, StoreData } from '@/store';
 
-jest.mock('@/api/internal', () => ({
+jest.mock('@/api/business', () => ({
   makeBusinessImagePrimary: jest.fn(),
 }));
 
@@ -18,7 +17,6 @@ describe('index.vue', () => {
   let vuetify: Vuetify;
   let date = new Date();
   let store: Store<StoreData>;
-
 
   const user = {
     id: 1,

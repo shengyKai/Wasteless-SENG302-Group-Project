@@ -1,10 +1,12 @@
 package org.seng302.leftovers.controllers;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.ToString;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.seng302.leftovers.dto.saleitem.*;
 import org.seng302.leftovers.dto.ResultPageDTO;
 
 import org.seng302.leftovers.entities.*;
@@ -22,7 +24,9 @@ import org.seng302.leftovers.persistence.*;
 import org.seng302.leftovers.persistence.event.EventRepository;
 import org.seng302.leftovers.persistence.event.InterestEventRepository;
 import org.seng302.leftovers.tools.AuthenticationTokenManager;
-import org.seng302.leftovers.tools.SearchHelper;
+import org.seng302.leftovers.service.search.SearchPageConstructor;
+import org.seng302.leftovers.service.search.SearchSpecConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -34,10 +38,12 @@ import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import java.util.List;
-import java.util.Set;
 
 @RestController
 public class SaleController {
+    @Autowired
+    private ObjectMapper objectMapper;
+
     private static final Logger logger = LogManager.getLogger(SaleController.class);
 
     private final UserRepository userRepository;
@@ -61,8 +67,6 @@ public class SaleController {
         this.eventRepository = eventRepository;
     }
 
-    private static final Set<String> VALID_ORDERINGS = Set.of("created", "closing", "productCode", "productName", "quantity", "price");
-
     /**
      * Returns the ordering term for the Sort object for sorting Sale Items
      *
@@ -72,18 +76,20 @@ public class SaleController {
      */
     private Sort.Order getSaleItemOrder(String orderBy, Sort.Direction direction) {
         if (orderBy == null) orderBy = "created";
-        else if (!VALID_ORDERINGS.contains(orderBy)) {
-            logger.error("Invalid sale item ordering given: {}", orderBy);
-            throw new ValidationResponseException("The provided ordering is invalid");
+        switch (orderBy) {
+            case "created": case "quantity": case "price":
+                break;
+            case "productName":
+                orderBy = "inventoryItem.product.name";
+                break;
+            case "closing":
+                orderBy = "closes";
+                break;
+            default:
+                logger.error("Invalid sale item ordering given: {}", orderBy);
+                throw new ValidationResponseException("The provided ordering is invalid");
         }
-        if (orderBy.equals("productCode")) {
-            orderBy = "inventoryItem.product.productCode";
-        } else if (orderBy.equals("productName")) {
-            orderBy = "inventoryItem.product.name";
-        } else if (orderBy.equals("closing")) {
-            orderBy = "closes";
-        }
-        return new Sort.Order(direction, orderBy).ignoreCase();
+        return new Sort.Order(direction, orderBy).ignoreCase().nullsLast();
     }
 
     /**
@@ -94,6 +100,23 @@ public class SaleController {
     @AllArgsConstructor
     public static class CreateSaleItemResponseDTO {
         private Long listingId;
+    }
+
+    /**
+     * Parse search order term into proper access of term to sort by
+     * @param orderBy term to order results by in sale search
+     * @param direction Sort.Order value for Ascending or descending
+     * @return list of Sort.Order
+     */
+    private List<Sort.Order> getSaleItemSearchOrder(String orderBy, Sort.Direction direction) {
+        if (orderBy == null || orderBy.isEmpty()) orderBy = "created";
+        if (orderBy.equals("businessName")) {
+            return List.of(new Sort.Order(direction, "inventoryItem.product.business.name").ignoreCase());
+        }
+        if (orderBy.equals("businessLocation")) {
+            return List.of(new Sort.Order(direction, "inventoryItem.product.business.address.country"), new Sort.Order(direction, "inventoryItem.product.business.address.city"));
+        }
+        return (List.of(getSaleItemOrder(orderBy, direction)));
     }
 
     /**
@@ -150,16 +173,47 @@ public class SaleController {
             logger.info("Getting sales item for business (businessId={}).", id);
             Business business = businessRepository.getBusinessById(id);
 
-            Sort.Direction direction = SearchHelper.getSortDirection(reverse);
+            Sort.Direction direction = SearchPageConstructor.getSortDirection(reverse);
             List<Sort.Order> sortOrder = List.of(getSaleItemOrder(orderBy, direction));
 
-            PageRequest pageRequest = SearchHelper.getPageRequest(page, resultsPerPage, Sort.by(sortOrder));
+            PageRequest pageRequest = SearchPageConstructor.getPageRequest(page, resultsPerPage, Sort.by(sortOrder));
 
-            Specification<SaleItem> specification = SearchHelper.constructSpecificationFromSaleItemsFilter(business);
+            Specification<SaleItem> specification = SearchSpecConstructor.constructSpecificationFromSaleItemsFilter(business);
             Page<SaleItem> result = saleItemRepository.findAll(specification, pageRequest);
 
             return new ResultPageDTO<>(result.map(SaleItemResponseDTO::new));
 
+        } catch (Exception error) {
+            logger.error(error.getMessage());
+            throw error;
+        }
+    }
+
+
+    /**
+     * REST GET method to return sale items that match search criteria
+     * Takes SaleListingSearchDTO with all params
+     * @return JSON page of sale items
+     */
+    @GetMapping("/businesses/listings/search")
+    public ResultPageDTO<SaleItemResponseDTO> searchSaleItems(HttpServletRequest request,
+                                                              SaleListingSearchExternalDTO saleSearchDTO) {
+        try {
+            // Check auth
+            logger.info("Get sale items to match parameters.");
+            AuthenticationTokenManager.checkAuthenticationToken(request);
+
+            // Check sort ordering
+            Sort.Direction direction = SearchPageConstructor.getSortDirection(saleSearchDTO.getReverse());
+            List<Sort.Order> sortOrder = getSaleItemSearchOrder(saleSearchDTO.getOrderBy(), direction);
+
+            // Create page
+            PageRequest pageablePage = SearchPageConstructor.getPageRequest(saleSearchDTO.getPage(), saleSearchDTO.getResultsPerPage(), Sort.by(sortOrder));
+            Specification<SaleItem> specification = SearchSpecConstructor.constructSaleListingSpecificationForSearch(
+                    new SaleListingSearchDTO(saleSearchDTO));
+            Page<SaleItem> result = saleItemRepository.findAll(specification, pageablePage);
+
+            return new ResultPageDTO<>(result.map(SaleItemResponseDTO::new));
         } catch (Exception error) {
             logger.error(error.getMessage());
             throw error;

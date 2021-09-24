@@ -1,23 +1,25 @@
 import Vue from 'vue';
 import Vuex from 'vuex';
 import Vuetify from 'vuetify';
-import { createLocalVue, Wrapper, mount } from '@vue/test-utils';
+import {createLocalVue, mount, Wrapper} from '@vue/test-utils';
 
 import ModifyBusiness from '@/components/BusinessProfile/ModifyBusiness.vue';
 import {castMock, findButtonWithText} from "./utils";
-import * as api from '@/api/internal';
-import {User, Location, Business} from "@/api/internal";
-import { getStore, resetStoreForTesting } from '@/store';
+import {Location} from '@/api/internal';
+import {getStore, resetStoreForTesting} from '@/store';
+import {getUser as getUser1, User} from "@/api/user";
+import {modifyBusiness as modifyBusiness1, Business} from "@/api/business";
 
-jest.mock('@/api/internal', () => ({
+jest.mock('@/api/user', () => ({
   getUser: jest.fn(),
+}));
+jest.mock('@/api/business', () => ({
   modifyBusiness: jest.fn(),
-  uploadBusinessImage: jest.fn(),
 }));
 
-const getUser = castMock(api.getUser);
-const modifyBusiness = castMock(api.modifyBusiness);
-const uploadBusinessImage = castMock(api.uploadBusinessImage);
+
+const getUser = castMock(getUser1);
+const modifyBusiness = castMock(modifyBusiness1);
 Vue.use(Vuetify);
 const localVue = createLocalVue();
 
@@ -513,60 +515,4 @@ describe('modifyBusiness.vue', () => {
     });
   });
 
-  describe('Uploading images', () => {
-    beforeEach(() => {
-      uploadBusinessImage.mock.calls = [];
-      uploadBusinessImage.mockResolvedValue(undefined);
-    });
-
-    it('When image file added, it is appended to the list of image files', () => {
-      expect(wrapper.vm.allImageFiles.length).toBe(0);
-      const testFile = new File([], 'test_file');
-      wrapper.vm.imageFile = testFile;
-
-      wrapper.vm.addImage();
-
-      expect(wrapper.vm.allImageFiles.length).toBe(1);
-      expect(wrapper.vm.allImageFiles[0]).toBe(testFile);
-    });
-
-    it('When form is submitted and no images are added, no API call to upload images is made', async () => {
-      expect(wrapper.vm.allImageFiles.length).toBe(0);
-      await wrapper.vm.proceedWithModifyBusiness();
-      expect(uploadBusinessImage.mock.calls.length).toBe(0);
-    });
-
-    it('When form is submitted and one image is added, one API call to upload images is made', async () => {
-      const testFile1 = new File([], 'test_file_1');
-      wrapper.vm.allImageFiles = [testFile1];
-      expect(wrapper.vm.allImageFiles.length).toBe(1);
-      await wrapper.vm.proceedWithModifyBusiness();
-      expect(uploadBusinessImage.mock.calls.length).toBe(1);
-      expect(uploadBusinessImage.mock.calls[0][0]).toBe(44);
-      expect(uploadBusinessImage.mock.calls[0][1]).toBe(testFile1);
-    });
-
-    it('When form is submitted and multiple images are added, one API call to upload images is made for each image', async () => {
-      wrapper.vm.allImageFiles = [new File([], 'test_file_1'), new File([], 'test_file_2'), new File([], 'test_file_3')];
-      expect(wrapper.vm.allImageFiles.length).toBe(3);
-      await wrapper.vm.proceedWithModifyBusiness();
-      expect(uploadBusinessImage.mock.calls.length).toBe(3);
-    });
-
-    it('When upload image request is successful, no error message is displayed', async () => {
-      expect(wrapper.vm.errorMessage).toBe(undefined);
-      wrapper.vm.allImageFiles = [new File([], 'test_file_1')];
-      await wrapper.vm.proceedWithModifyBusiness();
-      expect(wrapper.vm.errorMessage).toBe(undefined);
-    });
-
-    it('When upload image request is unsuccessful, received error message is displayed', async () => {
-      expect(wrapper.vm.errorMessage).toBe(undefined);
-      uploadBusinessImage.mockResolvedValueOnce("This is an error");
-      wrapper.vm.allImageFiles = [new File([], 'test_file_1')];
-      await wrapper.vm.proceedWithModifyBusiness();
-      expect(wrapper.vm.errorMessage).toBe("This is an error");
-    });
-
-  });
 });
