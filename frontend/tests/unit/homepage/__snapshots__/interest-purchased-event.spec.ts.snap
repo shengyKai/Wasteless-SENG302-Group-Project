@@ -18,7 +18,7 @@ exports[`InterestEvent.vue Matches snapshot 1`] = `
     <strong><router-link-stub to="/business/1" class="text--secondary">
         Hillary Cresenct Jewelers
       </router-link-stub></strong>
-    has been sold.
+    has been sold to another user and is no longer available for purchase.
   </div>
   <!---->
   <div class="row">

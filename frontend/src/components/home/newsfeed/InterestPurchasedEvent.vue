@@ -11,7 +11,7 @@
           {{business.name}}
         </router-link>
       </strong>
-      has been sold.
+      has been sold to another user and is no longer available for purchase.
     </v-card-text>
   </Event>
 </template>
