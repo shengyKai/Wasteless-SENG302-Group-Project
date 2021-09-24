@@ -1,8 +1,18 @@
 <template>
   <Event :event="event" :title="title" :error="errorMessage">
     <v-card-text class="pb-1">
-      You have purchased <b>{{itemBought}}</b> from <b><a ref="bla" :href="viewBusiness()">{{seller}}</a></b> for <b>${{price}}</b>.<br>
-      This can be collected from <b>{{location}}</b> or otherwise arranged with the seller.
+      You have purchased <strong>{{itemBought}}</strong> from
+      <strong>
+        <router-link
+          class="text--secondary"
+          ref="businessLink"
+          :to="`/business/${event.boughtSaleItem.product.business.id}`"
+        >
+          {{seller}}
+        </router-link>
+      </strong>
+      for <strong>${{price}}</strong>.<br>
+      This can be collected from <strong>{{location}}</strong> or otherwise arranged with the seller.
     </v-card-text>
   </Event>
 </template>
@@ -11,7 +21,7 @@
 import Event from "@/components/home/newsfeed/Event";
 
 export default {
-  name: "PurchaseEvent",
+  name: "PurchasedEvent",
   components: {
     Event
   },
@@ -31,7 +41,7 @@ export default {
       return "Purchased " + this.itemBought;
     },
     itemBought() {
-      return this.event.boughtSaleItem.quantity + " " + this.event.boughtSaleItem.product.name;
+      return this.event.boughtSaleItem.quantity + "x " + this.event.boughtSaleItem.product.name;
     },
     seller() {
       return this.event.boughtSaleItem.product.business.name;
@@ -57,11 +67,6 @@ export default {
       return this.event.boughtSaleItem.price;
     }
   },
-  methods: {
-    viewBusiness() {
-      this.$router.push("/business/" + this.event.boughtSaleItem.product.business.id);
-    }
-  }
 };
 </script>
 

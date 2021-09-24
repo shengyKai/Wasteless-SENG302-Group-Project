@@ -3,6 +3,7 @@ import axios from 'axios';
 import {User} from "@/api/user";
 import {MarketplaceCard, MarketplaceCardSection, Message} from "@/api/marketplace";
 import {Keyword} from "@/api/keyword";
+import {Product} from "@/api/product";
 import {Sale} from "@/api/sale";
 import {is} from 'typescript-is';
 
@@ -14,7 +15,7 @@ const instance = axios.create({
   withCredentials: true,
 });
 
-export type AnyEvent = GlobalMessageEvent | ExpiryEvent | DeleteEvent | KeywordCreatedEvent | MessageEvent | InterestEvent;
+export type AnyEvent = GlobalMessageEvent | ExpiryEvent | DeleteEvent | KeywordCreatedEvent | MessageEvent | InterestEvent | PurchasedEvent;
 
 export type EventTag = 'none' | 'red' | 'orange' | 'yellow' | 'green' | 'blue' | 'purple'
 export type EventStatus = 'normal' | 'starred' | 'archived'
@@ -60,8 +61,9 @@ export type InterestEvent = BaseEvent<'InterestEvent'> & {
   interested: boolean,
 }
 
-export type PurchaseEvent = BaseEvent<'PurchaseEvent'> & {
+export type PurchasedEvent = BaseEvent<'PurchasedEvent'> & {
   boughtSaleItem: {
+    id: number,
     buyer: User,
     product: Product
     interestCount: number,

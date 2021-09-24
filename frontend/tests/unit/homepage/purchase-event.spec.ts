@@ -1,7 +1,7 @@
 import Vue from 'vue';
 import Vuetify from 'vuetify';
 import { createLocalVue, mount, Wrapper } from '@vue/test-utils';
-import PurchaseEvent from '@/components/home/newsfeed/PurchaseEvent.vue';
+import PurchaseEvent from '@/components/home/newsfeed/PurchasedEvent.vue';
 
 import Vuex, { Store } from 'vuex';
 import { getStore, resetStoreForTesting, StoreData } from '@/store';
@@ -10,7 +10,7 @@ import router from "@/plugins/vue-router";
 
 Vue.use(Vuetify);
 
-describe('PurchaseEvent.vue', () => {
+describe('PurchasedEvent.vue', () => {
   let wrapper: Wrapper<any>;
   let vuetify: Vuetify;
   // The global store to be used
@@ -34,11 +34,6 @@ describe('PurchaseEvent.vue', () => {
       vuetify,
       store,
       router,
-      mocks: {
-        $router: {
-          push: () => {return;}
-        }
-      },
       propsData: {
         event: {
           "id": 1,
@@ -108,11 +103,11 @@ describe('PurchaseEvent.vue', () => {
   });
 
   it("Title has quantity and name", () => {
-    expect(wrapper.vm.title).toBe("Purchased 27 Humongous Vinegar");
+    expect(wrapper.vm.title).toBe("Purchased 27x Humongous Vinegar");
   });
 
   it("Body has quantity and name", () => {
-    expect(wrapper.vm.itemBought).toBe("27 Humongous Vinegar");
+    expect(wrapper.vm.itemBought).toBe("27x Humongous Vinegar");
   });
 
   it("Body has price", () => {
@@ -125,12 +120,5 @@ describe('PurchaseEvent.vue', () => {
 
   it("Body has location", () => {
     expect(wrapper.vm.location).toBe("161 Clyde Road, Beaver County, Tapanui, Ulster, Malaysia");
-  });
-
-  it("Clicking business name takes you to the Business Home Page", async () => {
-    const busLink = wrapper.findComponent({ref: 'bla'});
-    await busLink.trigger("click");
-    let viewBusinessSpy = jest.spyOn(wrapper.vm, 'viewBusiness');
-    expect(router.currentRoute.path).toBe("/business/1");
   });
 });

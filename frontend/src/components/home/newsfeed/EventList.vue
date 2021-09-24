@@ -11,7 +11,7 @@
           class="full-width center-vertical"
         />
         <div
-          class="font-weight-medium center-horisontal secondary--text white"
+          class="font-weight-medium center-horizontal secondary--text white"
         >
           {{ event }}
         </div>
@@ -29,10 +29,8 @@
         <KeywordCreated v-else-if="event.type === 'KeywordCreatedEvent'" :event="event"/>
         <MessageEvent v-else-if="event.type === 'MessageEvent'" :event="event"/>
         <InterestEvent v-else-if="event.type === 'InterestEvent'" :event="event"/>
-        <PurchaseEvent v-else-if="event.type === 'PurchaseEvent'" :event="event"/>
-        <Event v-else :title="event.type">
-          <pre>{{ event }}</pre>
-        </Event>
+        <PurchasedEvent v-else-if="event.type === 'PurchasedEvent'" :event="event"/>
+        <Event v-else :title="event.type" :event="event"/>
       </v-card>
     </template>
     <!--paginate results-->
@@ -58,11 +56,11 @@ import GlobalMessage from "./GlobalMessage.vue";
 import KeywordCreated from './KeywordCreated.vue';
 import MessageEvent from './MessageEvent.vue';
 import InterestEvent from './InterestEvent.vue';
-import PurchaseEvent from './PurchaseEvent.vue';
+import PurchasedEvent from './PurchasedEvent.vue';
 
 export default {
   name: 'EventList',
-  components: {Event, InterestEvent, DeleteEvent, ExpiryEvent, GlobalMessage, KeywordCreated, MessageEvent, PurchaseEvent},
+  components: {Event, InterestEvent, DeleteEvent, ExpiryEvent, GlobalMessage, KeywordCreated, MessageEvent, PurchasedEvent},
   props: ['events', 'isFiltered'],
   data() {
     return {
