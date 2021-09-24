@@ -366,20 +366,6 @@ class ImageTests {
         assertNull(image.getAttachment());
     }
 
-    @Test
-    void getAttachment_savedUser_userReturned() {
-        var image = imageRepository.save(new Image("foo.png", "bar.png"));
-
-        var user = createUser();
-        user.addImage(image);
-        userRepository.save(user);
-
-        try (Session session = sessionFactory.openSession()) {
-            image = session.get(Image.class, image.getID());
-            assertTrue(image.getAttachment() instanceof User);
-            assertEquals(user.getUserID(), ((User)image.getAttachment()).getUserID());
-        }
-    }
 
     @Test
     void getAttachment_savedBusiness_businessReturned() {
@@ -411,33 +397,7 @@ class ImageTests {
         }
     }
 
-    @Test
-    void save_savedUserAndBusinessWithImage_failsToSave() {
-        var image = imageRepository.save(new Image("foo.png", "bar.png"));
 
-        var user = createUser();
-        user.addImage(image);
-        user = userRepository.save(user);
-
-        var business = createBusiness(user);
-        business.addImage(image);
-
-        assertThrows(DataIntegrityViolationException.class, () -> businessRepository.save(business));
-    }
-
-    @Test
-    void save_savedUserAndProductWithImage_failsToSave() {
-        var image = imageRepository.save(new Image("foo.png", "bar.png"));
-
-        var user = createUser();
-        user.addImage(image);
-        user = userRepository.save(user);
-
-        var product = createProduct(businessRepository.save(createBusiness(user)));
-        product.addImage(image);
-
-        assertThrows(DataIntegrityViolationException.class, () -> productRepository.save(product));
-    }
 
     @Test
     void save_savedBusinessAndProduct_failsToSave() {

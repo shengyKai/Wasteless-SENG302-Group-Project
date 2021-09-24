@@ -25,7 +25,7 @@ import org.seng302.leftovers.persistence.SearchMarketplaceCardHelper;
 import org.seng302.leftovers.persistence.UserRepository;
 import org.seng302.leftovers.persistence.event.ExpiryEventRepository;
 import org.seng302.leftovers.tools.AuthenticationTokenManager;
-import org.seng302.leftovers.tools.SearchHelper;
+import org.seng302.leftovers.service.search.SearchPageConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -686,7 +686,7 @@ class CardControllerTest {
                 .param("reverse", "false"))
                 .andExpect(status().isOk())
                 .andReturn();
-        var expectedPageRequest = SearchHelper.getPageRequest(6, 8, Sort.by(new Sort.Order(Sort.Direction.ASC, "created").ignoreCase()));
+        var expectedPageRequest = SearchPageConstructor.getPageRequest(6, 8, Sort.by(new Sort.Order(Sort.Direction.ASC, "created").ignoreCase()));
         verify(marketplaceCardRepository).getAllBySection(section, expectedPageRequest);
 
         JSONParser parser = new JSONParser(JSONParser.MODE_PERMISSIVE);
@@ -714,7 +714,7 @@ class CardControllerTest {
                 .param("reverse", "false"))
                 .andExpect(status().isOk())
                 .andReturn();
-        var expectedPageRequest = SearchHelper.getPageRequest(6, 8, Sort.by(new Sort.Order(Sort.Direction.ASC, ordering).ignoreCase()));
+        var expectedPageRequest = SearchPageConstructor.getPageRequest(6, 8, Sort.by(new Sort.Order(Sort.Direction.ASC, ordering).ignoreCase()));
         verify(marketplaceCardRepository).getAllBySection(MarketplaceCard.Section.WANTED, expectedPageRequest);
 
         JSONParser parser = new JSONParser(JSONParser.MODE_PERMISSIVE);
@@ -820,7 +820,7 @@ class CardControllerTest {
                 .andExpect(status().isOk())
                 .andReturn();
 
-        var expectedPageRequest = SearchHelper.getPageRequest(6, 8, Sort.by(new Sort.Order(Sort.Direction.ASC, ordering).ignoreCase()));
+        var expectedPageRequest = SearchPageConstructor.getPageRequest(6, 8, Sort.by(new Sort.Order(Sort.Direction.ASC, ordering).ignoreCase()));
 
         verify(marketplaceCardRepository).findAll(combinedSpec, expectedPageRequest);
 
@@ -856,7 +856,7 @@ class CardControllerTest {
                 .andExpect(status().isOk())
                 .andReturn();
 
-        var expectedPageRequest = SearchHelper.getPageRequest(6, 8, Sort.by(new Sort.Order(Sort.Direction.ASC, "created").ignoreCase()));
+        var expectedPageRequest = SearchPageConstructor.getPageRequest(6, 8, Sort.by(new Sort.Order(Sort.Direction.ASC, "created").ignoreCase()));
 
         verify(marketplaceCardRepository).findAll(combinedSpec, expectedPageRequest);
 
@@ -878,7 +878,7 @@ class CardControllerTest {
      * Creates several marketplace cards based on a product. These items have
      * differing attributes to identify them.
      * 
-     * @throws Exception
+     * @throws Exception Exception
      */
     public void addSeveralMarketplaceCards(List<MarketplaceCard> cards) throws Exception {
         cards.add(new MarketplaceCard.Builder().withCreator(testUser).withCloses(Instant.now().plus(1, ChronoUnit.HOURS))
@@ -990,7 +990,7 @@ class CardControllerTest {
                 .param("page", "6"))
                 .andExpect(status().isOk())
                 .andReturn();
-        var expectedPageRequest = SearchHelper.getPageRequest(6, 8, Sort.by(new Sort.Order(Sort.Direction.DESC, "lastRenewed")));
+        var expectedPageRequest = SearchPageConstructor.getPageRequest(6, 8, Sort.by(new Sort.Order(Sort.Direction.DESC, "lastRenewed")));
         verify(marketplaceCardRepository).getAllByCreator(mockUser, expectedPageRequest);
 
         JSONParser parser = new JSONParser(JSONParser.MODE_PERMISSIVE);
@@ -1020,7 +1020,7 @@ class CardControllerTest {
                 .andReturn();
         
         //verify the arguments for the method call are the same
-        var expectedPageRequest = SearchHelper.getPageRequest(6, 8, Sort.by(List.of(new Sort.Order(Sort.Direction.ASC, "creator.address.country").ignoreCase(), new Sort.Order(Sort.Direction.ASC, "creator.address.city").ignoreCase())));
+        var expectedPageRequest = SearchPageConstructor.getPageRequest(6, 8, Sort.by(List.of(new Sort.Order(Sort.Direction.ASC, "creator.address.country").ignoreCase(), new Sort.Order(Sort.Direction.ASC, "creator.address.city").ignoreCase())));
         verify(marketplaceCardRepository).getAllBySection(MarketplaceCard.Section.WANTED, expectedPageRequest);
 
         JSONParser parser = new JSONParser(JSONParser.MODE_PERMISSIVE);
@@ -1049,7 +1049,7 @@ class CardControllerTest {
                 .andReturn();
         
         //verify the arguments for the method call are the same
-        var expectedPageRequest = SearchHelper.getPageRequest(6, 8, Sort.by(List.of(new Sort.Order(Sort.Direction.DESC, "creator.address.country").ignoreCase(), new Sort.Order(Sort.Direction.DESC, "creator.address.city").ignoreCase())));
+        var expectedPageRequest = SearchPageConstructor.getPageRequest(6, 8, Sort.by(List.of(new Sort.Order(Sort.Direction.DESC, "creator.address.country").ignoreCase(), new Sort.Order(Sort.Direction.DESC, "creator.address.city").ignoreCase())));
         verify(marketplaceCardRepository).getAllBySection(MarketplaceCard.Section.WANTED, expectedPageRequest); 
     }
 }

@@ -1,5 +1,5 @@
 <template>
-  <div  class="d-flex flex-column" no-gutters>
+  <div class="d-flex flex-column" no-gutters>
     <v-row justify="center">
       <v-col cols="10">
         <v-card max-width=1800px>
@@ -149,37 +149,8 @@
                     </v-row>
                   </div>
                   <v-card-title class="mt-n3">Image</v-card-title>
-                  <v-card v-if="businessImages && businessImages.length > 0">
-                    <ImageCarousel
-                      :imagesList="businessImages"
-                      :showMakePrimary="true"
-                      :showDelete="false"
-                      @change-primary-image="makeImagePrimary"
-                      ref="businessImageCarousel"
-                    />
-                  </v-card>
-                  <!-- INPUT: Image Uploader -->
-                  <v-btn
-                    class="upload-image"
-                    color="primary"
-                    outlined
-                    @click="showImageUploaderForm=true"
-                  >
-                    <v-icon
-                      class="expand-icon"
-                      color="primary"
-                    >
-                      mdi-upload
-                    </v-icon>
-                    Upload new image
-                  </v-btn>
+                  <!-- INPUT: Business images -->
                   <ImageManager/>
-                  <BusinessImageUploader
-                    v-model="imageFile"
-                    v-if="showImageUploaderForm"
-                    @closeDialog="showImageUploaderForm=false"
-                    @uploadImage="addImage"/>
-                  <v-card-text v-if="allImageFiles.length > 0"> Images uploaded: {{ imageNames }} </v-card-text>
                   <p class="error-text" v-if ="errorMessage !== undefined"> {{errorMessage}} </p>
                 </v-container>
               </v-card-text>
@@ -257,7 +228,6 @@
 
 <script>
 import LocationAutocomplete from '@/components/utils/LocationAutocomplete';
-import BusinessImageUploader from "@/components/utils/BusinessImageUploader";
 import ImageManager from "@/components/utils/ImageManager";
 import {
   alphabetExtendedMultilineRules,
@@ -266,15 +236,13 @@ import {
   maxCharRules, postCodeRules, streetNumRules,
   USER_ROLES
 } from "@/utils";
-import { modifyBusiness, uploadBusinessImage, makeBusinessImagePrimary, getUser } from '@/api/internal';
-import ImageCarousel from "@/components/utils/ImageCarousel";
+import { modifyBusiness } from '@/api/business';
+import { getUser } from '@/api/user';
 
 export default {
   name: 'ModifyBusiness',
   components: {
     LocationAutocomplete,
-    BusinessImageUploader,
-    ImageCarousel,
     ImageManager
   },
   props: {
@@ -283,7 +251,6 @@ export default {
   data() {
     return {
       currencyConfirmDialog: false,
-      serverUrl: process.env.VUE_APP_SERVER_ADD,
       readableAddress: "",
       errorMessage: undefined,
       dialog: true,
@@ -297,7 +264,6 @@ export default {
       region: this.business.address.region,
       country: this.business.address.country,
       postcode: this.business.address.postcode,
-      images: this.business.images || [],
       businessTypes: [
         'Accommodation and Food Services',
         'Charitable organisation',
@@ -306,13 +272,10 @@ export default {
       ],
       updateProductCountry: false,
       valid: false,
-      showImageUploaderForm: false,
       showAlert: false,
       showChangeAdminAlert: false,
       primaryAdminAlertMsg: "",
       primaryAdministratorId: this.business.primaryAdministratorId,
-      imageFile: undefined,
-      allImageFiles: [],
       maxCharRules: () => maxCharRules(100),
       maxCharDescriptionRules: ()=> maxCharRules(200),
       mandatoryRules: ()=> mandatoryRules,
@@ -339,12 +302,6 @@ export default {
     isPrimaryOwner() {
       return this.$store.state.user.id === this.business.primaryAdministratorId;
     },
-    imageNames() {
-      return this.allImageFiles.map((image) => image.name).join(", ");
-    },
-    businessImages() {
-      return this.business.images;
-    }
   },
   methods: {
     /**
@@ -370,18 +327,6 @@ export default {
      */
     discardButton() {
       this.$emit('discardModifyBusiness');
-    },
-    /**
-     * Sets the given image as primary image to be displayed
-     * @param imageId ID of the Image to set
-     */
-    async makeImagePrimary(imageId) {
-      this.errorMessage = undefined;
-      const result = await makeBusinessImagePrimary(this.business.id, imageId);
-      if (typeof result === 'string') {
-        this.errorMessage = result;
-        this.$refs.businessImageCarousel.forceClose();
-      }
     },
     /**
      * Action(s) of modifying a business
@@ -424,11 +369,6 @@ export default {
       if (typeof result === 'string') {
         this.errorMessage = result;
       }
-      for (let image of this.allImageFiles) {
-        if (this.errorMessage === undefined) {
-          await this.uploadImage(image);
-        }
-      }
 
       // Updates the $store.state.user.businessesAdministered property if we are administering this business
       if (this.administrators.some(admin => admin.id === this.$store.state.user.id)) {
@@ -461,47 +401,6 @@ export default {
       }
       this.primaryAdministratorId = admin.id;
     },
-    addImage() {
-      this.showImageUploaderForm = false;
-      this.allImageFiles.push(this.imageFile);
-      this.imageFile = undefined;
-    },
-    async uploadImage(image) {
-      const result = await uploadBusinessImage(this.business.id, image);
-      if (typeof result === 'string') {
-        this.errorMessage = result;
-      }
-    }
   },
 };
 </script>
-
-<style scoped>
-.body {
-    padding: 16px;
-    width: 100%;
-    margin-top: 140px;
-}
-
-.top-section {
-  display: flex;
-  flex-wrap: wrap;
-}
-
-.business-modify {
-  margin-top: 20px;
-}
-
-.modify-business-button {
-  display: block;
-  margin-right: 48%;
-}
-
-.expand-icon {
-  padding-right: 10px;
-}
-
-.upload-image {
-  margin-top: 25px;
-}
-</style>

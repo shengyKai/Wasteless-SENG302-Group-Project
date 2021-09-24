@@ -1,6 +1,10 @@
-import {Keyword, MarketplaceCard, MarketplaceCardSection, MaybeError, Message, Sale, User, Product} from "./internal";
+import {MaybeError} from "./internal";
 import axios from 'axios';
-import { is } from 'typescript-is';
+import {User} from "@/api/user";
+import {MarketplaceCard, MarketplaceCardSection, Message} from "@/api/marketplace";
+import {Keyword} from "@/api/keyword";
+import {Sale} from "@/api/sale";
+import {is} from 'typescript-is';
 
 const SERVER_URL = process.env.VUE_APP_SERVER_ADD;
 
@@ -140,4 +144,44 @@ export async function getEvents(userId: number, modifiedSince: string | undefine
     if (status === 406) return 'User does not exist';
     return 'Request failed: ' + error.response?.data.message;
   }
+}
+
+/**
+ * Deletes a notification from your feed
+ * @param eventId The id of the notification to be deleted
+ */
+export async function deleteNotification(eventId: number): Promise<MaybeError<undefined>> {
+  try {
+    await instance.delete(`/feed/${eventId}`);
+  } catch (error) {
+    let status: number | undefined = error.response?.status;
+    if (status === undefined) return 'Failed to reach backend';
+    if (status === 401) return 'You have been logged out. Please login again and retry';
+    if (status === 403) return 'Invalid authorization for notification removal';
+    // If the notification is not found on the backend, respond the same way as if it was successfully deleted.
+    if (status === 406) return undefined;
+    return 'Request failed: ' + error.response?.data.message;
+  }
+  return undefined;
+}
+
+/**
+ * Tag an event with a coloured tag
+ * @param eventId The ID of the event
+ * @param colour  The colour of the tag user wan to set
+ */
+export async function setEventTag(eventId: number, colour: EventTag): Promise<MaybeError<undefined>> {
+  try {
+    await instance.put(`/feed/${eventId}/tag`, {
+      value: colour
+    });
+  } catch (error) {
+    let status: number | undefined = error.response?.status;
+    if (status === undefined) return 'Failed to reach backend';
+    if (status === 401) return 'You have been logged out. Please login again and retry';
+    if (status === 403) return 'Invalid authorization for Event tagging';
+    if (status === 406) return 'Event not found';
+    return 'Request failed: ' + error.response?.data.message;
+  }
+  return undefined;
 }

@@ -14,7 +14,7 @@ import org.seng302.leftovers.persistence.MessageRepository;
 import org.seng302.leftovers.persistence.UserRepository;
 import org.seng302.leftovers.service.MessageService;
 import org.seng302.leftovers.tools.AuthenticationTokenManager;
-import org.seng302.leftovers.tools.SearchHelper;
+import org.seng302.leftovers.service.search.SearchPageConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
@@ -120,7 +120,7 @@ public class ConversationController {
             }
 
             var conversation = conversationRepository.getConversation(card, buyer);
-            var pageRequest = SearchHelper.getPageRequest(page, resultsPerPage, Sort.by("created").descending());
+            var pageRequest = SearchPageConstructor.getPageRequest(page, resultsPerPage, Sort.by("created").descending());
             var messages = messageRepository.findAllByConversation(conversation, pageRequest);
 
             return new ResultPageDTO<>(messages.map(MessageDTO::new));
