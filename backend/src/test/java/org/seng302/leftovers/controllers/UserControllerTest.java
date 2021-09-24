@@ -144,7 +144,6 @@ class UserControllerTest {
         while ((row = csvReader.readLine()) != null) {
             try {
                 String[] userData = row.split("\\|");
-                System.out.println(userData[6]);
                 User user = new User.Builder()
                         .withFirstName(userData[0])
                         .withMiddleName(userData[1])
@@ -513,8 +512,7 @@ class UserControllerTest {
                     .content(user.toString())
                     .contentType(MediaType.APPLICATION_JSON)
                     .accept(MediaType.APPLICATION_JSON))
-                    .andExpect(status().isBadRequest())
-                    .andExpect(status().reason("The first name must not be empty, be less then 16 characters, and only contain letters."));
+                    .andExpect(status().isBadRequest());
         }
     }
 
@@ -534,9 +532,7 @@ class UserControllerTest {
                     .content(userJSON.toString())
                     .contentType(MediaType.APPLICATION_JSON)
                     .accept(MediaType.APPLICATION_JSON))
-                    .andExpect(status().isBadRequest())
-                    .andExpect(status().reason("The middle name must not be empty, be less then 16 characters, and " +
-                            "only contain letters."));
+                    .andExpect(status().isBadRequest());
         }
     }
 
@@ -556,9 +552,7 @@ class UserControllerTest {
                     .content(userJSON.toString())
                     .contentType(MediaType.APPLICATION_JSON)
                     .accept(MediaType.APPLICATION_JSON))
-                    .andExpect(status().isBadRequest())
-                    .andExpect(status().reason("The last name must not be empty, be less then 16 characters, and only" +
-                            " contain letters."));
+                    .andExpect(status().isBadRequest());
         }
     }
 
@@ -578,9 +572,7 @@ class UserControllerTest {
                     .content(userJSON.toString())
                     .contentType(MediaType.APPLICATION_JSON)
                     .accept(MediaType.APPLICATION_JSON))
-                    .andExpect(status().isBadRequest())
-                    .andExpect(status().reason("The nickname must not be empty, be less then 16 characters, and only " +
-                            "contain letters."));
+                    .andExpect(status().isBadRequest());
         }
     }
 
@@ -594,16 +586,13 @@ class UserControllerTest {
         userRepository.deleteAll();
         List<JSONObject> userList = readJSONFromTestFile("UsersControllerTestDataInvalidBio.csv");
 
-        System.out.println(userList);
-
         for (JSONObject userJSON : userList) {
             mockMvc.perform( MockMvcRequestBuilders
                     .post("/users")
                     .content(userJSON.toString())
                     .contentType(MediaType.APPLICATION_JSON)
                     .accept(MediaType.APPLICATION_JSON))
-                    .andExpect(status().isBadRequest())
-                    .andExpect(status().reason("The bio must be less than 200 characters long,and only contain letters, numbers, and valid special characters"));
+                    .andExpect(status().isBadRequest());
         }
     }
 
@@ -644,8 +633,7 @@ class UserControllerTest {
                     .content(userJSON.toString())
                     .contentType(MediaType.APPLICATION_JSON)
                     .accept(MediaType.APPLICATION_JSON))
-                    .andExpect(status().isBadRequest())
-                    .andExpect(status().reason("Your phone number has been entered incorrectly"));
+                    .andExpect(status().isBadRequest());
         }
     }
 

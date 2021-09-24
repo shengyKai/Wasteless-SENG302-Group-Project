@@ -1,5 +1,6 @@
 package org.seng302.leftovers.controllers;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.SneakyThrows;
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
@@ -17,7 +18,6 @@ import org.seng302.leftovers.persistence.MessageRepository;
 import org.seng302.leftovers.persistence.UserRepository;
 import org.seng302.leftovers.service.MessageService;
 import org.seng302.leftovers.tools.AuthenticationTokenManager;
-import org.seng302.leftovers.tools.JsonTools;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -45,6 +45,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 class ConversationControllerTest {
     @Autowired
     private MockMvc mockMvc;
+    @Autowired
+    private ObjectMapper objectMapper;
     @Mock
     private MarketplaceCardRepository marketplaceCardRepository;
     @Mock
@@ -440,7 +442,7 @@ class ConversationControllerTest {
         var resultArray = (JSONArray) response.get("results");
         var messageJson = (JSONObject) resultArray.get(0);
         assertEquals(existingMessage1.getCreated().toString(), messageJson.getAsString("created"));
-        assertEquals(existingMessage1.getSender().getUserID(), JsonTools.parseLongFromJsonField(messageJson, "senderId"));
+        assertEquals(existingMessage1.getSender().getUserID(), objectMapper.convertValue(messageJson.get("senderId"), Long.class));
         assertEquals(existingMessage1.getContent(), messageJson.getAsString("content"));
     }
 
@@ -463,7 +465,7 @@ class ConversationControllerTest {
             var messageJson = (JSONObject) resultArray.get(i);
             var expectedMessage = expectedMessages.get(i);
             assertEquals(expectedMessage.getCreated().toString(), messageJson.getAsString("created"));
-            assertEquals(expectedMessage.getSender().getUserID(), JsonTools.parseLongFromJsonField(messageJson, "senderId"));
+            assertEquals(expectedMessage.getSender().getUserID(), objectMapper.convertValue(messageJson.get("senderId"), Long.class));
             assertEquals(expectedMessage.getContent(), messageJson.getAsString("content"));
         }
     }

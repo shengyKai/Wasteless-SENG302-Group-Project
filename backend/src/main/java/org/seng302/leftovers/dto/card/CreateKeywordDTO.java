@@ -1,4 +1,4 @@
-package org.seng302.leftovers.dto;
+package org.seng302.leftovers.dto.card;
 
 import lombok.EqualsAndHashCode;
 import lombok.Getter;

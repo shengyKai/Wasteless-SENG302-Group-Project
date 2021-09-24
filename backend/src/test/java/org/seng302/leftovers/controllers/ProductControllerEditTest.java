@@ -12,7 +12,7 @@ import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.seng302.leftovers.entities.Business;
 import org.seng302.leftovers.entities.Product;
-import org.seng302.leftovers.exceptions.AccessTokenException;
+import org.seng302.leftovers.exceptions.AccessTokenResponseException;
 import org.seng302.leftovers.persistence.BusinessRepository;
 import org.seng302.leftovers.persistence.ProductRepository;
 import org.seng302.leftovers.tools.AuthenticationTokenManager;
@@ -101,7 +101,7 @@ class ProductControllerEditTest {
     void editProduct_noAuthToken_401Response() throws Exception {
         // Mock the AuthenticationTokenManager to respond as it would when the authentication token is missing or invalid
         authenticationTokenManager.when(() -> AuthenticationTokenManager.checkAuthenticationToken(any()))
-                    .thenThrow(new AccessTokenException());
+                    .thenThrow(new AccessTokenResponseException());
 
         // Verify that a 401 response is received in response to the POST request
         mockMvc.perform(put("/businesses/1/products/APPLE-1")

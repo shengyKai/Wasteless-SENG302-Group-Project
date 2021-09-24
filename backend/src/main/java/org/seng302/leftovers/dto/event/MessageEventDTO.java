@@ -3,8 +3,8 @@ package org.seng302.leftovers.dto.event;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.ToString;
-import org.seng302.leftovers.dto.ConversationDTO;
-import org.seng302.leftovers.dto.MessageDTO;
+import org.seng302.leftovers.dto.conversation.ConversationDTO;
+import org.seng302.leftovers.dto.conversation.MessageDTO;
 import org.seng302.leftovers.entities.event.MessageEvent;
 
 /**

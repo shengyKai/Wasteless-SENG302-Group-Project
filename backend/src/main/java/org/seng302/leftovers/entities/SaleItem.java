@@ -4,14 +4,12 @@ import lombok.NoArgsConstructor;
 import org.hibernate.annotations.Formula;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
-import org.springframework.http.HttpStatus;
-import org.springframework.web.server.ResponseStatusException;
+import org.seng302.leftovers.exceptions.ValidationResponseException;
 
 import javax.persistence.*;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -116,7 +114,7 @@ public class SaleItem {
         if (item != null) {
             this.inventoryItem = item;
         } else {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Cannot sell something that is not in your inventory");
+            throw new ValidationResponseException("Cannot sell something that is not in your inventory");
         }
     }
 
@@ -132,7 +130,7 @@ public class SaleItem {
      */
     public void setQuantity(int quantity) {
         if (quantity <= 0) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Quantity must be greater than 0");
+            throw new ValidationResponseException("Quantity must be greater than 0");
         }
 
         int diff = this.quantity - quantity;
@@ -155,10 +153,10 @@ public class SaleItem {
             if (newPrice.compareTo(BigDecimal.ZERO) >= 0) {
                 this.price = newPrice;
             } else {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Please enter a positive number");
+                throw new ValidationResponseException("Please enter a positive number");
             }
         } catch (Exception e) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Please enter a valid number");
+            throw new ValidationResponseException("Please enter a valid number");
         }
     }
 
@@ -189,10 +187,10 @@ public class SaleItem {
             return;
         }
         if (moreInfo.length() > 200) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Extra sale information must not be longer than 200 characters");
+            throw new ValidationResponseException("Extra sale information must not be longer than 200 characters");
         }
         if (!moreInfo.matches("^[\\p{Space}\\d\\p{Punct}\\p{L}]*$")) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Extra sale info must only contain letters, numbers, whitespace and punctuation");
+            throw new ValidationResponseException("Extra sale info must only contain letters, numbers, whitespace and punctuation");
         }
         this.moreInfo = moreInfo;
     }
@@ -219,17 +217,17 @@ public class SaleItem {
      */
     public void setCloses(LocalDate newCloses) {
         if (inventoryItem.getExpires().isBefore(LocalDate.now())) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "This product is already expired");
+            throw new ValidationResponseException("This product is already expired");
         } else if (newCloses.isAfter(LocalDate.now().minus(1, DAYS))) {
             this.closes = newCloses;
         } else {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "You cannot set close dates in the past");
+            throw new ValidationResponseException("You cannot set close dates in the past");
         }
     }
 
     public void setCloses() {
         if (inventoryItem.getExpires().isBefore(LocalDate.now())) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "This product is already expired");
+            throw new ValidationResponseException("This product is already expired");
         }
         this.closes = inventoryItem.getExpires();
     }
@@ -293,7 +291,7 @@ public class SaleItem {
             try {
                 this.price = new BigDecimal(price);
             } catch (NumberFormatException ignored) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The price is not a number");
+                throw new ValidationResponseException("The price is not a number");
             }
             return this;
         }

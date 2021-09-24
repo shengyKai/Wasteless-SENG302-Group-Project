@@ -5,11 +5,11 @@ import org.apache.logging.log4j.Logger;
 import org.seng302.leftovers.entities.Message;
 import org.seng302.leftovers.entities.User;
 import org.seng302.leftovers.entities.event.MessageEvent;
+import org.seng302.leftovers.exceptions.InternalErrorResponseException;
 import org.seng302.leftovers.persistence.event.EventRepository;
 import org.seng302.leftovers.persistence.event.MessageEventRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import java.util.Optional;
@@ -50,7 +50,7 @@ public class MessageService {
                     messageEvent = new MessageEvent(user, message);
                 }
                 eventRepository.save(messageEvent);
-            } catch (ResponseStatusException e) {
+            } catch (InternalErrorResponseException e) {
                 logger.error(e.getMessage());
             }
         }

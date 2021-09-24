@@ -5,11 +5,10 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.ToString;
-import net.minidev.json.JSONObject;
+import org.seng302.leftovers.dto.ImageDTO;
 import org.seng302.leftovers.dto.user.UserResponseDTO;
 import org.seng302.leftovers.entities.Account;
 import org.seng302.leftovers.entities.Business;
-import org.seng302.leftovers.entities.Image;
 
 import java.time.Instant;
 import java.util.Comparator;
@@ -25,7 +24,7 @@ import java.util.stream.Collectors;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class BusinessResponseDTO extends CreateBusinessDTO {
     private Long id;
-    private List<JSONObject> images;
+    private List<ImageDTO> images;
     @JsonFormat(shape=JsonFormat.Shape.STRING)
     private Instant created;
 
@@ -59,8 +58,7 @@ public class BusinessResponseDTO extends CreateBusinessDTO {
     protected BusinessResponseDTO(Business business, boolean includeAdminDetails) {
         super(business);
         this.id = business.getId();
-        // TODO When ImageDTO is done, then update this
-        this.images = business.getImages().stream().map(Image::constructJSONObject).collect(Collectors.toList());
+        this.images = business.getImages().stream().map(ImageDTO::new).collect(Collectors.toList());
         this.created = business.getCreated();
 
         if (includeAdminDetails) {

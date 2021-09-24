@@ -43,7 +43,7 @@ class BoughtSaleItemTest {
         assertEquals(saleItem.getPrice(), boughtSaleItem.getPrice());
         assertEquals(saleItem.getQuantity(), boughtSaleItem.getQuantity());
         assertEquals(saleItem.getCreated(), boughtSaleItem.getListingDate());
-        assertEquals(saleItem.getLikeCount(), boughtSaleItem.getLikeCount());
+        assertEquals(saleItem.getLikeCount(), boughtSaleItem.getInterestCount());
     }
 
     @Test

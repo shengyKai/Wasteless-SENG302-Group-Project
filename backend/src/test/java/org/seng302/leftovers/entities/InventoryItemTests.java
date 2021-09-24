@@ -2,31 +2,28 @@ package org.seng302.leftovers.entities;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import net.minidev.json.JSONObject;
-import org.apache.tomcat.jni.Local;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.seng302.leftovers.dto.business.BusinessType;
 import org.seng302.leftovers.dto.inventory.InventoryItemResponseDTO;
 import org.seng302.leftovers.dto.product.ProductResponseDTO;
-import org.seng302.leftovers.dto.business.BusinessType;
+import org.seng302.leftovers.exceptions.ValidationResponseException;
 import org.seng302.leftovers.persistence.BusinessRepository;
 import org.seng302.leftovers.persistence.InventoryItemRepository;
 import org.seng302.leftovers.persistence.ProductRepository;
 import org.seng302.leftovers.persistence.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.http.HttpStatus;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
 import java.time.temporal.ChronoUnit;
-import java.util.Arrays;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -145,58 +142,44 @@ class InventoryItemTests {
     */
 
     @Test
-    void createInventoryItem_withNullProduct_exceptionThrown() throws Exception {
-        try {
-            InventoryItem invItem = new InventoryItem.Builder()
-                    .withProduct(null)
-                    .withQuantity(2)
-                    .withExpires(LocalDate.now().plus(50, ChronoUnit.DAYS))
-                    .build();
-            // fail();
-        } catch (ResponseStatusException e) {
-            assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
-            assertEquals("No product was provided", e.getReason());
-        } catch (Exception e) { fail(); }
+    void createInventoryItem_withNullProduct_exceptionThrown() {
+        var invItemBuilder = new InventoryItem.Builder()
+                .withProduct(null)
+                .withQuantity(2)
+                .withExpires(LocalDate.now().plus(50, ChronoUnit.DAYS));
+        var exception = assertThrows(ValidationResponseException.class, invItemBuilder::build);
+        assertEquals("No product was provided", exception.getMessage());
+    }
+
+    @Test
+    void createInventoryItem_withNullExpires_exceptionThrown() {
+        var invItemBuilder = new InventoryItem.Builder()
+                .withProduct(testProduct)
+                .withQuantity(2)
+                .withExpires((LocalDate) null);
+        var exception = assertThrows(ValidationResponseException.class, invItemBuilder::build);
+        assertEquals("No expiry date was provided", exception.getMessage());
     }
     @Test
-    void createInventoryItem_withNullExpires_exceptionThrown() throws Exception {
-        try {
-            InventoryItem invItem = new InventoryItem.Builder()
-                    .withProduct(testProduct)
-                    .withQuantity(1)
-                    .withExpires((LocalDate) null)
-                    .build();
-        } catch (ResponseStatusException e) {
-            assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
-            assertEquals("No expiry date was provided", e.getReason());
-        } catch (Exception e) { fail(); }
+    void createInventoryItem_withZeroQuantity_exceptionThrown() {
+        var invItemBuilder = new InventoryItem.Builder()
+                .withProduct(testProduct)
+                .withQuantity(0)
+                .withExpires(LocalDate.now().plus(50, ChronoUnit.DAYS));
+        var exception = assertThrows(ValidationResponseException.class, invItemBuilder::build);
+        assertEquals("A quantity less than 1 was provided", exception.getMessage());
     }
+
     @Test
-    void createInventoryItem_withZeroQuantity_exceptionThrown() throws Exception {
-        try {
-            InventoryItem invItem = new InventoryItem.Builder()
-                    .withProduct(testProduct)
-                    .withQuantity(0)
-                    .withExpires(LocalDate.now().plus(50, ChronoUnit.DAYS))
-                    .build();
-        } catch (ResponseStatusException e) {
-            assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
-            assertEquals("A quantity less than 1 was provided", e.getReason());
-        } catch (Exception e) { fail(); }
+    void createInventoryItem_withNegativeQuantity_exceptionThrown() {
+        var invItemBuilder = new InventoryItem.Builder()
+                .withProduct(testProduct)
+                .withQuantity(-69)
+                .withExpires(LocalDate.now().plus(50, ChronoUnit.DAYS));
+        var exception = assertThrows(ValidationResponseException.class, invItemBuilder::build);
+        assertEquals("A quantity less than 1 was provided", exception.getMessage());
     }
-    @Test
-    void createInventoryItem_withNegativeQuantity_exceptionThrown() throws Exception {
-        try {
-            InventoryItem invItem = new InventoryItem.Builder()
-                    .withProduct(testProduct)
-                    .withQuantity(-69)
-                    .withExpires(LocalDate.now().plus(50, ChronoUnit.DAYS))
-                    .build();
-        } catch (ResponseStatusException e) {
-            assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
-            //assertEquals("A quantity less than 1 was provided", e.getReason());
-        } catch (Exception e) { fail(); }
-    }
+
     /**
      * The following test section will test attributes related to price which is 
      * Price per item, Total price
@@ -271,7 +254,7 @@ class InventoryItemTests {
         .withProduct(testProduct)
         .withQuantity(2)
         .withExpires(LocalDate.now().plus(50, ChronoUnit.DAYS));
-        assertThrows(ResponseStatusException.class, () -> {
+        assertThrows(ValidationResponseException.class, () -> {
             builder.withPricePerItem("xx0.1");
         });
     }
@@ -281,7 +264,7 @@ class InventoryItemTests {
         .withProduct(testProduct)
         .withQuantity(2)
         .withExpires(LocalDate.now().plus(50, ChronoUnit.DAYS));
-        assertThrows(ResponseStatusException.class, () -> {
+        assertThrows(ValidationResponseException.class, () -> {
             builder.withTotalPrice("xx0.1");
         });
     }
@@ -293,7 +276,7 @@ class InventoryItemTests {
             .withQuantity(2)
             .withExpires(LocalDate.now().plus(50, ChronoUnit.DAYS))
             .build();
-        assertThrows(ResponseStatusException.class, () -> {
+        assertThrows(ValidationResponseException.class, () -> {
             invItem.setPricePerItem(value);
         });
     }
@@ -305,7 +288,7 @@ class InventoryItemTests {
         .withQuantity(2)
         .withExpires(LocalDate.now().plus(50, ChronoUnit.DAYS))
         .build();
-        assertThrows(ResponseStatusException.class, () -> {
+        assertThrows(ValidationResponseException.class, () -> {
             invItem.setTotalPrice(value);
         });
     }
@@ -340,7 +323,7 @@ class InventoryItemTests {
                 .withQuantity(2)
                 .withExpires(LocalDate.now().plus(50, ChronoUnit.DAYS))
                 .withManufactured("2022-03-03");
-        assertThrows(ResponseStatusException.class, builder::build);
+        assertThrows(ValidationResponseException.class, builder::build);
     }
     @Test
     void createInventoryItem_withInvalidManufacturedFormat_objectNotCreated() {
@@ -372,7 +355,7 @@ class InventoryItemTests {
                 .withQuantity(2)
                 .withExpires(LocalDate.now().plus(50, ChronoUnit.DAYS))
                 .withSellBy("2000-03-03");
-        assertThrows(ResponseStatusException.class, builder::build);
+        assertThrows(ValidationResponseException.class, builder::build);
     }
     @Test
     void createInventoryItem_withDateInFutureForSellBy_objectCreated() throws Exception {
@@ -416,7 +399,7 @@ class InventoryItemTests {
                 .withQuantity(2)
                 .withExpires(LocalDate.now().plus(50, ChronoUnit.DAYS))
                 .withBestBefore("2000-03-03");
-        assertThrows(ResponseStatusException.class, builder::build);
+        assertThrows(ValidationResponseException.class, builder::build);
     }
     @Test
     void createInventoryItem_withDateInFutureForBestBefore_objectCreated() throws Exception {
@@ -642,7 +625,7 @@ class InventoryItemTests {
         var sellBy = dates.get(1);
         var bestBefore = dates.get(2);
 
-        assertThrows(ResponseStatusException.class, () -> invItem.setDates(manufactured, sellBy, bestBefore, null));
+        assertThrows(ValidationResponseException.class, () -> invItem.setDates(manufactured, sellBy, bestBefore, null));
         inventoryItemRepository.save(invItem);
         InventoryItem invItemRepo = inventoryItemRepository.findById(invItem.getId()).orElseThrow();
         assertEquals(originalManufactured, invItemRepo.getManufactured());
@@ -671,7 +654,7 @@ class InventoryItemTests {
         LocalDate originalSellBy = invItem.getSellBy();
         LocalDate originalBestBefore = invItem.getBestBefore();
         LocalDate originalExpires = invItem.getExpires();
-        assertThrows(ResponseStatusException.class, () -> {
+        assertThrows(ValidationResponseException.class, () -> {
             invItem.setDates(null, null, null, null);
         });
         inventoryItemRepository.save(invItem);
@@ -692,7 +675,7 @@ class InventoryItemTests {
         var sellBy = dates.get(1);
         var bestBefore = dates.get(2);
         var expires = dates.get(3);
-        assertThrows(ResponseStatusException.class, () -> invItem.setDates(manufacturedAfterToday, sellBy, bestBefore, expires));
+        assertThrows(ValidationResponseException.class, () -> invItem.setDates(manufacturedAfterToday, sellBy, bestBefore, expires));
         InventoryItem inventoryItemRepo = inventoryItemRepository.findById(invItem.getId()).orElseThrow();
         assertEquals(inventoryItemRepo.getManufactured(), originalManufactured);
     }
@@ -706,7 +689,7 @@ class InventoryItemTests {
         var sellBy = dates.get(1);
         var bestBefore = dates.get(2);
         var expires = dates.get(3);
-        assertThrows(ResponseStatusException.class, () -> invItem.setDates(manufacturedAfterToday, sellBy, bestBefore, expires));
+        assertThrows(ValidationResponseException.class, () -> invItem.setDates(manufacturedAfterToday, sellBy, bestBefore, expires));
         InventoryItem inventoryItemRepo = inventoryItemRepository.findById(invItem.getId()).orElseThrow();
         assertEquals(inventoryItemRepo.getManufactured(), originalManufactured);
     }
@@ -720,7 +703,7 @@ class InventoryItemTests {
         var manufactured = dates.get(0);
         var bestBefore = dates.get(2);
         var expires = dates.get(3);
-        assertThrows(ResponseStatusException.class, () -> invItem.setDates(manufactured, sellByBeforeToday, bestBefore, expires));
+        assertThrows(ValidationResponseException.class, () -> invItem.setDates(manufactured, sellByBeforeToday, bestBefore, expires));
         InventoryItem inventoryItemRepo = inventoryItemRepository.findById(invItem.getId()).orElseThrow();
         assertEquals(inventoryItemRepo.getSellBy(), originalSellBy);
     }
@@ -734,7 +717,7 @@ class InventoryItemTests {
         var manufactured = dates.get(0);
         var bestBefore = dates.get(2);
         var expires = dates.get(3);
-        assertThrows(ResponseStatusException.class, () -> invItem.setDates(manufactured, sellByBeforeToday, bestBefore, expires));
+        assertThrows(ValidationResponseException.class, () -> invItem.setDates(manufactured, sellByBeforeToday, bestBefore, expires));
         InventoryItem inventoryItemRepo = inventoryItemRepository.findById(invItem.getId()).orElseThrow();
         assertEquals(inventoryItemRepo.getSellBy(), originalSellBy);
     }
@@ -748,7 +731,7 @@ class InventoryItemTests {
         var manufactured = dates.get(0);
         var sellBy = dates.get(1);
         var expires = dates.get(3);
-        assertThrows(ResponseStatusException.class, () -> invItem.setDates(manufactured, sellBy, bestBeforeBeforeToday, expires));
+        assertThrows(ValidationResponseException.class, () -> invItem.setDates(manufactured, sellBy, bestBeforeBeforeToday, expires));
         InventoryItem inventoryItemRepo = inventoryItemRepository.findById(invItem.getId()).orElseThrow();
         assertEquals(inventoryItemRepo.getBestBefore(), originalBestBefore);
     }
@@ -762,7 +745,7 @@ class InventoryItemTests {
         var manufactured = dates.get(0);
         var sellBy = dates.get(1);
         var expires = dates.get(3);
-        assertThrows(ResponseStatusException.class, () -> invItem.setDates(manufactured, sellBy, bestBeforeBeforeToday, expires));
+        assertThrows(ValidationResponseException.class, () -> invItem.setDates(manufactured, sellBy, bestBeforeBeforeToday, expires));
         InventoryItem inventoryItemRepo = inventoryItemRepository.findById(invItem.getId()).orElseThrow();
         assertEquals(inventoryItemRepo.getBestBefore(), originalBestBefore);
     }
@@ -776,7 +759,7 @@ class InventoryItemTests {
         var manufactured = dates.get(0);
         var sellBy = dates.get(1);
         var bestBefore = dates.get(2);
-        assertThrows(ResponseStatusException.class, () -> {
+        assertThrows(ValidationResponseException.class, () -> {
             invItem.setDates(manufactured, sellBy, bestBefore, expiresBeforeToday);
         });
         InventoryItem inventoryItemRepo = inventoryItemRepository.findById(invItem.getId()).orElseThrow();
@@ -792,7 +775,7 @@ class InventoryItemTests {
         var manufactured = dates.get(0);
         var sellBy = dates.get(1);
         var bestBefore = dates.get(2);
-        assertThrows(ResponseStatusException.class, () -> invItem.setDates(manufactured, sellBy, bestBefore, expiresBeforeToday));
+        assertThrows(ValidationResponseException.class, () -> invItem.setDates(manufactured, sellBy, bestBefore, expiresBeforeToday));
         InventoryItem inventoryItemRepo = inventoryItemRepository.findById(invItem.getId()).orElseThrow();
         assertEquals(inventoryItemRepo.getExpires(), originalExpires);
     }
@@ -808,7 +791,7 @@ class InventoryItemTests {
         var newBestBefore = LocalDate.now().plusDays(11);
         var manufactured = dates.get(0);
         var expires = dates.get(3);
-        assertThrows(ResponseStatusException.class, () -> invItem.setDates(manufactured, newSellBy, newBestBefore, expires));
+        assertThrows(ValidationResponseException.class, () -> invItem.setDates(manufactured, newSellBy, newBestBefore, expires));
         InventoryItem inventoryItemRepo = inventoryItemRepository.findById(invItem.getId()).orElseThrow();
         assertEquals(inventoryItemRepo.getSellBy(), originalSellBy);
         assertEquals(inventoryItemRepo.getBestBefore(), originalBestBefore);
@@ -824,7 +807,7 @@ class InventoryItemTests {
         var newExpires = LocalDate.now().plusDays(11);
         var manufactured = dates.get(0);
         var sellBy = dates.get(1);
-        assertThrows(ResponseStatusException.class, () -> {
+        assertThrows(ValidationResponseException.class, () -> {
             invItem.setDates(manufactured, sellBy, newBestBefore, newExpires);
         });
         InventoryItem inventoryItemRepo = inventoryItemRepository.findById(invItem.getId()).orElseThrow();
@@ -842,9 +825,46 @@ class InventoryItemTests {
         var newExpires = LocalDate.now().plusDays(11);
         var manufactured = dates.get(0);
         var bestBefore = dates.get(2);
-        assertThrows(ResponseStatusException.class, () -> invItem.setDates(manufactured, newSellBy, bestBefore, newExpires));
+        assertThrows(ValidationResponseException.class, () -> invItem.setDates(manufactured, newSellBy, bestBefore, newExpires));
         InventoryItem inventoryItemRepo = inventoryItemRepository.findById(invItem.getId()).orElseThrow();
         assertEquals(inventoryItemRepo.getSellBy(), originalSellBy);
         assertEquals(inventoryItemRepo.getExpires(), originalExpires);
+    }
+
+    @ParameterizedTest
+    @ValueSource(ints = {0, -1, -3000})
+    void sellQuantity_saleQuantityLessThanZero_validationExceptionThrown(int saleQuantity) {
+        var exception = assertThrows(ValidationResponseException.class, () -> testInvItem.sellQuantity(saleQuantity));
+        assertEquals("Quantity sold must be at least 1", exception.getMessage());
+    }
+
+    @Test
+    void sellQuantity_saleQuantityGreaterThanQuantity_validationExceptionThrown() {
+        testInvItem.setQuantity(100);
+        assertEquals(100, testInvItem.getQuantity());
+        var exception = assertThrows(ValidationResponseException.class, () -> testInvItem.sellQuantity(200));
+        assertEquals("Quantity sold must not be greater than available quantity", exception.getMessage());
+    }
+
+    @Test
+    void sellQuantity_saleQuantityGreaterThanDifferenceBetweenQuantityAndRemainingQuantity_validationExceptionThrown() {
+        testInvItem.setQuantity(100);
+        testInvItem.setRemainingQuantity(50);
+        assertEquals(100, testInvItem.getQuantity());
+        assertEquals(50, testInvItem.getRemainingQuantity());
+        var exception = assertThrows(ValidationResponseException.class, () -> testInvItem.sellQuantity(70));
+        assertEquals("Inventory item quantity cannot be less than remaining quantity", exception.getMessage());
+    }
+
+    @ParameterizedTest
+    @ValueSource(ints = {50, 1, 33})
+    void sellQuantity_saleQuantityNotGreaterThanDifferenceBetweenQuantityAndRemainingQuantity_quantityUpdated(int saleQuantity) {
+        testInvItem.setQuantity(100);
+        testInvItem.setRemainingQuantity(50);
+        assertEquals(100, testInvItem.getQuantity());
+        assertEquals(50, testInvItem.getRemainingQuantity());
+        assertDoesNotThrow(() -> testInvItem.sellQuantity(saleQuantity));
+        assertEquals(100 - saleQuantity, testInvItem.getQuantity());
+        assertEquals(50, testInvItem.getRemainingQuantity());
     }
 }

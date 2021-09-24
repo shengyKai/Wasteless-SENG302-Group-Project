@@ -6,10 +6,10 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.seng302.leftovers.dto.LocationDTO;
+import org.seng302.leftovers.exceptions.ValidationResponseException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.web.server.ResponseStatusException;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -423,7 +423,7 @@ class LocationTests {
             .inCountry("New Zealand")
             .withPostCode("8041")
             .atDistrict("Ashburton");
-    assertThrows(ResponseStatusException.class, builder::build);
+    assertThrows(ValidationResponseException.class, builder::build);
   }
 
   /**
@@ -441,7 +441,7 @@ class LocationTests {
             .withPostCode("8041")
             .atDistrict("Ashburton")
             .atDistrict("Ashburton");
-    assertThrows(ResponseStatusException.class, builder::build);
+    assertThrows(ValidationResponseException.class, builder::build);
   }
 
   /**
@@ -458,7 +458,7 @@ class LocationTests {
             .inCountry("New Zealand")
             .withPostCode("8041")
             .atDistrict("Ashburton");
-    assertThrows(ResponseStatusException.class, builder::build);
+    assertThrows(ValidationResponseException.class, builder::build);
   }
 
   /**
@@ -475,7 +475,7 @@ class LocationTests {
             .inCountry("New Zealand")
             .withPostCode("8041")
             .atDistrict("Ashburton");
-    assertThrows(ResponseStatusException.class, builder::build);
+    assertThrows(ValidationResponseException.class, builder::build);
   }
 
   /**
@@ -492,7 +492,7 @@ class LocationTests {
             .inCountry("N3w Z3@l@nd")
             .withPostCode("8041")
             .atDistrict("Ashburton");
-    assertThrows(ResponseStatusException.class, builder::build);
+    assertThrows(ValidationResponseException.class, builder::build);
   }
 
   /**
@@ -509,7 +509,7 @@ class LocationTests {
             .inCountry("New Zealand")
             .withPostCode("80999999999999941")
             .atDistrict("Ashburton");
-    assertThrows(ResponseStatusException.class, builder::build);
+    assertThrows(ValidationResponseException.class, builder::build);
   }
 
   /**
@@ -526,7 +526,7 @@ class LocationTests {
             .inCountry("New Zealand")
             .withPostCode("8041")
             .atDistrict("this district string contains above one hundred characters from start to end inclusive of spacessssss");
-    assertThrows(ResponseStatusException.class, builder::build);
+    assertThrows(ValidationResponseException.class, builder::build);
   }
 
   /**
@@ -542,7 +542,7 @@ class LocationTests {
             .inCountry("New Zealand")
             .withPostCode("8041")
             .atDistrict("Ashburton");
-    assertThrows(ResponseStatusException.class, locationBuilder::build);
+    assertThrows(ValidationResponseException.class, locationBuilder::build);
   }
 
   /**
@@ -558,7 +558,7 @@ class LocationTests {
             .inCountry("New Zealand")
             .withPostCode("8041")
             .atDistrict("Ashburton");
-    assertThrows(ResponseStatusException.class, locationBuilder::build);
+    assertThrows(ValidationResponseException.class, locationBuilder::build);
   }
 
   /**
@@ -573,7 +573,7 @@ class LocationTests {
             .inCountry("New Zealand")
             .withPostCode("8041")
             .atDistrict("Ashburton");
-    assertThrows(ResponseStatusException.class, locationBuilder::build);
+    assertThrows(ValidationResponseException.class, locationBuilder::build);
   }
 
   /**
@@ -589,7 +589,7 @@ class LocationTests {
             .inCountry("New Zealand")
             .withPostCode("8041")
             .atDistrict("Ashburton");
-    assertThrows(ResponseStatusException.class, locationBuilder::build);
+    assertThrows(ValidationResponseException.class, locationBuilder::build);
   }
 
   /**
@@ -605,7 +605,7 @@ class LocationTests {
             .inRegion("Canterbury")
             .withPostCode("8041")
             .atDistrict("Ashburton");
-    assertThrows(ResponseStatusException.class, locationBuilder::build);
+    assertThrows(ValidationResponseException.class, locationBuilder::build);
   }
 
   /**
@@ -621,7 +621,7 @@ class LocationTests {
             .inRegion("Canterbury")
             .inCountry("New Zealand")
             .atDistrict("Ashburton");
-    assertThrows(ResponseStatusException.class, locationBuilder::build);
+    assertThrows(ValidationResponseException.class, locationBuilder::build);
   }
 
   /**
