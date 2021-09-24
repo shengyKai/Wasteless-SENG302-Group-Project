@@ -77,7 +77,6 @@ public class InventoryItemGenerator {
 
         int[] quantities = generateQuantities();
         int quantity = quantities[0];
-        int remainingQuantity = quantities[1];
 
         float pricePerItem = generatePricePerItem();
 
@@ -93,9 +92,9 @@ public class InventoryItemGenerator {
             stmt.setObject(4, manufactured); //manufactured date
             stmt.setObject(5, pricePerItem); //price per item
             stmt.setObject(6, quantity); //quantity
-            stmt.setObject(7, remainingQuantity); //remaining quantity
+            stmt.setObject(7, quantity); //remaining quantity, same as quantity since no sale items exist yet
             stmt.setObject(8, sellBy); //sell by date
-            stmt.setObject(9, remainingQuantity * pricePerItem); //total price
+            stmt.setObject(9, quantity * pricePerItem); //total price
             stmt.setObject(10, generateVersion()); //version of product
             stmt.setObject(11, productId); //product id
             stmt.executeUpdate();
