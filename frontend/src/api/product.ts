@@ -1,6 +1,7 @@
 import {is} from 'typescript-is';
-import {Image, MaybeError, SearchResults, instance} from "@/api/internal";
+import {MaybeError, SearchResults, instance} from "@/api/internal";
 import {Business} from "@/api/business";
+import { Image } from '@/api/images';
 
 export type Product = {
   id: string,

@@ -53,11 +53,5 @@ export type Location = {
   postcode?: string
 };
 
-export type Image = {
-  id: number,
-  filename: string,
-  thumbnailFilename: string,
-};
-
 
 
