@@ -29,6 +29,7 @@
         <KeywordCreated v-else-if="event.type === 'KeywordCreatedEvent'" :event="event"/>
         <MessageEvent v-else-if="event.type === 'MessageEvent'" :event="event"/>
         <InterestEvent v-else-if="event.type === 'InterestEvent'" :event="event"/>
+        <InterestPurchasedEvent v-else-if="event.type === 'InterestPurchasedEvent'" :event="event"/>
         <PurchasedEvent v-else-if="event.type === 'PurchasedEvent'" :event="event"/>
         <Event v-else :title="event.type" :event="event"/>
       </v-card>
@@ -57,10 +58,11 @@ import KeywordCreated from './KeywordCreated.vue';
 import MessageEvent from './MessageEvent.vue';
 import InterestEvent from './InterestEvent.vue';
 import PurchasedEvent from './PurchasedEvent.vue';
+import InterestPurchasedEvent from './InterestPurchasedEvent.vue';
 
 export default {
   name: 'EventList',
-  components: {Event, InterestEvent, DeleteEvent, ExpiryEvent, GlobalMessage, KeywordCreated, MessageEvent, PurchasedEvent},
+  components: {InterestEvent, DeleteEvent, ExpiryEvent, GlobalMessage, KeywordCreated, MessageEvent, PurchasedEvent, InterestPurchasedEvent},
   props: ['events', 'isFiltered'],
   data() {
     return {

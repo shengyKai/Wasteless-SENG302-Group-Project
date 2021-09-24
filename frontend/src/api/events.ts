@@ -3,8 +3,8 @@ import axios from 'axios';
 import {User} from "@/api/user";
 import {MarketplaceCard, MarketplaceCardSection, Message} from "@/api/marketplace";
 import {Keyword} from "@/api/keyword";
+import {BoughtSale, Sale} from "@/api/sale";
 import {Product} from "@/api/product";
-import {Sale} from "@/api/sale";
 import {is} from 'typescript-is';
 
 const SERVER_URL = process.env.VUE_APP_SERVER_ADD;
@@ -15,7 +15,7 @@ const instance = axios.create({
   withCredentials: true,
 });
 
-export type AnyEvent = GlobalMessageEvent | ExpiryEvent | DeleteEvent | KeywordCreatedEvent | MessageEvent | InterestEvent | PurchasedEvent;
+export type AnyEvent = GlobalMessageEvent | ExpiryEvent | DeleteEvent | KeywordCreatedEvent | MessageEvent | InterestEvent | PurchasedEvent | InterestPurchaedEvent;
 
 export type EventTag = 'none' | 'red' | 'orange' | 'yellow' | 'green' | 'blue' | 'purple'
 export type EventStatus = 'normal' | 'starred' | 'archived'
@@ -72,6 +72,10 @@ export type PurchasedEvent = BaseEvent<'PurchasedEvent'> & {
     saleDate: string,
     listingDate: string,
   }
+}
+
+export type InterestPurchasedEvent = BaseEvent<'InterestPurchasedEvent'> & {
+  boughtSaleItem: BoughtSale,
 }
 
 /**
