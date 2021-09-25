@@ -81,10 +81,10 @@ describe('ImageManager.vue', () => {
     await wrapper.setData({
       uploadedImage: anotherImage
     });
-    expect(wrapper.vm.toBeSubmittedImages.length).toEqual(1);
+    expect(wrapper.vm.outputImages.length).toEqual(1);
     expect(wrapper.vm.images.length).toEqual(1);
-    await wrapper.vm.upload();
-    expect(wrapper.vm.toBeSubmittedImages.length).toEqual(2);
+    await wrapper.vm.upload(true);
+    expect(wrapper.vm.outputImages.length).toEqual(2);
     expect(wrapper.vm.images.length).toEqual(1);
   });
 });
