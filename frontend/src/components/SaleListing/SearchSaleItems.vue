@@ -35,7 +35,7 @@
 import AdvancedSearchBar from './AdvancedSearchBar.vue';
 import SimpleSearchBar from './SimpleSearchBar.vue';
 import SaleResult from './SaleResult.vue';
-import {getBusinessSales} from "@/api/sale";
+import {basicSearchSaleitem, advanceSearchSaleitem} from "@/api/sale";
 
 export default {
   name: "SearchSaleItems",
@@ -53,20 +53,20 @@ export default {
       resultsPage: undefined,
       showAdvancedSearch: false,
       simpleSearchParams: {
-        query: undefined,
-        orderBy: undefined,
+        query: "",
+        orderBy: "created",
         reverse: false
       },
       advancedSearchParams: {
-        productQuery: undefined,
-        businessQuery: undefined,
-        locationQuery: undefined,
-        closesBefore: undefined,
-        closesAfter: undefined,
-        orderBy: undefined,
+        productQuery: "",
+        businessQuery: "",
+        locationQuery: "",
+        closesBefore: "",
+        closesAfter: "",
+        orderBy: "created",
         businessTypes: [],
-        lowestPrice: undefined,
-        highestPrice: undefined,
+        lowestPrice: "",
+        highestPrice: "",
         reverse: false
       },
     };
@@ -85,11 +85,26 @@ export default {
     },
   },
   methods: {
-    simpleSearch() {
+    async simpleSearch() {
       //TODO implement when linked to endpoint
+      const result = await basicSearchSaleitem(this.simpleSearchParams.query, this.simpleSearchParams.orderBy,
+        this.currentPage, this.resultsPerPage, this.simpleSearchParams.reverse);
+      if (typeof result === 'string'){
+        this.errorMessage = result;
+      } else {
+        this.errorMessage = undefined;
+        this.resultsPage = result;
+      }
     },
-    advancedSearch() {
+    async advancedSearch() {
       //TODO implement when linked to endpoint
+      const result = await advanceSearchSaleitem(this.advancedSearchParams, this.currentPage, this.resultsPerPage);
+      if (typeof result === 'string'){
+        this.errorMessage = result;
+      } else {
+        this.errorMessage = undefined;
+        this.resultsPage = result;
+      }
     },
   },
   watch: {
@@ -104,7 +119,7 @@ export default {
     }
   },
   async beforeMount() {
-    this.resultsPage = (await getBusinessSales(3, 1, 1, "created", false));
+    this.resultsPage = (await basicSearchSaleitem("", "created", 1, this.resultsPerPage, false));
   }
 };
 </script>

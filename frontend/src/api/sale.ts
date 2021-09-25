@@ -29,8 +29,20 @@ export type Sale = {
 
 type SalesOrderBy = 'created' | 'closing' | 'productCode' | 'productName' | 'quantity' | 'price'
 
-type SaleListingOrderBy = "name" | "price" | "businessName" | "businessLocation" | "expiry" | "closes" | "created" | "quantity";
+type SaleListingOrderBy = "price" | "productName" |"businessName" | "businessLocation" | "expiry" | "closing" | "created" | "quantity";
 
+type AdvanceSearch = {
+  productQuery: string,
+  businessQuery: string,
+  locationQuery: string,
+  closesBefore: string,
+  closesAfter: string,
+  orderBy: SalesOrderBy,
+  businessTypes: BusinessType[],
+  lowestPrice: string,
+  highestPrice: string,
+  reverse: boolean
+}
 /**
  * Adds a sale item to the business sales listing
  *
@@ -129,13 +141,15 @@ export async function getListingInterest(listingId: number, userId: number): Pro
   return response.data.isInterested;
 }
 
-export async function basicSearchSaleitem(query: string, orderBy: SaleListingOrderBy, reverse: boolean): Promise<MaybeError<SearchResults<Sale>>> {
+export async function basicSearchSaleitem(query: string, orderBy: SaleListingOrderBy, page: number, resultsPerPage: number, reverse: boolean): Promise<MaybeError<SearchResults<Sale>>> {
   let response;
   try {
-    response = await instance.get('/somebasicsearch/saleitem', {
+    response = await instance.get('/businesses/listings/search', {
       params: {
-        searchQuery: query,
+        basicSearchQuery: query,
         orderBy,
+        page,
+        resultsPerPage,
         reverse: reverse.toString(),
       }
     });
@@ -157,21 +171,23 @@ export async function basicSearchSaleitem(query: string, orderBy: SaleListingOrd
   return response.data;
 }
 
-export async function advanceSearchSaleitem(query: string, businessQuery: string, locationQuery: string, closesBefore: string, closesAfter:string, orderBy: SaleListingOrderBy, businessTypes: BusinessType[], lowestPrice: string, highestPrice: string, reverse: boolean): Promise<MaybeError<SearchResults<Sale>>> {
+export async function advanceSearchSaleitem(advanceSearch: AdvanceSearch, page: number, resultsPerPage: number): Promise<MaybeError<SearchResults<Sale>>> {
   let response;
   try {
-    response = await instance.get('/someadvancesearch/saleitem', {
+    response = await instance.get('/businesses/listings/search', {
       params: {
-        searchQuery: query,
-        businessQuery: businessQuery,
-        locationQuery: locationQuery,
-        closesBefore: closesBefore,
-        closesAfter: closesAfter,
-        orderBy: orderBy,
-        businessTypes: businessTypes,
-        lowestPrice: lowestPrice,
-        highestPrice: highestPrice,
-        reverse: reverse.toString(),
+        productSearchQuery: advanceSearch.productQuery,
+        businessSearchQuery: advanceSearch.businessQuery,
+        locationSearchQuery: advanceSearch.locationQuery,
+        closesLower: advanceSearch.closesBefore,
+        closesUpper: advanceSearch.closesAfter,
+        orderBy: advanceSearch.orderBy,
+        page,
+        resultsPerPage,
+        reverse: advanceSearch.reverse.toString(),
+        businessTypes: advanceSearch.businessTypes,
+        priceLower: advanceSearch.lowestPrice,
+        priceUpper: advanceSearch.highestPrice,
       }
     });
   } catch (error) {

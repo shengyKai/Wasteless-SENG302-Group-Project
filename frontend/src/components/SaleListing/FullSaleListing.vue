@@ -312,6 +312,7 @@ export default {
      * Minimize the full sale listing and back to the listing result page
      */
     hideExpand() {
+      this.interestCount = "";
       this.$emit('goBack');
     },
   },
