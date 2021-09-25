@@ -13,21 +13,25 @@ import FullSaleListing from "@/components/SaleListing/FullSaleListing.vue";
 Vue.use(Vuetify);
 
 const business: Business = {
-  "images":[],
-  "primaryAdministratorId":2,
-  "address":{
-    "country":"Iceland",
-    "streetName":"Racheal Road",
-    "streetNumber":"711","city":"London",
-    "district":"New Plymouth District",
-    "postcode":"42105",
-    "region":"Southland"},
-  "created":"2021-09-14T01:29:16.496459Z",
-  "name":"Hillary Cresenct Jewelers",
-  "description":"Nihil, eveniet aliquid culpa officia aut! Impedit sit sunt quaerat, odit, tenetur error, harum nesciunt.",
-  "id":1,
-  "points": 5,
-  "businessType":"Accommodation and Food Services"
+  images:[],
+  primaryAdministratorId:2,
+  address: {
+    country:"Iceland",
+    streetName:"Racheal Road",
+    streetNumber:"711","city":"London",
+    district:"New Plymouth District",
+    postcode:"42105",
+    region:"Southland"
+  },
+  created:"2021-09-14T01:29:16.496459Z",
+  name:"Hillary Cresenct Jewelers",
+  description:"Nihil, eveniet aliquid culpa officia aut! Impedit sit sunt quaerat, odit, tenetur error, harum nesciunt.",
+  id:1,
+  points: 5,
+  rank: {
+    name: 'bronze',
+  },
+  businessType:"Accommodation and Food Services"
 };
 const product: Product = {
   "countryOfSale":"Iceland",
