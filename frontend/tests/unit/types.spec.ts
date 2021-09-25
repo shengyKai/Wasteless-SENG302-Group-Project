@@ -45,7 +45,8 @@ it('Testing valid user with businesses', () => {
         name: "BUSINESS_NAME",
         description: "DESCRIPTION",
         id: 10,
-        businessType: "Accommodation and Food Services"
+        businessType: "Accommodation and Food Services",
+        points: 4
       }
     ],
     middleName: "Percy",
@@ -112,6 +113,7 @@ it('Testing valid business', () => {
     description:"DESCRIPTION",
     id:10,
     businessType:"Accommodation and Food Services",
+    points: 4,
     administrators:[
       {
         firstName:"Andy",
