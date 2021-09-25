@@ -368,6 +368,15 @@ public class BusinessStepDefinition {
         assertTrue(response.containsKey("points"));
     }
 
+    @Then("I am able to see the rank of the business")
+    public void i_can_see_business_rank() throws net.minidev.json.parser.ParseException, UnsupportedEncodingException {
+        var result = requestContext.getLastResult();
+        JSONParser parser = new JSONParser(JSONParser.MODE_PERMISSIVE);
+        JSONObject response = (JSONObject) parser.parse(result.getResponse().getContentAsString());
+
+        assertTrue(response.containsKey("rank"));
+    }
+
     @Given("The business has {int} points")
     public void the_business_has_points(int points) {
         var business = businessContext.getLast();
@@ -379,5 +388,11 @@ public class BusinessStepDefinition {
     public void i_expect_business_to_have_points(int points) {
         var business = businessRepository.getBusinessById(businessContext.getLast().getId()) ;
         assertEquals(points, business.getPoints());
+    }
+
+    @Then("I expect the business to have {string} rank")
+    public void i_expect_the_business_to_have_rank(String rank) {
+        var business = businessRepository.getBusinessById(businessContext.getLast().getId());
+        assertEquals(rank, business.getRank().getName());
     }
 }

@@ -6,6 +6,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.EnumSource;
+import org.junit.jupiter.params.provider.NullSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import static org.junit.jupiter.api.Assertions.*;
@@ -51,5 +53,27 @@ class RankTest {
             assertEquals(rank.getThreshold(), json.get("threshold"));
             assertEquals(2, json.size());
         }
+    }
+
+    @ParameterizedTest
+    @EnumSource(Rank.class)
+    void forValues_validInput_expectedRankReturned(Rank rank) {
+        var parsedRank = Rank.forValues(rank.getName(), rank.getThreshold());
+        assertEquals(rank, parsedRank);
+    }
+
+    @ParameterizedTest
+    @EnumSource(Rank.class)
+    void forValues_invalidThreshold_noRankReturned(Rank rank) {
+        var parsedRank = Rank.forValues(rank.getName(), -1000);
+        assertNull(parsedRank);
+    }
+
+    @ParameterizedTest
+    @NullSource
+    @ValueSource(strings = {"foo", "bronzes"})
+    void forValues_invalidThreshold_noRankReturned(String rankName) {
+        var parsedRank = Rank.forValues(rankName, Rank.BRONZE.getThreshold());
+        assertNull(parsedRank);
     }
 }

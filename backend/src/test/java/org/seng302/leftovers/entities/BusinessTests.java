@@ -666,7 +666,7 @@ class BusinessTests {
      * called with true, false or no argument.
      */
     @Test
-    void constructJsonSimpleFieldsHaveExpectedValueTest() throws JsonProcessingException {
+    void constructJsonSimpleFieldsHaveExpectedValueTest() {
         List<JSONObject> testJsons = getTestJsons(testBusiness1);
         for (var json : testJsons) {
             assertEquals(testBusiness1.getName(), json.getAsString("name"));
@@ -678,9 +678,7 @@ class BusinessTests {
             assertEquals(testBusiness1.getCreated().toString(), json.getAsString("created"));
             assertEquals(List.of(), json.get("images"));
             assertEquals(testBusiness1.getPoints(), json.get("points"));
-            assertEquals(
-                    objectMapper.readTree(objectMapper.writeValueAsString(testBusiness1.getRank())),
-                    objectMapper.readTree(objectMapper.writeValueAsString(json.get("rank"))));
+            assertEquals(testBusiness1.getRank(), objectMapper.convertValue(json.get("rank"), Rank.class));
         }
     }
 

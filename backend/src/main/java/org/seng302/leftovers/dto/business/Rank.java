@@ -1,8 +1,11 @@
 package org.seng302.leftovers.dto.business;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonValue;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+import java.util.Objects;
 
 /**
  * DTO representing the rank of a business
@@ -40,5 +43,23 @@ public enum Rank {
     Rank(String name, Integer threshold) {
         this.name = name;
         this.threshold = threshold;
+    }
+
+    /**
+     * Helper method used by Jackson to convert json objects into a rank.
+     * This is only expected to be used in tests, since the user should not need to know the rank's threshold value.
+     * @param name Name of Rank
+     * @param threshold Threshold value
+     * @return Parsed rank
+     */
+    @JsonCreator
+    public static Rank forValues(@JsonProperty("name") String name,
+                                     @JsonProperty("threshold") Integer threshold) {
+        for (Rank rank : Rank.values()) {
+            if (rank.getName().equals(name) && Objects.equals(rank.getThreshold(), threshold)) {
+                return rank;
+            }
+        }
+        return null;
     }
 }
