@@ -51,7 +51,7 @@
                 no-data-text="No keywords found"
                 value = "keywords"
                 v-model="selectedKeywords"
-                :items="allKeywords"
+                :items="filteredKeywords"
                 :hint="selectedKeywordsNames"
                 label="Select keywords"
                 item-text="name"
@@ -112,6 +112,7 @@ export default {
     return {
       title: this.previousCard?.title ?? "",
       description: this.previousCard?.description ?? "",
+      filteredKeywords: [],
       allKeywords: [],
       selectedKeywords: this.previousCard?.keywords ?? [],
       keywordFilter: "",
@@ -122,7 +123,7 @@ export default {
       allowedCharsRegex: /^[\s\d\p{L}\p{P}]*$/u,
     };
   },
-  mounted() {
+  async mounted() {
     function OnInput() {
       this.style.height = "auto";
       this.style.height = (this.scrollHeight) + "px";
@@ -134,7 +135,8 @@ export default {
     this.titleField.setAttribute("style", "height:" + (this.titleField.scrollHeight) + "px;overflow-y:hidden;");
     this.titleField.addEventListener("input", OnInput);
 
-    this.searchKeywords();
+    await this.searchKeywords();
+    this.allKeywords = this.filteredKeywords;
 
     if (this.previousCard) {
       const prevKeywordIds = [];
@@ -147,10 +149,10 @@ export default {
   computed: {
     selectedKeywordsNames() {
       let names = "";
-      for (let i = 0; i < this.selectedKeywords.length; i++) {
-        for (let j = 0; j < this.allKeywords.length; j++) {
-          if (this.selectedKeywords[i] === this.allKeywords[j].id) {
-            names += this.allKeywords[j].name + ', ';
+      for (let selectedKeywordsId of this.selectedKeywords) {
+        for (let keyword of this.allKeywords) {
+          if (selectedKeywordsId === keyword.id) {
+            names += keyword.name + ', ';
           }
         }
       }
@@ -245,12 +247,14 @@ export default {
         } else {
           await this.searchKeywords();
           this.selectedKeywords.push(result);
+          this.resetSearch();
         }
       }
     },
-    resetSearch() {
+    async resetSearch() {
       this.keywordFilter = "";
-      this.searchKeywords();
+      await this.searchKeywords();
+      this.allKeywords = this.filteredKeywords;
     },
     closeDialog() {
       this.$emit('closeDialog');
@@ -284,7 +288,7 @@ export default {
       if (typeof response === 'string') {
         this.errorMessage = response;
       } else {
-        this.allKeywords = response;
+        this.filteredKeywords = response;
       }
     }
   }
