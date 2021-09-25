@@ -45,7 +45,7 @@
             </v-col>
           </v-row>
           <v-row>
-            <div class="keyword">
+            <v-col cols="9">
               <v-select
                 class="keyword-child"
                 no-data-text="No keywords found"
@@ -73,11 +73,13 @@
                   </v-list-item>
                 </template>
               </v-select>
+            </v-col>
+            <v-col cols="3">
               <!-- Add new keyword -->
               <v-btn class="keyword-child" color="primary" @click="addNewKeyword" title="Can't find what you're looking for? Hit '+' to create a new keyword out of what you have currently typed">
                 <v-icon>mdi-plus-box</v-icon>
               </v-btn>
-            </div>
+            </v-col>
             <p class="error-text text-center" v-if ="errorMessage !== undefined"> {{errorMessage}} </p>
             <v-card-actions>
               <v-spacer/>
@@ -291,12 +293,6 @@ export default {
 
 
 <style scoped>
-.keyword {
-  display: flex;
-}
-.keyword-child {
-  margin: 0.5em;
-}
 .title {
   line-height: 1.25;
   word-break: break-word;
