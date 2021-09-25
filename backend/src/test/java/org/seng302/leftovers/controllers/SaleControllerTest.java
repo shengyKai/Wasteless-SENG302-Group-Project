@@ -360,6 +360,19 @@ class SaleControllerTest {
     }
 
     @Test
+    void addSaleItemToBusiness_validInput_businessPointsUpdated() throws Exception {
+        var object = generateSalesItemInfo();
+        mockMvc.perform(post("/businesses/1/listings")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(object.toString()))
+                .andExpect(status().isCreated())
+                .andReturn();
+
+        verify(business, times(1)).incrementPoints();
+        verify(businessRepository, times(1)).save(business);
+    }
+
+    @Test
     void getSaleItemsForBusiness_noAuthToken_401Response() throws Exception {
         // Mock the AuthenticationTokenManager to respond as it would when the authentication token is missing or invalid
         authenticationTokenManager.when(() -> AuthenticationTokenManager.checkAuthenticationToken(any()))

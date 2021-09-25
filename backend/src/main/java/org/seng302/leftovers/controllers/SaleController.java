@@ -145,6 +145,8 @@ public class SaleController {
                     .withCloses(saleItemInfo.getCloses())
                     .build();
             saleItem = saleItemRepository.save(saleItem);
+            business.incrementPoints();
+            businessRepository.save(business);
 
             response.setStatus(201);
             return new CreateSaleItemResponseDTO(saleItem.getId());
