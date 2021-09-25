@@ -82,14 +82,21 @@
             </v-col>
             <p class="error-text text-center" v-if ="errorMessage !== undefined"> {{errorMessage}} </p>
             <v-card-actions>
-              <v-spacer/>
-              <div class="error--text" v-if="feedback !== undefined">{{ feedback }}</div>
-              <v-btn text color="primary" :disabled="!valid" @click="submit">
-                {{ submitText }}
-              </v-btn>
-              <v-btn text color="primary" @click="closeDialog">
-                Cancel
-              </v-btn>
+              <v-row>
+                <v-col cols="4">
+                  <div class="error--text" v-if="feedback !== undefined">{{ feedback }}</div>
+                </v-col>
+                <v-col cols="4">
+                  <v-btn text color="primary" :disabled="!valid" @click="submit">
+                    {{ submitText }}
+                  </v-btn>
+                </v-col>
+                <v-col cols="4">
+                  <v-btn text color="primary" @click="closeDialog">
+                    Cancel
+                  </v-btn>
+                </v-col>
+              </v-row>
             </v-card-actions>
           </v-row>
         </v-container>
