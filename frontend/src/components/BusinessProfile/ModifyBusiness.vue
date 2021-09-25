@@ -285,7 +285,6 @@ export default {
       postcodeRules: ()=> postCodeRules,
       isLoading: false,
       imageIds: this.business.images.map(image => image.id),
-      primaryImageId: null,
     };
   },
   computed: {
@@ -330,13 +329,6 @@ export default {
       this.$emit('discardModifyBusiness');
     },
     /**
-     * Sets the given image as primary image to be displayed
-     * @param imageId ID of the Image to set
-     */
-    async makeImagePrimary(imageId) {
-      this.primaryImageId = imageId;
-    },
-    /**
      * Action(s) of modifying a business
      * Get the street number and name from the street address field.
      * Check existence of new selected primary owner, update to new owner or remain unchange
@@ -366,7 +358,6 @@ export default {
         businessType: this.businessType,
         updateProductCountry: this.updateProductCountry,
         imageIds: this.imageIds,
-        primaryImageId: this.primaryImageId,
       };
       const result = await modifyBusiness(this.business.id, modifiedFields);
 
@@ -412,10 +403,10 @@ export default {
       this.primaryAdministratorId = admin.id;
     },
     /**
-     * Method to update the imageIds from the uploadedImages received from ImageManager to be sent for business modification.
+     * Method to update the imageIds from the outputImages received from ImageManager to be sent for business modification.
      */
-    updateBusinessImages(uploadedImages) {
-      this.imageIds = uploadedImages.map(image => image.id);
+    updateBusinessImages(outputImages) {
+      this.imageIds = outputImages.map(image => image.id);
     }
   },
 };

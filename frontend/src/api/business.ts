@@ -35,7 +35,6 @@ export type ModifyBusiness = {
   businessType: BusinessType,
   updateProductCountry: boolean,
   imageIds: Array<number>
-  primaryImageId: number
 }
 
 /**

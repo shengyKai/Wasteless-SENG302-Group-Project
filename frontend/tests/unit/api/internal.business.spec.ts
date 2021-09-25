@@ -160,8 +160,7 @@ describe('Test PUT /businesses/${businessId} endpoint', () => {
     },
     businessType: "Accommodation and Food Services",
     updateProductCountry: true,
-    imageIds: [1],
-    primaryImageId: 1
+    imageIds: [1]
   };
 
   it('When API request is successfully resolved, returns undefined', async () => {

@@ -3,11 +3,11 @@
     <v-row class="mt-5">
       <v-col>
         <v-carousel
-          v-if="toBeSubmittedImages.length > 0"
+          v-if="outputImages.length > 0"
           v-model="model"
         >
           <v-carousel-item
-            v-for="(image, enumerator) in toBeSubmittedImages"
+            v-for="(image, enumerator) in outputImages"
             :key="enumerator"
             :src="imageUrl(image.filename)"
             contain
@@ -128,10 +128,9 @@ export default {
   computed: {
     /**
      * An cloned array of images from the images prop. This is needed because we cannot mutate props and we want to show a carousel of
-     * images which contains the confirmed and not confirmed images relating to an entity. Confirmed in this case refers to whether
-     * an image is tied to an entity or not.
+     * images which contains the images that are both tied and pending to be tied to the entity.
      */
-    toBeSubmittedImages() {
+    outputImages() {
       return Array.from(this.images);
     }
   },
@@ -139,10 +138,14 @@ export default {
     /**
      * Method to push the uploaded image to the end of the image array, so that it can be shown to the user.
      * Emits an event "updateImages" along with the images which are uploaded to the parent to submit the form for modification.
+     * Takes in a boolean isActionForImageUpload, to identify whether the upload method refers to a close dialog action or a
+     * action to upload images, since they are both being called using the same emit event from ImageUploader
      */
-    upload() {
-      this.toBeSubmittedImages.push(this.uploadedImage);
-      this.$emit("updateImages", this.toBeSubmittedImages);
+    upload(isActionForImageUpload) {
+      if (isActionForImageUpload) {
+        this.outputImages.push(this.uploadedImage);
+        this.$emit("updateImages", this.outputImages);
+      }
       this.showImageUploader = false;
     },
     /**
