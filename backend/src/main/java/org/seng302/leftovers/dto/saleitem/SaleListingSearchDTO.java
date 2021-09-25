@@ -47,12 +47,7 @@ public class SaleListingSearchDTO {
         }
         this.priceLowerBound = externalDTO.getPriceLower();
         this.priceUpperBound = externalDTO.getPriceUpper();
-        try {
-            this.businessTypes = objectMapper.convertValue(externalDTO.getBusinessTypes(), new TypeReference<>() {
-            });
-        } catch (IllegalArgumentException e) {
-            throw new ValidationResponseException("Invalid business types");
-        }
+        this.businessTypes = externalDTO.getBusinessTypes();
         this.basicSearchQuery = externalDTO.getBasicSearchQuery();
         this.productSearchQuery = externalDTO.getProductSearchQuery();
         this.businessSearchQuery = externalDTO.getBusinessSearchQuery();

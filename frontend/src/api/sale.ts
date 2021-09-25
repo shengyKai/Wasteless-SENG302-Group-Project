@@ -188,7 +188,7 @@ export async function advanceSearchSaleitem(advanceSearch: AdvanceSearch, page: 
         businessTypes: advanceSearch.businessTypes,
         priceLower: advanceSearch.lowestPrice,
         priceUpper: advanceSearch.highestPrice,
-      }
+      },
     });
   } catch (error) {
     let status: number | undefined = error.response?.status;
