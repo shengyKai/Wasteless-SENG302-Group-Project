@@ -2910,6 +2910,7 @@ components:
         - name
         - address
         - businessType
+        - rank
       properties:
         id:
           type: integer
@@ -2971,6 +2972,7 @@ components:
     Rank:
       type: object
       description: An enum representing a business's rank
+      readOnly: true
       required:
         - name
       properties:
