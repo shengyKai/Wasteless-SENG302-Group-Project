@@ -15,19 +15,23 @@ import org.json.JSONObject;
 import org.junit.jupiter.api.Assertions;
 import org.seng302.leftovers.entities.BoughtSaleItem;
 import org.seng302.leftovers.entities.SaleItem;
+import org.seng302.leftovers.entities.event.Event;
+import org.seng302.leftovers.entities.event.InterestPurchasedEvent;
 import org.seng302.leftovers.persistence.BoughtSaleItemRepository;
 import org.seng302.leftovers.persistence.InventoryItemRepository;
 import org.seng302.leftovers.persistence.SaleItemRepository;
+import org.seng302.leftovers.persistence.event.EventRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 
 import javax.transaction.Transactional;
 import java.util.Comparator;
+import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.junit.Assert.assertEquals;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 
 public class PurchaseStepDefinition {
 
@@ -39,6 +43,8 @@ public class PurchaseStepDefinition {
     private SaleItemRepository saleItemRepository;
     @Autowired
     private InventoryItemRepository inventoryItemRepository;
+    @Autowired
+    private EventRepository eventRepository;
     @Autowired
     private RequestContext requestContext;
     @Autowired
@@ -122,5 +128,11 @@ public class PurchaseStepDefinition {
                 .content(requestBody.toString()));
     }
 
-
+    @Then("{string} will receive a notification stating that {string} is no longer available")
+    public void will_receive_a_notification_stating_that_is_no_longer_available(String userName, String string2) {
+        var user = userContext.getByName(userName);
+        List<Event> events = eventRepository.findEventsForUser(user);
+        Assertions.assertEquals(1, events.size());
+        Assertions.assertEquals(InterestPurchasedEvent.class, events.get(0).getClass());
+    }
 }

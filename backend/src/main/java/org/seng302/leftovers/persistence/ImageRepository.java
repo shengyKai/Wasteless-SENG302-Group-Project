@@ -7,6 +7,8 @@ import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -54,5 +56,19 @@ public interface ImageRepository extends CrudRepository<Image, Long> {
         }
         return image.get();
 
+    }
+
+    /**
+     * Fetches a list of Images given a list of Image IDS
+     * If one or more ImageIds are invalid, a NOT_ACCEPTABLE exception is raised
+     * @param ids List of Image IDs
+     * @return List of Images
+     */
+    default List<Image> getImagesByIds(List<Long> ids) {
+        List<Image> images = new ArrayList<>();
+        for (var id: ids) {
+            images.add(getImageById(id));
+        }
+        return images;
     }
 }

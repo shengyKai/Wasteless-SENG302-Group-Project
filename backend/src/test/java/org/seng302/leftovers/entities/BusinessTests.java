@@ -629,6 +629,7 @@ class BusinessTests {
         json.remove("administrators");
         json.remove("created");
         json.remove("images");
+        json.remove("points");
         assertTrue(json.isEmpty());
     }
 
@@ -648,6 +649,7 @@ class BusinessTests {
         json.remove("primaryAdministratorId");
         json.remove("created");
         json.remove("images");
+        json.remove("points");
         assertTrue(json.isEmpty());
     }
 
@@ -891,5 +893,12 @@ class BusinessTests {
     void businessType_toString_isExpectedString(String typeString, String mappedTypeString) {
         BusinessType role = BusinessType.valueOf(typeString);
         assertEquals(mappedTypeString, objectMapper.convertValue(role, String.class));
+    }
+
+    @Test
+    void incrementPoints_incrementsPoints() {
+        var pointsInitial = testBusiness1.getPoints();
+        testBusiness1.incrementPoints();
+        assertEquals(pointsInitial + 1,testBusiness1.getPoints());
     }
 }

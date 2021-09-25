@@ -17,6 +17,7 @@ export type Business = {
   businessType: BusinessType,
   created?: string,
   images?: Image[],
+  points: number
 };
 
 export type CreateBusiness = {

@@ -52,6 +52,3 @@ export type Location = {
   country: string,
   postcode?: string
 };
-
-
-

@@ -35,6 +35,7 @@ import org.springframework.test.web.servlet.MvcResult;
 import javax.transaction.Transactional;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 import java.nio.file.Path;
 import java.text.ParseException;
 import java.util.*;
@@ -369,4 +370,31 @@ public class BusinessStepDefinition {
         businessContext.save(business);
     }
 
+    @When("I view the business {string}")
+    public void i_view_the_business(String name) {
+        Business business = businessContext.getByName(name);
+        requestContext.performRequest(get("/businesses/" + business.getId()));
+    }
+
+    @Then("I am able to see the points for the business")
+    public void i_can_see_business_points() throws net.minidev.json.parser.ParseException, UnsupportedEncodingException {
+        var result = requestContext.getLastResult();
+        JSONParser parser = new JSONParser(JSONParser.MODE_PERMISSIVE);
+        JSONObject response = (JSONObject) parser.parse(result.getResponse().getContentAsString());
+
+        assertTrue(response.containsKey("points"));
+    }
+
+    @Given("The business has {int} points")
+    public void the_business_has_points(int points) {
+        var business = businessContext.getLast();
+        business.setPoints(points);
+        businessContext.save(business);
+    }
+
+    @Then("I expect the business to have {int} points")
+    public void i_expect_business_to_have_points(int points) {
+        var business = businessRepository.getBusinessById(businessContext.getLast().getId()) ;
+        assertEquals(points, business.getPoints());
+    }
 }

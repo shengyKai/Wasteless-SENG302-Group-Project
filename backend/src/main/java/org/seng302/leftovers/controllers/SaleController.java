@@ -8,8 +8,14 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.seng302.leftovers.dto.saleitem.*;
 import org.seng302.leftovers.dto.ResultPageDTO;
+
 import org.seng302.leftovers.entities.*;
 import org.seng302.leftovers.entities.event.InterestEvent;
+import org.seng302.leftovers.entities.event.InterestPurchasedEvent;
+import org.seng302.leftovers.dto.saleitem.CreateSaleItemDTO;
+import org.seng302.leftovers.dto.saleitem.SaleItemResponseDTO;
+import org.seng302.leftovers.dto.saleitem.SetSaleItemInterestDTO;
+
 import org.seng302.leftovers.entities.event.PurchasedEvent;
 import org.seng302.leftovers.exceptions.DoesNotExistResponseException;
 import org.seng302.leftovers.exceptions.InsufficientPermissionResponseException;
@@ -139,6 +145,8 @@ public class SaleController {
                     .withCloses(saleItemInfo.getCloses())
                     .build();
             saleItem = saleItemRepository.save(saleItem);
+            business.incrementPoints();
+            businessRepository.save(business);
 
             response.setStatus(201);
             return new CreateSaleItemResponseDTO(saleItem.getId());
@@ -300,6 +308,15 @@ public class SaleController {
 
             var boughtSaleItem = new BoughtSaleItem(saleItem, purchaser);
             boughtSaleItemRepository.save(boughtSaleItem);
+
+            InterestPurchasedEvent interestPurchasedEvent;
+            for (User user : saleItem.getInterestedUsers()) {
+                // Does not create this event for the purchaser only
+                if (user != purchaser) {
+                    interestPurchasedEvent = new InterestPurchasedEvent(user, boughtSaleItem);
+                    eventRepository.save(interestPurchasedEvent);
+                }
+            }
 
             var inventoryItem = saleItem.getInventoryItem();
             inventoryItem.sellQuantity(saleItem.getQuantity());

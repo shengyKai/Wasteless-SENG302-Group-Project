@@ -140,7 +140,7 @@
 <script>
 import ImageCarousel from "@/components/utils/ImageCarousel";
 import { currencyFromCountry } from "@/api/currency";
-import { setListingInterest, getListingInterest} from '../../api/sale';
+import { setListingInterest, getListingInterest, purchaseListing} from '../../api/sale';
 import { formatDate, formatPrice } from '@/utils';
 
 export default {
@@ -292,10 +292,15 @@ export default {
       }
     },
     /**
-     * TODO in other task
+     * Purchases the sale listing and if successful triggers a refresh otherwise shows an error message
      */
-    buy() {
-      console.log(this.saleItem);
+    async buy() {
+      let response = await purchaseListing(this.saleItem.id, this.userId);
+      if (typeof response === 'string') {
+        this.errorMessage = response;
+        return;
+      }
+      this.$emit('refresh');
     },
     /**
      * Computes the currency

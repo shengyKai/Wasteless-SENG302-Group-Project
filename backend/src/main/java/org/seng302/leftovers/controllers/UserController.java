@@ -12,6 +12,7 @@ import org.seng302.leftovers.entities.Location;
 import org.seng302.leftovers.entities.User;
 import org.seng302.leftovers.exceptions.DoesNotExistResponseException;
 import org.seng302.leftovers.exceptions.InsufficientPermissionResponseException;
+import org.seng302.leftovers.persistence.ImageRepository;
 import org.seng302.leftovers.persistence.UserRepository;
 import org.seng302.leftovers.tools.AuthenticationTokenManager;
 import org.seng302.leftovers.tools.PasswordAuthenticator;
@@ -35,11 +36,13 @@ import java.util.Optional;
 public class UserController {
     private static final List<String> USER_ORDER_BY_OPTIONS = List.of("userID", "firstName", "middleName", "lastName", "nickname", "email");
     private final UserRepository userRepository;
+    private final ImageRepository imageRepository;
     private static final Logger logger = LogManager.getLogger(UserController.class.getName());
 
-    public UserController(UserRepository userRepository) {
+    public UserController(UserRepository userRepository, ImageRepository imageRepository) {
 
         this.userRepository = userRepository;
+        this.imageRepository = imageRepository;
     }
 
     /**
@@ -125,6 +128,8 @@ public class UserController {
                 PasswordAuthenticator.verifyPassword(body.getPassword(), user.getAuthenticationCode());
                 user.setAuthenticationCodeFromPassword(body.getNewPassword());
             }
+
+            user.setImages(imageRepository.getImagesByIds(body.getImageIds()));
 
             user.setFirstName(body.getFirstName());
             user.setMiddleName(body.getMiddleName());

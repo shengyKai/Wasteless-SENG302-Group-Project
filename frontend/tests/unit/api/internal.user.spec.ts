@@ -33,7 +33,8 @@ describe('Test PUT /users/{userId} endpoint', () => {
       city: "Christchurch",
       region: "Canterbury",
       country: "New Zealand"
-    }
+    },
+    imageIds: [1, 2, 3]
   };
 
   it('When API request is successfully resolved, returns undefined', async () => {

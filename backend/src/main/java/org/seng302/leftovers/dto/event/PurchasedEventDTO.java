@@ -22,6 +22,6 @@ public class PurchasedEventDTO extends EventDTO{
      */
     public PurchasedEventDTO(PurchasedEvent event) {
         super(event);
-        this.boughtSaleItem = new BoughtSaleItemDTO(event.getBoughtSaleItem());
+        this.boughtSaleItem = new BoughtSaleItemDTO(event.getBoughtSaleItem(), true);
     }
 }

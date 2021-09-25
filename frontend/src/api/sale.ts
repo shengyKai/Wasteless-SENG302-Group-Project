@@ -1,6 +1,8 @@
 import {is} from 'typescript-is';
 import {InventoryItem} from "@/api/inventory";
 import {MaybeError, SearchResults, instance} from "@/api/internal";
+import { User } from './user';
+import { Product } from './product';
 
 export type SaleInterest = {
   userId: number,
@@ -25,6 +27,17 @@ export type Sale = {
   closes?: string,
   interestCount?: number,
 };
+
+export type BoughtSale = {
+  id: number,
+  buyer: User | null,
+  product: Product,
+  interestCount: number,
+  price: number,
+  quantity: number,
+  saleDate: string,
+  listingDate: string,
+}
 
 type SalesOrderBy = 'created' | 'closing' | 'productCode' | 'productName' | 'quantity' | 'price'
 
@@ -126,4 +139,24 @@ export async function getListingInterest(listingId: number, userId: number): Pro
   return response.data.isInterested;
 }
 
+/**
+ * Sents a request to purchase a sale listing
+ * @param listingId Listing to purchase
+ * @param purchaserId Id of the user that is purchasing
+ * @returns An error message, if one occurred otherwise undefined
+ */
+export async function purchaseListing(listingId: number, purchaserId: number): Promise<MaybeError<undefined>> {
+  try {
+    await instance.post(`/listings/${listingId}/purchase`, {
+      purchaserId,
+    });
+  } catch (error) {
+    let status: number | undefined = error.response?.status;
+    if (status === undefined) return 'Failed to reach backend';
+    if (status === 401) return 'You have been logged out. Please login again and retry';
+    if (status === 406) return 'Listing does not exist';
 
+    return error.response?.data.message;
+  }
+  return undefined;
+}

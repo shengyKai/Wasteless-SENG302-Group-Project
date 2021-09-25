@@ -7,12 +7,12 @@ import { is, Reason } from 'typescript-is';
 import {CreateUser, login, createUser} from "@/api/user";
 import {CreateProduct, Product, createProduct, uploadProductImage, getProducts, modifyProduct} from "@/api/product";
 import {InventoryItem} from "@/api/inventory";
-import {Sale, getBusinessSales, setListingInterest, getListingInterest } from "@/api/sale";
+import {Sale, getBusinessSales, setListingInterest, getListingInterest, purchaseListing } from "@/api/sale";
 import {getMessagesInConversation, Message} from "@/api/marketplace";
 
 const api = {
   login, createUser, createProduct, uploadProductImage, getProducts, modifyProduct,
-  getBusinessSales, getMessagesInConversation, setListingInterest, getListingInterest
+  getBusinessSales, getMessagesInConversation, setListingInterest, getListingInterest, purchaseListing
 };
 
 jest.mock('axios', () => ({
@@ -183,7 +183,7 @@ type ApiCalls = {[k in keyof ApiMethods]: {
   usesServerMessage: boolean,                       // Whether the "message" attribute in the response is used for unspecialised error messages
 }};
 
-const apiCalls: Partial<ApiCalls> = {
+const apiCalls: ApiCalls = {
   createProduct: {
     parameters: [
       7,
@@ -358,7 +358,21 @@ const apiCalls: Partial<ApiCalls> = {
       406: 'Listing does not exist',
     },
     usesServerMessage: true,
-  }
+  },
+  purchaseListing: {
+    parameters: [6, 5],
+    httpMethod: 'post',
+    url: '/listings/6/purchase',
+    body: {
+      purchaserId: 5,
+    },
+    result: undefined,
+    extraStatusMessages: {
+      401: 'You have been logged out. Please login again and retry',
+      406: 'Listing does not exist',
+    },
+    usesServerMessage: true,
+  },
 };
 
 

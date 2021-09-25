@@ -38,7 +38,8 @@ describe('Test GET businesses/search endpoint', () => {
       country: "New Zealand",
       postcode: "7777"
     },
-    businessType: "Accommodation and Food Services"
+    businessType: "Accommodation and Food Services",
+    points: 24
   };
 
   const invalidBusiness: any  = {
