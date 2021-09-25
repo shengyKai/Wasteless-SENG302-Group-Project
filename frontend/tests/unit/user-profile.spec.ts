@@ -61,6 +61,7 @@ function makeTestBusiness(businessId: number, administrators?: number[]) {
     address: { country: 'test_business_country' + businessId },
     description: 'test_business_description' + businessId,
     created: '1/5/2005',
+    points: 10,
     businessType: 'Accommodation and Food Services',
   };
 
