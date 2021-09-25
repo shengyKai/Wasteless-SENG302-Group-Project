@@ -1,6 +1,7 @@
 package org.seng302.leftovers.entities;
 
 import org.seng302.leftovers.dto.business.BusinessType;
+import org.seng302.leftovers.dto.business.Rank;
 import org.seng302.leftovers.exceptions.DoesNotExistResponseException;
 import org.seng302.leftovers.exceptions.InsufficientPermissionResponseException;
 import org.seng302.leftovers.exceptions.ValidationResponseException;
@@ -41,6 +42,9 @@ public class Business implements ImageAttachment {
     private Instant created;
     @Column(nullable = false)
     private int points;
+    @Column(nullable = false)
+    @Enumerated(EnumType.ORDINAL)
+    private Rank rank = Rank.BRONZE;
 
     @OneToMany (fetch = FetchType.LAZY, mappedBy = "business", cascade = CascadeType.REMOVE)
     private List<Product> catalogue = new ArrayList<>();
@@ -201,6 +205,13 @@ public class Business implements ImageAttachment {
      * @param points Value to set points
      */
     public void setPoints(int points){this.points = points;}
+
+    /**
+     * Gets the business' current rank
+     */
+    public Rank getRank() {
+        return rank;
+    }
 
     /**
      * Sets primary owner of the business

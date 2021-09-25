@@ -18,6 +18,7 @@ import org.mockito.MockitoAnnotations;
 import org.seng302.leftovers.dto.LocationDTO;
 import org.seng302.leftovers.dto.business.BusinessResponseDTO;
 import org.seng302.leftovers.dto.business.BusinessType;
+import org.seng302.leftovers.dto.business.Rank;
 import org.seng302.leftovers.dto.user.UserResponseDTO;
 import org.seng302.leftovers.dto.user.UserRole;
 import org.seng302.leftovers.exceptions.AccessTokenResponseException;
@@ -593,6 +594,8 @@ class BusinessTests {
        assertTrue(json.containsKey("primaryAdministratorId"));
        assertTrue(json.containsKey("administrators"));
        assertTrue(json.containsKey("created"));
+       assertTrue(json.containsKey("points"));
+       assertTrue(json.containsKey("rank"));
     }
 
     /**
@@ -610,6 +613,8 @@ class BusinessTests {
         assertTrue(json.containsKey("id"));
         assertTrue(json.containsKey("primaryAdministratorId"));
         assertTrue(json.containsKey("created"));
+        assertTrue(json.containsKey("points"));
+        assertTrue(json.containsKey("rank"));
     }
 
     /**
@@ -630,6 +635,7 @@ class BusinessTests {
         json.remove("created");
         json.remove("images");
         json.remove("points");
+        json.remove("rank");
         assertTrue(json.isEmpty());
     }
 
@@ -650,6 +656,7 @@ class BusinessTests {
         json.remove("created");
         json.remove("images");
         json.remove("points");
+        json.remove("rank");
         assertTrue(json.isEmpty());
     }
 
@@ -659,7 +666,7 @@ class BusinessTests {
      * called with true, false or no argument.
      */
     @Test
-    void constructJsonSimpleFieldsHaveExpectedValueTest() {
+    void constructJsonSimpleFieldsHaveExpectedValueTest() throws JsonProcessingException {
         List<JSONObject> testJsons = getTestJsons(testBusiness1);
         for (var json : testJsons) {
             assertEquals(testBusiness1.getName(), json.getAsString("name"));
@@ -670,6 +677,10 @@ class BusinessTests {
             assertEquals(testBusiness1.getPrimaryOwner().getUserID().toString(), json.getAsString("primaryAdministratorId"));
             assertEquals(testBusiness1.getCreated().toString(), json.getAsString("created"));
             assertEquals(List.of(), json.get("images"));
+            assertEquals(testBusiness1.getPoints(), json.get("points"));
+            assertEquals(
+                    objectMapper.readTree(objectMapper.writeValueAsString(testBusiness1.getRank())),
+                    objectMapper.readTree(objectMapper.writeValueAsString(json.get("rank"))));
         }
     }
 
@@ -900,5 +911,10 @@ class BusinessTests {
         var pointsInitial = testBusiness1.getPoints();
         testBusiness1.incrementPoints();
         assertEquals(pointsInitial + 1,testBusiness1.getPoints());
+    }
+
+    @Test
+    void businessCreated_rankIsBronze() {
+        assertEquals(Rank.BRONZE, testBusiness1.getRank());
     }
 }

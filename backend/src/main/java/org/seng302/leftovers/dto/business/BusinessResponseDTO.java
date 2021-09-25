@@ -28,6 +28,7 @@ public class BusinessResponseDTO extends CreateBusinessDTO {
     @JsonFormat(shape=JsonFormat.Shape.STRING)
     private Instant created;
     private Integer points;
+    private Rank rank;
 
     private List<UserResponseDTO> administrators;
 
@@ -62,6 +63,7 @@ public class BusinessResponseDTO extends CreateBusinessDTO {
         this.images = business.getImages().stream().map(ImageDTO::new).collect(Collectors.toList());
         this.created = business.getCreated();
         this.points = business.getPoints();
+        this.rank = business.getRank();
 
         if (includeAdminDetails) {
             this.administrators = business.getOwnerAndAdministrators().stream()
