@@ -43,6 +43,7 @@ function createTestBusinesses(count: number) {
       businessType: "Accommodation and Food Services",
       address: { city: 'test_city' + i, country: 'test_country' + i },
       images: [],
+      points: 5
     });
   }
   return result;

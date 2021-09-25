@@ -25,6 +25,7 @@ function createTestBusinesses() {
     primaryAdministratorId: 1,
     businessType: "Accommodation and Food Services",
     address: { city: "test_city", country: "test_country" },
+    points: 5
   });
   return result;
 }

@@ -80,6 +80,7 @@ const test: Business = {
   description:"DESCRIPTION",
   id:10,
   businessType:"Accommodation and Food Services",
+  points: 5,
   administrators:[
     {
       firstName:"Andy",
