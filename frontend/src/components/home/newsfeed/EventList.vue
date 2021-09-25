@@ -151,7 +151,7 @@ pre {
   right: 0%;
 }
 
-.center-horisontal {
+.center-horizontal {
   position: absolute;
   left: 50%;
   transform: translate(-50%, 0);
