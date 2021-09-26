@@ -334,15 +334,6 @@ public class Business implements ImageAttachment {
     }
 
     /**
-     * Removes the given product from the business's catalogue
-     */
-    public void removeFromCatalogue(Product product) {
-        if(!catalogue.remove(product)) {
-            throw new DoesNotExistResponseException(Product.class);
-        }
-    }
-
-    /**
      * Returns the business's product catalogue.
      * @return product catalogue of the business.
      */
@@ -356,14 +347,6 @@ public class Business implements ImageAttachment {
      */
     @Override
     public List<Image> getImages() { return this.images; }
-
-    /**
-     * Adds a single image to the Business`s list of images
-     * @param image An image entity to be linked to this business
-     */
-    public void addImage(Image image) {
-        images.add(image);
-    }
 
     /**
      * Replaces the existing list of images with a new list of images

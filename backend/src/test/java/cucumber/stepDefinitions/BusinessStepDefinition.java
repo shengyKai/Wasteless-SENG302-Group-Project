@@ -23,9 +23,9 @@ import org.seng302.leftovers.controllers.BusinessController;
 import org.seng302.leftovers.dto.LocationDTO;
 import org.seng302.leftovers.dto.business.BusinessType;
 import org.seng302.leftovers.entities.*;
-import org.seng302.leftovers.exceptions.ValidationResponseException;
 import org.seng302.leftovers.persistence.BusinessRepository;
 import org.seng302.leftovers.persistence.ImageRepository;
+import org.seng302.leftovers.service.ImageService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
@@ -60,6 +60,8 @@ public class BusinessStepDefinition {
     private ImageRepository imageRepository;
     @Autowired
     private ImageContext imageContext;
+    @Autowired
+    private ImageService imageService;
     @Autowired
     private UserContext userContext;
     @Autowired
@@ -308,7 +310,7 @@ public class BusinessStepDefinition {
         image = imageContext.save(image);
         List<Long> imageIds = business.getIdsOfImages();
         imageIds.add(0, image.getID());
-        business.setImages(businessController.getListOfImagesFromIds(imageIds));
+        business.setImages(imageService.getListOfImagesFromIds(imageIds));
         business = businessContext.save(business);
         assertFalse(business.getImages().isEmpty());
         assertEquals(image, business.getImages().get(0));
@@ -319,7 +321,9 @@ public class BusinessStepDefinition {
         Business business = businessContext.getByName(businessName);
         Image image = new Image(imageName, imageName + "_thumbnail.png");
         image = imageContext.save(image);
-        business.addImage(image);
+        List<Image> images = business.getImages();
+        images.add(image);
+        business.setImages(images);  // Can't just string these together because List.add() return type is bool for success, rather than the updated list
         business = businessContext.save(business);
 
         assertFalse(business.getImages().isEmpty());

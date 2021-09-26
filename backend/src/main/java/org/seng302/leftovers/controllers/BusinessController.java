@@ -32,14 +32,11 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.server.ResponseStatusException;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -104,21 +101,6 @@ public class BusinessController {
     }
 
     /**
-     * Converts of image ids into their respective image objects
-     * @param imageIds a list of image ids
-     * @return a list of image objects
-     */
-    public List<Image> getListOfImagesFromIds(List<Long> imageIds) {
-        List<Image> images = new ArrayList<Image>();
-        for (Long imageId : imageIds) {
-            Image image = imageRepository.findById(imageId)
-                    .orElseThrow(() -> new DoesNotExistResponseException(Image.class));
-            images.add(image);
-        }
-        return images;
-    }
-
-    /**
      * PUT endpoint for modifying an existing business.
      * Ensures that the given primary business owner is an existing User.
      * Adds the business to the database if all of the business information is valid.
@@ -132,33 +114,20 @@ public class BusinessController {
             Business business = businessRepository.findById(id)
                     .orElseThrow(() -> new DoesNotExistResponseException(Business.class));
             business.checkSessionPermissions(request);
+
             Long newAdminID = body.getPrimaryAdministratorId();
             if(!business.getPrimaryOwner().getUserID().equals(newAdminID)) {
-                business.checkSessionPermissionsOwner(request);
-
-                User newOwner = userRepository.findById(newAdminID)
-                        .orElseThrow(() -> new ValidationResponseException("Updated primary administrator does not exist"));
-                User previousOwner = userRepository.findById(business.getPrimaryOwner().getUserID())
-                        .orElseThrow(() -> new ValidationResponseException("Previous business owner account does not exist"));
-
-                business.removeAdmin(newOwner);
-                business.setPrimaryOwner(newOwner);
-                business.addAdmin(previousOwner);
+                changeAdmin(request, business, newAdminID);
             }
+
             business.setName(body.getName());
             business.setDescription(body.getDescription());
             business.setAddress(body.getAddress().createLocation());
             business.setBusinessType(body.getBusinessType());
-
-            business.setImages(getListOfImagesFromIds(body.getImageIds()));
+            business.setImages(imageService.getListOfImagesFromIds(body.getImageIds()));
 
             if (Boolean.TRUE.equals(body.getUpdateProductCountry())) {
-                List<Product> catalogue = business.getCatalogue();
-                String countryToChange = body.getAddress().getCountry();
-                // Iterate through each product in the catalogue and change their country to the specified country
-                for (Product product : catalogue) {
-                    product.setCountryOfSale(countryToChange);
-                }
+                updateCountry(body, business.getCatalogue());
             }
 
             businessRepository.save(business);
@@ -166,6 +135,38 @@ public class BusinessController {
             logger.error(e.getMessage());
             throw e;
         }
+    }
+
+    /**
+     * Updates the country of products associated with the business
+     * @param body Request body with all the business info
+     * @param catalogue List of products associated with the business
+     */
+    private void updateCountry(ModifyBusinessDTO body, List<Product> catalogue) {
+        String countryToChange = body.getAddress().getCountry();
+        // Iterate through each product in the catalogue and change their country to the specified country
+        for (Product product : catalogue) {
+            product.setCountryOfSale(countryToChange);
+        }
+    }
+
+    /**
+     * Update the primary administrator of the business
+     * @param request Request body with auth details of business
+     * @param business The business object being modified
+     * @param newAdminID The ID of the new admin
+     */
+    private void changeAdmin(HttpServletRequest request, Business business, Long newAdminID) {
+        business.checkSessionPermissionsOwner(request);
+
+        User newOwner = userRepository.findById(newAdminID)
+                .orElseThrow(() -> new ValidationResponseException("Updated primary administrator does not exist"));
+        User previousOwner = userRepository.findById(business.getPrimaryOwner().getUserID())
+                .orElseThrow(() -> new ValidationResponseException("Previous business owner account does not exist"));
+
+        business.removeAdmin(newOwner);
+        business.setPrimaryOwner(newOwner);
+        business.addAdmin(previousOwner);
     }
 
     /**
@@ -322,30 +323,5 @@ public class BusinessController {
 
         Page<Business> results = businessRepository.findAll(specification, pageRequest);
         return new ResultPageDTO<>(results.map(BusinessResponseDTO::withoutAdmins));
-    }
-
-    /**
-     * Adds a new image to the business' image list
-     * @param businessId Identifier of business to add image to
-     * @param file Uploaded image
-     * @return Empty response with 201 if successful
-     */
-    @PostMapping("/businesses/{businessId}/images")
-    public ResponseEntity<Void> uploadImage(@PathVariable Long businessId, @RequestParam("file") MultipartFile file, HttpServletRequest request) {
-        logger.info("Adding business image (businessId={})", businessId);
-        AuthenticationTokenManager.checkAuthenticationToken(request);
-        try {
-            Business business = businessRepository.getBusinessById(businessId);
-            business.checkSessionPermissions(request);
-
-            Image image = imageService.create(file);
-            business.addImage(image);
-            businessRepository.save(business);
-
-            return new ResponseEntity<>(HttpStatus.CREATED);
-        } catch (Exception e) {
-            logger.error(e.getMessage());
-            throw e;
-        }
     }
 }
