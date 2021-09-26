@@ -9,9 +9,8 @@
       <v-card v-if="businessImages && businessImages.length > 0">
         <ImageCarousel
           :imagesList="businessImages"
-          :showMakePrimary="permissionToActAsBusiness"
+          :showMakePrimary="false"
           :showDelete="false"
-          @change-primary-image="false"
           ref="businessImageCarousel"
         />
       </v-card>
