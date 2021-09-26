@@ -11,12 +11,11 @@ import org.seng302.leftovers.persistence.SpecificationsBuilder;
 import org.seng302.leftovers.persistence.SearchCriteria.Pred;
 import org.springframework.data.jpa.domain.Specification;
 
+import javax.persistence.criteria.Predicate;
 import java.math.BigDecimal;
+import java.time.Instant;
 import java.time.LocalDate;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class SearchSpecConstructor {
@@ -403,5 +402,25 @@ public class SearchSpecConstructor {
                 and(constructSaleListingSpecificationFromBusinessType(
                         saleListingSearchDTO.getBusinessTypes())).
                 and(constructSaleItemSpecificationFromSearchQueries(saleListingSearchDTO.getBasicSearchQuery(), saleListingSearchDTO.getProductSearchQuery(), saleListingSearchDTO.getBusinessSearchQuery(), saleListingSearchDTO.getLocationSearchQuery()));
+    }
+
+    /**
+     * Constructs a BoughtSaleItem specification that matches all entities that are bought within the bounds of the
+     * provided start and end dates+times.
+     * @param start Earliest matching sale date+time (inclusive)
+     * @param end Latest matching sale date+time (exclusive)
+     * @return Specification for bought sale items, sold within a certain interval
+     */
+    public static Specification<BoughtSaleItem> constructBoughtSaleListingSpecificationFromPeriod(Instant start, Instant end) {
+        return (root, query, criteriaBuilder) -> {
+            List<Predicate> predicates = new ArrayList<>();
+            if (start != null) {
+                predicates.add(criteriaBuilder.greaterThanOrEqualTo(root.get("saleDate"), start));
+            }
+            if (end != null) {
+                predicates.add(criteriaBuilder.lessThan(root.get("saleDate"), end));
+            }
+            return criteriaBuilder.and(predicates.toArray(Predicate[]::new));
+        };
     }
 }
