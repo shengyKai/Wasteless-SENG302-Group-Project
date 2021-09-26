@@ -366,22 +366,23 @@ public class Business implements ImageAttachment {
     }
 
     /**
-     * Adds a single image to the Business's list of images at given index
-     * @param index Index to insert the new image
-     * @param image An image entity to be linked to this business
+     * Replaces the existing list of images with a new list of images
+     * @param images A list of images
      */
-    public void addImage(int index, Image image) {
-        images.add(index, image);
+    public void setImages(List<Image> images) {
+        this.images = images;
     }
 
     /**
-     * Removes a given image from the list of business images
-     * @param image The image to remove
+     * Returns the ids of all the images associated with the business
+     * @return the ids of all the images associated with the business
      */
-    public void removeImage(Image image) {
-        if (!this.images.remove(image)) {
-            throw new ValidationResponseException("Cannot remove image");
+    public List<Long> getIdsOfImages() {
+        List<Long> imageIds = new ArrayList<Long>();
+        for (Image image: this.images) {
+            imageIds.add(image.getID());
         }
+        return imageIds;
     }
 
     @Override

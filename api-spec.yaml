@@ -2910,6 +2910,7 @@ components:
         - name
         - address
         - businessType
+        - rank
       properties:
         id:
           type: integer
@@ -2943,12 +2944,20 @@ components:
           example: '2020-07-14T14:52:00Z'
           readOnly: true
           description: Date and time when the account was created
+        points:
+          type: integer
+          example: 15
+          description: >-
+            The number of points associated with a given business. Once a certain number of points has been reached
+            the business will move up to the next rank.
         images:
           type: array
           readOnly: true
           description: List of images for this business, with the first image being the primary image.
           items:
             $ref: '#/components/schemas/Image'
+        rank:
+          $ref: '#/components/schemas/Rank'
     BusinessType:
       type: string
       example: Retail Trade
@@ -2966,6 +2975,26 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/BusinessType'
+    Rank:
+      type: object
+      description: An enum representing a business's rank
+      readOnly: true
+      required:
+        - name
+      properties:
+        name:
+          description: The name of the rank
+          type: string
+          example: bronze
+          enum:
+            - bronze
+            - silver
+            - gold
+            - platinum
+        threshold:
+          description: The points required to reach the next rank. This value is omitted for 'platinum'
+          type: number
+          example: 10
     Address:
       type: object
       description: Entity representing some physical address

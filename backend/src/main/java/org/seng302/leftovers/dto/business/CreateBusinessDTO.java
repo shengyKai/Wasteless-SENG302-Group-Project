@@ -5,8 +5,10 @@ import lombok.Getter;
 import lombok.ToString;
 import org.seng302.leftovers.dto.LocationDTO;
 import org.seng302.leftovers.entities.Business;
+import org.seng302.leftovers.entities.Image;
 
 import javax.validation.constraints.NotNull;
+import java.util.List;
 
 /**
  * A DTO representing the parameters passed to a POST /businesses request

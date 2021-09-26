@@ -317,15 +317,18 @@ public class SaleController {
                     eventRepository.save(interestPurchasedEvent);
                 }
             }
+            saleItemRepository.delete(saleItem);
 
             var inventoryItem = saleItem.getInventoryItem();
             inventoryItem.sellQuantity(saleItem.getQuantity());
-            inventoryItemRepository.save(inventoryItem);
+            if (inventoryItem.getQuantity() == 0) {
+                inventoryItemRepository.delete(inventoryItem);
+            } else {
+                inventoryItemRepository.save(inventoryItem);
+            }
 
             PurchasedEvent purchasedEvent = new PurchasedEvent(purchaser, boughtSaleItem);
             eventRepository.save(purchasedEvent);
-
-            saleItemRepository.delete(saleItem);
 
             logger.info("Sale item (id={}) has been purchased for user (id={})", saleItem.getId(), purchaser.getUserID());
         } catch (Exception e) {
