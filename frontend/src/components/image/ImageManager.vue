@@ -163,8 +163,8 @@ export default {
       const index = this.outputImages.indexOf(image);
       if (index !== -1) {
         this.outputImages.splice(index, 1);
+        this.output();
       }
-      this.output();
     },
     /**
      * Output data for two-way binding

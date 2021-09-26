@@ -27,14 +27,15 @@ describe('ImageManager.vue', () => {
         ImageUploader
       },
       propsData: {
-        images: [
+        value: [
           {
             id: 1,
             filename: "some test file",
             thumbnailFilename: "some thumbnail"
           }
         ]
-      }
+      },
+      stubs: ['ImageUploader']
     });
   });
 
@@ -43,8 +44,8 @@ describe('ImageManager.vue', () => {
   });
 
   it("Only shows the single upload icon if the images prop array length is lesser than 1", async () => {
-    await wrapper.setProps({
-      images: []
+    await wrapper.setData({
+      outputImages: []
     });
     expect(wrapper.findComponent({ref: "uploadWithNoImages"}).exists()).toBeTruthy();
     expect(wrapper.findComponent({ref: "upload"}).exists()).toBeFalsy();
@@ -52,16 +53,33 @@ describe('ImageManager.vue', () => {
     expect(wrapper.findComponent({ref: "makePrimary"}).exists()).toBeFalsy();
   });
 
-  it("Shows the upload, trash can and make primary icon if the images prop array length is more than or equal to 1", () => {
+  it("Shows the upload and trash can icon if the images prop array length is more than or equal to 1", () => {
     expect(wrapper.findComponent({ref: "uploadWithNoImages"}).exists()).toBeFalsy();
     expect(wrapper.findComponent({ref: "upload"}).exists()).toBeTruthy();
     expect(wrapper.findComponent({ref: "trashCan"}).exists()).toBeTruthy();
+    expect(wrapper.findComponent({ref: "makePrimary"}).exists()).toBeFalsy();
+  });
+
+  it("Shows the make image primary icon if there are at least two images", async () => {
+    const images = [
+      {
+        id: 1,
+        filename: "some test file",
+        thumbnailFilename: "some thumbnail"
+      },
+      {
+        id: 2,
+        filename: "another test file",
+        thumbnailFilename: "some thumbnail"
+      }
+    ];
+    await wrapper.setData({outputImages: images, model:1});
     expect(wrapper.findComponent({ref: "makePrimary"}).exists()).toBeTruthy();
   });
 
   it('If the uploadWithNoImages icon is clicked, the ImageUploader will be shown', async() => {
-    await wrapper.setProps({
-      images: []
+    await wrapper.setData({
+      outputImages: []
     });
     await wrapper.findComponent({ref: "uploadWithNoImages"}).trigger("click");
     expect(wrapper.findComponent(ImageUploader).exists()).toBeTruthy();
@@ -72,19 +90,57 @@ describe('ImageManager.vue', () => {
     expect(wrapper.findComponent(ImageUploader).exists()).toBeTruthy();
   });
 
-  it("If there is an uploadedImage, toBeSubmittedImages array will be updated while the images array still stays the same ", async () => {
+  it("If the imageUploader uploads an image, the output images will be updated", async () => {
     const anotherImage =  {
       id: 2,
       filename: "some test file 2",
       thumbnailFilename: "some thumbnail 2"
     };
-    await wrapper.setData({
-      uploadedImage: anotherImage
-    });
+    await wrapper.setData({showImageUploader:true, uploadedImage: anotherImage});
+    const imageUploader = wrapper.findComponent(ImageUploader);
     expect(wrapper.vm.outputImages.length).toEqual(1);
-    expect(wrapper.vm.images.length).toEqual(1);
-    await wrapper.vm.upload(true);
+    imageUploader.vm.$emit("upload");
+    await Vue.nextTick();
     expect(wrapper.vm.outputImages.length).toEqual(2);
-    expect(wrapper.vm.images.length).toEqual(1);
+    expect(wrapper.emitted('input')).toBeTruthy();
+  });
+
+  it("If the delete method is called, the image is removed", async () => {
+    expect(wrapper.vm.outputImages.length).toEqual(1);
+    await wrapper.vm.deleteImage(wrapper.vm.outputImages[0]);
+    await Vue.nextTick();
+    expect(wrapper.vm.outputImages.length).toEqual(0);
+  });
+
+  it("If the delete method is called with an image which doesn't exist, no image is removed", async () => {
+    expect(wrapper.vm.outputImages.length).toEqual(1);
+    wrapper.vm.deleteImage({
+      id: 2,
+      filename: "wrong image test file",
+      thumbnailFilename: "some thumbnail"
+    });
+    await Vue.nextTick();
+    expect(wrapper.vm.outputImages.length).toEqual(1);
+  });
+
+  it("If the makeImagePrimary is called, the image becomes the front of the output list", async ()=> {
+    const images = [
+      {
+        id: 1,
+        filename: "some test file",
+        thumbnailFilename: "some thumbnail"
+      },
+      {
+        id: 2,
+        filename: "another test file",
+        thumbnailFilename: "some thumbnail"
+      }
+    ];
+    await wrapper.setData({outputImages:images});
+    const image1 = wrapper.vm.outputImages[0];
+    const image2 = wrapper.vm.outputImages[1];
+    wrapper.vm.makeImagePrimary(image2);
+    expect(wrapper.vm.outputImages[0]).toBe(image2);
+    expect(wrapper.vm.outputImages[1]).toBe(image1);
   });
 });
