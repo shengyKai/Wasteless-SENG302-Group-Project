@@ -34,7 +34,7 @@
 </template>
 
 <script>
-import ImageSelector from "@/components/utils/ImageSelector";
+import ImageSelector from "@/components/image/ImageSelector";
 import { uploadImage } from "@/api/images";
 
 export default {

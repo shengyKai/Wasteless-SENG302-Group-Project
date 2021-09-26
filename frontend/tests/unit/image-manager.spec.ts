@@ -2,8 +2,8 @@ import Vue from 'vue';
 import Vuetify from 'vuetify';
 import {createLocalVue, mount, Wrapper} from '@vue/test-utils';
 
-import ImageManager from "@/components/utils/ImageManager.vue";
-import ImageUploader from "@/components/utils/ImageUploader.vue";
+import ImageManager from "@/components/image/ImageManager.vue";
+import ImageUploader from "@/components/image/ImageUploader.vue";
 
 Vue.use(Vuetify);
 

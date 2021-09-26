@@ -228,7 +228,7 @@
 
 <script>
 import LocationAutocomplete from '@/components/utils/LocationAutocomplete';
-import ImageManager from "@/components/utils/ImageManager";
+import ImageManager from "@/components/image/ImageManager";
 import {
   alphabetExtendedMultilineRules,
   alphabetExtendedSingleLineRules, alphabetRules,

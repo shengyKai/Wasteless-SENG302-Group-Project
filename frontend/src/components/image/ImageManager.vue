@@ -110,7 +110,7 @@
 </template>
 
 <script>
-import ImageUploader from "@/components/utils/ImageUploader";
+import ImageUploader from "@/components/image/ImageUploader";
 import {imageSrcFromFilename} from "@/utils";
 
 export default {
@@ -127,7 +127,7 @@ export default {
   }),
   computed: {
     /**
-     * An cloned array of images from the images prop. This is needed because we cannot mutate props and we want to show a carousel of
+     * A cloned array of images from the images prop. This is needed because we cannot mutate props and we want to show a carousel of
      * images which contains the images that are both tied and pending to be tied to the entity.
      */
     outputImages() {

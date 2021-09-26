@@ -102,7 +102,7 @@ import {
   mandatoryRules,
   maxCharRules, postCodeRules, streetNumRules
 } from "@/utils";
-import ImageCarousel from "@/components/utils/ImageCarousel";
+import ImageCarousel from "@/components/image/ImageCarousel";
 import {getBusiness} from "@/api/business";
 export default {
   name: 'BusinessProfile',
