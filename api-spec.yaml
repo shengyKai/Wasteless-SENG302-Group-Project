@@ -2944,6 +2944,12 @@ components:
           example: '2020-07-14T14:52:00Z'
           readOnly: true
           description: Date and time when the account was created
+        points:
+          type: integer
+          example: 15
+          description: >-
+            The number of points associated with a given business. Once a certain number of points has been reached
+            the business will move up to the next rank.
         images:
           type: array
           readOnly: true
