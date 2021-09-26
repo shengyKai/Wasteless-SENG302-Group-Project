@@ -5,13 +5,12 @@ import net.minidev.json.JSONObject;
 import net.minidev.json.parser.JSONParser;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInstance;
+import org.junit.jupiter.api.*;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.MockedConstruction;
 import org.mockito.Mockito;
+import org.mockito.MockitoAnnotations;
 import org.seng302.leftovers.dto.business.BusinessType;
 import org.seng302.leftovers.dto.user.UserRole;
 import org.seng302.leftovers.entities.*;
@@ -20,16 +19,19 @@ import org.seng302.leftovers.persistence.BusinessRepository;
 import org.seng302.leftovers.persistence.ImageRepository;
 import org.seng302.leftovers.persistence.ProductRepository;
 import org.seng302.leftovers.persistence.UserRepository;
+import org.seng302.leftovers.service.ImageService;
 import org.seng302.leftovers.service.search.SearchPageConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.Cookie;
 import java.lang.reflect.Field;
@@ -49,6 +51,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @AutoConfigureMockMvc
 class ProductControllerTest {
+
+    @MockBean
+    private ImageService imageService;
 
     @Autowired
     private MockMvc mockMvc;
@@ -133,6 +138,7 @@ class ProductControllerTest {
 
     @BeforeEach
     void setUp() throws ParseException {
+        MockitoAnnotations.openMocks(this);
 
         Sort.Order expectedOrder = new Sort.Order(Sort.Direction.ASC, "created").ignoreCase();
         templateRequest = SearchPageConstructor.getPageRequest(null,null, Sort.by(expectedOrder));
@@ -1144,17 +1150,26 @@ class ProductControllerTest {
     }
 
     @Test
-    void uploadProductImage_validImageData_201Response() throws Exception {
+    void uploadProductImage_validImageData_201ResponseAndImageSaved() throws Exception {
         setCurrentUser(ownerUser.getUserID());
         addSeveralProductsToACatalogue();
 
-        MockMultipartFile file = new MockMultipartFile("file", "filename.txt", "image/png", ProductControllerTest.class.getResourceAsStream("/point.png"));
+        byte[] data = {1, 2, 3, 5};
+        MockMultipartFile file = new MockMultipartFile("file", "filename.txt", "image/carrot", data);
+
         mockMvc.perform(multipart(String.format("/businesses/%d/products/NATHAN-APPLE-70/images", testBusiness1.getId()))
                 .file(file)
                 .sessionAttrs(sessionAuthToken)
                 .cookie(authCookie))
                 .andExpect(status().isCreated())
                 .andReturn();
+
+        var captor = ArgumentCaptor.forClass(MultipartFile.class);
+        verify(imageService, times(1)).create(captor.capture());
+        var actualFile = captor.getValue();
+
+        assertEquals("image/carrot", actualFile.getContentType());
+        assertArrayEquals(data, actualFile.getBytes());
     }
 
     /**
