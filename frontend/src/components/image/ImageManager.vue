@@ -38,7 +38,7 @@
                             color="primary"
                             v-bind="attrs"
                             v-on="on"
-                            @click="delete(image)">
+                            @click="deleteImage(image)">
                       mdi-trash-can
                     </v-icon>
                   </template>
@@ -48,6 +48,7 @@
                   <template v-slot:activator="{ on, attrs }">
                     <v-icon center
                             outlined
+                            v-if="enumerator !== 0"
                             ref="makePrimary"
                             class="ma-2 img-button"
                             color="primary"
@@ -126,12 +127,14 @@ export default {
       required: true
     }
   },
-  data: () => ({
-    model: 0,
-    showImageUploader: false,
-    uploadedImage: undefined,
-    outputImages: this.value,
-  }),
+  data: function() {
+    return {
+      model: 0,
+      showImageUploader: false,
+      uploadedImage: undefined,
+      outputImages: this.value,
+    };
+  },
   methods: {
     /**
      * Method to push the uploaded image to the end of the image array, so that it can be shown to the user.
@@ -149,14 +152,14 @@ export default {
      * More specifically, assigns the given image as the image in the first index of the image array.
      */
     makeImagePrimary(image) {
-      this.delete(image);
+      this.deleteImage(image);
       this.outputImages.unshift(image);
       this.output();
     },
     /**
      * Deletes an image by removing it from the list of images
      */
-    delete(image) {
+    deleteImage(image) {
       const index = this.outputImages.indexOf(image);
       if (index !== -1) {
         this.outputImages.splice(index, 1);

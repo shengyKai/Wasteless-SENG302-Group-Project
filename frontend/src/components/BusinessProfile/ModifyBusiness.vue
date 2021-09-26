@@ -285,7 +285,6 @@ export default {
       postcodeRules: ()=> postCodeRules,
       isLoading: false,
       images: this.business.images,
-      imageIds: this.images.map(image => image.id),
     };
   },
   computed: {
@@ -303,6 +302,12 @@ export default {
     isPrimaryOwner() {
       return this.$store.state.user.id === this.business.primaryAdministratorId;
     },
+    /**
+     * Returns a list of IDs of the business's images
+     */
+    imageIds() {
+      return this.images.map(image => image.id);
+    }
   },
   methods: {
     /**
@@ -404,14 +409,6 @@ export default {
       this.primaryAdministratorId = admin.id;
     },
   },
-  watch: {
-    images: {
-      deep: true,
-      handler() {
-        this.imageIds = this.images.map(image => image.id);
-      }
-    }
-  }
 };
 </script>
 
