@@ -423,4 +423,13 @@ public class SearchSpecConstructor {
             return criteriaBuilder.and(predicates.toArray(Predicate[]::new));
         };
     }
+
+    /**
+     * Constructs a BoughtSaleItem specification that matches all that belong to the provided business
+     * @param business Business to filter bought sale items by
+     * @return Specification that matches only bought sale items that belong to the business
+     */
+    public static Specification<BoughtSaleItem> constructBoughtSaleListingSpecificationFromBusiness(Business business) {
+        return (root, query, criteriaBuilder) -> criteriaBuilder.equal(root.get("product").get("business"), business);
+    }
 }

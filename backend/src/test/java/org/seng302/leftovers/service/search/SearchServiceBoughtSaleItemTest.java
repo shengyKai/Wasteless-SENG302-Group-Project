@@ -36,6 +36,9 @@ class SearchServiceBoughtSaleItemTest {
     @Autowired
     private BoughtSaleItemRepository boughtSaleItemRepository;
 
+    private User owner;
+    private Business business;
+
     private final Instant referenceInstant = Instant.parse("2021-09-08T08:47:59Z");
 
     @BeforeAll
@@ -48,7 +51,7 @@ class SearchServiceBoughtSaleItemTest {
 
     @BeforeEach
     void setup() {
-        User owner = new User.Builder()
+        owner = new User.Builder()
                 .withFirstName("John")
                 .withMiddleName("Hector")
                 .withLastName("Smith")
@@ -76,7 +79,7 @@ class SearchServiceBoughtSaleItemTest {
                         "Canterbury,8041"))
                 .build();
         buyer = userRepository.save(buyer);
-        Business business = new Business.Builder()
+        business = new Business.Builder()
                 .withBusinessType(BusinessType.ACCOMMODATION_AND_FOOD_SERVICES)
                 .withAddress(Location.covertAddressStringToLocation("4,Rountree Street,Ashburton,Christchurch,New Zealand," +
                         "Canterbury,8041"))
@@ -158,5 +161,27 @@ class SearchServiceBoughtSaleItemTest {
         var result = boughtSaleItemRepository.findOne(spec);
         assertTrue(result.isPresent());
         assertEquals(referenceInstant.plus(1, ChronoUnit.DAYS), result.get().getSaleDate());
+    }
+
+    @Test
+    void constructFromBusiness_noMatchingBoughtSaleItems_noneReturned() {
+        Business emptyBusiness = new Business.Builder()
+                .withBusinessType(BusinessType.ACCOMMODATION_AND_FOOD_SERVICES)
+                .withAddress(Location.covertAddressStringToLocation("4,Rountree Street,Ashburton,Christchurch,New Zealand," +
+                        "Canterbury,8041"))
+                .withDescription("Some description")
+                .withName("Joe's Garage")
+                .withPrimaryOwner(owner)
+                .build();
+        emptyBusiness = businessRepository.save(emptyBusiness);
+
+        var spec = SearchSpecConstructor.constructBoughtSaleListingSpecificationFromBusiness(emptyBusiness);
+        assertEquals(0, boughtSaleItemRepository.count(spec));
+    }
+
+    @Test
+    void constructFromBusiness_withMatching_expectedNumberReturned() {
+        var spec = SearchSpecConstructor.constructBoughtSaleListingSpecificationFromBusiness(business);
+        assertEquals(3, boughtSaleItemRepository.count(spec));
     }
 }
