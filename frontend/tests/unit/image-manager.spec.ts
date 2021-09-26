@@ -103,7 +103,7 @@ describe('ImageManager.vue', () => {
 
   it("If the delete method is called, the image is removed", async () => {
     expect(wrapper.vm.outputImages.length).toEqual(1);
-    await wrapper.vm.deleteImage(wrapper.vm.outputImages[0]);
+    await wrapper.findComponent({ref: 'trashCan'}).trigger('click');
     await Vue.nextTick();
     expect(wrapper.vm.outputImages.length).toEqual(0);
     expect(wrapper.emitted('input')).toBeTruthy();
@@ -122,10 +122,10 @@ describe('ImageManager.vue', () => {
         thumbnailFilename: "some thumbnail"
       }
     ];
-    await wrapper.setData({outputImages:images});
+    await wrapper.setData({outputImages:images, model:1});
     const image1 = wrapper.vm.outputImages[0];
     const image2 = wrapper.vm.outputImages[1];
-    wrapper.vm.makeImagePrimary(image2);
+    await wrapper.findComponent({ref: 'makePrimary'}).trigger('click');
     expect(wrapper.vm.outputImages[0]).toBe(image2);
     expect(wrapper.vm.outputImages[1]).toBe(image1);
     expect(wrapper.emitted('input')).toBeTruthy();
