@@ -1117,28 +1117,12 @@ class ProductControllerTest {
                 .andReturn();
     }
 
-    /**
-     * Tests that uploading an image with an invalid content type fails with a 400 response.
-     */
     @Test
-    void uploadingImageToProductFailsIfInvalidContentType() throws Exception {
+    void uploadProductImage_invalidImage_400Response() throws Exception {
         setCurrentUser(ownerUser.getUserID());
         addSeveralProductsToACatalogue();
 
-        MockMultipartFile file = new MockMultipartFile("file", "filename.txt", "image/bad", new byte[100]);
-        mockMvc.perform(multipart(String.format("/businesses/%d/products/NATHAN-APPLE-70/images", testBusiness1.getId()))
-                .file(file)
-                .sessionAttrs(sessionAuthToken)
-                .cookie(authCookie))
-                .andExpect(status().isBadRequest())
-                .andReturn();
-    }
-
-
-    @Test
-    void uploadProductImage_invalidImageData_400Response() throws Exception {
-        setCurrentUser(ownerUser.getUserID());
-        addSeveralProductsToACatalogue();
+        when(imageService.create(any())).thenThrow(new ValidationResponseException(""));
 
         MockMultipartFile file = new MockMultipartFile("file", "filename.txt", "image/jpeg", new byte[100]);
         mockMvc.perform(multipart(String.format("/businesses/%d/products/NATHAN-APPLE-70/images", testBusiness1.getId()))
