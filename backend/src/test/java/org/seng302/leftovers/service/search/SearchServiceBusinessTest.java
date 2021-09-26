@@ -1,4 +1,4 @@
-package org.seng302.leftovers.service;
+package org.seng302.leftovers.service.search;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;

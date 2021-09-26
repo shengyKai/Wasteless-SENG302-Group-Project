@@ -1,4 +1,4 @@
-package org.seng302.leftovers.service;
+package org.seng302.leftovers.service.search;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.*;
@@ -14,9 +14,6 @@ import org.seng302.leftovers.dto.product.ProductFilterOption;
 import org.seng302.leftovers.entities.*;
 import org.seng302.leftovers.exceptions.ValidationResponseException;
 import org.seng302.leftovers.persistence.*;
-import org.seng302.leftovers.service.search.SearchPageConstructor;
-import org.seng302.leftovers.service.search.SearchQueryParser;
-import org.seng302.leftovers.service.search.SearchSpecConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.Page;
