@@ -46,7 +46,10 @@ it('Testing valid user with businesses', () => {
         description: "DESCRIPTION",
         id: 10,
         businessType: "Accommodation and Food Services",
-        points: 4
+        points: 4,
+        rank: {
+          name: 'bronze',
+        },
       }
     ],
     middleName: "Percy",
@@ -82,6 +85,9 @@ const test: Business = {
   id:10,
   businessType:"Accommodation and Food Services",
   points: 5,
+  rank: {
+    name: 'bronze',
+  },
   administrators:[
     {
       firstName:"Andy",
@@ -114,6 +120,9 @@ it('Testing valid business', () => {
     id:10,
     businessType:"Accommodation and Food Services",
     points: 4,
+    rank: {
+      name: 'bronze',
+    },
     administrators:[
       {
         firstName:"Andy",

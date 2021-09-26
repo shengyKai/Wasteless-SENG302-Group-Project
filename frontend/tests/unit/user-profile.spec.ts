@@ -62,6 +62,9 @@ function makeTestBusiness(businessId: number, administrators?: number[]) {
     description: 'test_business_description' + businessId,
     created: '1/5/2005',
     points: 10,
+    rank: {
+      name: 'bronze',
+    },
     businessType: 'Accommodation and Food Services',
   };
 
