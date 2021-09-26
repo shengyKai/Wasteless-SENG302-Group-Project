@@ -110,6 +110,7 @@ describe('ImageManager.vue', () => {
     await wrapper.vm.deleteImage(wrapper.vm.outputImages[0]);
     await Vue.nextTick();
     expect(wrapper.vm.outputImages.length).toEqual(0);
+    expect(wrapper.emitted('input')).toBeTruthy();
   });
 
   it("If the delete method is called with an image which doesn't exist, no image is removed", async () => {
@@ -142,5 +143,6 @@ describe('ImageManager.vue', () => {
     wrapper.vm.makeImagePrimary(image2);
     expect(wrapper.vm.outputImages[0]).toBe(image2);
     expect(wrapper.vm.outputImages[1]).toBe(image1);
+    expect(wrapper.emitted('input')).toBeTruthy();
   });
 });

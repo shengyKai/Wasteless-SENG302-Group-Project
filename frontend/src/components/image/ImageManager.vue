@@ -144,7 +144,6 @@ export default {
      */
     upload() {
       this.outputImages.push(this.uploadedImage);
-      this.output();
     },
     /**
      * Assigns the given image as the primary image
@@ -153,7 +152,6 @@ export default {
     makeImagePrimary(image) {
       this.deleteImage(image);
       this.outputImages.unshift(image);
-      this.output();
     },
     /**
      * Deletes an image by removing it from the list of images
@@ -162,7 +160,6 @@ export default {
       const index = this.outputImages.indexOf(image);
       if (index !== -1) {
         this.outputImages.splice(index, 1);
-        this.output();
       }
     },
     /**
@@ -178,6 +175,11 @@ export default {
       return imageSrcFromFilename(filename);
     },
   },
+  watch: {
+    outputImages: function() {
+      this.$emit('input', this.outputImages);
+    }
+  }
 };
 </script>
 
