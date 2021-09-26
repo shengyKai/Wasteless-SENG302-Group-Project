@@ -62,6 +62,7 @@ export default {
       } else {
         this.image = response;
         this.$emit('upload');
+        this.closeForm();
       }
     },
     /**

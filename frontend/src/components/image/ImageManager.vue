@@ -144,7 +144,6 @@ export default {
      */
     upload() {
       this.outputImages.push(this.uploadedImage);
-      this.showImageUploader = false;
       this.output();
     },
     /**
