@@ -52,7 +52,12 @@
               </v-tooltip>
             </v-col>
           </v-row>
-          <p><strong>Created:</strong> {{ createdMsg }}</p>
+          <v-row class="mb-n8">
+            <v-col><strong>Created:</strong> {{ createdMsg }}</v-col>
+          </v-row>
+          <v-row class="mb-2">
+            <v-col><strong>Points:</strong>47</v-col>
+          </v-row>
           <v-btn outlined color="primary" @click="goSalePage" :value="false" width="150">
             Sale listings
           </v-btn>

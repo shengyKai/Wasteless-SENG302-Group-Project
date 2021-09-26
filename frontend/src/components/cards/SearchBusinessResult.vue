@@ -8,13 +8,19 @@
         <v-list-item-content>
           <v-list-item-title>
 
-            <a style="color: black;" @click="viewBusinessProfile">
+            <a class="mr-10" style="color: black;" @click="viewBusinessProfile">
               {{ business.name }}
             </a>
 
           </v-list-item-title>
-          <v-list-item-subtitle> {{ business.businessType }} </v-list-item-subtitle>
-          <v-list-item-subtitle> {{ insertAddress(business.address) }} </v-list-item-subtitle>
+          <v-list-item-subtitle>
+            <label class="mr-10"><strong>Rank: </strong>Bronze (47 points)</label>
+          </v-list-item-subtitle>
+          <v-list-item-subtitle>
+            <label class="mr-10">{{ insertAddress(business.address) }}</label>
+            <label class="mr-10">{{ business.businessType }}</label>
+          </v-list-item-subtitle>
+
         </v-list-item-content>
       </v-col>
     </v-row>
@@ -53,4 +59,7 @@ export default {
     text-decoration: underline;
 }
 
+.result-column {
+  min-width: 500px;
+}
 </style>
