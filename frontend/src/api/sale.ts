@@ -174,21 +174,22 @@ export async function basicSearchSaleitem(query: string, orderBy: SaleListingOrd
 export async function advanceSearchSaleitem(advanceSearch: AdvanceSearch, page: number, resultsPerPage: number): Promise<MaybeError<SearchResults<Sale>>> {
   let response;
   try {
+    let params : URLSearchParams = new URLSearchParams(
+      {"productSearchQuery": advanceSearch.productQuery,
+        "businessSearchQuery":  advanceSearch.businessQuery,
+        "locationSearchQuery": advanceSearch.locationQuery,
+        "closesLower": advanceSearch.closesBefore,
+        "closesUpper": advanceSearch.closesAfter,
+        "orderBy": advanceSearch.orderBy,
+        "page": page.toString(),
+        "resultsPerPage": resultsPerPage.toString(),
+        "reverse": advanceSearch.reverse.toString(),
+        "priceLower": advanceSearch.lowestPrice,
+        "priceUpper": advanceSearch.highestPrice,
+      });
+    advanceSearch.businessTypes.map(type => params.append("businessTypes", type));
     response = await instance.get('/businesses/listings/search', {
-      params: {
-        productSearchQuery: advanceSearch.productQuery,
-        businessSearchQuery: advanceSearch.businessQuery,
-        locationSearchQuery: advanceSearch.locationQuery,
-        closesLower: advanceSearch.closesBefore,
-        closesUpper: advanceSearch.closesAfter,
-        orderBy: advanceSearch.orderBy,
-        page,
-        resultsPerPage,
-        reverse: advanceSearch.reverse.toString(),
-        businessTypes: advanceSearch.businessTypes,
-        priceLower: advanceSearch.lowestPrice,
-        priceUpper: advanceSearch.highestPrice,
-      },
+      params: params
     });
   } catch (error) {
     let status: number | undefined = error.response?.status;

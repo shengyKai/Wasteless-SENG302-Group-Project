@@ -14,7 +14,7 @@
     <v-list three-line v-if="resultsPage">
       <template v-for="(sale, index) in resultsPage.results">
         <v-divider v-if="sale === undefined" :key="'divider-'+index"/>
-        <SaleResult v-else :key="sale.id" :saleItem="sale"/>
+        <SaleResult v-else :key="sale.id" :saleItem="sale" @goBack="updatePage"/>
       </template>
     </v-list>
     <!--paginate results-->
@@ -86,7 +86,7 @@ export default {
   },
   methods: {
     async simpleSearch() {
-      //TODO implement when linked to endpoint
+      if(this.simpleSearchParams.query === null) this.simpleSearchParams = "";
       const result = await basicSearchSaleitem(this.simpleSearchParams.query, this.simpleSearchParams.orderBy,
         this.currentPage, this.resultsPerPage, this.simpleSearchParams.reverse);
       if (typeof result === 'string'){
@@ -97,7 +97,9 @@ export default {
       }
     },
     async advancedSearch() {
-      //TODO implement when linked to endpoint
+      if(this.advancedSearchParams.productQuery === null) this.advancedSearchParams.productQuery = "";
+      if(this.advancedSearchParams.businessQuery === null) this.advancedSearchParams.businessQuery = "";
+      if(this.advancedSearchParams.locationQuery === null) this.advancedSearchParams.locationQuery = "";
       const result = await advanceSearchSaleitem(this.advancedSearchParams, this.currentPage, this.resultsPerPage);
       if (typeof result === 'string'){
         this.errorMessage = result;
@@ -105,6 +107,11 @@ export default {
         this.errorMessage = undefined;
         this.resultsPage = result;
       }
+    },
+    async updatePage() {
+      console.log("S");
+      if(this.showAdvancedSearch) this.advancedSearch();
+      else this.simpleSearch();
     },
   },
   watch: {

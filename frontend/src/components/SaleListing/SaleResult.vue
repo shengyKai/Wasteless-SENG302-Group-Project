@@ -8,7 +8,7 @@
         <v-list-item-title>
           <a class="result-title" @click="showFullListing = !showFullListing">{{ product.name }}</a>
           <label class="result-title-join">From </label>
-          <label class="result-title-business">{{ product.manufacturer }}</label>
+          <label class="result-title-business">{{ product.business.name }}</label>
         </v-list-item-title>
         <v-list-item-subtitle>
           <label>More Info: {{ saleItem.moreInfo }}</label>
@@ -33,7 +33,7 @@
   <div v-else>
     <FullSaleListing
       :saleItem="saleItem"
-      @goBack="showFullListing = false"
+      @goBack="goBack"
     />
   </div>
 </template>
@@ -85,6 +85,10 @@ export default {
     }
   },
   methods: {
+    goBack() {
+      this.showFullListing = false;
+      this.$emit("goBack");
+    },
     /**
      * Computes the currency
      */

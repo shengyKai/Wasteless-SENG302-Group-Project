@@ -37,7 +37,7 @@
                 <v-icon class="ml-1">{{thumbIcon}}</v-icon>
               </v-btn>
               <!-- A return button for user to hide full sale listing-->
-              <v-btn class="ml-2 mr-1 pl-2 pr-1" color="secondary" @click="hideExpand">
+              <v-btn class="ml-2 mr-1 pl-2 pr-1" color="secondary" @click="goBack">
                 Hide
                 <v-icon class="ml-1">mdi-arrow-left</v-icon>
               </v-btn>
@@ -311,8 +311,7 @@ export default {
     /**
      * Minimize the full sale listing and back to the listing result page
      */
-    hideExpand() {
-      this.interestCount = "";
+    goBack() {
       this.$emit('goBack');
     },
   },
