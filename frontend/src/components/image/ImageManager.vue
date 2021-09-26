@@ -37,7 +37,8 @@
                             class="ma-2 img-button"
                             color="primary"
                             v-bind="attrs"
-                            v-on="on">
+                            v-on="on"
+                            @click="delete(image)">
                       mdi-trash-can
                     </v-icon>
                   </template>
@@ -51,7 +52,8 @@
                             class="ma-2 img-button"
                             color="primary"
                             v-bind="attrs"
-                            v-on="on">
+                            v-on="on"
+                            @click="makeImagePrimary(image)">
                       mdi-image-edit
                     </v-icon>
                   </template>
@@ -104,7 +106,8 @@
     <ImageUploader
       v-model="uploadedImage"
       v-if="showImageUploader"
-      @closeDialog="upload"
+      @upload="upload"
+      @closeDialog="showImageUploader=false"
     />
   </div>
 </template>
@@ -118,22 +121,17 @@ export default {
     ImageUploader,
   },
   props: {
-    images: Array
+    value: {
+      type: Array,
+      required: true
+    }
   },
   data: () => ({
     model: 0,
     showImageUploader: false,
     uploadedImage: undefined,
+    outputImages: this.value,
   }),
-  computed: {
-    /**
-     * A cloned array of images from the images prop. This is needed because we cannot mutate props and we want to show a carousel of
-     * images which contains the images that are both tied and pending to be tied to the entity.
-     */
-    outputImages() {
-      return Array.from(this.images);
-    }
-  },
   methods: {
     /**
      * Method to push the uploaded image to the end of the image array, so that it can be shown to the user.
@@ -141,12 +139,35 @@ export default {
      * Takes in a boolean isActionForImageUpload, to identify whether the upload method refers to a close dialog action or a
      * action to upload images, since they are both being called using the same emit event from ImageUploader
      */
-    upload(isActionForImageUpload) {
-      if (isActionForImageUpload) {
-        this.outputImages.push(this.uploadedImage);
-        this.$emit("updateImages", this.outputImages);
-      }
+    upload() {
+      this.outputImages.push(this.uploadedImage);
       this.showImageUploader = false;
+      this.output();
+    },
+    /**
+     * Assigns the given image as the primary image
+     * More specifically, assigns the given image as the image in the first index of the image array.
+     */
+    makeImagePrimary(image) {
+      this.delete(image);
+      this.outputImages.unshift(image);
+      this.output();
+    },
+    /**
+     * Deletes an image by removing it from the list of images
+     */
+    delete(image) {
+      const index = this.outputImages.indexOf(image);
+      if (index !== -1) {
+        this.outputImages.splice(index, 1);
+      }
+      this.output();
+    },
+    /**
+     * Output data for two-way binding
+     */
+    output() {
+      this.$emit('input', this.outputImages);
     },
     /**
      * Method to call another method to get the image source from the image file name

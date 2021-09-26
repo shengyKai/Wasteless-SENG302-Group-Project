@@ -61,7 +61,7 @@ export default {
         this.errorMessage = response;
       } else {
         this.image = response;
-        this.$emit('closeDialog', true);
+        this.$emit('upload');
       }
     },
     /**
@@ -69,7 +69,7 @@ export default {
      */
     closeForm() {
       this.file = undefined;
-      this.$emit('closeDialog', false);
+      this.$emit('closeDialog');
     },
   },
   computed: {
