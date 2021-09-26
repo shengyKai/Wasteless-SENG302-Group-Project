@@ -40,9 +40,6 @@ import { uploadImage } from "@/api/images";
 export default {
   name: "ImageUploader",
   components: { ImageSelector },
-  props: {
-    value: undefined,
-  },
   data() {
     return {
       isLoading: false,
@@ -60,8 +57,7 @@ export default {
       if (typeof response === 'string') {
         this.errorMessage = response;
       } else {
-        this.image = response;
-        this.$emit('upload');
+        this.$emit('upload', response);
         this.closeForm();
       }
     },
@@ -73,15 +69,5 @@ export default {
       this.$emit('closeDialog');
     },
   },
-  computed: {
-    image: {
-      get() {
-        return this.value;
-      },
-      set (value) {
-        this.$emit('input', value);
-      },
-    }
-  }
 };
 </script>

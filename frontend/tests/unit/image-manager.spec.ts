@@ -16,10 +16,6 @@ describe('ImageManager.vue', () => {
   beforeEach(() => {
     const vuetify = new Vuetify();
 
-    const app = document.createElement ("div");
-    app.setAttribute ("data-app", "true");
-    document.body.append(app);
-
     wrapper = mount(ImageManager, {
       localVue,
       vuetify,
@@ -96,10 +92,10 @@ describe('ImageManager.vue', () => {
       filename: "some test file 2",
       thumbnailFilename: "some thumbnail 2"
     };
-    await wrapper.setData({showImageUploader:true, uploadedImage: anotherImage});
+    await wrapper.setData({showImageUploader:true});
     const imageUploader = wrapper.findComponent(ImageUploader);
     expect(wrapper.vm.outputImages.length).toEqual(1);
-    imageUploader.vm.$emit("upload");
+    imageUploader.vm.$emit("upload", anotherImage);
     await Vue.nextTick();
     expect(wrapper.vm.outputImages.length).toEqual(2);
     expect(wrapper.emitted('input')).toBeTruthy();
@@ -111,17 +107,6 @@ describe('ImageManager.vue', () => {
     await Vue.nextTick();
     expect(wrapper.vm.outputImages.length).toEqual(0);
     expect(wrapper.emitted('input')).toBeTruthy();
-  });
-
-  it("If the delete method is called with an image which doesn't exist, no image is removed", async () => {
-    expect(wrapper.vm.outputImages.length).toEqual(1);
-    wrapper.vm.deleteImage({
-      id: 2,
-      filename: "wrong image test file",
-      thumbnailFilename: "some thumbnail"
-    });
-    await Vue.nextTick();
-    expect(wrapper.vm.outputImages.length).toEqual(1);
   });
 
   it("If the makeImagePrimary is called, the image becomes the front of the output list", async ()=> {
