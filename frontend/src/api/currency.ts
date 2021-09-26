@@ -58,7 +58,7 @@ export async function currencyFromCountry(country: string): Promise<CurrencyOrEr
  */
 export async function queryCurrencyAPI(country: string): Promise<MaybeError<Response>> {
 
-  const queryUrl = `https://restcountries.eu/rest/v2/name/${country}?fullText=true&fields=currencies`;
+  const queryUrl = `https://restcountries.com/v2/name/${country}?fullText=true&fields=currencies`;
 
   const response = await fetch(queryUrl)
     .catch(error => {
