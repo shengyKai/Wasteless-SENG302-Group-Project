@@ -47,7 +47,8 @@ public enum Rank {
 
     /**
      * Helper method used by Jackson to convert json objects into a rank.
-     * This is only expected to be used in tests, since the user should not need to know the rank's threshold value.
+     * This is only expected to be used in tests, since the user should not need to provide the threshold value to send
+     * a rank to the backend.
      * @param name Name of Rank
      * @param threshold Threshold value
      * @return Parsed rank
