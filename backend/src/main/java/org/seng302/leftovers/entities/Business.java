@@ -1,6 +1,7 @@
 package org.seng302.leftovers.entities;
 
 import org.seng302.leftovers.dto.business.BusinessType;
+import org.seng302.leftovers.dto.business.Rank;
 import org.seng302.leftovers.exceptions.DoesNotExistResponseException;
 import org.seng302.leftovers.exceptions.InsufficientPermissionResponseException;
 import org.seng302.leftovers.exceptions.ValidationResponseException;
@@ -201,6 +202,22 @@ public class Business implements ImageAttachment {
      * @param points Value to set points
      */
     public void setPoints(int points){this.points = points;}
+
+    /**
+     * Gets the business' current rank
+     * @return The rank of the business based on its current points.
+     */
+    public Rank getRank() {
+        return Rank.getRankFromPoints(points);
+    }
+
+    /**
+     * Get the next rank which the business will be awarded if it reaches the points threshold for its current rank.
+     * @return The next rank which the business can be awarded.
+     */
+    public Rank getNextRank() {
+        return Rank.getNextRank(this.getRank());
+    }
 
     /**
      * Sets primary owner of the business

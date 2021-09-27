@@ -1116,10 +1116,31 @@ class SaleControllerTest {
 
         // Inventory item should be updated if request is successful
         verify(inventoryItem, times(1)).sellQuantity(50);
-        var inventoryItemCaptor = ArgumentCaptor.forClass(InventoryItem.class);
-        verify(inventoryItemRepository, times(1)).save(inventoryItemCaptor.capture());
-        assertEquals(inventoryItem, inventoryItemCaptor.getValue());
+        verify(inventoryItemRepository, times(1)).save(inventoryItem);
     }
+
+    @Test
+    void purchaseSaleItem_allInventoryItemsSold_inventoryItemDeleted() throws Exception {
+        authenticationTokenManager.when(() -> AuthenticationTokenManager.sessionCanSeePrivate(any(), any())).thenReturn(true);
+        JSONObject validBody = new JSONObject();
+        validBody.put("purchaserId", user.getUserID());
+
+        when(inventoryItem.getQuantity()).thenReturn(50);
+        doAnswer(invocation -> {
+            when(inventoryItem.getQuantity()).thenReturn(0); // Once sold, then set quantity to 0
+            return null;
+        }).when(inventoryItem).sellQuantity(any());
+
+        mockMvc.perform(post(String.format("/listings/%d/purchase", saleItem.getId()))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(validBody.toString()))
+                .andExpect(status().isOk());
+
+        verify(inventoryItemRepository, times(0)).save(any());
+        verify(inventoryItemRepository, times(1)).delete(inventoryItem);
+    }
+
+
     @Test
     void purchaseSaleItem_validRequest_purchaseEventCreated() throws Exception {
         authenticationTokenManager.when(() -> AuthenticationTokenManager.sessionCanSeePrivate(any(), any())).thenReturn(true);

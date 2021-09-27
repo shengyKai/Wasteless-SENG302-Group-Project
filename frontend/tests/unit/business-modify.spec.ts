@@ -82,7 +82,10 @@ function createTestBusiness(businessId: number, primaryAdminId: number, admins: 
     businessType: 'Charitable organisation',
     created: '2/6/2006',
     images: [],
-    points: 0
+    points: 0,
+    rank: {
+      name: 'bronze',
+    },
   };
   return business;
 }
