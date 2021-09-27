@@ -163,10 +163,8 @@
             </v-tab-item>
             <!-- Business image tab -->
             <v-tab-item key="image" :eager="true">
-              <v-card-title class="mt-n3">Image</v-card-title>
-              <!-- INPUT: Business images -->
               <ImageManager :images="business.images" @updateImages="updateBusinessImages"/>
-              <p class="error-text" v-if ="errorMessage !== undefined"> {{errorMessage}} </p>
+                  <p class="error-text" v-if ="errorMessage !== undefined"> {{errorMessage}} </p>
             </v-tab-item>
           </v-tabs-items>
           <v-divider/>
@@ -245,7 +243,6 @@
 
 <script>
 import LocationAutocomplete from '@/components/utils/LocationAutocomplete';
-import { modifyBusiness, getUser } from '@/api/internal';
 import ImageManager from "@/components/utils/ImageManager";
 import {
   alphabetExtendedMultilineRules,
@@ -254,6 +251,8 @@ import {
   maxCharRules, postCodeRules, streetNumRules,
   USER_ROLES
 } from "@/utils";
+import { modifyBusiness } from '@/api/business';
+import { getUser } from '@/api/user';
 export default {
   name: 'ModifyBusiness',
   components: {
