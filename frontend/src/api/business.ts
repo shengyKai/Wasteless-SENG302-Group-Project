@@ -7,6 +7,13 @@ export type BusinessType = 'Accommodation and Food Services' | 'Retail Trade' | 
 export const BUSINESS_TYPES: BusinessType[] = ['Accommodation and Food Services', 'Retail Trade', 'Charitable organisation', 'Non-profit organisation'];
 type BusinessOrderBy = 'created' | 'name' | 'location' | 'businessType';
 
+export type RankName = 'bronze' | 'silver' | 'gold' | 'platinum'
+
+type Rank = {
+  name: RankName,
+  threshold?: number,
+};
+
 export type Business = {
   id: number,
   primaryAdministratorId: number,
@@ -17,7 +24,11 @@ export type Business = {
   businessType: BusinessType,
   created?: string,
   images?: Image[],
+  points: number,
+  rank: Rank,
 };
+
+
 
 export type CreateBusiness = {
   primaryAdministratorId: number,
@@ -33,7 +44,8 @@ export type ModifyBusiness = {
   description?: string,
   address: Location,
   businessType: BusinessType,
-  updateProductCountry: boolean
+  updateProductCountry: boolean,
+  imageIds: Array<number>
 }
 
 /**

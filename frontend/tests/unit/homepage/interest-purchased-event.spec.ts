@@ -24,6 +24,10 @@ const business: Business = {
   name:"Hillary Cresenct Jewelers",
   description:"Nihil, eveniet aliquid culpa officia aut! Impedit sit sunt quaerat, odit, tenetur error, harum nesciunt.",
   id:1,
+  points: 4,
+  rank: {
+    name: 'bronze',
+  },
   businessType:"Accommodation and Food Services"
 };
 const product: Product = {

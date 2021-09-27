@@ -150,7 +150,7 @@
                   </div>
                   <v-card-title class="mt-n3">Image</v-card-title>
                   <!-- INPUT: Business images -->
-                  <ImageManager/>
+                  <ImageManager :images="business.images" @updateImages="updateBusinessImages"/>
                   <p class="error-text" v-if ="errorMessage !== undefined"> {{errorMessage}} </p>
                 </v-container>
               </v-card-text>
@@ -238,7 +238,6 @@ import {
 } from "@/utils";
 import { modifyBusiness } from '@/api/business';
 import { getUser } from '@/api/user';
-
 export default {
   name: 'ModifyBusiness',
   components: {
@@ -285,6 +284,7 @@ export default {
       streetRules: ()=> streetNumRules,
       postcodeRules: ()=> postCodeRules,
       isLoading: false,
+      imageIds: this.business.images.map(image => image.id),
     };
   },
   computed: {
@@ -356,7 +356,8 @@ export default {
           postcode: this.postcode
         },
         businessType: this.businessType,
-        updateProductCountry: this.updateProductCountry
+        updateProductCountry: this.updateProductCountry,
+        imageIds: this.imageIds,
       };
       const result = await modifyBusiness(this.business.id, modifiedFields);
 
@@ -401,6 +402,15 @@ export default {
       }
       this.primaryAdministratorId = admin.id;
     },
+    /**
+     * Method to update the imageIds from the outputImages received from ImageManager to be sent for business modification.
+     */
+    updateBusinessImages(outputImages) {
+      this.imageIds = outputImages.map(image => image.id);
+    }
   },
 };
 </script>
+
+<style scoped>
+</style>
