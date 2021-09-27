@@ -2,7 +2,7 @@
   <v-card color="secondary" dark>
     <v-card-actions>
       <v-row align="center" justify="center">
-        <v-col cols="2">
+        <v-col cols="2" class="mt-1">
           <v-menu
             ref="fromMenu"
             v-model="fromDateMenu"
@@ -191,7 +191,16 @@ export default {
 </script>
 
 <style scoped>
-v-menu .v-text-field .v-text-field__details .v-messages{
-  background: red;
+/*
+  The bottom two css styles had to be done because by Vueitfy's default implementation, there are sometimes some components
+  which are created which causes the layout to be unorganised. The >>> symbol is a deep selector symbol which targets the specific
+  Vue/Vueitfy class when you provide a parent class. Try uncommenting the bottom two styles to see the difference
+ */
+.v-input >>> .v-text-field__details{
+  margin-bottom: 0;
+  display: none;
+}
+.v-input >>> .v-input__slot{
+  margin-bottom: 0;
 }
 </style>
