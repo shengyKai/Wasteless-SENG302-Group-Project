@@ -42,9 +42,6 @@ public class Business implements ImageAttachment {
     private Instant created;
     @Column(nullable = false)
     private int points;
-    @Column(nullable = false)
-    @Enumerated(EnumType.ORDINAL)
-    private Rank rank = Rank.BRONZE;
 
     @OneToMany (fetch = FetchType.LAZY, mappedBy = "business", cascade = CascadeType.REMOVE)
     private List<Product> catalogue = new ArrayList<>();
@@ -208,9 +205,18 @@ public class Business implements ImageAttachment {
 
     /**
      * Gets the business' current rank
+     * @return The rank of the business based on its current points.
      */
     public Rank getRank() {
-        return rank;
+        return Rank.getRankFromPoints(points);
+    }
+
+    /**
+     * Get the next rank which the business will be awarded if it reaches the points threshold for its current rank.
+     * @return The next rank which the business can be awarded.
+     */
+    public Rank getNextRank() {
+        return Rank.getNextRank(this.getRank());
     }
 
     /**
