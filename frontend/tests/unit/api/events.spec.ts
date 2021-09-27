@@ -137,11 +137,12 @@ describe('Test GET /users/:id/feed endpoint', () => {
     expect(instance.get).toBeCalledWith('/users/3/feed', {params: new URLSearchParams()});
   });
 
-  it('When getEvents is called with a modifiedSince date, GET /users/:id/feed endpoint is called with given user ID and the given date as a query parameters', async () => {
+  it.only('When getEvents is called with a modifiedSince date, GET /users/:id/feed endpoint is called with given user ID and the given date as a query parameters', async () => {
     const expectedParams = new URLSearchParams();
     expectedParams.append("modifiedSince", "2021-09-09 12:30:25.902Z");
     await getEvents(3, "2021-09-09 12:30:25.902Z");
     expect(instance.get).toBeCalledTimes(1);
+    console.log(expectedParams, instance.get.mock.calls);
     expect(instance.get).toBeCalledWith('/users/3/feed', {params: expectedParams});
   });
 

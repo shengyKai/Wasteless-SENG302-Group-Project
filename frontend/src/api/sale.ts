@@ -178,8 +178,8 @@ export async function advanceSearchSaleitem(advanceSearch: AdvanceSearch, page: 
       {"productSearchQuery": advanceSearch.productQuery,
         "businessSearchQuery":  advanceSearch.businessQuery,
         "locationSearchQuery": advanceSearch.locationQuery,
-        "closesLower": advanceSearch.closesBefore,
-        "closesUpper": advanceSearch.closesAfter,
+        "closeLower": advanceSearch.closesBefore,
+        "closeUpper": advanceSearch.closesAfter,
         "orderBy": advanceSearch.orderBy,
         "page": page.toString(),
         "resultsPerPage": resultsPerPage.toString(),
@@ -188,6 +188,7 @@ export async function advanceSearchSaleitem(advanceSearch: AdvanceSearch, page: 
         "priceUpper": advanceSearch.highestPrice,
       });
     advanceSearch.businessTypes.map(type => params.append("businessTypes", type));
+    console.log(Array.from(params.entries()));
     response = await instance.get('/businesses/listings/search', {
       params: params
     });
