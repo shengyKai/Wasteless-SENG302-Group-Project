@@ -14,10 +14,7 @@
     <v-list three-line v-if="resultsPage">
       <template v-for="(sale, index) in resultsPage.results">
         <v-divider v-if="sale === undefined" :key="'divider-'+index"/>
-        <SaleResult v-else :key="sale.id" :saleItem="sale"
-                    @goBack="updatePage"
-                    @refresh="updatePage"/>
-
+        <SaleResult v-else :key="sale.id" :saleItem="sale" @goBack="updatePage" @refresh="updateResults"/>
       </template>
     </v-list>
     <!--paginate results-->
@@ -131,6 +128,12 @@ export default {
       if(this.showAdvancedSearch) this.advancedSearch();
       else this.simpleSearch();
     },
+    /**
+     * Fetches a new set of results
+     */
+    async updateResults() {
+      this.resultsPage = (await basicSearchSaleitem("", "created", 1, this.resultsPerPage, false));
+    },
   },
   watch: {
     /**
@@ -156,7 +159,7 @@ export default {
     },
   },
   async beforeMount() {
-    this.resultsPage = (await basicSearchSaleitem("", "created", 1, this.resultsPerPage, false));
+    this.updateResults();
   }
 };
 </script>

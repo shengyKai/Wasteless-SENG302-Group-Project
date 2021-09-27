@@ -2,6 +2,7 @@ import Vue from 'vue';
 import Vuetify from 'vuetify';
 import { createLocalVue, mount, Wrapper } from '@vue/test-utils';
 import SaleResult from "@/components/SaleListing/SaleResult.vue";
+import { Business } from '@/api/business';
 
 Vue.use(Vuetify);
 
@@ -13,6 +14,19 @@ jest.mock('@/api/currency', () => ({
     };
   })
 }));
+
+const testBusiness: Business = {
+  id: 1,
+  primaryAdministratorId: 2,
+  name: "test_business",
+  address: { city: "test_city", country: "test_country" },
+  businessType: "Accommodation and Food Services",
+  points: 999,
+  rank: {
+    name: "bronze",
+    threshold: 1000
+  }
+};
 
 describe('SaleResult.vue', () => {
   let wrapper: Wrapper<any>;
@@ -33,6 +47,7 @@ describe('SaleResult.vue', () => {
           "inventoryItem": {
             "id": 101,
             "product": {
+              "business" : testBusiness,
               "id": "WATT-420-BEANS",
               "name": "Watties Baked Beans - 420g can",
               "description": "Baked Beans as they should be.",

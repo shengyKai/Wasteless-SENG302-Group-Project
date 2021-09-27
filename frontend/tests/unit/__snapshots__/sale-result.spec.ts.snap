@@ -5,7 +5,7 @@ exports[`SaleResult.vue Component matches snapshot 1`] = `
   <div tabindex="-1" class="v-list-item theme--light purple--text">
     <div class="v-avatar v-list-item__avatar" style="height: 70px; min-width: 40px; width: 70px;"><img src="../../assets/grumpy.webp"></div>
     <div class="v-list-item__content">
-      <div class="v-list-item__title"><a class="result-title">Watties Baked Beans - 420g can</a> <label class="result-title-join">From </label> <label class="result-title-business">Heinz Wattie's Limited</label></div>
+      <div class="v-list-item__title"><a class="result-title">Watties Baked Beans - 420g can</a> <label class="result-title-join">From </label> <label class="result-title-business">test_business</label></div>
       <div class="v-list-item__subtitle"><label>More Info: Seller may be willing to consider near offers.</label></div>
       <div class="v-list-item__subtitle"><label class="total-price-label">Total Price:</label> <label>$17.99</label> <label class="divider1"></label> <label class="quantity-label">Quantity:</label> <label>3</label></div>
       <div class="v-list-item__subtitle"><label class="creation-date-label">Creation Date:</label> <label>14 Jul 2021</label> <label class="divider2"></label> <label class="closing-date-label">Closing Date:</label> <label>22 Jul 2021</label></div>

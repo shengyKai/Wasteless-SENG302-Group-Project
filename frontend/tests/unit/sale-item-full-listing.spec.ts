@@ -149,7 +149,6 @@ describe('FullSaleListing.vue', () => {
   });
 
   it("Must contain the manufactured origin country of the sale", () => {
-    console.log(wrapper.text());
     expect(wrapper.text()).toContain("Country of Sale: New Z");
   });
 
