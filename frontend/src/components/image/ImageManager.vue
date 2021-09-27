@@ -161,12 +161,6 @@ export default {
       }
     },
     /**
-     * Output data for two-way binding
-     */
-    output() {
-      this.$emit('input', this.outputImages);
-    },
-    /**
      * Method to call another method to get the image source from the image file name
      */
     imageUrl(filename) {
