@@ -164,7 +164,7 @@
             <!-- Business image tab -->
             <v-tab-item key="image" :eager="true">
               <ImageManager :images="business.images" @updateImages="updateBusinessImages"/>
-                  <p class="error-text" v-if ="errorMessage !== undefined"> {{errorMessage}} </p>
+              <p class="error-text" v-if ="errorMessage !== undefined"> {{errorMessage}} </p>
             </v-tab-item>
           </v-tabs-items>
           <v-divider/>
