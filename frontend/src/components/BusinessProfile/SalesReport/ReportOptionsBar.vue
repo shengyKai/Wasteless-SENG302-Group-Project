@@ -132,6 +132,12 @@ export default {
   name: "ReportGenerationBar",
   data() {
     return {
+      fromDate: '',
+      toDate: '',
+      fromDateMenu: false,
+      toDateMenu: false,
+      periodBefore: null,
+      granularity: null,
       periodBeforeOptions: [
         { periodLevel:'One day before', periodValue:'day' },
         { periodLevel:'One week before', periodValue:'week' },
