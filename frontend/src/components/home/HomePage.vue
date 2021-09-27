@@ -29,7 +29,6 @@
         </template>
       </v-select>
       <!-- Newsfeed -->
-      <!-- Example message - move inside for loop once message is an event type -->
       <v-tabs
         v-model="tab">
         <v-tabs-slider/>

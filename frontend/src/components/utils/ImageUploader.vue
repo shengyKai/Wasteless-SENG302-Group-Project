@@ -3,7 +3,7 @@
     <v-form>
       <v-card>
         <v-card-title>
-          Upload Business Image
+          Upload Image
         </v-card-title>
         <v-card-text>
           <ImageSelector v-model="file"/>
@@ -35,10 +35,11 @@
 
 <script>
 import ImageSelector from "@/components/utils/ImageSelector";
+import { uploadImage } from "@/api/images";
 
 export default {
-  name: "BusinessImageUploader",
-  components: {ImageSelector},
+  name: "ImageUploader",
+  components: { ImageSelector },
   props: {
     value: undefined,
   },
@@ -46,26 +47,33 @@ export default {
     return {
       isLoading: false,
       errorMessage: undefined,
-      showDialog: true
+      showDialog: true,
+      file: undefined
     };
   },
   methods: {
-    /*
-     * Close the dialog and emit message to the parent to add file to uploaded images.
+    /**
+     * Uploads the image and if successful closes the dialog form
      */
-    uploadImage() {
-      this.$emit('uploadImage');
+    async uploadImage() {
+      const response = await uploadImage(this.file);
+      if (typeof response === 'string') {
+        this.errorMessage = response;
+      } else {
+        this.image = response;
+        this.$emit('closeDialog', true);
+      }
     },
     /**
      * Closes the dialog and clears any selected files
      */
     closeForm() {
       this.file = undefined;
-      this.$emit('closeDialog');
+      this.$emit('closeDialog', false);
     },
   },
   computed: {
-    file: {
+    image: {
       get() {
         return this.value;
       },

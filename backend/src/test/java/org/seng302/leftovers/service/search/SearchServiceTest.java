@@ -1,4 +1,4 @@
-package org.seng302.leftovers.tools;
+package org.seng302.leftovers.service.search;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.*;
@@ -8,6 +8,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mockito;
 import org.mockito.internal.matchers.apachecommons.ReflectionEquals;
 import org.seng302.leftovers.controllers.DGAAController;
+import org.seng302.leftovers.controllers.UserController;
 import org.seng302.leftovers.dto.business.BusinessType;
 import org.seng302.leftovers.dto.product.ProductFilterOption;
 import org.seng302.leftovers.entities.*;
@@ -37,7 +38,7 @@ import static org.mockito.Mockito.when;
 
 @SpringBootTest
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-class SearchHelperTest {
+class SearchServiceTest {
 
     /**
      * List of users to be used in testing of getPageInResults.
@@ -81,16 +82,15 @@ class SearchHelperTest {
     /**
      * Read user info from file UserSearchHelperTestData1.csv, use this information to construct User objects and add them to userList
      *
-     * @throws ParseException
-     * @throws IOException
+     * @throws IOException Database exception
      */
     @BeforeEach
     void setUp() throws IOException {
         SpecificationsBuilder<User> builder = new SpecificationsBuilder<User>()
-                .with("firstName", ":", "andy", true)
-                .with("middleName", ":", "andy", true)
-                .with("lastName", ":", "andy", true)
-                .with("nickname", ":", "andy", true);
+                .with("firstName", SearchCriteria.Pred.PARTIAL_MATCH, "andy", true)
+                .with("middleName", SearchCriteria.Pred.PARTIAL_MATCH, "andy", true)
+                .with("lastName", SearchCriteria.Pred.PARTIAL_MATCH, "andy", true)
+                .with("nickname", SearchCriteria.Pred.PARTIAL_MATCH, "andy", true);
         spec = builder.build();
 
         pagingUserList = readUserFile("UserSearchHelperTestData1.csv");
@@ -117,7 +117,7 @@ class SearchHelperTest {
         List<User> userList = new ArrayList<>();
         String row;
         BufferedReader csvReader = new BufferedReader(new InputStreamReader(
-                Objects.requireNonNull(SearchHelperTest.class.getResourceAsStream("/testData/" + resourceName))
+                Objects.requireNonNull(SearchServiceTest.class.getResourceAsStream("/testData/" + resourceName))
         ));
         while ((row = csvReader.readLine()) != null) {
             try {
@@ -125,9 +125,7 @@ class SearchHelperTest {
                 User user = new User.Builder().withFirstName(userData[0]).withMiddleName(userData[1]).withLastName(userData[2]).withNickName(userData[3])
                         .withEmail(userData[4]).withPassword(userData[5]).withAddress(Location.covertAddressStringToLocation(userData[6])).withDob(userData[7]).build();
                 userList.add(user);
-            } catch (Exception e) {
-
-            }
+            } catch (Exception ignored) {}
         }
         csvReader.close();
         return userList;
@@ -140,7 +138,7 @@ class SearchHelperTest {
      */
     @Test
     void getPageInResultsValidResultsPerPageValidRequestedPageTest() {
-        List<User> result = SearchHelper.getPageInResults(pagingUserList, 2, 10);
+        List<User> result = SearchPageConstructor.getPageInResults(pagingUserList, 2, 10);
         assertArrayEquals(pagingUserList.subList(10, 20).toArray(), result.toArray());
     }
 
@@ -150,7 +148,7 @@ class SearchHelperTest {
      */
     @Test
     void getPageInResultsValidResultsPerPageNullRequestedPageTest() {
-        List<User> result = SearchHelper.getPageInResults(pagingUserList, null, 10);
+        List<User> result = SearchPageConstructor.getPageInResults(pagingUserList, null, 10);
         assertArrayEquals(pagingUserList.subList(0, 10).toArray(), result.toArray());
     }
 
@@ -160,7 +158,7 @@ class SearchHelperTest {
      */
     @Test
     void getPageInResultsValidResultsPerPageNegativeRequestedPageTest() {
-        List<User> result = SearchHelper.getPageInResults(pagingUserList, -3, 10);
+        List<User> result = SearchPageConstructor.getPageInResults(pagingUserList, -3, 10);
         assertArrayEquals(pagingUserList.subList(0, 10).toArray(), result.toArray());
     }
 
@@ -171,7 +169,7 @@ class SearchHelperTest {
      */
     @Test
     void getPageInResultsValidResultsPerPageAboveMaximumRequestedPageTest() {
-        List<User> result = SearchHelper.getPageInResults(pagingUserList, 100, 10);
+        List<User> result = SearchPageConstructor.getPageInResults(pagingUserList, 100, 10);
         assertArrayEquals(pagingUserList.subList(20, 26).toArray(), result.toArray());
     }
 
@@ -181,7 +179,7 @@ class SearchHelperTest {
      */
     @Test
     void getPageInResultsNegativeResultsPerPageValidRequestedPageTest() {
-        List<User> result = SearchHelper.getPageInResults(pagingUserList, 1, -100);
+        List<User> result = SearchPageConstructor.getPageInResults(pagingUserList, 1, -100);
         assertArrayEquals(pagingUserList.subList(0, 15).toArray(), result.toArray());
     }
 
@@ -191,7 +189,7 @@ class SearchHelperTest {
      */
     @Test
     void getPageInResultsNullResultsPerPageValidRequestedPageTest() {
-        List<User> result = SearchHelper.getPageInResults(pagingUserList, 1, null);
+        List<User> result = SearchPageConstructor.getPageInResults(pagingUserList, 1, null);
         assertArrayEquals(pagingUserList.subList(0, 15).toArray(), result.toArray());
     }
 
@@ -202,7 +200,7 @@ class SearchHelperTest {
      */
     @Test
     void getPageInResultsValidResultsPerPageFinalRequestedPageTest() {
-        List<User> result = SearchHelper.getPageInResults(pagingUserList, 3, 10);
+        List<User> result = SearchPageConstructor.getPageInResults(pagingUserList, 3, 10);
         assertArrayEquals(pagingUserList.subList(20, 26).toArray(), result.toArray());
     }
 
@@ -212,8 +210,8 @@ class SearchHelperTest {
      */
     @Test
     void getPageInResultsQueryResultsEmptyTest() {
-        List<User> emptyList = new ArrayList<User>();
-        List<User> result = SearchHelper.getPageInResults(emptyList, 1, 10);
+        List<User> emptyList = new ArrayList<>();
+        List<User> result = SearchPageConstructor.getPageInResults(emptyList, 1, 10);
         assertArrayEquals(emptyList.toArray(), result.toArray());
     }
 
@@ -223,7 +221,7 @@ class SearchHelperTest {
      */
     @Test
     void getSortOrderByNullTest() {
-        Sort userSort = SearchHelper.getSort(null, null);
+        Sort userSort = UserController.getSort(null, null);
         List<User> queryResults = userRepository.findAll(spec, userSort);
         User firstUser = queryResults.get(0);
         Long previousId = firstUser.getUserID();
@@ -240,7 +238,7 @@ class SearchHelperTest {
      */
     @Test
     void getSortOrderByFirstNameTest() {
-        Sort userSort = SearchHelper.getSort("firstName", null);
+        Sort userSort = UserController.getSort("firstName", null);
         List<User> queryResults = userRepository.findAll(spec, userSort);
         User firstUser = queryResults.get(0);
         String previousFirstName = firstUser.getFirstName();
@@ -257,7 +255,7 @@ class SearchHelperTest {
      */
     @Test
     void getSortOrderByMiddleNameTest() {
-        Sort userSort = SearchHelper.getSort("middleName", null);
+        Sort userSort = UserController.getSort("middleName", null);
         List<User> queryResults = userRepository.findAll(spec, userSort);
         User firstUser = queryResults.get(0);
         String previousMiddleName = firstUser.getMiddleName();
@@ -274,7 +272,7 @@ class SearchHelperTest {
      */
     @Test
     void getSortOrderByLastNameTest() {
-        Sort userSort = SearchHelper.getSort("lastName", null);
+        Sort userSort = UserController.getSort("lastName", null);
         List<User> queryResults = userRepository.findAll(spec, userSort);
         User firstUser = queryResults.get(0);
         String previousLastName = firstUser.getLastName();
@@ -291,7 +289,7 @@ class SearchHelperTest {
      */
     @Test
     void getSortOrderByNicknameTest() {
-        Sort userSort = SearchHelper.getSort("nickname", null);
+        Sort userSort = UserController.getSort("nickname", null);
         List<User> queryResults = userRepository.findAll(spec, userSort);
         User firstUser = queryResults.get(0);
         String previousNickname = firstUser.getNickname();
@@ -308,7 +306,7 @@ class SearchHelperTest {
      */
     @Test
     void getSortOrderByEmailTest() {
-        Sort userSort = SearchHelper.getSort("email", null);
+        Sort userSort = UserController.getSort("email", null);
         List<User> queryResults = userRepository.findAll(spec, userSort);
         User firstUser = queryResults.get(0);
         String previousEmail = firstUser.getEmail();
@@ -326,7 +324,7 @@ class SearchHelperTest {
      */
     @Test
     void getSortOrderByFirstNameReverseTrueTest() {
-        Sort userSort = SearchHelper.getSort("firstName", true);
+        Sort userSort = UserController.getSort("firstName", true);
         List<User> queryResults = userRepository.findAll(spec, userSort);
         User firstUser = queryResults.get(0);
         String previousFirstName = firstUser.getFirstName();
@@ -344,7 +342,7 @@ class SearchHelperTest {
      */
     @Test
     void getSortOrderByEmailReverseFalseTest() {
-        Sort userSort = SearchHelper.getSort("email", false);
+        Sort userSort = UserController.getSort("email", false);
         List<User> queryResults = userRepository.findAll(spec, userSort);
         User firstUser = queryResults.get(0);
         String previousEmail = firstUser.getEmail();
@@ -362,7 +360,7 @@ class SearchHelperTest {
      */
     @Test
     void getSortOrderByInvalidOptionTest() {
-        Sort userSort = SearchHelper.getSort("dateOfBirth", null);
+        Sort userSort = UserController.getSort("dateOfBirth", null);
         List<User> queryResults = userRepository.findAll(spec, userSort);
         User firstUser = queryResults.get(0);
         Long previousId = firstUser.getUserID();
@@ -379,9 +377,7 @@ class SearchHelperTest {
      */
     @Test
     void constructUserSpecificationFromSearchQueryEmptyStringTest() {
-        assertThrows(ValidationResponseException.class, () -> {
-            SearchHelper.constructUserSpecificationFromSearchQuery("");
-        });
+        assertThrows(ValidationResponseException.class, () -> SearchSpecConstructor.constructUserSpecificationFromSearchQuery(""));
     }
 
     /**
@@ -391,7 +387,7 @@ class SearchHelperTest {
      */
     @Test
     void constructUserSpecificationFromSearchQueryDoubleQuotesExactMatchTest() {
-        Specification<User> specification = SearchHelper.constructUserSpecificationFromSearchQuery("\"Carl\"");
+        Specification<User> specification = SearchSpecConstructor.constructUserSpecificationFromSearchQuery("\"Carl\"");
         List<User> matches = userRepository.findAll(specification);
         assertEquals(1, matches.size());
         assertEquals("Carl", matches.get(0).getFirstName());
@@ -404,7 +400,7 @@ class SearchHelperTest {
      */
     @Test
     void constructUserSpecificationFromSearchQuerySingleQuotesExactMatchTest() {
-        Specification<User> specification = SearchHelper.constructUserSpecificationFromSearchQuery("'Petra'");
+        Specification<User> specification = SearchSpecConstructor.constructUserSpecificationFromSearchQuery("'Petra'");
         List<User> matches = userRepository.findAll(specification);
         assertEquals(1, matches.size());
         assertEquals("Petra", matches.get(0).getMiddleName());
@@ -435,7 +431,7 @@ class SearchHelperTest {
             "andy   and        \"Potato\",0"
     })
     void constructUserSpecificationFromSearchQuery_variousQueries_expectedMatchesNumberFound(String searchQuery, int expectedMatches) {
-        Specification<User> specification = SearchHelper.constructUserSpecificationFromSearchQuery(searchQuery);
+        Specification<User> specification = SearchSpecConstructor.constructUserSpecificationFromSearchQuery(searchQuery);
         List<User> matches = userRepository.findAll(specification);
         assertEquals(expectedMatches, matches.size());
     }
@@ -446,7 +442,7 @@ class SearchHelperTest {
      */
     @Test
     void constructUserSpecificationFromSearchQueryNoQuotesExactMatchTest() {
-        Specification<User> specification = SearchHelper.constructUserSpecificationFromSearchQuery("Andy");
+        Specification<User> specification = SearchSpecConstructor.constructUserSpecificationFromSearchQuery("Andy");
         List<User> matches = userRepository.findAll(specification);
         assertEquals(7, matches.size());
         for (User user : matches) {
@@ -463,7 +459,7 @@ class SearchHelperTest {
      */
     @Test
     void constructUserSpecificationFromSearchQueryNoQuotesPartialMatchTest() {
-        Specification<User> specification = SearchHelper.constructUserSpecificationFromSearchQuery("ndy");
+        Specification<User> specification = SearchSpecConstructor.constructUserSpecificationFromSearchQuery("ndy");
         List<User> matches = userRepository.findAll(specification);
         assertEquals(7, matches.size());
         for (User user : matches) {
@@ -481,7 +477,7 @@ class SearchHelperTest {
      */
     @Test
     void constructUserSpecificationFromSearchQueryNoQuotesDifferentCaseMatchTest() {
-        Specification<User> specification = SearchHelper.constructUserSpecificationFromSearchQuery("ANDY");
+        Specification<User> specification = SearchSpecConstructor.constructUserSpecificationFromSearchQuery("ANDY");
         List<User> matches = userRepository.findAll(specification);
         assertEquals(7, matches.size());
         for (User user : matches) {
@@ -498,15 +494,13 @@ class SearchHelperTest {
      */
     @Test
     void constructUserSpecificationFromSearchQueryJustAndTest() {
-        assertThrows(ValidationResponseException.class, () -> {
-            SearchHelper.constructUserSpecificationFromSearchQuery("and");
-        });
+        assertThrows(ValidationResponseException.class, () -> SearchSpecConstructor.constructUserSpecificationFromSearchQuery("and"));
     }
 
     @ParameterizedTest
     @ValueSource(strings = {"andy and \"Graham\"", "andy AND \"Graham\"", "andy \"Graham\""})
     void constructUserSpecificationFromSearchQuery_andConjunction_matchesUsingAnd(String searchQuery) {
-        Specification<User> specification = SearchHelper.constructUserSpecificationFromSearchQuery(searchQuery);
+        Specification<User> specification = SearchSpecConstructor.constructUserSpecificationFromSearchQuery(searchQuery);
         List<User> matches = userRepository.findAll(specification);
         assertEquals(1, matches.size());
         User user = matches.get(0);
@@ -520,9 +514,7 @@ class SearchHelperTest {
      */
     @Test
     void constructUserSpecificationFromSearchQueryJustOrTest() {
-        assertThrows(ValidationResponseException.class, () -> {
-            SearchHelper.constructUserSpecificationFromSearchQuery("OR");
-        });
+        assertThrows(ValidationResponseException.class, () -> SearchSpecConstructor.constructUserSpecificationFromSearchQuery("OR"));
     }
 
     /**
@@ -531,7 +523,7 @@ class SearchHelperTest {
      */
     @Test
     void constructUserSpecificationFromSearchQueryBothMatchTest() {
-        Specification<User> specification = SearchHelper.constructUserSpecificationFromSearchQuery("peter or \"Graham\"");
+        Specification<User> specification = SearchSpecConstructor.constructUserSpecificationFromSearchQuery("peter or \"Graham\"");
         List<User> matches = userRepository.findAll(specification);
         assertEquals(1, matches.size());
         User user = matches.get(0);
@@ -546,7 +538,7 @@ class SearchHelperTest {
     @ParameterizedTest
     @ValueSource(strings = {"peter or \"Potato\"", "peter Or \"Potato\"", "peter         or      \"Potato\""})
     void constructUserSpecificationFromSearchQuery_orConjunction_matchesUsingOr(String searchQuery) {
-        Specification<User> specification = SearchHelper.constructUserSpecificationFromSearchQuery(searchQuery);
+        Specification<User> specification = SearchSpecConstructor.constructUserSpecificationFromSearchQuery(searchQuery);
         List<User> matches = userRepository.findAll(specification);
         assertEquals(1, matches.size());
         User user = matches.get(0);
@@ -563,9 +555,7 @@ class SearchHelperTest {
      */
     @Test
     void constructUserSpecificationFromSearchQueryOpeningQuoteTest() {
-        assertThrows(ValidationResponseException.class, () -> {
-            SearchHelper.constructUserSpecificationFromSearchQuery("\"hello");
-        });
+        assertThrows(ValidationResponseException.class, () -> SearchSpecConstructor.constructUserSpecificationFromSearchQuery("\"hello"));
     }
 
     /**
@@ -573,7 +563,7 @@ class SearchHelperTest {
      */
     @Test
     void getQueryStringWithoutOrLowerCaseTest() {
-        assertEquals("this and that", SearchHelper.getQueryStringWithoutOr("this or that"));
+        assertEquals("this and that", SearchQueryParser.getQueryStringWithoutOr("this or that"));
     }
 
     /**
@@ -581,7 +571,7 @@ class SearchHelperTest {
      */
     @Test
     void getQueryStringWithoutOrUpperCaseTest() {
-        assertEquals("ME and YOU", SearchHelper.getQueryStringWithoutOr("ME OR YOU"));
+        assertEquals("ME and YOU", SearchQueryParser.getQueryStringWithoutOr("ME OR YOU"));
     }
 
     /**
@@ -589,7 +579,7 @@ class SearchHelperTest {
      */
     @Test
     void getQueryStringWithoutOrQuotesTest() {
-        assertEquals("chicken 'or' beef", SearchHelper.getQueryStringWithoutOr("chicken 'or' beef"));
+        assertEquals("chicken 'or' beef", SearchQueryParser.getQueryStringWithoutOr("chicken 'or' beef"));
     }
 
     /**
@@ -597,7 +587,7 @@ class SearchHelperTest {
      */
     @Test
     void getQueryStringWithoutOrWithinWordTest() {
-        assertEquals("corn horn and orchard", SearchHelper.getQueryStringWithoutOr("corn horn and orchard"));
+        assertEquals("corn horn and orchard", SearchQueryParser.getQueryStringWithoutOr("corn horn and orchard"));
     }
 
     /**
@@ -605,7 +595,7 @@ class SearchHelperTest {
      */
     @Test
     void getFullMatchesQueryStringNoQuotesTest() {
-        assertEquals("\"apple\" \"banana\" \"carrot\"", SearchHelper.getFullMatchesQueryString("apple banana carrot"));
+        assertEquals("\"apple\" \"banana\" \"carrot\"", SearchQueryParser.getFullMatchesQueryString("apple banana carrot"));
     }
 
     /**
@@ -613,7 +603,7 @@ class SearchHelperTest {
      */
     @Test
     void getFullMatchesQueryStringPredicateTest() {
-        assertEquals("\"Tom\" and \"Dick\" OR \"Harry\"", SearchHelper.getFullMatchesQueryString("Tom and Dick OR Harry"));
+        assertEquals("\"Tom\" and \"Dick\" OR \"Harry\"", SearchQueryParser.getFullMatchesQueryString("Tom and Dick OR Harry"));
     }
 
     /**
@@ -621,7 +611,7 @@ class SearchHelperTest {
      */
     @Test
     void getFullMatchesQueryStringQuotesTest() {
-        assertEquals("'Wow!' \"Amazing!\" \"Incredible!\"", SearchHelper.getFullMatchesQueryString("'Wow!' Amazing! \"Incredible!\""));
+        assertEquals("'Wow!' \"Amazing!\" \"Incredible!\"", SearchQueryParser.getFullMatchesQueryString("'Wow!' Amazing! \"Incredible!\""));
     }
 
     /**
@@ -643,7 +633,7 @@ class SearchHelperTest {
         userRepository.save(lucyMcDonald);
         userRepository.save(donaldDuck);
         userRepository.save(donaldSmith);
-        List<User> result = SearchHelper.getSearchResultsOrderedByRelevance("Donald or Duck", userRepository, null);
+        List<User> result = SearchQueryParser.getSearchResultsOrderedByRelevance("Donald or Duck", userRepository, null);
 
         assertEquals("Donald", result.get(0).getFirstName());
         assertEquals("Duck", result.get(0).getLastName());
@@ -672,7 +662,7 @@ class SearchHelperTest {
         userRepository.save(lucyMcDonald);
         userRepository.save(donaldDuck);
         userRepository.save(donaldSmith);
-        List<User> result = SearchHelper.getSearchResultsOrderedByRelevance("Donald or Duck", userRepository, true);
+        List<User> result = SearchQueryParser.getSearchResultsOrderedByRelevance("Donald or Duck", userRepository, true);
 
         assertEquals("Donald", result.get(0).getFirstName());
         assertEquals("Smith", result.get(0).getLastName());
@@ -689,7 +679,7 @@ class SearchHelperTest {
      */
     @Test
     void getSearchResultsOrderedByRelevanceCorrectIdOrderTest() {
-        List<User> result = SearchHelper.getSearchResultsOrderedByRelevance("andy", userRepository, null);
+        List<User> result = SearchQueryParser.getSearchResultsOrderedByRelevance("andy", userRepository, null);
         User firstUser = result.get(0);
         Long previousId = firstUser.getUserID();
         for (int i = 1; i < result.size(); i++) {
@@ -705,7 +695,7 @@ class SearchHelperTest {
      */
     @Test
     void getSearchResultsOrderedByRelevanceNoDuplicationTest() {
-        List<User> result = SearchHelper.getSearchResultsOrderedByRelevance("a or Donna or Percy", userRepository, null);
+        List<User> result = SearchQueryParser.getSearchResultsOrderedByRelevance("a or Donna or Percy", userRepository, null);
         HashSet<Long> ids = new HashSet<>();
         for (User user : result) {
             assertFalse(ids.contains(user.getUserID()));
@@ -719,9 +709,9 @@ class SearchHelperTest {
      */
     @Test
     void constructUserSpecificationFromSearchQueryToMatchDGAATest() {
-        Specification<User> specificationDouble = SearchHelper.constructUserSpecificationFromSearchQuery("\"DGAA\"");
+        Specification<User> specificationDouble = SearchSpecConstructor.constructUserSpecificationFromSearchQuery("\"DGAA\"");
         List<User> matchesDouble = userRepository.findAll(specificationDouble);
-        Specification<User> specificationSingle = SearchHelper.constructUserSpecificationFromSearchQuery("\'DGAA\'");
+        Specification<User> specificationSingle = SearchSpecConstructor.constructUserSpecificationFromSearchQuery("'DGAA'");
         List<User> matchesSingle = userRepository.findAll(specificationSingle);
         assertEquals(0, matchesDouble.size());
         assertEquals(0, matchesSingle.size());
@@ -740,7 +730,7 @@ class SearchHelperTest {
     @ValueSource(strings = {"App", "Apples", "apples"})
     void constructKeywordSpecificationFromSearchQuery_matchingQuery_keywordReturned(String searchQuery) {
         createKeywords();
-        Specification<Keyword> specification = SearchHelper.constructKeywordSpecificationFromSearchQuery(searchQuery);
+        Specification<Keyword> specification = SearchSpecConstructor.constructKeywordSpecificationFromSearchQuery(searchQuery);
         List<Keyword> result = keywordRepository.findAll(specification);
 
         assertEquals(1, result.size());
@@ -750,7 +740,7 @@ class SearchHelperTest {
     @Test
     void constructKeywordSpecificationFromSearchQuery_noMatch() {
         createKeywords();
-        Specification<Keyword> specification = SearchHelper.constructKeywordSpecificationFromSearchQuery("thisShouldntGiveMeAny");
+        Specification<Keyword> specification = SearchSpecConstructor.constructKeywordSpecificationFromSearchQuery("thisShouldntGiveMeAny");
         List<Keyword> result = keywordRepository.findAll(specification);
 
         assertEquals(0, result.size());
@@ -785,7 +775,7 @@ class SearchHelperTest {
                 .build());
 
         Business business2 = createBusiness();
-        var products = productRepository.findAll(SearchHelper.productBusinessSpecification(business2));
+        var products = productRepository.findAll(SearchSpecConstructor.productBusinessSpecification(business2));
         assertEquals(0, products.size());
     }
 
@@ -810,7 +800,7 @@ class SearchHelperTest {
                 .withName("B")
                 .build());
 
-        var products = productRepository.findAll(SearchHelper.productBusinessSpecification(business2));
+        var products = productRepository.findAll(SearchSpecConstructor.productBusinessSpecification(business2));
         var productCodes = products.stream().map(Product::getProductCode).collect(Collectors.toSet());
         assertEquals(Set.of("A", "B"), productCodes);
     }
@@ -836,7 +826,7 @@ class SearchHelperTest {
                 .build());
 
         ProductFilterOption option = objectMapper.convertValue(column, ProductFilterOption.class);
-        var products = productRepository.findAll(SearchHelper.productFilterSpecification(search, Set.of(option)));
+        var products = productRepository.findAll(SearchSpecConstructor.productFilterSpecification(search, Set.of(option)));
         assertEquals(1, products.size());
     }
 
@@ -863,7 +853,7 @@ class SearchHelperTest {
                 .build());
 
         var option = objectMapper.convertValue(column, ProductFilterOption.class);
-        var products = productRepository.findAll(SearchHelper.productFilterSpecification(search, Set.of(option)));
+        var products = productRepository.findAll(SearchSpecConstructor.productFilterSpecification(search, Set.of(option)));
         assertEquals(0, products.size());
     }
 
@@ -879,7 +869,7 @@ class SearchHelperTest {
                 .withManufacturer("Some guy")
                 .build());
 
-        var products = productRepository.findAll(SearchHelper.productFilterSpecification(search, Set.of()));
+        var products = productRepository.findAll(SearchSpecConstructor.productFilterSpecification(search, Set.of()));
         assertEquals(1, products.size());
     }
 
@@ -896,7 +886,7 @@ class SearchHelperTest {
                 .build());
 
         var options = Set.of(ProductFilterOption.values());
-        var products = productRepository.findAll(SearchHelper.productFilterSpecification(search, options));
+        var products = productRepository.findAll(SearchSpecConstructor.productFilterSpecification(search, options));
         assertEquals(1, products.size());
     }
 
@@ -910,13 +900,13 @@ class SearchHelperTest {
         when(businesSpec.and(filterSpec)).thenReturn(combinedSpec);
         when(filterSpec.and(businesSpec)).thenReturn(combinedSpec);
 
-        try (var searchHelper = Mockito.mockStatic(SearchHelper.class)) {
-            searchHelper.when(() -> SearchHelper.productBusinessSpecification(business)).thenReturn(businesSpec);
-            searchHelper.when(() -> SearchHelper.productFilterSpecification("hello", Set.of(ProductFilterOption.PRODUCT_CODE))).thenReturn(filterSpec);
+        try (var searchHelper = Mockito.mockStatic(SearchSpecConstructor.class)) {
+            searchHelper.when(() -> SearchSpecConstructor.productBusinessSpecification(business)).thenReturn(businesSpec);
+            searchHelper.when(() -> SearchSpecConstructor.productFilterSpecification("hello", Set.of(ProductFilterOption.PRODUCT_CODE))).thenReturn(filterSpec);
 
-            searchHelper.when(() -> SearchHelper.constructSpecificationFromProductSearch(any(), any(), any())).thenCallRealMethod();
+            searchHelper.when(() -> SearchSpecConstructor.constructSpecificationFromProductSearch(any(), any(), any())).thenCallRealMethod();
 
-            var resultSpec = SearchHelper.constructSpecificationFromProductSearch(business, "hello", Set.of(ProductFilterOption.PRODUCT_CODE));
+            var resultSpec = SearchSpecConstructor.constructSpecificationFromProductSearch(business, "hello", Set.of(ProductFilterOption.PRODUCT_CODE));
             assertEquals(combinedSpec, resultSpec);
         }
     }
@@ -961,12 +951,12 @@ class SearchHelperTest {
         createProductInventorySaleItemWithBusiness(business2);
 
         // the requestedPage, resultsPerPage and sortBy values are arbitrary
-        PageRequest pageRequest = SearchHelper.getPageRequest(1, 10, Sort.by("quantity"));
+        PageRequest pageRequest = SearchPageConstructor.getPageRequest(1, 10, Sort.by("quantity"));
 
-        Specification<InventoryItem> specification1 = SearchHelper.constructSpecificationFromInventoryItemsFilter(business1);
+        Specification<InventoryItem> specification1 = SearchSpecConstructor.constructSpecificationFromInventoryItemsFilter(business1);
         Page<InventoryItem> resultInventoryItemsBusiness1 = inventoryItemRepository.findAll(specification1, pageRequest);
 
-        Specification<InventoryItem> specification2 = SearchHelper.constructSpecificationFromInventoryItemsFilter(business2);
+        Specification<InventoryItem> specification2 = SearchSpecConstructor.constructSpecificationFromInventoryItemsFilter(business2);
         Page<InventoryItem> resultInventoryItemsBusiness2 = inventoryItemRepository.findAll(specification2, pageRequest);
 
         // Inventory items from each business should be distinct
@@ -981,12 +971,12 @@ class SearchHelperTest {
         createProductInventorySaleItemWithBusiness(business2);
 
         // the requestedPage, resultsPerPage and sortBy values are arbitrary
-        PageRequest pageRequest = SearchHelper.getPageRequest(1, 10, Sort.by("created"));
+        PageRequest pageRequest = SearchPageConstructor.getPageRequest(1, 10, Sort.by("created"));
 
-        Specification<SaleItem> specification1 = SearchHelper.constructSpecificationFromSaleItemsFilter(business1);
+        Specification<SaleItem> specification1 = SearchSpecConstructor.constructSpecificationFromSaleItemsFilter(business1);
         Page<SaleItem> resultSaleItemsBusiness1 = saleItemRepository.findAll(specification1, pageRequest);
 
-        Specification<SaleItem> specification2 = SearchHelper.constructSpecificationFromSaleItemsFilter(business2);
+        Specification<SaleItem> specification2 = SearchSpecConstructor.constructSpecificationFromSaleItemsFilter(business2);
         Page<SaleItem> resultSaleItemsBusiness2 = saleItemRepository.findAll(specification2, pageRequest);
 
         // Sale items from each business should be distinct

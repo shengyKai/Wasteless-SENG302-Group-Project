@@ -78,13 +78,13 @@ public class CucumberSetup {
      * Delete all entities from all repositories in the database.
      */
     private void clearDatabase() {
+        eventRepository.deleteAll();
         interestEventRepository.deleteAll();
         saleItemRepository.deleteAll();
         boughtSaleItemRepository.deleteAll();
         inventoryItemRepository.deleteAll();
         productRepository.deleteAll();
         businessRepository.deleteAll();
-        eventRepository.deleteAll();
         expiryEventRepository.deleteAll();
         marketplaceCardRepository.deleteAll();
         keywordRepository.deleteAll();

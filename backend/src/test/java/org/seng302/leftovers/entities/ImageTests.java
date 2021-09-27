@@ -4,15 +4,14 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import net.minidev.json.JSONObject;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
-import org.hibernate.exception.ConstraintViolationException;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.seng302.leftovers.dto.ImageDTO;
 import org.seng302.leftovers.dto.business.BusinessType;
-import org.seng302.leftovers.persistence.BusinessRepository;
 import org.seng302.leftovers.exceptions.ValidationResponseException;
+import org.seng302.leftovers.persistence.BusinessRepository;
 import org.seng302.leftovers.persistence.ImageRepository;
 import org.seng302.leftovers.persistence.ProductRepository;
 import org.seng302.leftovers.persistence.UserRepository;
@@ -367,20 +366,6 @@ class ImageTests {
         assertNull(image.getAttachment());
     }
 
-    @Test
-    void getAttachment_savedUser_userReturned() {
-        var image = imageRepository.save(new Image("foo.png", "bar.png"));
-
-        var user = createUser();
-        user.addImage(image);
-        userRepository.save(user);
-
-        try (Session session = sessionFactory.openSession()) {
-            image = session.get(Image.class, image.getID());
-            assertTrue(image.getAttachment() instanceof User);
-            assertEquals(user.getUserID(), ((User)image.getAttachment()).getUserID());
-        }
-    }
 
     @Test
     void getAttachment_savedBusiness_businessReturned() {
@@ -412,33 +397,7 @@ class ImageTests {
         }
     }
 
-    @Test
-    void save_savedUserAndBusinessWithImage_failsToSave() {
-        var image = imageRepository.save(new Image("foo.png", "bar.png"));
 
-        var user = createUser();
-        user.addImage(image);
-        user = userRepository.save(user);
-
-        var business = createBusiness(user);
-        business.addImage(image);
-
-        assertThrows(DataIntegrityViolationException.class, () -> businessRepository.save(business));
-    }
-
-    @Test
-    void save_savedUserAndProductWithImage_failsToSave() {
-        var image = imageRepository.save(new Image("foo.png", "bar.png"));
-
-        var user = createUser();
-        user.addImage(image);
-        user = userRepository.save(user);
-
-        var product = createProduct(businessRepository.save(createBusiness(user)));
-        product.addImage(image);
-
-        assertThrows(DataIntegrityViolationException.class, () -> productRepository.save(product));
-    }
 
     @Test
     void save_savedBusinessAndProduct_failsToSave() {

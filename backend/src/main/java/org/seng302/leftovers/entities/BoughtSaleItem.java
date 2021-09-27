@@ -1,5 +1,7 @@
 package org.seng302.leftovers.entities;
 
+import org.seng302.leftovers.entities.event.InterestPurchasedEvent;
+
 import javax.persistence.*;
 import java.math.BigDecimal;
 import java.time.Instant;
@@ -22,7 +24,7 @@ public class BoughtSaleItem {
     private Product product;
 
     @Column(name = "like_count", nullable = false)
-    private int likeCount;
+    private int interestCount;
 
     @Column(name = "price", nullable = false)
     private BigDecimal price;
@@ -45,7 +47,7 @@ public class BoughtSaleItem {
     public BoughtSaleItem(SaleItem saleItem, User buyer) {
         this.buyer = buyer;
         this.product = saleItem.getProduct();
-        this.likeCount = saleItem.getLikeCount();
+        this.interestCount = saleItem.getLikeCount();
         this.price = saleItem.getPrice();
         this.quantity = saleItem.getQuantity();
         this.saleDate = Instant.now();
@@ -85,8 +87,8 @@ public class BoughtSaleItem {
      * Gets the number of users that liked the sale item before it was sold
      * @return Number of likes the sale item had
      */
-    public int getLikeCount() {
-        return likeCount;
+    public int getInterestCount() {
+        return interestCount;
     }
 
     /**
@@ -125,7 +127,7 @@ public class BoughtSaleItem {
     public String toString() {
         return "BoughtSaleItem{" +
                 "id=" + id +
-                ", likeCount=" + likeCount +
+                ", likeCount=" + interestCount +
                 ", price=" + price +
                 ", quantity=" + quantity +
                 ", saleDate=" + saleDate +

@@ -14,7 +14,12 @@
     <v-list three-line v-if="resultsPage">
       <template v-for="(sale, index) in resultsPage.results">
         <v-divider v-if="sale === undefined" :key="'divider-'+index"/>
-        <SaleResult v-else :key="sale.id" :saleItem="sale"/>
+        <SaleResult
+          v-else
+          :key="sale.id"
+          :saleItem="sale"
+          @refresh="updateResults"
+        />
       </template>
     </v-list>
     <!--paginate results-->
@@ -35,7 +40,7 @@
 import AdvancedSearchBar from './AdvancedSearchBar.vue';
 import SimpleSearchBar from './SimpleSearchBar.vue';
 import SaleResult from './SaleResult.vue';
-import {getDummySaleItemSearchResult} from "@/api/internal";
+import {getBusinessSales} from "@/api/sale";
 
 export default {
   name: "SearchSaleItems",
@@ -91,6 +96,12 @@ export default {
     advancedSearch() {
       //TODO implement when linked to endpoint
     },
+    /**
+     * Fetches a new set of results
+     */
+    async updateResults() {
+      this.resultsPage = (await getBusinessSales(1, 1, 1, "created", false));
+    },
   },
   watch: {
     /**
@@ -104,7 +115,7 @@ export default {
     }
   },
   async beforeMount() {
-    this.resultsPage = (await getDummySaleItemSearchResult());
+    this.updateResults();
   }
 };
 </script>

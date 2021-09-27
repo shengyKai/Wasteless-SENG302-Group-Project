@@ -1,6 +1,7 @@
 import { is } from 'typescript-is';
 
-import { Business, User } from '@/api/internal';
+import {User} from "@/api/user";
+import {Business} from "@/api/business";
 
 it('Testing that 7 is a number', () => {
   expect(is<number>(7)).toBeTruthy();
@@ -44,7 +45,11 @@ it('Testing valid user with businesses', () => {
         name: "BUSINESS_NAME",
         description: "DESCRIPTION",
         id: 10,
-        businessType: "Accommodation and Food Services"
+        businessType: "Accommodation and Food Services",
+        points: 4,
+        rank: {
+          name: 'bronze',
+        },
       }
     ],
     middleName: "Percy",
@@ -79,6 +84,10 @@ const test: Business = {
   description:"DESCRIPTION",
   id:10,
   businessType:"Accommodation and Food Services",
+  points: 5,
+  rank: {
+    name: 'bronze',
+  },
   administrators:[
     {
       firstName:"Andy",
@@ -110,6 +119,10 @@ it('Testing valid business', () => {
     description:"DESCRIPTION",
     id:10,
     businessType:"Accommodation and Food Services",
+    points: 4,
+    rank: {
+      name: 'bronze',
+    },
     administrators:[
       {
         firstName:"Andy",

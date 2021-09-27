@@ -22,7 +22,8 @@ import org.seng302.leftovers.persistence.ImageRepository;
 import org.seng302.leftovers.persistence.UserRepository;
 import org.seng302.leftovers.service.ImageService;
 import org.seng302.leftovers.tools.AuthenticationTokenManager;
-import org.seng302.leftovers.tools.SearchHelper;
+import org.seng302.leftovers.service.search.SearchPageConstructor;
+import org.seng302.leftovers.service.search.SearchSpecConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -32,11 +33,13 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.server.ResponseStatusException;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -101,6 +104,21 @@ public class BusinessController {
     }
 
     /**
+     * Converts of image ids into their respective image objects
+     * @param imageIds a list of image ids
+     * @return a list of image objects
+     */
+    public List<Image> getListOfImagesFromIds(List<Long> imageIds) {
+        List<Image> images = new ArrayList<Image>();
+        for (Long imageId : imageIds) {
+            Image image = imageRepository.findById(imageId)
+                    .orElseThrow(() -> new DoesNotExistResponseException(Image.class));
+            images.add(image);
+        }
+        return images;
+    }
+
+    /**
      * PUT endpoint for modifying an existing business.
      * Ensures that the given primary business owner is an existing User.
      * Adds the business to the database if all of the business information is valid.
@@ -118,19 +136,21 @@ public class BusinessController {
             if(!business.getPrimaryOwner().getUserID().equals(newAdminID)) {
                 business.checkSessionPermissionsOwner(request);
 
-                User newOwner = userRepository.findById(newAdminID)  
-                .orElseThrow(() -> new ValidationResponseException("Updated primary administrator does not exist"));
+                User newOwner = userRepository.findById(newAdminID)
+                        .orElseThrow(() -> new ValidationResponseException("Updated primary administrator does not exist"));
                 User previousOwner = userRepository.findById(business.getPrimaryOwner().getUserID())
-                .orElseThrow(() -> new ValidationResponseException("Previous business owner account does not exist"));
+                        .orElseThrow(() -> new ValidationResponseException("Previous business owner account does not exist"));
 
                 business.removeAdmin(newOwner);
-                business.setPrimaryOwner(newOwner);    
-                business.addAdmin(previousOwner);      
+                business.setPrimaryOwner(newOwner);
+                business.addAdmin(previousOwner);
             }
             business.setName(body.getName());
             business.setDescription(body.getDescription());
             business.setAddress(body.getAddress().createLocation());
             business.setBusinessType(body.getBusinessType());
+
+            business.setImages(getListOfImagesFromIds(body.getImageIds()));
 
             if (Boolean.TRUE.equals(body.getUpdateProductCountry())) {
                 List<Product> catalogue = business.getCatalogue();
@@ -281,7 +301,7 @@ public class BusinessController {
             throw new ValidationResponseException("Invalid business type provided");
         }
 
-        Sort.Direction direction = SearchHelper.getSortDirection(reverse);
+        Sort.Direction direction = SearchPageConstructor.getSortDirection(reverse);
         if (orderBy == null) {
             orderBy = "created";
         }
@@ -297,8 +317,8 @@ public class BusinessController {
             sortOrder = List.of(new Sort.Order(direction, orderBy).ignoreCase());
         }
 
-        PageRequest pageRequest = SearchHelper.getPageRequest(page, resultsPerPage, Sort.by(sortOrder));
-        Specification<Business> specification = SearchHelper.constructSpecificationFromBusinessSearch(searchQuery, businessType);
+        PageRequest pageRequest = SearchPageConstructor.getPageRequest(page, resultsPerPage, Sort.by(sortOrder));
+        Specification<Business> specification = SearchSpecConstructor.constructSpecificationFromBusinessSearch(searchQuery, businessType);
 
         Page<Business> results = businessRepository.findAll(specification, pageRequest);
         return new ResultPageDTO<>(results.map(BusinessResponseDTO::withoutAdmins));
@@ -323,40 +343,6 @@ public class BusinessController {
             businessRepository.save(business);
 
             return new ResponseEntity<>(HttpStatus.CREATED);
-        } catch (Exception e) {
-            logger.error(e.getMessage());
-            throw e;
-        }
-    }
-
-    /**
-     * Sets the new primary image to be displayed for a business
-     * @param businessId The ID of the business to modify
-     * @param imageId The ID of the image to set as primary image
-     * @return Empty response with 200 if successful
-     */
-    @PutMapping("/businesses/{businessId}/images/{imageId}/makeprimary")
-    public ResponseEntity<Void> makeImagePrimary(@PathVariable Long businessId, @PathVariable Long imageId, HttpServletRequest request) {
-        logger.info("Making business image primary (businessId={}, imageId={})", businessId, imageId);
-        AuthenticationTokenManager.checkAuthenticationToken(request);
-        try {
-            Business business = businessRepository.getBusinessById(businessId);
-            business.checkSessionPermissions(request);
-
-            Image image = imageRepository.getImageById(imageId);
-            var images = business.getImages();
-            // Ensure that the provided image belongs to this business. Otherwise, action is forbidden
-            if (!images.contains(image)) {
-                throw new InsufficientPermissionResponseException("You cannot modify this image");
-            }
-            if (images.get(0).equals(image)) {
-                return new ResponseEntity<>(HttpStatus.OK);
-            }
-            business.removeImage(image);
-            business.addImage(0, image);
-            businessRepository.save(business);
-
-            return new ResponseEntity<>(HttpStatus.OK);
         } catch (Exception e) {
             logger.error(e.getMessage());
             throw e;

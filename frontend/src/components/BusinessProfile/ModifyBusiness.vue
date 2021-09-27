@@ -163,39 +163,10 @@
             </v-tab-item>
             <!-- Business image tab -->
             <v-tab-item key="image" :eager="true">
-              <!-- <v-card-title class="mt-n3">Image</v-card-title> -->
-              <!-- <v-card v-if="businessImages && businessImages.length > 0">
-                <ImageCarousel
-                  :imagesList="businessImages"
-                  :showMakePrimary="true"
-                  :showDelete="false"
-                  @change-primary-image="makeImagePrimary"
-                  ref="businessImageCarousel"
-                />
-              </v-card> -->
-              <!-- INPUT: Image Uploader -->
-              <!-- <v-btn
-                class="upload-image"
-                color="primary"
-                outlined
-                @click="showImageUploaderForm=true"
-              >
-                <v-icon
-                  class="expand-icon"
-                  color="primary"
-                >
-                  mdi-upload
-                </v-icon>
-                Upload new image
-              </v-btn> -->
-              <!-- Image manager that handle all action for image modifying and rendering -->
-              <ImageManager/>
-              <!-- <BusinessImageUploader
-                v-model="imageFile"
-                v-if="showImageUploaderForm"
-                @closeDialog="showImageUploaderForm=false"
-                @uploadImage="addImage"/>
-              <v-card-text v-if="allImageFiles.length > 0"> Images uploaded: {{ imageNames }} </v-card-text> -->
+              <v-card-title class="mt-n3">Image</v-card-title>
+              <!-- INPUT: Business images -->
+              <ImageManager :images="business.images" @updateImages="updateBusinessImages"/>
+              <p class="error-text" v-if ="errorMessage !== undefined"> {{errorMessage}} </p>
             </v-tab-item>
           </v-tabs-items>
           <v-divider/>
@@ -274,9 +245,7 @@
 
 <script>
 import LocationAutocomplete from '@/components/utils/LocationAutocomplete';
-import { modifyBusiness, uploadBusinessImage, makeBusinessImagePrimary, getUser } from '@/api/internal';
-// import ImageCarousel from "@/components/utils/ImageCarousel";
-// import BusinessImageUploader from "@/components/utils/BusinessImageUploader";
+import { modifyBusiness, getUser } from '@/api/internal';
 import ImageManager from "@/components/utils/ImageManager";
 import {
   alphabetExtendedMultilineRules,
@@ -285,14 +254,10 @@ import {
   maxCharRules, postCodeRules, streetNumRules,
   USER_ROLES
 } from "@/utils";
-
-
 export default {
   name: 'ModifyBusiness',
   components: {
     LocationAutocomplete,
-    // BusinessImageUploader,
-    // ImageCarousel,
     ImageManager
   },
   props: {
@@ -302,7 +267,6 @@ export default {
     return {
       tab: 'location',
       currencyConfirmDialog: false,
-      serverUrl: process.env.VUE_APP_SERVER_ADD,
       readableAddress: "",
       errorMessage: undefined,
       dialog: true,
@@ -316,7 +280,6 @@ export default {
       region: this.business.address.region,
       country: this.business.address.country,
       postcode: this.business.address.postcode,
-      images: this.business.images || [],
       businessTypes: [
         'Accommodation and Food Services',
         'Charitable organisation',
@@ -325,13 +288,10 @@ export default {
       ],
       updateProductCountry: false,
       valid: false,
-      showImageUploaderForm: false,
       showAlert: false,
       showChangeAdminAlert: false,
       primaryAdminAlertMsg: "",
       primaryAdministratorId: this.business.primaryAdministratorId,
-      imageFile: undefined,
-      allImageFiles: [],
       maxCharRules: () => maxCharRules(100),
       maxCharDescriptionRules: ()=> maxCharRules(200),
       mandatoryRules: ()=> mandatoryRules,
@@ -341,6 +301,7 @@ export default {
       streetRules: ()=> streetNumRules,
       postcodeRules: ()=> postCodeRules,
       isLoading: false,
+      imageIds: this.business.images.map(image => image.id),
     };
   },
   computed: {
@@ -358,12 +319,6 @@ export default {
     isPrimaryOwner() {
       return this.$store.state.user.id === this.business.primaryAdministratorId;
     },
-    imageNames() {
-      return this.allImageFiles.map((image) => image.name).join(", ");
-    },
-    businessImages() {
-      return this.business.images;
-    }
   },
   methods: {
     /**
@@ -389,18 +344,6 @@ export default {
      */
     discardButton() {
       this.$emit('discardModifyBusiness');
-    },
-    /**
-     * Sets the given image as primary image to be displayed
-     * @param imageId ID of the Image to set
-     */
-    async makeImagePrimary(imageId) {
-      this.errorMessage = undefined;
-      const result = await makeBusinessImagePrimary(this.business.id, imageId);
-      if (typeof result === 'string') {
-        this.errorMessage = result;
-        this.$refs.businessImageCarousel.forceClose();
-      }
     },
     /**
      * Action(s) of modifying a business
@@ -430,7 +373,8 @@ export default {
           postcode: this.postcode
         },
         businessType: this.businessType,
-        updateProductCountry: this.updateProductCountry
+        updateProductCountry: this.updateProductCountry,
+        imageIds: this.imageIds,
       };
       const result = await modifyBusiness(this.business.id, modifiedFields);
 
@@ -442,11 +386,6 @@ export default {
        */
       if (typeof result === 'string') {
         this.errorMessage = result;
-      }
-      for (let image of this.allImageFiles) {
-        if (this.errorMessage === undefined) {
-          await this.uploadImage(image);
-        }
       }
 
       // Updates the $store.state.user.businessesAdministered property if we are administering this business
@@ -480,27 +419,13 @@ export default {
       }
       this.primaryAdministratorId = admin.id;
     },
-    addImage() {
-      this.showImageUploaderForm = false;
-      this.allImageFiles.push(this.imageFile);
-      this.imageFile = undefined;
-    },
-    async uploadImage(image) {
-      const result = await uploadBusinessImage(this.business.id, image);
-      if (typeof result === 'string') {
-        this.errorMessage = result;
-      }
+    /**
+     * Method to update the imageIds from the outputImages received from ImageManager to be sent for business modification.
+     */
+    updateBusinessImages(outputImages) {
+      this.imageIds = outputImages.map(image => image.id);
     }
   },
 };
 </script>
 
-<style scoped>
-.expand-icon {
-  padding-right: 10px;
-}
-
-.upload-image {
-  margin-top: 25px;
-}
-</style>

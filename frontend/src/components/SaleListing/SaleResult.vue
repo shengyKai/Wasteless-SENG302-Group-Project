@@ -6,7 +6,7 @@
       </v-list-item-avatar>
       <v-list-item-content>
         <v-list-item-title>
-          <a class="result-title" @click="showFullListing = !showFullListing">{{ product.name }}</a>
+          <a ref="title" class="result-title" @click="showFullListing = !showFullListing">{{ product.name }}</a>
           <label class="result-title-join">From </label>
           <label class="result-title-business">{{ product.manufacturer }}</label>
         </v-list-item-title>
@@ -31,9 +31,10 @@
     </v-list-item>
   </div>
   <div v-else>
-    <SaleListingPage
+    <FullSaleListing
       :saleItem="saleItem"
       @goBack="showFullListing = false"
+      @refresh="$emit('refresh')"
     />
   </div>
 </template>
@@ -41,12 +42,12 @@
 <script>
 import { currencyFromCountry } from "@/api/currency";
 import { formatDate } from '@/utils';
-import SaleListingPage from "@/components/SaleListing/FullSaleListing.vue";
+import FullSaleListing from "@/components/SaleListing/FullSaleListing.vue";
 
 export default {
   name: "SaleResult",
   components: {
-    SaleListingPage
+    FullSaleListing
   },
   data() {
     return {

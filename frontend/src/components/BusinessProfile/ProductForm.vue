@@ -3,7 +3,7 @@
     <v-dialog
       v-model="dialog"
       persistent
-      max-width="600px"
+      max-width="800px"
     >
       <v-form
         v-model="valid"
@@ -103,13 +103,14 @@
 </template>
 
 <script>
-import {createProduct, getBusiness, modifyProduct} from '@/api/internal';
 import {currencyFromCountry} from "@/api/currency";
 import {
   alphabetExtendedMultilineRules,
   alphabetExtendedSingleLineRules, mandatoryRules,
   maxCharRules, productCodeRules, smallPriceRules
 } from "@/utils";
+import {getBusiness} from "@/api/business";
+import {createProduct, modifyProduct} from "@/api/product";
 export default {
   name: 'ProductForm',
   props: {

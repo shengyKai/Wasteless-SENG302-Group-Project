@@ -14,6 +14,12 @@ Feature: U31 - Purchases
       | FISH       | 10    | 5        |
     And A user exists with name "Alice"
 
+  Scenario: AC1: When an item is purchased, any other users who have liked that item will be notified that it is unavailable
+    Given I am logged into "Alice" account
+    And I like the sale item
+    When user "Jeffrey" has purchased the sale listing "fish" from business "Amazon"
+    Then "Alice" will receive a notification stating that "fish" is no longer available
+
   Scenario: AC3: When an item is purchased, the seller's inventory is updated
     Given user "Alice" has purchased the sale listing "fish" from business "Amazon"
     And I am logged into "Jeffrey" account
@@ -33,3 +39,10 @@ Feature: U31 - Purchases
     When I try to purchase the most recent sale listing
     Then The request succeeds
     And A record of the purchase is added to the business's sale history
+
+  Scenario: AC2: A notification appears on my home feed to remind me what I have purchased
+    Given I am logged into "Alice" account
+    And I am viewing the sale listings for business "Amazon"
+    When I try to purchase the most recent sale listing
+    And I check my notification feed
+    Then I receive a notification

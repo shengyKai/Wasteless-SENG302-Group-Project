@@ -1,14 +1,17 @@
 package cucumber.stepDefinitions;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import cucumber.context.BusinessContext;
 import cucumber.context.ImageContext;
 import cucumber.context.RequestContext;
 import cucumber.context.UserContext;
 import cucumber.utils.CucumberUtils;
+import io.cucumber.java.en.And;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
+import lombok.SneakyThrows;
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
 import net.minidev.json.parser.JSONParser;
@@ -16,8 +19,11 @@ import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.junit.Assert;
 import org.seng302.datagenerator.ExampleDataFileReader;
+import org.seng302.leftovers.controllers.BusinessController;
+import org.seng302.leftovers.dto.LocationDTO;
 import org.seng302.leftovers.dto.business.BusinessType;
 import org.seng302.leftovers.entities.*;
+import org.seng302.leftovers.exceptions.ValidationResponseException;
 import org.seng302.leftovers.persistence.BusinessRepository;
 import org.seng302.leftovers.persistence.ImageRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,12 +35,10 @@ import org.springframework.test.web.servlet.MvcResult;
 import javax.transaction.Transactional;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 import java.nio.file.Path;
 import java.text.ParseException;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -44,6 +48,8 @@ public class BusinessStepDefinition {
     @Value("${storage-directory}")
     private Path root;
 
+    @Autowired
+    private BusinessController businessController;
     @Autowired
     private ObjectMapper objectMapper;
     @Autowired
@@ -63,6 +69,18 @@ public class BusinessStepDefinition {
 
 
     private JSONObject modifyParameters;
+
+    @SneakyThrows
+    private JSONObject createValidRequest(long ownerId) {
+        var json = new JSONObject();
+        json.put("primaryAdministratorId", ownerId);
+        json.put("name", "New business name");
+        json.put("description", "New business description");
+        json.put("address", new LocationDTO(Location.covertAddressStringToLocation("4,Rountree Street,Ashburton,Christchurch,New Zealand,Canterbury,8041"), true));
+        json.put("businessType", objectMapper.convertValue(BusinessType.ACCOMMODATION_AND_FOOD_SERVICES, String.class));
+        json.put("updateProductCountry", true);
+        return json;
+    }
 
     /**
      * Method to save multiple products into the latest business saved in the businessContext
@@ -288,12 +306,12 @@ public class BusinessStepDefinition {
         Business business = businessContext.getByName(businessName);
         Image image = new Image(imageName, imageName + "_thumbnail.png");
         image = imageContext.save(image);
-        business.addImage(0, image);
+        List<Long> imageIds = business.getIdsOfImages();
+        imageIds.add(0, image.getID());
+        business.setImages(businessController.getListOfImagesFromIds(imageIds));
         business = businessContext.save(business);
-
         assertFalse(business.getImages().isEmpty());
         assertEquals(image, business.getImages().get(0));
-
     }
 
     @Given("The business {string} has image {string}")
@@ -308,6 +326,7 @@ public class BusinessStepDefinition {
         assertTrue(business.getImages().contains(image));
 
     }
+
     @Transactional
     @When("I try to set the primary image for {string} to {string}")
     public void i_try_set_primary_image_to(String businessName, String imageName) {
@@ -317,12 +336,14 @@ public class BusinessStepDefinition {
         assertFalse(business.getImages().isEmpty());
         assertNotEquals(image, business.getImages().get(0));
 
+        var json = createValidRequest(business.getPrimaryOwner().getUserID());
+        json.put("imageIds", Collections.singletonList(image.getID()));
+
         requestContext.performRequest(
                 put("/businesses/"
-                        + business.getId()
-                        + "/images/"
-                        + image.getID()
-                        + "/makeprimary"));
+                        + business.getId())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json.toString()));
 
     }
 
@@ -334,5 +355,61 @@ public class BusinessStepDefinition {
 
         assertFalse(business.getImages().isEmpty());
         assertEquals(image, business.getImages().get(0)); // index zero is primary image
+    }
+
+    @And("the business {string} with the type {string} and location {string} exists")
+    public void theBusinessWithTheTypeAndLocationExists(String name, String type, String location) {
+        ObjectMapper objectMapper = new ObjectMapper();
+        var business = new Business.Builder()
+                .withName(name)
+                .withDescription("Sells stuff")
+                .withBusinessType(objectMapper.convertValue(type, new TypeReference<>() {}))
+                .withAddress(Location.covertAddressStringToLocation(location))
+                .withPrimaryOwner(userContext.getLast())
+                .build();
+        businessContext.save(business);
+    }
+
+    @When("I view the business {string}")
+    public void i_view_the_business(String name) {
+        Business business = businessContext.getByName(name);
+        requestContext.performRequest(get("/businesses/" + business.getId()));
+    }
+
+    @Then("I am able to see the points for the business")
+    public void i_can_see_business_points() throws net.minidev.json.parser.ParseException, UnsupportedEncodingException {
+        var result = requestContext.getLastResult();
+        JSONParser parser = new JSONParser(JSONParser.MODE_PERMISSIVE);
+        JSONObject response = (JSONObject) parser.parse(result.getResponse().getContentAsString());
+
+        assertTrue(response.containsKey("points"));
+    }
+
+    @Then("I am able to see the rank of the business")
+    public void i_can_see_business_rank() throws net.minidev.json.parser.ParseException, UnsupportedEncodingException {
+        var result = requestContext.getLastResult();
+        JSONParser parser = new JSONParser(JSONParser.MODE_PERMISSIVE);
+        JSONObject response = (JSONObject) parser.parse(result.getResponse().getContentAsString());
+
+        assertTrue(response.containsKey("rank"));
+    }
+
+    @Given("The business has {int} points")
+    public void the_business_has_points(int points) {
+        var business = businessContext.getLast();
+        business.setPoints(points);
+        businessContext.save(business);
+    }
+
+    @Then("I expect the business to have {int} points")
+    public void i_expect_business_to_have_points(int points) {
+        var business = businessRepository.getBusinessById(businessContext.getLast().getId()) ;
+        assertEquals(points, business.getPoints());
+    }
+
+    @Then("I expect the business to have {string} rank")
+    public void i_expect_the_business_to_have_rank(String rank) {
+        var business = businessRepository.getBusinessById(businessContext.getLast().getId());
+        assertEquals(rank, business.getRank().getName());
     }
 }

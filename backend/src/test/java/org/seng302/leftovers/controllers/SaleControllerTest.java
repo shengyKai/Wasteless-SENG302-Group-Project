@@ -8,16 +8,27 @@ import org.hamcrest.Matchers;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.junit.runner.RunWith;
 import org.mockito.*;
 import org.mockito.internal.matchers.apachecommons.ReflectionEquals;
+import org.seng302.leftovers.dto.business.BusinessType;
+import org.seng302.leftovers.dto.saleitem.SaleListingSearchDTO;
 import org.seng302.leftovers.entities.*;
+import org.seng302.leftovers.entities.event.Event;
 import org.seng302.leftovers.entities.event.InterestEvent;
+import org.seng302.leftovers.entities.event.InterestPurchasedEvent;
+import org.seng302.leftovers.entities.event.PurchasedEvent;
 import org.seng302.leftovers.exceptions.AccessTokenResponseException;
 import org.seng302.leftovers.persistence.*;
+import org.seng302.leftovers.persistence.event.EventRepository;
 import org.seng302.leftovers.persistence.event.InterestEventRepository;
+import org.seng302.leftovers.service.search.SearchQueryParser;
 import org.seng302.leftovers.tools.AuthenticationTokenManager;
-import org.seng302.leftovers.tools.SearchHelper;
+import org.seng302.leftovers.service.search.SearchPageConstructor;
+import org.seng302.leftovers.service.search.SearchSpecConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.Page;
@@ -65,9 +76,17 @@ class SaleControllerTest {
     @Mock
     private BoughtSaleItemRepository boughtSaleItemRepository;
     @Mock
+    private EventRepository eventRepository;
+    @Mock
     private Business business;
     @Mock
     private User user;
+    @Mock
+    private User interestedUser1;
+    @Mock
+    private User interestedUser2;
+    @Mock
+    private User interestedUser3;
     @Mock
     private InventoryItem inventoryItem;
     @Mock
@@ -88,6 +107,11 @@ class SaleControllerTest {
     ArgumentCaptor<Specification<SaleItem>> specificationArgumentCaptor;
     @Captor
     ArgumentCaptor<PageRequest> pageRequestArgumentCaptor;
+    @Captor
+    ArgumentCaptor<Event> eventCaptor;
+
+    private MockedStatic<SearchPageConstructor> searchPageConstructor;
+    private MockedStatic<SearchSpecConstructor> searchSpecConstructor;
 
 
     @BeforeEach
@@ -96,6 +120,16 @@ class SaleControllerTest {
 
         // By default this will mock checkAuthenticationToken method to do nothing, which simulates a valid authentication token
         authenticationTokenManager = Mockito.mockStatic(AuthenticationTokenManager.class);
+        searchPageConstructor = Mockito.mockStatic(SearchPageConstructor.class);
+        searchSpecConstructor = Mockito.mockStatic(SearchSpecConstructor.class);
+
+        searchPageConstructor.when(() -> SearchPageConstructor.getSortDirection(any())).thenReturn(Sort.Direction.DESC);
+        searchPageConstructor.when(() -> SearchPageConstructor.getPageRequest(any(), any(), any()))
+                .thenReturn(PageRequest.of(1, 1, Sort.unsorted()));
+        searchSpecConstructor.when(() -> SearchSpecConstructor.constructSaleListingSpecificationForSearch(any()))
+                .thenReturn(Specification.where(null));
+        searchSpecConstructor.when(() -> SearchSpecConstructor.constructSpecificationFromSaleItemsFilter(any()))
+                .thenReturn(Specification.where(null));
 
         // Setup mock business
         when(business.getId()).thenReturn(1L);
@@ -129,7 +163,7 @@ class SaleControllerTest {
         when(userRepository.findById(not(eq(4L)))).thenReturn(Optional.empty());
 
         saleController = spy(new SaleController(userRepository, businessRepository, saleItemRepository,
-                inventoryItemRepository, interestEventRepository, boughtSaleItemRepository));
+                inventoryItemRepository, interestEventRepository, boughtSaleItemRepository, eventRepository));
         mockMvc = MockMvcBuilders.standaloneSetup(saleController).build();
     }
 
@@ -146,6 +180,8 @@ class SaleControllerTest {
     @AfterEach
     public void tearDown() {
         authenticationTokenManager.close();
+        searchPageConstructor.close();
+        searchSpecConstructor.close();
     }
 
     @Test
@@ -324,6 +360,19 @@ class SaleControllerTest {
     }
 
     @Test
+    void addSaleItemToBusiness_validInput_businessPointsUpdated() throws Exception {
+        var object = generateSalesItemInfo();
+        mockMvc.perform(post("/businesses/1/listings")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(object.toString()))
+                .andExpect(status().isCreated())
+                .andReturn();
+
+        verify(business, times(1)).incrementPoints();
+        verify(businessRepository, times(1)).save(business);
+    }
+
+    @Test
     void getSaleItemsForBusiness_noAuthToken_401Response() throws Exception {
         // Mock the AuthenticationTokenManager to respond as it would when the authentication token is missing or invalid
         authenticationTokenManager.when(() -> AuthenticationTokenManager.checkAuthenticationToken(any()))
@@ -368,8 +417,8 @@ class SaleControllerTest {
         mockMvc.perform(get("/businesses/1/listings")
                 .param("orderBy", "price"))
                 .andReturn();
-        Specification<SaleItem> expectedSpecification = SearchHelper.constructSpecificationFromSaleItemsFilter(business);
-        PageRequest expectedPageRequest = SearchHelper.getPageRequest(null, null, Sort.by(new Sort.Order(Sort.Direction.ASC, "price").ignoreCase()));
+        Specification<SaleItem> expectedSpecification = SearchSpecConstructor.constructSpecificationFromSaleItemsFilter(business);
+        PageRequest expectedPageRequest = SearchPageConstructor.getPageRequest(null, null, Sort.by(new Sort.Order(Sort.Direction.ASC, "price").ignoreCase()));
 
         verify(saleItemRepository, times(1)).findAll(specificationArgumentCaptor.capture(), pageRequestArgumentCaptor.capture());
         assertTrue(new ReflectionEquals(expectedSpecification).matches(specificationArgumentCaptor.getValue()));
@@ -382,8 +431,8 @@ class SaleControllerTest {
         mockMvc.perform(get("/businesses/1/listings"))
                 .andReturn();
 
-        Specification<SaleItem> expectedSpecification = SearchHelper.constructSpecificationFromSaleItemsFilter(business);
-        PageRequest expectedPageRequest = SearchHelper.getPageRequest(null, null, Sort.by(new Sort.Order(Sort.Direction.ASC, "created").ignoreCase()));
+        Specification<SaleItem> expectedSpecification = SearchSpecConstructor.constructSpecificationFromSaleItemsFilter(business);
+        PageRequest expectedPageRequest = SearchPageConstructor.getPageRequest(null, null, Sort.by(new Sort.Order(Sort.Direction.ASC, "created").ignoreCase()));
 
         verify(saleItemRepository, times(1)).findAll(specificationArgumentCaptor.capture(), pageRequestArgumentCaptor.capture());
         assertTrue(new ReflectionEquals(expectedSpecification).matches(specificationArgumentCaptor.getValue()));
@@ -419,8 +468,8 @@ class SaleControllerTest {
                 .andExpect(status().isOk())
                 .andReturn();
 
-        Specification<SaleItem> expectedSpecification = SearchHelper.constructSpecificationFromSaleItemsFilter(business);
-        PageRequest expectedPageRequest = SearchHelper.getPageRequest(null, null, Sort.by(new Sort.Order(Sort.Direction.ASC, "created").ignoreCase()));
+        Specification<SaleItem> expectedSpecification = SearchSpecConstructor.constructSpecificationFromSaleItemsFilter(business);
+        PageRequest expectedPageRequest = SearchPageConstructor.getPageRequest(null, null, Sort.by(new Sort.Order(Sort.Direction.ASC, "created").ignoreCase()));
 
         verify(saleItemRepository, times(1)).findAll(specificationArgumentCaptor.capture(), pageRequestArgumentCaptor.capture());
         assertTrue(new ReflectionEquals(expectedSpecification).matches(specificationArgumentCaptor.getValue()));
@@ -430,7 +479,7 @@ class SaleControllerTest {
     @Test
     void getSaleItemsForBusiness_reverseFalse_itemsAscending() throws Exception {
         var items = generateMockSaleItems();
-        when(saleItemRepository.findAll(any(), any(PageRequest.class))).thenReturn(new PageImpl<SaleItem>(items));
+        when(saleItemRepository.findAll(any(), any(PageRequest.class))).thenReturn(new PageImpl<>(items));
         saleItemRepository.saveAll(items);
 
         MvcResult result = mockMvc.perform(get("/businesses/1/listings")
@@ -438,8 +487,8 @@ class SaleControllerTest {
                 .andExpect(status().isOk())
                 .andReturn();
 
-        Specification<SaleItem> expectedSpecification = SearchHelper.constructSpecificationFromSaleItemsFilter(business);
-        PageRequest expectedPageRequest = SearchHelper.getPageRequest(null, null, Sort.by(new Sort.Order(Sort.Direction.ASC, "created").ignoreCase()));
+        Specification<SaleItem> expectedSpecification = SearchSpecConstructor.constructSpecificationFromSaleItemsFilter(business);
+        PageRequest expectedPageRequest = SearchPageConstructor.getPageRequest(null, null, Sort.by(new Sort.Order(Sort.Direction.ASC, "created").ignoreCase()));
 
         verify(saleItemRepository, times(1)).findAll(specificationArgumentCaptor.capture(), pageRequestArgumentCaptor.capture());
         assertTrue(new ReflectionEquals(expectedSpecification).matches(specificationArgumentCaptor.getValue()));
@@ -449,7 +498,7 @@ class SaleControllerTest {
     @Test
     void getSaleItemsForBusiness_reverseTrue_itemsDescending() throws Exception {
         var items = generateMockSaleItems();
-        when(saleItemRepository.findAll(any(), any(PageRequest.class))).thenReturn(new PageImpl<SaleItem>(items));
+        when(saleItemRepository.findAll(any(), any(PageRequest.class))).thenReturn(new PageImpl<>(items));
         saleItemRepository.saveAll(items);
 
 
@@ -458,8 +507,8 @@ class SaleControllerTest {
                 .andExpect(status().isOk())
                 .andReturn();
 
-        Specification<SaleItem> expectedSpecification = SearchHelper.constructSpecificationFromSaleItemsFilter(business);
-        PageRequest expectedPageRequest = SearchHelper.getPageRequest(null, null, Sort.by(new Sort.Order(Sort.Direction.DESC, "created").ignoreCase()));
+        Specification<SaleItem> expectedSpecification = SearchSpecConstructor.constructSpecificationFromSaleItemsFilter(business);
+        PageRequest expectedPageRequest = SearchPageConstructor.getPageRequest(null, null, Sort.by(new Sort.Order(Sort.Direction.DESC, "created").ignoreCase()));
 
         verify(saleItemRepository, times(1)).findAll(specificationArgumentCaptor.capture(), pageRequestArgumentCaptor.capture());
         assertTrue(new ReflectionEquals(expectedSpecification).matches(specificationArgumentCaptor.getValue()));
@@ -469,15 +518,15 @@ class SaleControllerTest {
     @Test
     void getSaleItemsForBusiness_resultsPerPageSet_firstPageReturned() throws Exception {
         var items = generateMockSaleItems();
-        when(saleItemRepository.findAll(any(), any(PageRequest.class))).thenReturn(new PageImpl<SaleItem>(items));
+        when(saleItemRepository.findAll(any(), any(PageRequest.class))).thenReturn(new PageImpl<>(items));
 
         MvcResult result = mockMvc.perform(get("/businesses/1/listings")
                 .param("resultsPerPage", "4"))
                 .andExpect(status().isOk())
                 .andReturn();
 
-        Specification<SaleItem> expectedSpecification = SearchHelper.constructSpecificationFromSaleItemsFilter(business);
-        PageRequest expectedPageRequest = SearchHelper.getPageRequest(null, 4, Sort.by(new Sort.Order(Sort.Direction.ASC, "created").ignoreCase()));
+        Specification<SaleItem> expectedSpecification = SearchSpecConstructor.constructSpecificationFromSaleItemsFilter(business);
+        PageRequest expectedPageRequest = SearchPageConstructor.getPageRequest(null, 4, Sort.by(new Sort.Order(Sort.Direction.ASC, "created").ignoreCase()));
 
         verify(saleItemRepository, times(1)).findAll(specificationArgumentCaptor.capture(), pageRequestArgumentCaptor.capture());
         assertTrue(new ReflectionEquals(expectedSpecification).matches(specificationArgumentCaptor.getValue()));
@@ -487,7 +536,7 @@ class SaleControllerTest {
     @Test
     void getSaleItemsForBusiness_secondPageRequested_secondPageReturned() throws Exception {
         var items = generateMockSaleItems();
-        when(saleItemRepository.findAll(any(), any(PageRequest.class))).thenReturn(new PageImpl<SaleItem>(items));
+        when(saleItemRepository.findAll(any(), any(PageRequest.class))).thenReturn(new PageImpl<>(items));
         saleItemRepository.saveAll(items);
 
 
@@ -497,8 +546,8 @@ class SaleControllerTest {
                 .andExpect(status().isOk())
                 .andReturn();
 
-        Specification<SaleItem> expectedSpecification = SearchHelper.constructSpecificationFromSaleItemsFilter(business);
-        PageRequest expectedPageRequest = SearchHelper.getPageRequest(2, 4, Sort.by(new Sort.Order(Sort.Direction.ASC, "created").ignoreCase()));
+        Specification<SaleItem> expectedSpecification = SearchSpecConstructor.constructSpecificationFromSaleItemsFilter(business);
+        PageRequest expectedPageRequest = SearchPageConstructor.getPageRequest(2, 4, Sort.by(new Sort.Order(Sort.Direction.ASC, "created").ignoreCase()));
 
         verify(saleItemRepository, times(1)).findAll(specificationArgumentCaptor.capture(), pageRequestArgumentCaptor.capture());
         assertTrue(new ReflectionEquals(expectedSpecification).matches(specificationArgumentCaptor.getValue()));
@@ -680,6 +729,108 @@ class SaleControllerTest {
         verify(interestEvent, times(1)).setInterested(false);
 
         verify(interestEventRepository, times(1)).save(interestEvent);
+    }
+
+    @Test
+    void saleSearch_noQuery_200() throws Exception {
+        var items = generateMockSaleItems();
+        when(saleItemRepository.findAll(any(), any(PageRequest.class))).thenReturn(new PageImpl<>(items));
+
+        mockMvc.perform(get("/businesses/listings/search"))
+                .andExpect(status().isOk());
+    }
+
+    @ParameterizedTest
+    @CsvSource({"true,true", "false,false"})
+    void saleSearch_reverseQuery_PageConstructorCalledExpected(String input, Boolean reverse) throws Exception {
+        var items = generateMockSaleItems();
+        when(saleItemRepository.findAll(any(), any(PageRequest.class))).thenReturn(new PageImpl<>(items));
+        ArgumentCaptor<Boolean> reverseArgCaptor = ArgumentCaptor.forClass(Boolean.class);
+        searchPageConstructor.when(() -> SearchPageConstructor.getSortDirection(reverseArgCaptor.capture())).thenCallRealMethod();
+        mockMvc.perform(get("/businesses/listings/search").param("reverse", input))
+                    .andExpect(status().isOk());
+        assertEquals(reverse, reverseArgCaptor.getValue());
+    }
+
+    @Test
+    void saleSearch_pageRequest_PageConstructorCalledExpected() throws Exception {
+        var items = generateMockSaleItems();
+        when(saleItemRepository.findAll(any(), any(PageRequest.class))).thenReturn(new PageImpl<>(items));
+        ArgumentCaptor<Integer> pageArgCaptor = ArgumentCaptor.forClass(Integer.class);
+        ArgumentCaptor<Integer> resultNumArgCaptor = ArgumentCaptor.forClass(Integer.class);
+        ArgumentCaptor<Sort> orderArgCaptor = ArgumentCaptor.forClass(Sort.class);
+
+        searchPageConstructor.when(() -> SearchPageConstructor.getPageRequest(pageArgCaptor.capture(), resultNumArgCaptor.capture(), orderArgCaptor.capture())).thenReturn(PageRequest.of(1, 1, Sort.unsorted()));
+
+        mockMvc.perform(get("/businesses/listings/search")
+                .param("page", "5")
+                .param("resultsPerPage", "12")
+                .param("orderBy", "productName"))
+                .andExpect(status().isOk());
+
+        Sort expectedSort = Sort.by(new Sort.Order(Sort.Direction.DESC, "inventoryItem.product.name").ignoreCase().nullsLast());
+        assertEquals(5, pageArgCaptor.getValue());
+        assertEquals(12, resultNumArgCaptor.getValue());
+        assertEquals(expectedSort, orderArgCaptor.getValue());
+    }
+
+    @Test
+    void saleSearch_severalParameters_200() throws Exception {
+        var items = generateMockSaleItems();
+        when(saleItemRepository.findAll(any(), any(PageRequest.class))).thenReturn(new PageImpl<>(items));
+
+        ArgumentCaptor<SaleListingSearchDTO> specArgCaptor = ArgumentCaptor.forClass(SaleListingSearchDTO.class);
+        searchSpecConstructor.when(() -> SearchSpecConstructor.constructSaleListingSpecificationForSearch(specArgCaptor.capture())).thenReturn(Specification.where(null));
+
+        mockMvc.perform(get("/businesses/listings/search")
+                .param("productSearchQuery", "Cheese")
+                .param("businessSearchQuery", "Lactose and Co")
+                .param("locationSearchQuery", "Here")
+                .param("priceLower", "2.00")
+                .param("priceUpper", "25.00")
+                .param("closeLower", "2022-09-09")
+                .param("businessTypes", "Retail Trade"))
+                .andExpect(status().isOk());
+
+        assertEquals("Cheese", specArgCaptor.getValue().getProductSearchQuery());
+        assertEquals("Lactose and Co", specArgCaptor.getValue().getBusinessSearchQuery());
+        assertEquals("Here", specArgCaptor.getValue().getLocationSearchQuery());
+        assertEquals(new BigDecimal("2.00"), specArgCaptor.getValue().getPriceLowerBound());
+        assertEquals(new BigDecimal("25.00"), specArgCaptor.getValue().getPriceUpperBound());
+        assertEquals(LocalDate.parse("2022-09-09"), specArgCaptor.getValue().getClosingDateLowerBound());
+        assertEquals(List.of(BusinessType.RETAIL_TRADE), specArgCaptor.getValue().getBusinessTypes());
+        assertNull(specArgCaptor.getValue().getBasicSearchQuery());
+        assertNull(specArgCaptor.getValue().getClosingDateUpperBound());
+    }
+
+    @Test
+    void saleSearch_invalidSearchParametersType_400() throws Exception {
+        mockMvc.perform(get("/businesses/listings/search")
+                .param("businessTypes", "Meat Farm"))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void saleSearch_invalidSearchParametersPrice_400() throws Exception {
+        mockMvc.perform(get("/businesses/listings/search")
+                .param("priceUpper", "Meat Farm"))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void saleSearch_invalidSearchParametersClose_400() throws Exception {
+        mockMvc.perform(get("/businesses/listings/search")
+                .param("closeUpper", "Meat Farm"))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void saleSearch_notLoggedIn_401() throws Exception {
+        authenticationTokenManager.when(() -> AuthenticationTokenManager.checkAuthenticationToken(any()))
+                .thenThrow(new AccessTokenResponseException());
+
+        mockMvc.perform(get("/businesses/listings/search"))
+                .andExpect(status().isUnauthorized());
     }
 
     @Test
@@ -965,9 +1116,100 @@ class SaleControllerTest {
 
         // Inventory item should be updated if request is successful
         verify(inventoryItem, times(1)).sellQuantity(50);
-        var inventoryItemCaptor = ArgumentCaptor.forClass(InventoryItem.class);
-        verify(inventoryItemRepository, times(1)).save(inventoryItemCaptor.capture());
-        assertEquals(inventoryItem, inventoryItemCaptor.getValue());
+        verify(inventoryItemRepository, times(1)).save(inventoryItem);
     }
 
+    @Test
+    void purchaseSaleItem_allInventoryItemsSold_inventoryItemDeleted() throws Exception {
+        authenticationTokenManager.when(() -> AuthenticationTokenManager.sessionCanSeePrivate(any(), any())).thenReturn(true);
+        JSONObject validBody = new JSONObject();
+        validBody.put("purchaserId", user.getUserID());
+
+        when(inventoryItem.getQuantity()).thenReturn(50);
+        doAnswer(invocation -> {
+            when(inventoryItem.getQuantity()).thenReturn(0); // Once sold, then set quantity to 0
+            return null;
+        }).when(inventoryItem).sellQuantity(any());
+
+        mockMvc.perform(post(String.format("/listings/%d/purchase", saleItem.getId()))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(validBody.toString()))
+                .andExpect(status().isOk());
+
+        verify(inventoryItemRepository, times(0)).save(any());
+        verify(inventoryItemRepository, times(1)).delete(inventoryItem);
+    }
+
+
+    @Test
+    void purchaseSaleItem_validRequest_purchaseEventCreated() throws Exception {
+        authenticationTokenManager.when(() -> AuthenticationTokenManager.sessionCanSeePrivate(any(), any())).thenReturn(true);
+        var product = Mockito.mock(Product.class);
+        JSONObject validBody = new JSONObject();
+        validBody.put("purchaserId", user.getUserID());
+
+        mockMvc.perform(post(String.format("/listings/%d/purchase", saleItem.getId()))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(validBody.toString()))
+                .andExpect(status().isOk());
+
+        var purchasedEventArgumentCaptor = ArgumentCaptor.forClass(PurchasedEvent.class);
+        verify(eventRepository, times(1)).save(purchasedEventArgumentCaptor.capture());
+        assertEquals(user, purchasedEventArgumentCaptor.getValue().getBoughtSaleItem().getBuyer());
+    }
+
+    @Test
+    void purchaseSaleItem_userLikedSaleItemBoughtByAnotherUser_eventCreatedForTheInterestedUser() throws Exception {
+        when(saleItem.getInterestedUsers()).thenReturn(Set.of(interestedUser1));
+        authenticationTokenManager.when(() -> AuthenticationTokenManager.sessionCanSeePrivate(any(), any())).thenReturn(true);
+        JSONObject validBody = new JSONObject();
+        validBody.put("purchaserId", user.getUserID());
+
+        mockMvc.perform(post(String.format("/listings/%d/purchase", saleItem.getId()))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(validBody.toString()))
+                .andExpect(status().isOk());
+
+        verify(eventRepository, times(2)).save(eventCaptor.capture());
+        List<Event> allSavedEvents = eventCaptor.getAllValues();
+        assertEquals(allSavedEvents.get(0).getClass(), InterestPurchasedEvent.class);
+        assertEquals(allSavedEvents.get(1).getClass(), PurchasedEvent.class);
+    }
+
+    @Test
+    void purchaseSaleItem_noUserLikedSaleItemBoughtByAnotherUser_noEventsCreated() throws Exception {
+        when(saleItem.getInterestedUsers()).thenReturn(Set.of());
+        authenticationTokenManager.when(() -> AuthenticationTokenManager.sessionCanSeePrivate(any(), any())).thenReturn(true);
+        JSONObject validBody = new JSONObject();
+        validBody.put("purchaserId", user.getUserID());
+
+        mockMvc.perform(post(String.format("/listings/%d/purchase", saleItem.getId()))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(validBody.toString()))
+                .andExpect(status().isOk());
+
+        verify(eventRepository, times(1)).save(eventCaptor.capture());
+        List<Event> allSavedEvents = eventCaptor.getAllValues();
+        assertEquals(allSavedEvents.get(0).getClass(), PurchasedEvent.class);
+    }
+
+    @Test
+    void purchaseSaleItem_multipleUsersLikedSaleItemBoughtByAnotherUser_eventsCreatedForTheInterestedUsers() throws Exception {
+        when(saleItem.getInterestedUsers()).thenReturn(Set.of(interestedUser1, interestedUser2, interestedUser3));
+        authenticationTokenManager.when(() -> AuthenticationTokenManager.sessionCanSeePrivate(any(), any())).thenReturn(true);
+        JSONObject validBody = new JSONObject();
+        validBody.put("purchaserId", user.getUserID());
+
+        mockMvc.perform(post(String.format("/listings/%d/purchase", saleItem.getId()))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(validBody.toString()))
+                .andExpect(status().isOk());
+
+        verify(eventRepository, times(4)).save(eventCaptor.capture());
+        List<Event> allSavedEvents = eventCaptor.getAllValues();
+        assertEquals(allSavedEvents.get(0).getClass(), InterestPurchasedEvent.class);
+        assertEquals(allSavedEvents.get(1).getClass(), InterestPurchasedEvent.class);
+        assertEquals(allSavedEvents.get(2).getClass(), InterestPurchasedEvent.class);
+        assertEquals(allSavedEvents.get(3).getClass(), PurchasedEvent.class);
+    }
 }
