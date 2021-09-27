@@ -3,7 +3,7 @@ import Vuex from 'vuex';
 import Vuetify from 'vuetify';
 import { createLocalVue, Wrapper, mount } from '@vue/test-utils';
 
-import ImageCarousel from '@/components/utils/ImageCarousel.vue';
+import ImageCarousel from '@/components/image/ImageCarousel.vue';
 
 Vue.use(Vuetify);
 

@@ -9,9 +9,8 @@
       <v-card v-if="businessImages && businessImages.length > 0">
         <ImageCarousel
           :imagesList="businessImages"
-          :showMakePrimary="permissionToActAsBusiness"
+          :showMakePrimary="false"
           :showDelete="false"
-          @change-primary-image="false"
           ref="businessImageCarousel"
         />
       </v-card>
@@ -87,7 +86,7 @@
     <ModifyBusiness
       :business="business"
       v-if="modifyBusiness"
-      @discardModifyBusiness="modifyBusiness=false"
+      @discardModifyBusiness="updateBusiness"
       @modifySuccess="updateBusiness"
     />
   </div>
@@ -102,7 +101,7 @@ import {
   mandatoryRules,
   maxCharRules, postCodeRules, streetNumRules
 } from "@/utils";
-import ImageCarousel from "@/components/utils/ImageCarousel";
+import ImageCarousel from "@/components/image/ImageCarousel";
 import {getBusiness} from "@/api/business";
 export default {
   name: 'BusinessProfile',

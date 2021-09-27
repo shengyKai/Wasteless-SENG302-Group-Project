@@ -138,7 +138,7 @@
 </template>
 
 <script>
-import ImageCarousel from "@/components/utils/ImageCarousel";
+import ImageCarousel from "@/components/image/ImageCarousel";
 import { currencyFromCountry } from "@/api/currency";
 import { setListingInterest, getListingInterest, purchaseListing} from '../../api/sale';
 import { formatDate, formatPrice } from '@/utils';

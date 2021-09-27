@@ -53,7 +53,7 @@
                 </v-col>
               </v-row>
               <!-- Sub section in info tab for admin modifying -->
-              <div v-if="isPrimaryOwner | isSystemAdmin" class="mt-1">
+              <div v-if="isPrimaryOwner || isSystemAdmin" class="mt-1">
                 <v-card-title>Change Primary Administrator</v-card-title>
                 <v-row>
                   <v-col>
@@ -163,7 +163,7 @@
             </v-tab-item>
             <!-- Business image tab -->
             <v-tab-item key="image" :eager="true">
-              <ImageManager :images="business.images" @updateImages="updateBusinessImages"/>
+              <ImageManager v-model="images"/>
               <p class="error-text" v-if ="errorMessage !== undefined"> {{errorMessage}} </p>
             </v-tab-item>
           </v-tabs-items>
@@ -243,7 +243,7 @@
 
 <script>
 import LocationAutocomplete from '@/components/utils/LocationAutocomplete';
-import ImageManager from "@/components/utils/ImageManager";
+import ImageManager from "@/components/image/ImageManager";
 import {
   alphabetExtendedMultilineRules,
   alphabetExtendedSingleLineRules, alphabetRules,
@@ -300,7 +300,7 @@ export default {
       streetRules: ()=> streetNumRules,
       postcodeRules: ()=> postCodeRules,
       isLoading: false,
-      imageIds: this.business.images.map(image => image.id),
+      images: this.business.images,
     };
   },
   computed: {
@@ -318,6 +318,12 @@ export default {
     isPrimaryOwner() {
       return this.$store.state.user.id === this.business.primaryAdministratorId;
     },
+    /**
+     * Returns a list of IDs of the business's images
+     */
+    imageIds() {
+      return this.images.map(image => image.id);
+    }
   },
   methods: {
     /**
@@ -418,12 +424,6 @@ export default {
       }
       this.primaryAdministratorId = admin.id;
     },
-    /**
-     * Method to update the imageIds from the outputImages received from ImageManager to be sent for business modification.
-     */
-    updateBusinessImages(outputImages) {
-      this.imageIds = outputImages.map(image => image.id);
-    }
   },
 };
 </script>
