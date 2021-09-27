@@ -159,7 +159,7 @@ export async function basicSearchSaleitem(query: string, orderBy: SaleListingOrd
     if (status === 400) return 'Invalid user provided';
     if (status === 401) return 'You have been logged out. Please login again and retry';
     if (status === 403) return 'Operation not permitted';
-    if (status === 406) return 'Sale Item hahah';
+    if (status === 406) return 'Sale Listing does not exist';
 
     return error.response?.data.message;
   }
@@ -197,7 +197,7 @@ export async function advanceSearchSaleitem(advanceSearch: AdvanceSearch, page: 
     if (status === 400) return 'Invalid user provided';
     if (status === 401) return 'You have been logged out. Please login again and retry';
     if (status === 403) return 'Operation not permitted';
-    if (status === 406) return 'Sale Item hahah';
+    if (status === 406) return 'Sale Listing does not exist';
 
     return error.response?.data.message;
   }

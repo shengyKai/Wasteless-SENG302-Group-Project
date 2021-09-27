@@ -378,37 +378,48 @@ const apiCalls: Partial<ApiCalls> = {
     extraStatusMessages: {
       401: 'You have been logged out. Please login again and retry',
       403: 'Operation not permitted',
-      406: 'Sale Item hahah',
+      406: 'Sale Listing does not exist',
     },
     usesServerMessage: true,
   },
-//   advanceSearchSaleitem: {
-//     parameters: [{
-//       productQuery: "Apple",
-//       businessQuery: "Nathan",
-//       locationQuery: "New Zealand",
-//       closesBefore: "21/01/2030",
-//       closesAfter: "11/01/2030",
-//       orderBy: "productName",
-//       businessTypes: ["Retail Trade"],
-//       lowestPrice: "1",
-//       highestPrice: "50",
-//       reverse: false}, 1, 10],
-//     httpMethod: 'get',
-//     url: '/businesses/listings/search',
-//     body: {
-//       params: <URLSearchParams>{
-//       }
-//     },
-//     result: searchResult([testSaleItem]),
-//     failedTypeCheckResponse: 'Response is not Sale Item Listing array',
-//     extraStatusMessages: {
-//       401: 'You have been logged out. Please login again and retry',
-//       403: 'Operation not permitted',
-//       406: 'Sale Item hahah',
-//     },
-//     usesServerMessage: true,
-//   },
+  advanceSearchSaleitem: {
+    parameters: [{
+      productQuery: "Apple",
+      businessQuery: "Nathan",
+      locationQuery: "New Zealand",
+      closesBefore: "21/01/2030",
+      closesAfter: "11/01/2030",
+      orderBy: "productName",
+      businessTypes: ["Retail Trade"],
+      lowestPrice: "1",
+      highestPrice: "50",
+      reverse: false}, 1, 10],
+    httpMethod: 'get',
+    url: '/businesses/listings/search',
+    body: {
+      params: new URLSearchParams({
+        "productSearchQuery": "Apple",
+        "businessSearchQuery":  "Nathan",
+        "locationSearchQuery": "New Zealand",
+        "closesLower": "21/01/2030",
+        "closesUpper": "11/01/2030",
+        "orderBy": "productName",
+        "page": "1",
+        "resultsPerPage": "50",
+        "reverse": "false",
+        "priceLower": "1",
+        "priceUpper": "50",
+      }),
+    },
+    result: searchResult([testSaleItem]),
+    failedTypeCheckResponse: 'Response is not Sale Item Listing array',
+    extraStatusMessages: {
+      401: 'You have been logged out. Please login again and retry',
+      403: 'Operation not permitted',
+      406: 'Sale Listing does not exist',
+    },
+    usesServerMessage: true,
+  },
 };
 
 
@@ -479,7 +490,7 @@ describe('api', () => {
       if (fields.headers !== undefined) {
         parameters.push({headers: fields.headers });
       }
-
+      console.log(parameters);
       expect(instance[fields.httpMethod]).toBeCalledWith(...parameters);
     });
 
