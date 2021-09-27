@@ -48,9 +48,8 @@
                     color="primary"
                     v-bind="attrs"
                     v-on="on"
-                    @click="ranklog()"
+                    @click="modifyBusiness = true"
                   >
-                    <!-- @click="modifyBusiness = true" -->
                     <v-icon>mdi-cog</v-icon>
                   </v-btn>
                 </template>
@@ -258,19 +257,10 @@ export default {
           this.business = value;
           this.readableAddress = convertAddressToReadableText(value.address, "full");
         }
+        this.rank = this.business.rank.name;
       });
+
     },
-    /**
-     * Sets the variable rank to be the business's rank
-     */
-    setRank() {
-      if (this.business.rank === undefined) {
-        //TODO This should be modified or removed, however it is currently used for testing and show other team members
-        this.rank = "silver";
-      } else {
-        this.rank = this.business.rank;
-      }
-    }
   }
 };
 </script>
