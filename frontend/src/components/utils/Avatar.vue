@@ -71,7 +71,7 @@ export default {
     image() {
       let image;
       if (this.user !== undefined) {
-        image = undefined; // User images not implemented
+        image = this.user.images[0];
       } else if (this.business !== undefined) {
         image = this.business.images[0];
       } else {
