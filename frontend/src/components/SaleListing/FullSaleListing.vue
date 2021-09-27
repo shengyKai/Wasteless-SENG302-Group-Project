@@ -114,14 +114,16 @@
               <v-col cols="6" sm="6">
                 <h4 class=" font-weight-regular">{{ product.countryOfSale }}</h4>
               </v-col>
-              <v-col cols="12" sm="6">
-                <h4 class=" font-weight-bold">More Info:</h4>
-              </v-col>
-              <v-col cols="12" sm="6">
-                <h4 class=" font-weight-regular">
-                  {{ saleItem.moreInfo }}
-                </h4>
-              </v-col>
+              <v-row>
+                <v-col cols="6" sm="3">
+                  <h4 class=" font-weight-bold">More Info:</h4>
+                </v-col>
+                <v-col cols="12" sm="6">
+                  <h4 class=" font-weight-regular">
+                    {{ saleItem.moreInfo }}
+                  </h4>
+                </v-col>
+              </v-row>
             </v-row>
           </v-card>
         </v-container>

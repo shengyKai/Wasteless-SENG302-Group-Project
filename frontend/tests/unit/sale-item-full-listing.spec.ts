@@ -29,7 +29,7 @@ const testBusiness: Business = {
   rank: {
     name: "bronze",
     threshold: 1000
-}
+  }
 };
 
 jest.mock('@/api/currency', () => ({

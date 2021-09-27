@@ -14,9 +14,9 @@
     <v-list three-line v-if="resultsPage">
       <template v-for="(sale, index) in resultsPage.results">
         <v-divider v-if="sale === undefined" :key="'divider-'+index"/>
-        <SaleResult v-else :key="sale.id" :saleItem="sale" 
-        @goBack="updatePage"
-        @refresh="updatePage"/>
+        <SaleResult v-else :key="sale.id" :saleItem="sale"
+                    @goBack="updatePage"
+                    @refresh="updatePage"/>
 
       </template>
     </v-list>
