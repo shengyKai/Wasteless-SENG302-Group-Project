@@ -188,7 +188,6 @@ export async function advanceSearchSaleitem(advanceSearch: AdvanceSearch, page: 
         "priceUpper": advanceSearch.highestPrice,
       });
     advanceSearch.businessTypes.map(type => params.append("businessTypes", type));
-    console.log(Array.from(params.entries()));
     response = await instance.get('/businesses/listings/search', {
       params: params
     });

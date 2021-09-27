@@ -279,8 +279,6 @@ describe('ProductCatalogue.vue', () => {
     createGetProductWrapper();
     await Vue.nextTick();
 
-    // console.log(wrapper.html());
-
     expect(wrapper.findComponent({name: 'ProductForm'}).exists()).toBeFalsy();
     await findAddProductButton().trigger('click');
     await Vue.nextTick();

@@ -199,8 +199,6 @@ const temp = new URLSearchParams({
   "businessTypes": "Retail Trade",
 });
 
-console.log(Array.from(temp.entries()));
-
 const apiCalls: Partial<ApiCalls> = {
   createProduct: {
     parameters: [
@@ -493,25 +491,6 @@ describe('api', () => {
       if (fields.headers !== undefined) {
         parameters.push({headers: fields.headers });
       }
-      console.log(parameters);
-      const call = instance[fields.httpMethod].mock.calls[0];
-
-      // for (let i = 0; i<call.length; i++) {
-      //   const actual = call[i];
-      //   const expected = parameters[i];
-      //   if (expected instanceof URLSearchParams) {
-      //     console.log('foo');
-      //     expect(Array.from(expected.entries())).toBe(Array.from(actual.entries()));
-
-      //     delete call[i];
-      //     delete parameters[i];
-      //   }
-      // }
-
-      console.log(call);
-      console.log(parameters);
-
-      // expect(call).toStrictEqual(parameters);
       expect(instance[fields.httpMethod]).toBeCalledWith(...parameters);
     });
 

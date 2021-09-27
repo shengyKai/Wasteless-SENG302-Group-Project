@@ -7,6 +7,7 @@ import { User } from '@/api/user';
 import { getStore, resetStoreForTesting, StoreData } from '@/store';
 import { getListingInterest, setListingInterest } from '@/api/sale';
 import { castMock } from '../utils';
+import { Business } from '@/api/business';
 
 Vue.use(Vuetify);
 
@@ -16,6 +17,14 @@ const testUser: User = {
   lastName: 'test_lastname',
   email: 'test_email',
   homeAddress: { country: 'test_country', city: 'test_city', district: 'test_district'},
+};
+
+const testBusiness: Business = {
+  id: 1,
+  primaryAdministratorId: 2,
+  name: "test_business",
+  address: { city: "test_city", country: "test_country" },
+  businessType: "Accommodation and Food Services",
 };
 
 jest.mock('@/api/currency', () => ({
@@ -59,6 +68,7 @@ describe('FullSaleListing.vue', () => {
           "inventoryItem": {
             "id": 101,
             "product": {
+              "business" : testBusiness,
               "id": "WATT-420-BEANS",
               "name": "Watties Baked Beans - 420g can",
               "description": "Baked Beans as they should be.",
@@ -131,11 +141,12 @@ describe('FullSaleListing.vue', () => {
   });
 
   it("Must contain the manufactured origin country of the sale", () => {
-    expect(wrapper.text()).toContain("Country: New Zealand");
+    console.log(wrapper.text());
+    expect(wrapper.text()).toContain("Country of Sale: New Z");
   });
 
   it("Must contain the manufactured details", () => {
-    expect(wrapper.text()).toContain("Manufacturer: Heinz Wattie's Limited Original");
+    expect(wrapper.text()).toContain("Manufacturer: Heinz Wattie's Limited");
   });
 
   it("Must contain interested like count for the listing", () => {
