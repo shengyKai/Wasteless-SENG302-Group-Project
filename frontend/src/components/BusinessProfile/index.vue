@@ -207,10 +207,6 @@ export default {
     },
   },
 
-  mounted() {
-    this.setRank();
-  },
-
   methods: {
     /**
      * Reroutes user to this business' sales page
