@@ -122,18 +122,8 @@ export default {
   },
   data: () => ({
     model: 0,
-<<<<<<< HEAD
-    colors: [
-      'yellow darken-2',
-      'secondary',
-      'grey',
-      'red',
-      'orange',
-    ],
-=======
     showImageUploader: false,
     uploadedImage: undefined,
->>>>>>> dev
   }),
   computed: {
     /**
