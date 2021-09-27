@@ -184,6 +184,23 @@ type ApiCalls = {[k in keyof ApiMethods]: {
   usesServerMessage: boolean,                       // Whether the "message" attribute in the response is used for unspecialised error messages
 }};
 
+const temp = new URLSearchParams({
+  "productSearchQuery": "Apple",
+  "businessSearchQuery":  "Nathan",
+  "locationSearchQuery": "New Zealand",
+  "closeLower": "21/01/2030",
+  "closeUpper": "11/01/2030",
+  "orderBy": "productName",
+  "page": "1",
+  "resultsPerPage": "10",
+  "reverse": "false",
+  "priceLower": "1",
+  "priceUpper": "50",
+  "businessTypes": "Retail Trade",
+});
+
+console.log(Array.from(temp.entries()));
+
 const apiCalls: Partial<ApiCalls> = {
   createProduct: {
     parameters: [
@@ -397,19 +414,7 @@ const apiCalls: Partial<ApiCalls> = {
     httpMethod: 'get',
     url: '/businesses/listings/search',
     body: {
-      params: new URLSearchParams({
-        "productSearchQuery": "Apple",
-        "businessSearchQuery":  "Nathan",
-        "locationSearchQuery": "New Zealand",
-        "closesLower": "21/01/2030",
-        "closesUpper": "11/01/2030",
-        "orderBy": "productName",
-        "page": "1",
-        "resultsPerPage": "50",
-        "reverse": "false",
-        "priceLower": "1",
-        "priceUpper": "50",
-      }),
+      params: temp,
     },
     result: searchResult([testSaleItem]),
     failedTypeCheckResponse: 'Response is not Sale Item Listing array',
@@ -421,7 +426,6 @@ const apiCalls: Partial<ApiCalls> = {
     usesServerMessage: true,
   },
 };
-
 
 describe('api', () => {
   // Makes sure the the mocks are clean
@@ -477,7 +481,6 @@ describe('api', () => {
         expect(response).toBe('Request failed: ' + statusCode);
       });
     }
-
     it('Method should be called with the expected url and body', async () => {
       instance[fields.httpMethod].mockResolvedValueOnce(makeAxiosResponse(fields.apiResult));
 
@@ -491,6 +494,24 @@ describe('api', () => {
         parameters.push({headers: fields.headers });
       }
       console.log(parameters);
+      const call = instance[fields.httpMethod].mock.calls[0];
+
+      // for (let i = 0; i<call.length; i++) {
+      //   const actual = call[i];
+      //   const expected = parameters[i];
+      //   if (expected instanceof URLSearchParams) {
+      //     console.log('foo');
+      //     expect(Array.from(expected.entries())).toBe(Array.from(actual.entries()));
+
+      //     delete call[i];
+      //     delete parameters[i];
+      //   }
+      // }
+
+      console.log(call);
+      console.log(parameters);
+
+      // expect(call).toStrictEqual(parameters);
       expect(instance[fields.httpMethod]).toBeCalledWith(...parameters);
     });
 
