@@ -86,7 +86,7 @@
     <ModifyBusiness
       :business="business"
       v-if="modifyBusiness"
-      @discardModifyBusiness="modifyBusiness=false"
+      @discardModifyBusiness="updateBusiness"
       @modifySuccess="updateBusiness"
     />
   </div>

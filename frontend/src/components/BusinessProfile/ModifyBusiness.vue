@@ -116,7 +116,7 @@
                       />
                     </v-col>
                   </v-row>
-                  <div v-if="isPrimaryOwner | isSystemAdmin" class="mt-1">
+                  <div v-if="isPrimaryOwner || isSystemAdmin" class="mt-1">
                     <v-card-title>Change Primary Administrator</v-card-title>
                     <v-row>
                       <v-col>
