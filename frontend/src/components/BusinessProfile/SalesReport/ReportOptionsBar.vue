@@ -1,8 +1,8 @@
 <template>
   <v-card color="secondary" dark>
     <v-card-actions>
-      <v-row>
-        <v-col cols="auto">
+      <v-row align="center" justify="center">
+        <v-col cols="2">
           <v-menu
             ref="fromMenu"
             v-model="fromDateMenu"
@@ -17,6 +17,7 @@
                 v-model="fromDate"
                 label="From"
                 prepend-inner-icon="mdi-calendar"
+                readonly
                 v-bind="attrs"
                 v-on="on"
                 outlined
@@ -44,8 +45,9 @@
             </v-date-picker>
           </v-menu>
         </v-col>
-        <v-col cols="auto">
+        <v-col cols="2">
           <v-menu
+            class="mb-0 pb-0"
             ref="toMenu"
             v-model="toDateMenu"
             :return-value.sync="toDate"
@@ -87,7 +89,7 @@
             </v-date-picker>
           </v-menu>
         </v-col>
-        <v-col cols="auto">
+        <v-col cols="4">
           <v-select
             v-model="periodBefore"
             flat
@@ -101,7 +103,7 @@
             color="secondary"
           />
         </v-col>
-        <v-col cols="auto">
+        <v-col cols="2">
           <v-select
             v-model="granularity"
             flat
@@ -146,3 +148,9 @@ export default {
   }
 };
 </script>
+
+<style scoped>
+v-menu .v-text-field .v-text-field__details .v-messages{
+  background: red;
+}
+</style>
