@@ -9,6 +9,7 @@ import {Location} from '@/api/internal';
 import {getStore, resetStoreForTesting} from '@/store';
 import {getUser as getUser1, User} from "@/api/user";
 import {modifyBusiness as modifyBusiness1, Business} from "@/api/business";
+import ImageManager from "@/components/image/ImageManager.vue";
 
 jest.mock('@/api/user', () => ({
   getUser: jest.fn(),
@@ -79,7 +80,12 @@ function createTestBusiness(businessId: number, primaryAdminId: number, admins: 
     description: 'test_description' + businessId,
     address: createTestLocation(),
     businessType: 'Charitable organisation',
-    created: '2/6/2006'
+    created: '2/6/2006',
+    images: [],
+    points: 0,
+    rank: {
+      name: 'bronze',
+    },
   };
   return business;
 }
@@ -146,6 +152,9 @@ describe('modifyBusiness.vue', () => {
       vuetify,
       attachTo: elem,
       store: store,
+      components: {
+        ImageManager
+      },
       data() {
         return {
           thingy: business
@@ -515,4 +524,43 @@ describe('modifyBusiness.vue', () => {
     });
   });
 
+  it("With one uploaded image, imageIds will be updated after an emit call from ImageManager", () => {
+    const images = [
+      {
+        id: 1,
+        filename: "some test file",
+        thumbnailFilename: "some thumbnail"
+      }
+    ];
+    const imageManagerWrapper = wrapper.findComponent(ImageManager);
+    expect(imageManagerWrapper.exists()).toBeTruthy();
+    expect(wrapper.vm.imageIds.length).toEqual(0);
+    imageManagerWrapper.vm.$emit("input", images);
+    expect(wrapper.vm.imageIds.length).toEqual(1);
+  });
+
+  it("With multiple uploaded images, imageIds will be updated", () => {
+    const images = [
+      {
+        id: 1,
+        filename: "some test file1",
+        thumbnailFilename: "some thumbnail"
+      },
+      {
+        id: 2,
+        filename: "some test file2",
+        thumbnailFilename: "some thumbnail"
+      },
+      {
+        id: 3,
+        filename: "some test file3",
+        thumbnailFilename: "some thumbnail"
+      }
+    ];
+    const imageManagerWrapper = wrapper.findComponent(ImageManager);
+    expect(imageManagerWrapper.exists()).toBeTruthy();
+    expect(wrapper.vm.imageIds.length).toEqual(0);
+    imageManagerWrapper.vm.$emit("input", images);
+    expect(wrapper.vm.imageIds.length).toEqual(3);
+  });
 });

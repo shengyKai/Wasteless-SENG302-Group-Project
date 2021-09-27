@@ -7,13 +7,13 @@ import { is, Reason } from 'typescript-is';
 import {CreateUser, login, createUser} from "@/api/user";
 import {CreateProduct, Product, createProduct, uploadProductImage, getProducts, modifyProduct} from "@/api/product";
 import {InventoryItem} from "@/api/inventory";
-import {Sale, getBusinessSales, setListingInterest, getListingInterest, basicSearchSaleitem, advanceSearchSaleitem } from "@/api/sale";
+import {Sale, getBusinessSales, setListingInterest, getListingInterest, basicSearchSaleitem, advanceSearchSaleitem, purchaseListing } from "@/api/sale";
 import {getMessagesInConversation, Message} from "@/api/marketplace";
 
 const api = {
   login, createUser, createProduct, uploadProductImage, getProducts, modifyProduct,
   getBusinessSales, getMessagesInConversation, setListingInterest, getListingInterest,
-  basicSearchSaleitem, advanceSearchSaleitem
+  basicSearchSaleitem, advanceSearchSaleitem, purchaseListing
 };
 
 jest.mock('axios', () => ({
@@ -420,6 +420,20 @@ const apiCalls: Partial<ApiCalls> = {
       401: 'You have been logged out. Please login again and retry',
       403: 'Operation not permitted',
       406: 'Sale Listing does not exist',
+    },
+    usesServerMessage: true,
+  },
+  purchaseListing: {
+    parameters: [6, 5],
+    httpMethod: 'post',
+    url: '/listings/6/purchase',
+    body: {
+      purchaserId: 5,
+    },
+    result: undefined,
+    extraStatusMessages: {
+      401: 'You have been logged out. Please login again and retry',
+      406: 'Listing does not exist',
     },
     usesServerMessage: true,
   },

@@ -34,15 +34,12 @@
 </template>
 
 <script>
-import ImageSelector from "@/components/utils/ImageSelector";
+import ImageSelector from "@/components/image/ImageSelector";
 import { uploadImage } from "@/api/images";
 
 export default {
   name: "ImageUploader",
   components: { ImageSelector },
-  props: {
-    value: undefined,
-  },
   data() {
     return {
       isLoading: false,
@@ -60,8 +57,8 @@ export default {
       if (typeof response === 'string') {
         this.errorMessage = response;
       } else {
-        this.image = response;
-        this.$emit('closeDialog');
+        this.$emit('upload', response);
+        this.closeForm();
       }
     },
     /**
@@ -72,15 +69,5 @@ export default {
       this.$emit('closeDialog');
     },
   },
-  computed: {
-    image: {
-      get() {
-        return this.value;
-      },
-      set (value) {
-        this.$emit('input', value);
-      },
-    }
-  }
 };
 </script>

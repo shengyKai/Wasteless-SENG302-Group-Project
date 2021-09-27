@@ -1,6 +1,7 @@
 package org.seng302.leftovers.entities;
 
 import org.seng302.leftovers.dto.business.BusinessType;
+import org.seng302.leftovers.dto.business.Rank;
 import org.seng302.leftovers.exceptions.DoesNotExistResponseException;
 import org.seng302.leftovers.exceptions.InsufficientPermissionResponseException;
 import org.seng302.leftovers.exceptions.ValidationResponseException;
@@ -22,6 +23,7 @@ public class Business implements ImageAttachment {
 
     //Minimum age to create a business
     private static final int MINIMUM_AGE = 16;
+    private static int POINTS_PER_SALE_LISTING = 1;
     private static final String TEXT_REGEX = "[ \\p{L}0-9\\p{Punct}]*";
 
     @Id
@@ -38,6 +40,8 @@ public class Business implements ImageAttachment {
     private BusinessType businessType;
     @Column
     private Instant created;
+    @Column(nullable = false)
+    private int points;
 
     @OneToMany (fetch = FetchType.LAZY, mappedBy = "business", cascade = CascadeType.REMOVE)
     private List<Product> catalogue = new ArrayList<>();
@@ -178,6 +182,41 @@ public class Business implements ImageAttachment {
      */
     public Instant getCreated() {
         return this.created;
+    }
+
+    /**
+     * Increments the business' points in response to selling a listing
+     */
+    public void incrementPoints() {
+        this.points += POINTS_PER_SALE_LISTING;
+    }
+
+    /**
+     * Gets business' points total
+     * @return Business points
+     */
+    public int getPoints(){return this.points;}
+
+    /**
+     * Sets the business' points total
+     * @param points Value to set points
+     */
+    public void setPoints(int points){this.points = points;}
+
+    /**
+     * Gets the business' current rank
+     * @return The rank of the business based on its current points.
+     */
+    public Rank getRank() {
+        return Rank.getRankFromPoints(points);
+    }
+
+    /**
+     * Get the next rank which the business will be awarded if it reaches the points threshold for its current rank.
+     * @return The next rank which the business can be awarded.
+     */
+    public Rank getNextRank() {
+        return Rank.getNextRank(this.getRank());
     }
 
     /**
@@ -333,22 +372,23 @@ public class Business implements ImageAttachment {
     }
 
     /**
-     * Adds a single image to the Business's list of images at given index
-     * @param index Index to insert the new image
-     * @param image An image entity to be linked to this business
+     * Replaces the existing list of images with a new list of images
+     * @param images A list of images
      */
-    public void addImage(int index, Image image) {
-        images.add(index, image);
+    public void setImages(List<Image> images) {
+        this.images = images;
     }
 
     /**
-     * Removes a given image from the list of business images
-     * @param image The image to remove
+     * Returns the ids of all the images associated with the business
+     * @return the ids of all the images associated with the business
      */
-    public void removeImage(Image image) {
-        if (!this.images.remove(image)) {
-            throw new ValidationResponseException("Cannot remove image");
+    public List<Long> getIdsOfImages() {
+        List<Long> imageIds = new ArrayList<Long>();
+        for (Image image: this.images) {
+            imageIds.add(image.getID());
         }
+        return imageIds;
     }
 
     @Override

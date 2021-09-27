@@ -6,7 +6,7 @@
       </v-list-item-avatar>
       <v-list-item-content>
         <v-list-item-title>
-          <a class="result-title" @click="showFullListing = !showFullListing">{{ product.name }}</a>
+          <a ref="title" class="result-title" @click="showFullListing = !showFullListing">{{ product.name }}</a>
           <label class="result-title-join">From </label>
           <label class="result-title-business">{{ product.business.name }}</label>
         </v-list-item-title>
@@ -34,6 +34,7 @@
     <FullSaleListing
       :saleItem="saleItem"
       @goBack="goBack"
+      @refresh="$emit('refresh')"
     />
   </div>
 </template>

@@ -8,8 +8,14 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.seng302.leftovers.dto.saleitem.*;
 import org.seng302.leftovers.dto.ResultPageDTO;
+
 import org.seng302.leftovers.entities.*;
 import org.seng302.leftovers.entities.event.InterestEvent;
+import org.seng302.leftovers.entities.event.InterestPurchasedEvent;
+import org.seng302.leftovers.dto.saleitem.CreateSaleItemDTO;
+import org.seng302.leftovers.dto.saleitem.SaleItemResponseDTO;
+import org.seng302.leftovers.dto.saleitem.SetSaleItemInterestDTO;
+
 import org.seng302.leftovers.entities.event.PurchasedEvent;
 import org.seng302.leftovers.exceptions.DoesNotExistResponseException;
 import org.seng302.leftovers.exceptions.InsufficientPermissionResponseException;
@@ -142,6 +148,8 @@ public class SaleController {
                     .withCloses(saleItemInfo.getCloses())
                     .build();
             saleItem = saleItemRepository.save(saleItem);
+            business.incrementPoints();
+            businessRepository.save(business);
 
             response.setStatus(201);
             return new CreateSaleItemResponseDTO(saleItem.getId());
@@ -304,14 +312,26 @@ public class SaleController {
             var boughtSaleItem = new BoughtSaleItem(saleItem, purchaser);
             boughtSaleItemRepository.save(boughtSaleItem);
 
+            InterestPurchasedEvent interestPurchasedEvent;
+            for (User user : saleItem.getInterestedUsers()) {
+                // Does not create this event for the purchaser only
+                if (user != purchaser) {
+                    interestPurchasedEvent = new InterestPurchasedEvent(user, boughtSaleItem);
+                    eventRepository.save(interestPurchasedEvent);
+                }
+            }
+            saleItemRepository.delete(saleItem);
+
             var inventoryItem = saleItem.getInventoryItem();
             inventoryItem.sellQuantity(saleItem.getQuantity());
-            inventoryItemRepository.save(inventoryItem);
+            if (inventoryItem.getQuantity() == 0) {
+                inventoryItemRepository.delete(inventoryItem);
+            } else {
+                inventoryItemRepository.save(inventoryItem);
+            }
 
             PurchasedEvent purchasedEvent = new PurchasedEvent(purchaser, boughtSaleItem);
             eventRepository.save(purchasedEvent);
-
-            saleItemRepository.delete(saleItem);
 
             logger.info("Sale item (id={}) has been purchased for user (id={})", saleItem.getId(), purchaser.getUserID());
         } catch (Exception e) {

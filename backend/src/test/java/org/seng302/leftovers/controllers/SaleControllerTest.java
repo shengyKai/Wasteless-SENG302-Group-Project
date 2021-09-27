@@ -17,7 +17,9 @@ import org.mockito.internal.matchers.apachecommons.ReflectionEquals;
 import org.seng302.leftovers.dto.business.BusinessType;
 import org.seng302.leftovers.dto.saleitem.SaleListingSearchDTO;
 import org.seng302.leftovers.entities.*;
+import org.seng302.leftovers.entities.event.Event;
 import org.seng302.leftovers.entities.event.InterestEvent;
+import org.seng302.leftovers.entities.event.InterestPurchasedEvent;
 import org.seng302.leftovers.entities.event.PurchasedEvent;
 import org.seng302.leftovers.exceptions.AccessTokenResponseException;
 import org.seng302.leftovers.persistence.*;
@@ -80,6 +82,12 @@ class SaleControllerTest {
     @Mock
     private User user;
     @Mock
+    private User interestedUser1;
+    @Mock
+    private User interestedUser2;
+    @Mock
+    private User interestedUser3;
+    @Mock
     private InventoryItem inventoryItem;
     @Mock
     private SaleItem saleItem;
@@ -99,6 +107,8 @@ class SaleControllerTest {
     ArgumentCaptor<Specification<SaleItem>> specificationArgumentCaptor;
     @Captor
     ArgumentCaptor<PageRequest> pageRequestArgumentCaptor;
+    @Captor
+    ArgumentCaptor<Event> eventCaptor;
 
     private MockedStatic<SearchPageConstructor> searchPageConstructor;
     private MockedStatic<SearchSpecConstructor> searchSpecConstructor;
@@ -347,6 +357,19 @@ class SaleControllerTest {
         expectedResponse.put("listingId", 400);
 
         assertEquals(expectedResponse, actualResponse);
+    }
+
+    @Test
+    void addSaleItemToBusiness_validInput_businessPointsUpdated() throws Exception {
+        var object = generateSalesItemInfo();
+        mockMvc.perform(post("/businesses/1/listings")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(object.toString()))
+                .andExpect(status().isCreated())
+                .andReturn();
+
+        verify(business, times(1)).incrementPoints();
+        verify(businessRepository, times(1)).save(business);
     }
 
     @Test
@@ -1093,10 +1116,31 @@ class SaleControllerTest {
 
         // Inventory item should be updated if request is successful
         verify(inventoryItem, times(1)).sellQuantity(50);
-        var inventoryItemCaptor = ArgumentCaptor.forClass(InventoryItem.class);
-        verify(inventoryItemRepository, times(1)).save(inventoryItemCaptor.capture());
-        assertEquals(inventoryItem, inventoryItemCaptor.getValue());
+        verify(inventoryItemRepository, times(1)).save(inventoryItem);
     }
+
+    @Test
+    void purchaseSaleItem_allInventoryItemsSold_inventoryItemDeleted() throws Exception {
+        authenticationTokenManager.when(() -> AuthenticationTokenManager.sessionCanSeePrivate(any(), any())).thenReturn(true);
+        JSONObject validBody = new JSONObject();
+        validBody.put("purchaserId", user.getUserID());
+
+        when(inventoryItem.getQuantity()).thenReturn(50);
+        doAnswer(invocation -> {
+            when(inventoryItem.getQuantity()).thenReturn(0); // Once sold, then set quantity to 0
+            return null;
+        }).when(inventoryItem).sellQuantity(any());
+
+        mockMvc.perform(post(String.format("/listings/%d/purchase", saleItem.getId()))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(validBody.toString()))
+                .andExpect(status().isOk());
+
+        verify(inventoryItemRepository, times(0)).save(any());
+        verify(inventoryItemRepository, times(1)).delete(inventoryItem);
+    }
+
+
     @Test
     void purchaseSaleItem_validRequest_purchaseEventCreated() throws Exception {
         authenticationTokenManager.when(() -> AuthenticationTokenManager.sessionCanSeePrivate(any(), any())).thenReturn(true);
@@ -1114,4 +1158,58 @@ class SaleControllerTest {
         assertEquals(user, purchasedEventArgumentCaptor.getValue().getBoughtSaleItem().getBuyer());
     }
 
+    @Test
+    void purchaseSaleItem_userLikedSaleItemBoughtByAnotherUser_eventCreatedForTheInterestedUser() throws Exception {
+        when(saleItem.getInterestedUsers()).thenReturn(Set.of(interestedUser1));
+        authenticationTokenManager.when(() -> AuthenticationTokenManager.sessionCanSeePrivate(any(), any())).thenReturn(true);
+        JSONObject validBody = new JSONObject();
+        validBody.put("purchaserId", user.getUserID());
+
+        mockMvc.perform(post(String.format("/listings/%d/purchase", saleItem.getId()))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(validBody.toString()))
+                .andExpect(status().isOk());
+
+        verify(eventRepository, times(2)).save(eventCaptor.capture());
+        List<Event> allSavedEvents = eventCaptor.getAllValues();
+        assertEquals(allSavedEvents.get(0).getClass(), InterestPurchasedEvent.class);
+        assertEquals(allSavedEvents.get(1).getClass(), PurchasedEvent.class);
+    }
+
+    @Test
+    void purchaseSaleItem_noUserLikedSaleItemBoughtByAnotherUser_noEventsCreated() throws Exception {
+        when(saleItem.getInterestedUsers()).thenReturn(Set.of());
+        authenticationTokenManager.when(() -> AuthenticationTokenManager.sessionCanSeePrivate(any(), any())).thenReturn(true);
+        JSONObject validBody = new JSONObject();
+        validBody.put("purchaserId", user.getUserID());
+
+        mockMvc.perform(post(String.format("/listings/%d/purchase", saleItem.getId()))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(validBody.toString()))
+                .andExpect(status().isOk());
+
+        verify(eventRepository, times(1)).save(eventCaptor.capture());
+        List<Event> allSavedEvents = eventCaptor.getAllValues();
+        assertEquals(allSavedEvents.get(0).getClass(), PurchasedEvent.class);
+    }
+
+    @Test
+    void purchaseSaleItem_multipleUsersLikedSaleItemBoughtByAnotherUser_eventsCreatedForTheInterestedUsers() throws Exception {
+        when(saleItem.getInterestedUsers()).thenReturn(Set.of(interestedUser1, interestedUser2, interestedUser3));
+        authenticationTokenManager.when(() -> AuthenticationTokenManager.sessionCanSeePrivate(any(), any())).thenReturn(true);
+        JSONObject validBody = new JSONObject();
+        validBody.put("purchaserId", user.getUserID());
+
+        mockMvc.perform(post(String.format("/listings/%d/purchase", saleItem.getId()))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(validBody.toString()))
+                .andExpect(status().isOk());
+
+        verify(eventRepository, times(4)).save(eventCaptor.capture());
+        List<Event> allSavedEvents = eventCaptor.getAllValues();
+        assertEquals(allSavedEvents.get(0).getClass(), InterestPurchasedEvent.class);
+        assertEquals(allSavedEvents.get(1).getClass(), InterestPurchasedEvent.class);
+        assertEquals(allSavedEvents.get(2).getClass(), InterestPurchasedEvent.class);
+        assertEquals(allSavedEvents.get(3).getClass(), PurchasedEvent.class);
+    }
 }

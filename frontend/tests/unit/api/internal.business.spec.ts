@@ -38,7 +38,11 @@ describe('Test GET businesses/search endpoint', () => {
       country: "New Zealand",
       postcode: "7777"
     },
-    businessType: "Accommodation and Food Services"
+    businessType: "Accommodation and Food Services",
+    points: 24,
+    rank: {
+      name: 'bronze',
+    },
   };
 
   const invalidBusiness: any  = {
@@ -159,7 +163,8 @@ describe('Test PUT /businesses/${businessId} endpoint', () => {
       postcode: "7777"
     },
     businessType: "Accommodation and Food Services",
-    updateProductCountry: true
+    updateProductCountry: true,
+    imageIds: [1]
   };
 
   it('When API request is successfully resolved, returns undefined', async () => {

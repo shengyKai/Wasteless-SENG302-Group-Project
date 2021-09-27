@@ -60,6 +60,10 @@ export function makeTestBusiness(businessId: number, administrators?: number[]):
     description: 'test_business_description' + businessId,
     created: '1/5/2005',
     businessType: 'Accommodation and Food Services',
+    points: 5,
+    rank: {
+      name: 'bronze',
+    }
   };
 
   if (administrators !== undefined) {

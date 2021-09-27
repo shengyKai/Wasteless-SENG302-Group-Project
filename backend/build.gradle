@@ -91,37 +91,6 @@ dependencies {
     testImplementation 'org.springframework.boot:spring-boot-starter-web'
 }
 
-// generator tasks
-task(generateUser, dependsOn: 'classes', type: JavaExec) {
-    main = 'org.seng302.datagenerator.UserGenerator'
-    standardInput = System.in
-    classpath = sourceSets.main.runtimeClasspath
-}
-
-task(generateBusiness, dependsOn: 'classes', type: JavaExec) {
-    main = 'org.seng302.datagenerator.BusinessGenerator'
-    standardInput = System.in
-    classpath = sourceSets.main.runtimeClasspath
-}
-
-task(generateProduct, dependsOn: 'classes', type: JavaExec) {
-    main = 'org.seng302.datagenerator.ProductGenerator'
-    standardInput = System.in
-    classpath = sourceSets.main.runtimeClasspath
-}
-
-task(generateInventoryItem, dependsOn: 'classes', type: JavaExec) {
-    main = 'org.seng302.datagenerator.InventoryItemGenerator'
-    standardInput = System.in
-    classpath = sourceSets.main.runtimeClasspath
-}
-
-task(generateMarketplaceCard, dependsOn: 'classes', type: JavaExec) {
-    main = 'org.seng302.datagenerator.MarketplaceCardGenerator'
-    standardInput = System.in
-    classpath = sourceSets.main.runtimeClasspath
-}
-
 // create a specific task to run cucumber tests
 task cucumber(type: Test) {
     excludes = ['**/org/seng302/**']

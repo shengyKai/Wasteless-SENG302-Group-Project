@@ -5,9 +5,9 @@ import FullSaleListing from "@/components/SaleListing/FullSaleListing.vue";
 import Vuex, { Store } from 'vuex';
 import { User } from '@/api/user';
 import { getStore, resetStoreForTesting, StoreData } from '@/store';
-import { getListingInterest, setListingInterest } from '@/api/sale';
-import { castMock } from '../utils';
 import { Business } from '@/api/business';
+import * as sale from '@/api/sale';
+import { castMock, findButtonWithText } from './utils';
 
 Vue.use(Vuetify);
 
@@ -25,6 +25,11 @@ const testBusiness: Business = {
   name: "test_business",
   address: { city: "test_city", country: "test_country" },
   businessType: "Accommodation and Food Services",
+  points: 999,
+  rank: {
+    name: "bronze",
+    threshold: 1000
+}
 };
 
 jest.mock('@/api/currency', () => ({
@@ -39,10 +44,12 @@ jest.mock('@/api/currency', () => ({
 jest.mock('@/api/sale', () => ({
   getListingInterest: jest.fn(),
   setListingInterest: jest.fn(),
+  purchaseListing: jest.fn(),
 }));
 
-const listingInterestGet = castMock(getListingInterest);
-const listingInterestSet = castMock(setListingInterest);
+const getListingInterest = castMock(sale.getListingInterest);
+const setListingInterest = castMock(sale.getListingInterest);
+const purchaseListing = castMock(sale.purchaseListing);
 
 describe('FullSaleListing.vue', () => {
   let wrapper: Wrapper<any>;
@@ -50,6 +57,7 @@ describe('FullSaleListing.vue', () => {
   let store: Store<StoreData>;
 
   beforeEach(async () => {
+    jest.clearAllMocks();
     const localVue = createLocalVue();
     vuetify = new Vuetify();
 
@@ -158,8 +166,34 @@ describe('FullSaleListing.vue', () => {
     expect(likeButton.exists()).toBeTruthy;
     await likeButton.trigger('click');
     await Vue.nextTick();
-    expect(listingInterestGet).toBeCalled();
-    expect(listingInterestSet).toBeCalled();
+    expect(getListingInterest).toBeCalled();
+    expect(setListingInterest).toBeCalled();
   });
 
+  it('When buy button is pressed and purchase succeeds a request is made and a refresh occurs', async () => {
+    purchaseListing.mockResolvedValue(undefined);
+
+    const buyButton = findButtonWithText(wrapper, 'Buy');
+    expect(buyButton.exists()).toBeTruthy();
+    await buyButton.trigger('click');
+
+    await Vue.nextTick();
+
+    expect(purchaseListing).toBeCalledWith(57, testUser.id);
+    expect(wrapper.emitted().refresh).toBeTruthy();
+  });
+
+  it('When buy button is pressed and purchase fails a request is made and the error is shown', async () => {
+    purchaseListing.mockResolvedValue('test_error_message');
+
+    const buyButton = findButtonWithText(wrapper, 'Buy');
+    expect(buyButton.exists()).toBeTruthy();
+    await buyButton.trigger('click');
+
+    await Vue.nextTick();
+
+    expect(purchaseListing).toBeCalledWith(57, testUser.id);
+    expect(wrapper.emitted().refresh).toBeFalsy();
+    expect(wrapper.text()).toContain('test_error_message');
+  });
 });
