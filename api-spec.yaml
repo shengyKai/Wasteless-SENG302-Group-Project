@@ -1386,7 +1386,7 @@ paths:
                       results:
                         type: array
                         items:
-                          - $ref: '#/components/schemas/Listing'
+                          $ref: '#/components/schemas/Listing'
         '400':
           description: >-
             Invalid search term provided
@@ -1433,6 +1433,7 @@ paths:
               - name
               - location
               - businessType
+              - points
         - name: reverse
           in: query
           description: Whether to flip default sort order (default is ascending)
@@ -2286,7 +2287,7 @@ paths:
             application admin.
         '406':
           $ref: '#/components/responses/NotAcceptableError'
-  listings/{id}/purchase:
+  /listings/{id}/purchase:
     post:
       tags:
         - 'U31: Purchases'
