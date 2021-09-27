@@ -18,13 +18,10 @@ import net.minidev.json.parser.JSONParser;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.junit.Assert;
-import org.seng302.datagenerator.ExampleDataFileReader;
-import org.seng302.leftovers.controllers.BusinessController;
 import org.seng302.leftovers.dto.LocationDTO;
 import org.seng302.leftovers.dto.business.BusinessType;
 import org.seng302.leftovers.entities.*;
 import org.seng302.leftovers.persistence.BusinessRepository;
-import org.seng302.leftovers.persistence.ImageRepository;
 import org.seng302.leftovers.service.ImageService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -33,11 +30,10 @@ import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.web.servlet.MvcResult;
 
 import javax.transaction.Transactional;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.BufferedInputStream;
+import java.io.File;
 import java.io.UnsupportedEncodingException;
 import java.nio.file.Path;
-import java.text.ParseException;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -49,15 +45,11 @@ public class BusinessStepDefinition {
     private Path root;
 
     @Autowired
-    private BusinessController businessController;
-    @Autowired
     private ObjectMapper objectMapper;
     @Autowired
     private BusinessContext businessContext;
     @Autowired
     private BusinessRepository businessRepository;
-    @Autowired
-    private ImageRepository imageRepository;
     @Autowired
     private ImageContext imageContext;
     @Autowired
@@ -97,7 +89,7 @@ public class BusinessStepDefinition {
                     .withDescription("some description")
                     .withManufacturer("Some manufacturer")
                     .withName("Some prod")
-                    .withProductCode("PROD" + String.valueOf(i))
+                    .withProductCode("PROD" + i)
                     .withRecommendedRetailPrice("123")
                     .build();
             business.addToCatalogue(product);
@@ -107,7 +99,7 @@ public class BusinessStepDefinition {
 
 
     @Given("the business {string} exists")
-    public void businessExists(String name) throws ParseException {
+    public void businessExists(String name) {
 
         var business = new Business.Builder()
                 .withName(name)
@@ -120,7 +112,7 @@ public class BusinessStepDefinition {
     }
 
     @When("I search with query {string}")
-    public void searchBusiness(String query) throws Exception {
+    public void searchBusiness(String query) {
         requestContext.performRequest(get("/businesses/search")
         .param("searchQuery", query));
     }
@@ -262,22 +254,11 @@ public class BusinessStepDefinition {
     }
 
     @When("I try to upload the image {string} to the business")
-    public void i_try_to_upload_the_image_to_the_business(String filename) throws IOException {
-        String contentType;
-        if (filename.endsWith(".png")) {
-            contentType = "image/png";
-        } else if (filename.endsWith(".jpg")) {
-            contentType = "image/jpeg";
-        } else if (filename.endsWith(".txt")) {
-            contentType = "text/plain";
-        } else {
-            fail("Could not parse content type for: \"" + filename + "\"");
-            return;
-        }
-
-        InputStream stream = ExampleDataFileReader.class.getResourceAsStream("/" + filename);
-        requestContext.performRequest(multipart("/businesses/" + businessContext.getLast().getId() + "/images")
-                .file(new MockMultipartFile("file", filename, contentType, stream)));
+    public void i_try_to_upload_the_image_to_the_business(String filename) {
+        MockMultipartFile file = new MockMultipartFile(filename, filename, "image/jpeg", new byte[100]);
+        requestContext.performRequest(multipart("/media/images")
+                .contentType("multipart/form-data")
+                .content(file.toString()));
     }
 
     @Transactional

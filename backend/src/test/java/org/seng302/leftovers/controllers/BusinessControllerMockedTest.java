@@ -14,6 +14,7 @@ import org.seng302.leftovers.dto.LocationDTO;
 import org.seng302.leftovers.dto.business.BusinessType;
 import org.seng302.leftovers.entities.*;
 import org.seng302.leftovers.exceptions.AccessTokenResponseException;
+import org.seng302.leftovers.exceptions.DoesNotExistResponseException;
 import org.seng302.leftovers.persistence.BusinessRepository;
 import org.seng302.leftovers.persistence.ImageRepository;
 import org.seng302.leftovers.persistence.UserRepository;
@@ -51,6 +52,8 @@ class BusinessControllerMockedTest {
     private final long mockOwnerId    = 7L;
     private final long mockNonOwnerId = 8L;
     private final long mockImageId = 9L;
+    private final long mockImageId2 = 23L;
+    private final long mockImageId3 = 19L;
 
     @Autowired
     private ObjectMapper objectMapper;
@@ -78,6 +81,10 @@ class BusinessControllerMockedTest {
     @Mock
     private Image mockImage;
     @Mock
+    private Image mockImage2;
+    @Mock
+    private Image mockImage3;
+    @Mock
     private Image mockPrimaryImage;
 
     private MockedStatic<AuthenticationTokenManager> authenticationTokenManager;
@@ -94,6 +101,8 @@ class BusinessControllerMockedTest {
         when(mockOwner.getUserID()).thenReturn(mockOwnerId);
         when(mockNonOwner.getUserID()).thenReturn(mockNonOwnerId);
         when(mockImage.getID()).thenReturn(mockImageId);
+        when(mockImage2.getID()).thenReturn(mockImageId2);
+        when(mockImage3.getID()).thenReturn(mockImageId3);
 
         when(userRepository.findById(mockOwnerId)).thenReturn(Optional.of(mockOwner));
         when(userRepository.findById(mockNonOwnerId)).thenReturn(Optional.of(mockNonOwner));
@@ -108,6 +117,8 @@ class BusinessControllerMockedTest {
         when(businessRepository.getBusinessById(any())).thenAnswer(CALLS_REAL_METHODS);
 
         when(imageRepository.findById(mockImageId)).thenReturn(Optional.of(mockImage));
+        when(imageRepository.findById(mockImageId2)).thenReturn(Optional.of(mockImage2));
+        when(imageRepository.findById(mockImageId3)).thenReturn(Optional.of(mockImage3));
 
         BusinessController businessController = new BusinessController(businessRepository, userRepository, imageService, imageRepository);
         mockMvc = MockMvcBuilders.standaloneSetup(businessController).build();
@@ -450,16 +461,14 @@ class BusinessControllerMockedTest {
                 .andExpect(status().isOk())
                 .andReturn();
 
-        verify(imageRepository, times(1)).findById(mockImageId);
         verify(mockBusiness, times(1)).setImages(any());
         verify(businessRepository, times(1)).save(mockBusiness);
-        assertEquals(mockImageId, mockBusiness.getImages().get(0).getID());
     }
 
     @Test
     void modifyBusinessSetManyImage_validRequest_200Response() throws Exception {
         var json = createValidRequest();
-        List<Long> expected = List.of(12L, 21L, 13L, 24L, 57L);
+        List<Long> expected = List.of(mockImageId, mockImageId2, mockImageId3);
         json.put("imageIds", expected);
 
         mockMvc.perform(put("/businesses/" + mockBusinessId)
@@ -468,13 +477,7 @@ class BusinessControllerMockedTest {
                 .andExpect(status().isOk())
                 .andReturn();
 
-        verify(imageRepository, times(5)).findById(mockImageId);
         verify(mockBusiness, times(1)).setImages(any());
         verify(businessRepository, times(1)).save(mockBusiness);
-
-        List<Image> images = mockBusiness.getImages();
-        for (int i = 0; i < images.size(); i++) {
-            assertEquals(images.get(i).getID(), expected.get(i));
-        }
     }
 }
