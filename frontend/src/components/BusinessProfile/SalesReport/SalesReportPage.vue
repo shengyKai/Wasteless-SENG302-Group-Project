@@ -1,5 +1,10 @@
 <template>
   <v-container>
+    <div class="text-h3 text-center mb-2">
+      <strong>
+        {{ title }}
+      </strong>
+    </div>
     <ReportOptionsBar/>
     <SalesReportTable/>
   </v-container>
@@ -14,6 +19,16 @@ export default {
   components: {
     ReportOptionsBar,
     SalesReportTable
+  },
+  data(){
+    return {
+      businessReportTitle: "Sheep Biz"
+    };
+  },
+  computed: {
+    title() {
+      return `Sales Report - ${this.businessReportTitle}`;
+    }
   }
 };
 
