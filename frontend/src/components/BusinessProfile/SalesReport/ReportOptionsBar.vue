@@ -25,6 +25,7 @@
             </template>
             <v-date-picker
               v-model="fromDate"
+              :max="maxFromDate"
               scrollable
             >
               <v-spacer/>
@@ -69,6 +70,7 @@
             </template>
             <v-date-picker
               v-model="toDate"
+              :max="maxToDate"
               scrollable
             >
               <v-spacer/>
@@ -132,8 +134,8 @@ export default {
   name: "ReportGenerationBar",
   data() {
     return {
-      fromDate: '',
-      toDate: '',
+      fromDate: new Date().toISOString().slice(0, 10),
+      toDate: new Date().toISOString().slice(0, 10),
       fromDateMenu: false,
       toDateMenu: false,
       periodBefore: null,
@@ -151,6 +153,39 @@ export default {
         { granularityLevel:'Year', granularityValue:'year' }
       ]
     };
+  },
+  computed: {
+    /**
+     * Max date of the fromDate has to be the same as the toDate
+     */
+    maxFromDate() {
+      return this.toDate;
+    },
+    /**
+     * Max date of the toDate is the present day
+     */
+    maxToDate() {
+      return new Date().toISOString().slice(0, 10);
+    }
+  },
+  watch: {
+    /**
+     * If the toDate date is before the fromDate date, change the fromDate to that value
+     */
+    toDate(value) {
+      if (new Date(value) < new Date(this.fromDate)) {
+        this.fromDate = value;
+      }
+    },
+    /**
+     * If the fromDate date is after the toDate date, change the toDate to that value
+     * Technically this situation should not have a chance to occur, but acts as a sanity check
+     */
+    fromDate(value) {
+      if (new Date(value) > new Date(this.toDate)) {
+        this.toDate = value;
+      }
+    }
   }
 };
 </script>

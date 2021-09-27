@@ -22,12 +22,15 @@ export default {
   },
   data(){
     return {
-      businessReportTitle: "Sheep Biz"
+      businessName: "Sheep Biz"
     };
   },
   computed: {
+    /**
+     * Creates the main title of the sales report page by the format Sales Report - *Business name*
+     */
     title() {
-      return `Sales Report - ${this.businessReportTitle}`;
+      return `Sales Report - ${this.businessName}`;
     }
   }
 };

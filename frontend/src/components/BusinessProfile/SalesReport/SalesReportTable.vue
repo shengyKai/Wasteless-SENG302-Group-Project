@@ -1,8 +1,13 @@
 <template>
-  <v-data-table
-    :headers="headers"
-    :items="reportValues"
-  />
+  <div class="text-h4 mb-3 mt-3">
+    <strong>
+      {{ reportTitle }}
+    </strong>
+    <v-data-table
+      :headers="headers"
+      :items="reportValues"
+    />
+  </div>
 </template>
 
 <script>
@@ -146,6 +151,9 @@ export default {
       } else {
         return this.distinctHeaders[this.reportType].concat(this.baseHeaders);
       }
+    },
+    reportTitle() {
+      return `${this.reportType.charAt(0).toUpperCase() + this.reportType.slice(1)} Report`;
     }
   }
 };
