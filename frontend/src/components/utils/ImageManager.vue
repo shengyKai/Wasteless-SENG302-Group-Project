@@ -12,69 +12,6 @@
             :src="imageUrl(image.filename)"
             contain
           >
-<<<<<<< HEAD
-            <v-sheet
-              :color="color"
-              height="100%"
-              tile
-            >
-              <v-row>
-                <v-col class="text-right">
-                  <v-tooltip bottom>
-                    <template v-slot:activator="{ on, attrs }">
-                      <v-icon center
-                              outlined
-                              class="ma-2"
-                              size="30"
-                              color="primary"
-                              v-bind="attrs"
-                              v-on="on">
-                        mdi-upload
-                      </v-icon>
-                    </template>
-                    <span>Upload a new image</span>
-                  </v-tooltip>
-                  <v-tooltip bottom>
-                    <template v-slot:activator="{ on, attrs }">
-                      <v-icon center
-                              outlined
-                              class="ma-2 size='30"
-                              size="30"
-                              color="primary"
-                              v-bind="attrs"
-                              v-on="on">
-                        mdi-trash-can
-                      </v-icon>
-                    </template>
-                    <span>Delete the current image</span>
-                  </v-tooltip>
-                  <v-tooltip bottom>
-                    <template v-slot:activator="{ on, attrs }">
-                      <v-icon center
-                              outlined
-                              class="ma-2"
-                              size="30"
-                              color="primary"
-                              v-bind="attrs"
-                              v-on="on">
-                        mdi-image-edit
-                      </v-icon>
-                    </template>
-                    <span>Set current image as primary thumbnail</span>
-                  </v-tooltip>
-                </v-col>
-              </v-row>
-              <v-row
-                class="fill-height"
-                align="center"
-                justify="center"
-              >
-                <div class="text-h2">
-                  Image {{ i + 1 }}
-                </div>
-              </v-row>
-            </v-sheet>
-=======
             <v-row>
               <v-col class="text-right">
                 <v-tooltip bottom>
@@ -122,7 +59,6 @@
                 </v-tooltip>
               </v-col>
             </v-row>
->>>>>>> dev
           </v-carousel-item>
         </v-carousel>
         <!-- This is needed because the above does not account for the scenario that the associated entity does not have
