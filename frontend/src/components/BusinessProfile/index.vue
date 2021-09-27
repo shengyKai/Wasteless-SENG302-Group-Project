@@ -34,7 +34,9 @@
             <v-col cols="11">
               <span>
                 <h1 class="business-name">{{ business.name }}</h1>
-                <SilverRank class="rank"/>
+                <SilverRank v-if="rank === 'silver'" class="rank"/>
+                <GoldRank v-if="rank === 'gold'" class="rank"/>
+                <PlatinumRank v-if="rank === 'platinum'" class="rank"/>
               </span>
             </v-col>z
             <v-col class="text-right" v-if='!modifyBusiness && permissionToActAsBusiness'>
@@ -46,8 +48,9 @@
                     color="primary"
                     v-bind="attrs"
                     v-on="on"
-                    @click="modifyBusiness = true;"
+                    @click="ranklog()"
                   >
+                    <!-- @click="modifyBusiness = true" -->
                     <v-icon>mdi-cog</v-icon>
                   </v-btn>
                 </template>
@@ -108,12 +111,16 @@ import {
 import ImageCarousel from "@/components/utils/ImageCarousel";
 import {getBusiness} from "@/api/business";
 import SilverRank from "@/components/ranks/SilverRank";
+import GoldRank from "@/components/ranks/GoldRank";
+import PlatinumRank from "@/components/ranks/PlatinumRank";
 export default {
   name: 'BusinessProfile',
   components: {
     ImageCarousel,
     ModifyBusiness,
-    SilverRank
+    SilverRank,
+    GoldRank,
+    PlatinumRank
   },
   data() {
     return {
@@ -131,6 +138,7 @@ export default {
       region: '',
       country: '',
       postcode: '',
+      rank: '',
       businessTypes: [
         'Accommodation and Food Services',
         'Charitable organisation',
@@ -197,7 +205,11 @@ export default {
     },
     businessImages() {
       return this.business.images;
-    }
+    },
+  },
+
+  mounted() {
+    this.setRank();
   },
 
   methods: {
@@ -247,6 +259,17 @@ export default {
           this.readableAddress = convertAddressToReadableText(value.address, "full");
         }
       });
+    },
+    /**
+     * Sets the variable rank to be the business's rank
+     */
+    setRank() {
+      if (this.business.rank === undefined) {
+        //TODO This should be modified or removed, however it is currently used for testing and show other team members
+        this.rank = "silver";
+      } else {
+        this.rank = this.business.rank;
+      }
     }
   }
 };
