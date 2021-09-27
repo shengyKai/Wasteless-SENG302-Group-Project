@@ -32,8 +32,11 @@
           </v-row>
           <v-row>
             <v-col cols="11">
-              <span><h1>{{ business.name }}</h1></span>
-            </v-col>
+              <span>
+                <h1 class="business-name">{{ business.name }}</h1>
+                <SilverRank class="rank"/>
+              </span>
+            </v-col>z
             <v-col class="text-right" v-if='!modifyBusiness && permissionToActAsBusiness'>
               <v-tooltip bottom>
                 <template #activator="{ on, attrs }">
@@ -104,11 +107,13 @@ import {
 } from "@/utils";
 import ImageCarousel from "@/components/utils/ImageCarousel";
 import {getBusiness} from "@/api/business";
+import SilverRank from "@/components/ranks/SilverRank";
 export default {
   name: 'BusinessProfile',
   components: {
     ImageCarousel,
-    ModifyBusiness
+    ModifyBusiness,
+    SilverRank
   },
   data() {
     return {
@@ -272,5 +277,15 @@ export default {
 
 .expand-icon {
   padding-right: 10px;
+}
+
+.business-name {
+  display: inline;
+}
+
+.rank {
+  display: inline;
+  height: 40px;
+  margin-left: 10px;
 }
 </style>
