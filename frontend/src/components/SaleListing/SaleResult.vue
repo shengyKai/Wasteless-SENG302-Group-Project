@@ -85,6 +85,9 @@ export default {
     }
   },
   methods: {
+    /**
+     * emit the goBack to update parent components
+     */
     goBack() {
       this.showFullListing = false;
       this.$emit("goBack");

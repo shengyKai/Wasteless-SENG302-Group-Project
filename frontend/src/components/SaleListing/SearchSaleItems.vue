@@ -35,6 +35,7 @@
 import AdvancedSearchBar from './AdvancedSearchBar.vue';
 import SimpleSearchBar from './SimpleSearchBar.vue';
 import SaleResult from './SaleResult.vue';
+import { debounce } from '@/utils';
 import {basicSearchSaleitem, advanceSearchSaleitem} from "@/api/sale";
 
 export default {
@@ -47,7 +48,6 @@ export default {
   data() {
     return {
       currentPage: 1,
-      totalPages: 1,
       error: undefined,
       resultsPerPage: 10,
       resultsPage: undefined,
@@ -69,6 +69,7 @@ export default {
         highestPrice: "",
         reverse: false
       },
+      debouncedUpdateQuery: debounce(this.updateSearchQuery, 500),
     };
   },
   computed: {
@@ -80,11 +81,23 @@ export default {
       return this.resultsPage.count;
     },
     resultsMessage() {
-      // TODO implement computing results message based on number of results when linking to endpoint
-      return "There are no results to show";
+      if(this.resultsPage === undefined) return 'There are no results to show';
+      const pageStartIndex = (this.currentPage - 1) * this.resultsPerPage;
+      const pageEndIndex = pageStartIndex + this.resultsPerPage;
+      return`Displaying ${pageStartIndex + 1} - ${pageEndIndex} of ${this.totalResults} results`;
+    },
+    /**
+     * The total number of pages required to show all the users
+     * May be 0 if there are no results
+     */
+    totalPages () {
+      return Math.ceil(this.totalResults / this.resultsPerPage);
     },
   },
   methods: {
+    /**
+     * Call basic search endpoint with the simpleSearchParams
+     */
     async simpleSearch() {
       if(this.simpleSearchParams.query === null) this.simpleSearchParams = "";
       const result = await basicSearchSaleitem(this.simpleSearchParams.query, this.simpleSearchParams.orderBy,
@@ -96,6 +109,9 @@ export default {
         this.resultsPage = result;
       }
     },
+    /**
+     * Call advanceSearch endpoint with advanceSearchParams
+     */
     async advancedSearch() {
       if(this.advancedSearchParams.productQuery === null) this.advancedSearchParams.productQuery = "";
       if(this.advancedSearchParams.businessQuery === null) this.advancedSearchParams.businessQuery = "";
@@ -109,7 +125,6 @@ export default {
       }
     },
     async updatePage() {
-      console.log("S");
       if(this.showAdvancedSearch) this.advancedSearch();
       else this.simpleSearch();
     },
@@ -123,7 +138,19 @@ export default {
       handler() {
         this.simpleSearch();
       }
-    }
+    },
+    advanceSearchParams: {
+      deep: true,
+      handler() {
+        this.simpleSearch();
+      }
+    },
+    currentPage() {
+      this.updatePage();
+    },
+    resultsPerPage() {
+      this.updatePage();
+    },
   },
   async beforeMount() {
     this.resultsPage = (await basicSearchSaleitem("", "created", 1, this.resultsPerPage, false));

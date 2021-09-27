@@ -156,10 +156,16 @@ export default {
   props: {
     saleItem: Object
   },
+  /**
+   * Get the interestCount of the saleListing when its chose to be rendered
+   */
   mounted() {
     this.interestCount = this.saleItem.interestCount;
   },
   computed: {
+    /**
+     * Easier access to business properties
+     */
     business() {
       return this.product.business;
     },
@@ -259,6 +265,9 @@ export default {
       }
       return this.currency.symbol + formatPrice(this.saleItem.price) + " " + this.currency.code;
     },
+    /**
+     * To handle the issue whe description is empty
+     */
     productDescription() {
       return this.product.description || "Description Not Provided";
     },
