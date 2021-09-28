@@ -82,7 +82,7 @@
                 <h4 class=" font-weight-bold">Manufacturer:</h4>
               </v-col>
               <v-col cols="6" sm="3">
-                <h4 class=" font-weight-regular">{{ product.manufacturer }}</h4>
+                <h4 class=" font-weight-regular">{{ productManufacturer}}</h4>
               </v-col>
               <v-col cols="6" sm="3">
                 <h4 class=" font-weight-bold">Expiry Date:</h4>
@@ -163,6 +163,7 @@ export default {
    */
   mounted() {
     this.interestCount = this.saleItem.interestCount;
+    console.log(this.saleItem);
   },
   computed: {
     /**
@@ -272,6 +273,12 @@ export default {
      */
     productDescription() {
       return this.product.description || "Description Not Provided";
+    },
+    /**
+     * To handle the issue whe description is empty
+     */
+    productManufacturer() {
+      return this.product.manufacturer || "Not Provided";
     },
   },
   methods: {
