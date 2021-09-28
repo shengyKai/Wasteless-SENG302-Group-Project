@@ -20,6 +20,7 @@ import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.junit.Assert;
 import org.seng302.datagenerator.ExampleDataFileReader;
+import org.seng302.leftovers.dto.ImageDTO;
 import org.seng302.leftovers.dto.LocationDTO;
 import org.seng302.leftovers.dto.business.BusinessType;
 import org.seng302.leftovers.entities.*;
@@ -278,11 +279,13 @@ public class BusinessStepDefinition {
 
         var result = requestContext.getLastResult();
         JSONParser parser = new JSONParser(JSONParser.MODE_PERMISSIVE);
-        JSONObject response = (JSONObject) parser.parse(result.getResponse().getContentAsString());
-        JSONArray images = (JSONArray) response.get("results");
-        Image image = imageRepository.findById((Long) ((JSONObject) images.get(0)).get("id")).orElse(null);
-        Business business = businessRepository.getBusinessById(businessContext.getLast().getId());
-        business.setImages(Collections.singletonList(image));
+        ImageDTO response = objectMapper.convertValue(parser.parse(result.getResponse().getContentAsString()), new TypeReference<>() {});
+        if (response != null) {
+            Image image = imageRepository.findById(response.getId()).orElse(null);
+            Business business = businessRepository.getBusinessById(businessContext.getLast().getId());
+            business.setImages(Collections.singletonList(image));
+            businessContext.save(business);
+        }
     }
 
     @Transactional

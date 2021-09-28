@@ -418,6 +418,8 @@ class BusinessControllerMockedTest {
 
     @Test
     void modifyBusinessSetImage_ImageDoesNotExist_406Response() throws Exception {
+        when(imageService.getListOfImagesFromIds(any())).thenThrow(new DoesNotExistResponseException(Image.class));
+
         var json = createValidRequest();
         json.put("imageIds", Collections.singletonList(9999L));
 
