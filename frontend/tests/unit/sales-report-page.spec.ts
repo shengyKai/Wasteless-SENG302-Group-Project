@@ -28,6 +28,10 @@ describe('SaleResult.vue', () => {
     });
   });
 
+  afterEach(() => {
+    wrapper.destroy();
+  });
+
   it("Must contain the page title of the format: Sales Report - *businessName*", () => {
     expect(wrapper.text()).toContain(`Sales Report - Some biz`);
   })

@@ -5,7 +5,7 @@ import ReportOptionsBar from "@/components/BusinessProfile/SalesReport/ReportOpt
 
 Vue.use(Vuetify);
 
-describe('SaleResult.vue', () => {
+describe('ReportOptionsBar.vue', () => {
   let wrapper: Wrapper<any>;
   let vuetify: Vuetify;
 

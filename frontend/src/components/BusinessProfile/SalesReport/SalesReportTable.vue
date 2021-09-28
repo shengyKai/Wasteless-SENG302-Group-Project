@@ -164,7 +164,7 @@ export default {
      * Otherwise, the headers are just the baseHeaders.
      */
     headers() {
-      if (this.reportType === ("yearly" || "periodic")) {
+      if (this.reportType === "yearly" || this.reportType === "periodic") {
         return this.baseHeaders;
       } else {
         return this.distinctHeaders[this.reportType].concat(this.baseHeaders);
