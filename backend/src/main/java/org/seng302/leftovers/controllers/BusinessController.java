@@ -55,7 +55,7 @@ public class BusinessController {
     private final ImageRepository imageRepository;
     private static final Logger logger = LogManager.getLogger(BusinessController.class.getName());
 
-    private static final Set<String> VALID_BUSINESS_ORDERINGS = Set.of("created", "name", "location", "businessType");
+    private static final Set<String> VALID_BUSINESS_ORDERINGS = Set.of("created", "name", "location", "businessType", "points");
 
     @Autowired
     public BusinessController(BusinessRepository businessRepository, UserRepository userRepository, ImageService imageService, ImageRepository imageRepository) {
@@ -290,9 +290,7 @@ public class BusinessController {
                                 @RequestParam(required = false, name = "businessType") String businessTypeString) {
 
         AuthenticationTokenManager.checkAuthenticationToken(request);
-
         logger.info("Performing Business search for query \"{}\" and type \"{}\"", searchQuery, businessTypeString);
-
 
         BusinessType businessType;
         try {

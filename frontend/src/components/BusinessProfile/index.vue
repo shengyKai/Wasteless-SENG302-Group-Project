@@ -66,9 +66,13 @@
               <h4>Category</h4>
               {{ business.businessType }}
             </v-col>
-            <v-col cols="12">
+            <v-col cols="12" sm="6">
               <h4>Description</h4>
               {{ business.description }}
+            </v-col>
+            <v-col cols="12" sm="6">
+              <h4>Points</h4>
+              {{ business.points }}
             </v-col>
             <v-col cols="12">
               <h4>Administrators</h4>
