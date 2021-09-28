@@ -36,6 +36,7 @@ export async function generateReport(businessId: number, startDate: string, endD
     let status: number | undefined = error.response?.status;
     if (status === undefined) return 'Failed to reach backend';
     if (status === 401) return 'You have been logged out. Please login again and retry';
+    if (status === 403) return 'You do not have permission to view reports for this business';
     if (status === 406) return 'Business not found';
 
     return 'Request failed: ' + status;

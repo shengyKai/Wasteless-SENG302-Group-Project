@@ -399,6 +399,7 @@ const apiCalls: ApiCalls = {
     failedTypeCheckResponse: "Invalid response type",
     extraStatusMessages: {
       401: 'You have been logged out. Please login again and retry',
+      403: 'You do not have permission to view reports for this business',
       406: 'Business not found',
     },
     usesServerMessage: false
