@@ -61,23 +61,28 @@ public class SearchSpecConstructor {
      * will be returned. If neither is provided then an exception will be thrown.
      * @param searchQuery A search query provided by the user, used to find matching business names.
      * @param businessType A business type provided by the user, used to find businesses with matching type.
+     * @param minPoints  A minimum points boundary provided by user to find business with more than or equal to the minPoints
      * @return A specification for businesses matching the provided search query and type.
      */
-    public static Specification<Business> constructSpecificationFromBusinessSearch(String searchQuery, BusinessType businessType) {
-        if (searchQuery == null && businessType == null) {
+    public static Specification<Business> constructSpecificationFromBusinessSearch(String searchQuery, BusinessType businessType, Integer minPoints) {
+        if (searchQuery == null && businessType == null && minPoints == null) {
             ValidationResponseException exception =
-                    new ValidationResponseException("Provide either a search query or business type to find matching businesses");
+                    new ValidationResponseException("Provide either a search query or business type or minPoints to find matching businesses");
             SearchQueryParser.logger.error(exception.getMessage());
             throw exception;
         }
         if (searchQuery == null) {
-            return constructBusinessSpecificationFromType(businessType);
+            return constructBusinessSpecificationFromType(businessType).and(constructBusinessSpecificationFromPoints(minPoints));
         }
         if (businessType == null) {
-            return constructBusinessSpecificationFromSearchQuery(searchQuery);
+            return constructBusinessSpecificationFromSearchQuery(searchQuery).and(constructBusinessSpecificationFromPoints(minPoints));
+        }
+        if (minPoints == null) {
+            return constructBusinessSpecificationFromSearchQuery(searchQuery).and(constructBusinessSpecificationFromType(businessType));
         }
         return constructBusinessSpecificationFromSearchQuery(searchQuery)
-                .and(constructBusinessSpecificationFromType(businessType));
+                .and(constructBusinessSpecificationFromType(businessType)
+                .and(constructBusinessSpecificationFromPoints(minPoints)));
     }
 
     /**
@@ -148,12 +153,17 @@ public class SearchSpecConstructor {
         return (root, query, criteriaBuilder) -> criteriaBuilder.equal(root.get("businessType"), businessType);
     }
 
+    private static Specification<Business> constructBusinessSpecificationFromPoints(Integer minPoints) {
+        return (root, query, criteriaBuilder) -> criteriaBuilder.equal(root.get("businessType"), minPoints);
+    }
+
     /**
      * Returns a specification for Keywords which is used to filter keywords using a search term.
      * @param searchQuery The term to search for
      * @return Specification of type Keyword
      */
     public static Specification<Keyword> constructKeywordSpecificationFromSearchQuery(String searchQuery) {
+//        TODO something
         return buildPartialMatchSpec(searchQuery, Collections.singletonList("name"));
     }
 
