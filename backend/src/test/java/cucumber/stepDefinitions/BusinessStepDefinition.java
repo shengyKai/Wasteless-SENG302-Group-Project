@@ -15,17 +15,21 @@ import lombok.SneakyThrows;
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
 import net.minidev.json.parser.JSONParser;
+import net.minidev.json.parser.ParseException;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.junit.Assert;
 import org.seng302.datagenerator.ExampleDataFileReader;
-import org.seng302.leftovers.controllers.BusinessController;
+import org.seng302.leftovers.dto.ImageDTO;
 import org.seng302.leftovers.dto.LocationDTO;
 import org.seng302.leftovers.dto.business.BusinessType;
+import org.seng302.leftovers.dto.business.Rank;
 import org.seng302.leftovers.entities.*;
+import org.seng302.leftovers.exceptions.DoesNotExistResponseException;
 import org.seng302.leftovers.exceptions.ValidationResponseException;
 import org.seng302.leftovers.persistence.BusinessRepository;
 import org.seng302.leftovers.persistence.ImageRepository;
+import org.seng302.leftovers.service.ImageService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
@@ -33,11 +37,8 @@ import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.web.servlet.MvcResult;
 
 import javax.transaction.Transactional;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
+import java.io.*;
 import java.nio.file.Path;
-import java.text.ParseException;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -49,17 +50,17 @@ public class BusinessStepDefinition {
     private Path root;
 
     @Autowired
-    private BusinessController businessController;
-    @Autowired
     private ObjectMapper objectMapper;
     @Autowired
     private BusinessContext businessContext;
     @Autowired
     private BusinessRepository businessRepository;
     @Autowired
+    private ImageContext imageContext;
+    @Autowired
     private ImageRepository imageRepository;
     @Autowired
-    private ImageContext imageContext;
+    private ImageService imageService;
     @Autowired
     private UserContext userContext;
     @Autowired
@@ -95,7 +96,7 @@ public class BusinessStepDefinition {
                     .withDescription("some description")
                     .withManufacturer("Some manufacturer")
                     .withName("Some prod")
-                    .withProductCode("PROD" + String.valueOf(i))
+                    .withProductCode("PROD" + i)
                     .withRecommendedRetailPrice("123")
                     .build();
             business.addToCatalogue(product);
@@ -105,7 +106,7 @@ public class BusinessStepDefinition {
 
 
     @Given("the business {string} exists")
-    public void businessExists(String name) throws ParseException {
+    public void businessExists(String name) {
 
         var business = new Business.Builder()
                 .withName(name)
@@ -118,7 +119,7 @@ public class BusinessStepDefinition {
     }
 
     @When("I search with query {string}")
-    public void searchBusiness(String query) throws Exception {
+    public void searchBusiness(String query) {
         requestContext.performRequest(get("/businesses/search")
         .param("searchQuery", query));
     }
@@ -260,7 +261,7 @@ public class BusinessStepDefinition {
     }
 
     @When("I try to upload the image {string} to the business")
-    public void i_try_to_upload_the_image_to_the_business(String filename) throws IOException {
+    public void i_try_to_upload_the_png_image_to_the_business(String filename) throws IOException, ParseException {
         String contentType;
         if (filename.endsWith(".png")) {
             contentType = "image/png";
@@ -274,8 +275,18 @@ public class BusinessStepDefinition {
         }
 
         InputStream stream = ExampleDataFileReader.class.getResourceAsStream("/" + filename);
-        requestContext.performRequest(multipart("/businesses/" + businessContext.getLast().getId() + "/images")
+        requestContext.performRequest(multipart("/media/images")
                 .file(new MockMultipartFile("file", filename, contentType, stream)));
+
+        var result = requestContext.getLastResult();
+        JSONParser parser = new JSONParser(JSONParser.MODE_PERMISSIVE);
+        ImageDTO response = objectMapper.convertValue(parser.parse(result.getResponse().getContentAsString()), new TypeReference<>() {});
+        if (response != null) {
+            Image image = imageRepository.findById(response.getId()).orElse(null);
+            Business business = businessRepository.getBusinessById(businessContext.getLast().getId());
+            business.setImages(Collections.singletonList(image));
+            businessContext.save(business);
+        }
     }
 
     @Transactional
@@ -308,7 +319,7 @@ public class BusinessStepDefinition {
         image = imageContext.save(image);
         List<Long> imageIds = business.getIdsOfImages();
         imageIds.add(0, image.getID());
-        business.setImages(businessController.getListOfImagesFromIds(imageIds));
+        business.setImages(imageService.getListOfImagesFromIds(imageIds));
         business = businessContext.save(business);
         assertFalse(business.getImages().isEmpty());
         assertEquals(image, business.getImages().get(0));
@@ -319,7 +330,9 @@ public class BusinessStepDefinition {
         Business business = businessContext.getByName(businessName);
         Image image = new Image(imageName, imageName + "_thumbnail.png");
         image = imageContext.save(image);
-        business.addImage(image);
+        List<Image> images = business.getImages();
+        images.add(image);
+        business.setImages(images);  // Can't just string these together because List.add() return type is bool for success, rather than the updated list
         business = businessContext.save(business);
 
         assertFalse(business.getImages().isEmpty());
@@ -401,6 +414,15 @@ public class BusinessStepDefinition {
         businessContext.save(business);
     }
 
+    @Given("my business has the {string} rank")
+    public void my_business_has_the_rank(String rankName) {
+        var business = businessRepository.getBusinessById(businessContext.getLast().getId());
+        var rank = Rank.valueOf(rankName.toUpperCase());
+        business.setPoints(rank.getThreshold() - 1);
+        business = businessContext.save(business);
+        assertEquals(rank, business.getRank());
+    }
+
     @Then("I expect the business to have {int} points")
     public void i_expect_business_to_have_points(int points) {
         var business = businessRepository.getBusinessById(businessContext.getLast().getId()) ;
@@ -411,5 +433,14 @@ public class BusinessStepDefinition {
     public void i_expect_the_business_to_have_rank(String rank) {
         var business = businessRepository.getBusinessById(businessContext.getLast().getId());
         assertEquals(rank, business.getRank().getName());
+    }
+
+    @When("I gain {int} points")
+    public void i_gain_points(Integer pointsGained) {
+        var business = businessContext.getLast();
+        var pointsBefore = business.getPoints();
+        business.setPoints(pointsBefore + pointsGained);
+        business = businessContext.save(business);
+        assertEquals(pointsGained, business.getPoints() - pointsBefore);
     }
 }

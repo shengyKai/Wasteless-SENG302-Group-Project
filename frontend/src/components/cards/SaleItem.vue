@@ -46,7 +46,7 @@
 
 <script>
 import FullSaleListing from "@/components/SaleListing/FullSaleListing.vue";
-import ImageCarousel from "@/components/utils/ImageCarousel.vue";
+import ImageCarousel from "@/components/image/ImageCarousel.vue";
 import { currencyFromCountry } from "@/api/currency";
 import { formatDate, formatPrice } from '@/utils';
 

@@ -42,9 +42,6 @@ public class Business implements ImageAttachment {
     private Instant created;
     @Column(nullable = false)
     private int points;
-    @Column(nullable = false)
-    @Enumerated(EnumType.ORDINAL)
-    private Rank rank = Rank.BRONZE;
 
     @OneToMany (fetch = FetchType.LAZY, mappedBy = "business", cascade = CascadeType.REMOVE)
     private List<Product> catalogue = new ArrayList<>();
@@ -208,9 +205,18 @@ public class Business implements ImageAttachment {
 
     /**
      * Gets the business' current rank
+     * @return The rank of the business based on its current points.
      */
     public Rank getRank() {
-        return rank;
+        return Rank.getRankFromPoints(points);
+    }
+
+    /**
+     * Get the next rank which the business will be awarded if it reaches the points threshold for its current rank.
+     * @return The next rank which the business can be awarded.
+     */
+    public Rank getNextRank() {
+        return Rank.getNextRank(this.getRank());
     }
 
     /**
@@ -334,15 +340,6 @@ public class Business implements ImageAttachment {
     }
 
     /**
-     * Removes the given product from the business's catalogue
-     */
-    public void removeFromCatalogue(Product product) {
-        if(!catalogue.remove(product)) {
-            throw new DoesNotExistResponseException(Product.class);
-        }
-    }
-
-    /**
      * Returns the business's product catalogue.
      * @return product catalogue of the business.
      */
@@ -356,14 +353,6 @@ public class Business implements ImageAttachment {
      */
     @Override
     public List<Image> getImages() { return this.images; }
-
-    /**
-     * Adds a single image to the Business`s list of images
-     * @param image An image entity to be linked to this business
-     */
-    public void addImage(Image image) {
-        images.add(image);
-    }
 
     /**
      * Replaces the existing list of images with a new list of images

@@ -636,6 +636,7 @@ class BusinessTests {
         json.remove("images");
         json.remove("points");
         json.remove("rank");
+        json.remove("nextRank");
         assertTrue(json.isEmpty());
     }
 
@@ -657,6 +658,7 @@ class BusinessTests {
         json.remove("images");
         json.remove("points");
         json.remove("rank");
+        json.remove("nextRank");
         assertTrue(json.isEmpty());
     }
 

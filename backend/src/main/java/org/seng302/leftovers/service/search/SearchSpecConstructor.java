@@ -7,8 +7,8 @@ import org.seng302.leftovers.dto.saleitem.SaleListingSearchDTO;
 import org.seng302.leftovers.dto.user.UserRole;
 import org.seng302.leftovers.entities.*;
 import org.seng302.leftovers.exceptions.ValidationResponseException;
-import org.seng302.leftovers.persistence.SpecificationsBuilder;
 import org.seng302.leftovers.persistence.SearchCriteria.Pred;
+import org.seng302.leftovers.persistence.SpecificationsBuilder;
 import org.springframework.data.jpa.domain.Specification;
 
 import javax.persistence.criteria.Predicate;

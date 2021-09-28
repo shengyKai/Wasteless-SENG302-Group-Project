@@ -9,7 +9,7 @@ import {Location} from '@/api/internal';
 import {getStore, resetStoreForTesting} from '@/store';
 import {getUser as getUser1, User} from "@/api/user";
 import {modifyBusiness as modifyBusiness1, Business} from "@/api/business";
-import ImageManager from "@/components/utils/ImageManager.vue";
+import ImageManager from "@/components/image/ImageManager.vue";
 
 jest.mock('@/api/user', () => ({
   getUser: jest.fn(),
@@ -535,11 +535,11 @@ describe('modifyBusiness.vue', () => {
     const imageManagerWrapper = wrapper.findComponent(ImageManager);
     expect(imageManagerWrapper.exists()).toBeTruthy();
     expect(wrapper.vm.imageIds.length).toEqual(0);
-    imageManagerWrapper.vm.$emit("updateImages", images);
+    imageManagerWrapper.vm.$emit("input", images);
     expect(wrapper.vm.imageIds.length).toEqual(1);
   });
 
-  it("With multiple uploaded images, imageIds will be updated after an emit call from ImageManager", () => {
+  it("With multiple uploaded images, imageIds will be updated", () => {
     const images = [
       {
         id: 1,
@@ -560,7 +560,7 @@ describe('modifyBusiness.vue', () => {
     const imageManagerWrapper = wrapper.findComponent(ImageManager);
     expect(imageManagerWrapper.exists()).toBeTruthy();
     expect(wrapper.vm.imageIds.length).toEqual(0);
-    imageManagerWrapper.vm.$emit("updateImages", images);
+    imageManagerWrapper.vm.$emit("input", images);
     expect(wrapper.vm.imageIds.length).toEqual(3);
   });
 });
