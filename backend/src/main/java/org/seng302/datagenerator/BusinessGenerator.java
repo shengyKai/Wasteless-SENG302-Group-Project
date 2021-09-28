@@ -29,8 +29,8 @@ public class BusinessGenerator {
      */
     private long createInsertBusinessSQL(long addressId, long ownerId) throws SQLException {
         try (PreparedStatement stmt = conn.prepareStatement(
-                    "INSERT INTO business (business_type, created, description, name, address_id, owner_id, points, rank)" +
-                            "VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+                    "INSERT INTO business (business_type, created, description, name, address_id, owner_id, points)" +
+                            "VALUES (?, ?, ?, ?, ?, ?, ?)",
                     Statement.RETURN_GENERATED_KEYS
             )) {
             stmt.setObject(1, random.nextInt(BusinessType.values().length));
@@ -40,7 +40,6 @@ public class BusinessGenerator {
             stmt.setObject(5, addressId);
             stmt.setObject(6, ownerId);
             stmt.setObject(7, random.nextInt(100));
-            stmt.setObject(8, Rank.BRONZE.ordinal()); // TODO When changing ranks is implemented this needs to be updated
             stmt.executeUpdate();
             ResultSet keys = stmt.getGeneratedKeys();
             keys.next();

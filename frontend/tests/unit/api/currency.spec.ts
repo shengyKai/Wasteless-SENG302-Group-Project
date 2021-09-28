@@ -58,9 +58,9 @@ describe('currency.ts', () => {
     );
     const currency = await currencyFromCountry("Australia");
     expect(consoleOutput).toEqual([
-      "Failed to reach https://restcountries.eu/rest/v2/name/Australia?fullText=true&fields=currencies"
+      "Failed to reach https://restcountries.com/v2/name/Australia?fullText=true&fields=currencies"
     ]);
-    expect(currency).toStrictEqual({"errorMessage": "Failed to reach https://restcountries.eu/rest/v2/name/Australia?fullText=true&fields=currencies", "symbol": "$", "code": ""});
+    expect(currency).toStrictEqual({"errorMessage": "Failed to reach https://restcountries.com/v2/name/Australia?fullText=true&fields=currencies", "symbol": "$", "code": ""});
   });
 
   it('Returns no currency to the frontend and outputs to the console when 404 response received', async () => {

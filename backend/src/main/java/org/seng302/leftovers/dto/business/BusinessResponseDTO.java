@@ -29,6 +29,7 @@ public class BusinessResponseDTO extends CreateBusinessDTO {
     private Instant created;
     private Integer points;
     private Rank rank;
+    private Rank nextRank;
 
     private List<UserResponseDTO> administrators;
 
@@ -64,6 +65,7 @@ public class BusinessResponseDTO extends CreateBusinessDTO {
         this.created = business.getCreated();
         this.points = business.getPoints();
         this.rank = business.getRank();
+        this.nextRank = business.getNextRank();
 
         if (includeAdminDetails) {
             this.administrators = business.getOwnerAndAdministrators().stream()
