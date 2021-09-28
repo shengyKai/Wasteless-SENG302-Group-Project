@@ -348,6 +348,7 @@ public class SaleController {
     @AllArgsConstructor
     public static class GetSaleItemInterestDTO {
         private Boolean isInterested;
+        private Integer likeCount;
     }
 
     /**
@@ -375,7 +376,7 @@ public class SaleController {
             var saleItem = saleItemRepository.findById(listingId)
                     .orElseThrow(() -> new DoesNotExistResponseException(SaleItem.class));
 
-            return new GetSaleItemInterestDTO(saleItem.getInterestedUsers().contains(user));
+            return new GetSaleItemInterestDTO(saleItem.getInterestedUsers().contains(user), saleItem.getLikeCount());
         } catch (Exception error) {
             logger.error(error.getMessage());
             throw error;
