@@ -1,7 +1,5 @@
 package org.seng302.leftovers.entities;
 
-import org.seng302.leftovers.entities.event.InterestPurchasedEvent;
-
 import javax.persistence.*;
 import java.math.BigDecimal;
 import java.time.Instant;
