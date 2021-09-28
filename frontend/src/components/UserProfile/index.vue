@@ -460,7 +460,7 @@ export default {
       return (this.isViewingOwnProfile===true || this.currentUserRole!=='user') && this.user.role !== 'defaultGlobalApplicationAdmin';
     },
     userImages() {
-      return this.user.images;
+      return this.user?.images;
     }
   },
   components: {

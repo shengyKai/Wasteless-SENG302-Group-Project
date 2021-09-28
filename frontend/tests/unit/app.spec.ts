@@ -54,6 +54,7 @@ describe('App.vue', () => {
         localVue,
         store,
         router,
+        stubs: ['Avatar'],
         vuetify: new Vuetify(),
       });
     });

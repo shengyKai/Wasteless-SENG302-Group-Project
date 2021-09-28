@@ -87,6 +87,7 @@ describe("ModifyUserPage.vue", () => {
         localVue,
         vuetify,
         store,
+        stubs: ['Avatar'],
         mocks: {
           $route: {
             params: {
