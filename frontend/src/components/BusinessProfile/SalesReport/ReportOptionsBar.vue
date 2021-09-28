@@ -94,11 +94,9 @@
         <v-col cols="4">
           <v-row align="center" justify="center">
             <v-col cols="2">
-              <div class="text-h5 text-center">
-                <strong>
-                  OR
-                </strong>
-              </div>
+              <h4 class="font-weight-bold text-center">
+                OR
+              </h4>
             </v-col>
             <v-col cols="10">
               <v-select

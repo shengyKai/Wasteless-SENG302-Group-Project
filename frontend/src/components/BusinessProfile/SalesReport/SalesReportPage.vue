@@ -1,10 +1,6 @@
 <template>
   <v-container>
-    <div class="text-h3 text-center mb-2">
-      <strong>
-        {{ title }}
-      </strong>
-    </div>
+    <h2 class="font-weight-bold text-center">{{ title }}</h2>
     <ReportOptionsBar/>
     <SalesReportTable/>
   </v-container>
