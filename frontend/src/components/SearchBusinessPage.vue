@@ -134,7 +134,8 @@ export default {
       orderByOptions: [
         {text: "Name", value: "name"},
         {text: "Location", value: "location"},
-        {text: "Business Type", value: "businessType"}
+        {text: "Business Type", value: "businessType"},
+        {text: "Points", value: "points"}
       ],
     };
   },
