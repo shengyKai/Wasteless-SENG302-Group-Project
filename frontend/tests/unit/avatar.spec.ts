@@ -43,6 +43,10 @@ describe("Avatar.vue", () => {
     });
   });
 
+  afterEach(() => {
+    wrapper.destroy();
+  });
+
   it('When business is provided, avatar is set to business\'s primary image', async () => {
     imageScrFromFilenameMock.mockReturnValueOnce("http://localhost:9500/businessThumbnail.jpg");
     await wrapper.setProps({

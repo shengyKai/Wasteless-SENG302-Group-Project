@@ -102,7 +102,8 @@ function makeTestUser(userId: number, businesses?: number[], role?: UserRole) {
       district: 'test_district',
       country: 'test_country' + userId
     },
-    role: role ?? 'user'
+    role: role ?? 'user',
+    images: [],
   };
 
   if (businesses !== undefined) {

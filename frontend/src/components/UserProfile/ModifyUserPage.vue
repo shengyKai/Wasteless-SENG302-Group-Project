@@ -345,7 +345,9 @@ export default {
           region: '',
           country: '',
           postcode: '',
-        }
+        },
+
+        images: [],
       },
       previousUser: {},
       countryCode: '',

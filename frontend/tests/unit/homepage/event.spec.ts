@@ -65,6 +65,10 @@ describe('Event.vue', () => {
     generateWrapper();
   });
 
+  afterEach(() => {
+    wrapper.destroy();
+  });
+
   /**
    * Finds the associated icon in the event/notification
    *

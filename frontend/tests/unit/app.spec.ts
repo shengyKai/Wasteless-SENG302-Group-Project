@@ -36,6 +36,10 @@ describe('App.vue', () => {
     getEvents.mockResolvedValue([]);
   });
 
+  afterEach(() => {
+    wrapper.destroy();
+  });
+
   /**
    * Finds the current error message component if it exists.
    *

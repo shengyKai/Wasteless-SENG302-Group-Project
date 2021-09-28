@@ -96,7 +96,8 @@ describe('store.ts', () => {
         email: "email@email.com",
         homeAddress: {
           country: "Country"
-        }
+        },
+        images: [],
       };
     });
 

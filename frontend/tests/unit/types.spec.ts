@@ -97,7 +97,8 @@ const test: Business = {
       middleName:"Percy",
       id:2,
       email:"123andyelliot@gmail.com",
-      homeAddress:{ country:"New Zealand", region:"Canterbury",city:"Christchurch" }
+      homeAddress:{ country:"New Zealand", region:"Canterbury",city:"Christchurch" },
+      images: [],
     }
   ]
 };
