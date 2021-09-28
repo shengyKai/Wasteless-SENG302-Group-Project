@@ -103,10 +103,10 @@ export async function updateEventAsRead(eventId: number): Promise<MaybeError<und
  * @param eventId Event id of the event to be overwriting
  * @param status  The desire status to be updated for the event
  */
-export async function updateEventStatus(eventId: number, status: EventStatus): Promise<MaybeError<undefined>> {
+export async function updateEventStatus(eventId: number, eventStatus: EventStatus): Promise<MaybeError<undefined>> {
   try {
     await instance.put(`/feed/${eventId}/status`, {
-      value: status
+      eventStatus: status
     }
     );
   } catch (error) {
