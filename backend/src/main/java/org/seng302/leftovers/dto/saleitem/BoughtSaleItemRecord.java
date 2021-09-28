@@ -11,6 +11,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+/**
+ * A collection of statistics about a list of BoughtSaleItems purchased over a period.
+ */
 @Getter
 @ToString
 @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -23,6 +26,10 @@ public class BoughtSaleItemRecord {
     private Integer totalInterest = 0;
     private Double averageDaysToSell;
 
+    /**
+     * Construct a new Record from a list of BoughtSaleItems
+     * @param items BoughtSaleItems to generate a report record for
+     */
     public BoughtSaleItemRecord(List<BoughtSaleItem> items) {
         Set<Long> buyerIds = new HashSet<>();
         Set<Long> productIds = new HashSet<>();

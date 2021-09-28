@@ -4,10 +4,16 @@ import lombok.AllArgsConstructor;
 import lombok.ToString;
 import org.seng302.leftovers.dto.saleitem.BoughtSaleItemRecord;
 import org.seng302.leftovers.dto.saleitem.ReportGranularity;
+import org.seng302.leftovers.entities.Business;
+import org.seng302.leftovers.persistence.BoughtSaleItemRepository;
+import org.seng302.leftovers.service.search.SearchSpecConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.Clock;
 import java.time.Instant;
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.time.temporal.TemporalAdjusters;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
@@ -19,6 +25,14 @@ import java.util.List;
 @Service
 public class ReportService {
 
+
+    private final BoughtSaleItemRepository boughtSaleItemRepository;
+
+
+    public ReportService(BoughtSaleItemRepository boughtSaleItemRepository) {
+        this.boughtSaleItemRepository = boughtSaleItemRepository;
+    }
+
     /**
      * Object representing a start and end date
      */
@@ -27,6 +41,13 @@ public class ReportService {
     private static class DateRange {
         LocalDate start;
         LocalDate end;
+
+        Instant startInstant() {
+            return start.atStartOfDay(ZoneId.systemDefault()).toInstant();
+        }
+        Instant endInstant() {
+            return end.plusDays(1).atStartOfDay(ZoneId.systemDefault()).toInstant();
+        }
     }
 
 
@@ -54,11 +75,28 @@ public class ReportService {
         return ranges;
     }
 
+
     /**
-     * TODO
+     * @param business The business to generate the report for
+     * @param start Date of the start of the report
+     * @param end Date of the end of the report
+     * @param granularity Unit of time to snap the report entries to
+     * @return List of BoughtSaleItemRecords
      */
-    public List<BoughtSaleItemRecord> generateReport(LocalDate start, LocalDate end, ReportGranularity granularity) {
+    public List<BoughtSaleItemRecord> generateReport(Business business, LocalDate start, LocalDate end, ReportGranularity granularity) {
         var ranges = getRanges(start, end, granularity);
-        return null;
+
+        List<BoughtSaleItemRecord> records = new ArrayList<>();
+
+        for (DateRange range : ranges) {
+            var specification = SearchSpecConstructor.constructBoughtSaleListingSpecificationFromBusiness(business)
+                    .and(SearchSpecConstructor.constructBoughtSaleListingSpecificationFromPeriod(range.startInstant(), range.endInstant()));
+
+            var items = boughtSaleItemRepository.findAll(specification);
+
+            records.add(new BoughtSaleItemRecord(items));
+        }
+
+        return records;
     }
 }
