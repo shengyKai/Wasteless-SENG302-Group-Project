@@ -38,7 +38,7 @@
                 <GoldRank v-if="rank === 'gold'" class="rank"/>
                 <PlatinumRank v-if="rank === 'platinum'" class="rank"/>
               </span>
-            </v-col>z
+            </v-col>
             <v-col class="text-right" v-if='!modifyBusiness && permissionToActAsBusiness'>
               <v-tooltip bottom>
                 <template #activator="{ on, attrs }">
@@ -273,19 +273,6 @@ export default {
 
 .link-chip {
   margin-right: 4px;
-}
-
-.business-modify {
-  margin-top: 20px;
-}
-
-.modify-business-button {
-  display: block;
-  margin-right: 48%;
-}
-
-.expand-icon {
-  padding-right: 10px;
 }
 
 .business-name {
