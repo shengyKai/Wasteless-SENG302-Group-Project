@@ -16,7 +16,7 @@ import Inventory from "../components/Inventory.vue";
 import SalePage from "../components/SalePage.vue";
 import Marketplace from "../components/marketplace/Marketplace.vue";
 import UserCards from "../components/marketplace/UserCards.vue";
-import ImageManager from "../components/Image/ImageManager.vue";
+import ImageManager from "../components/image/ImageManager.vue";
 import SalesReportPage from "../components/BusinessProfile/SalesReport/SalesReportPage.vue";
 import { COOKIE, getCookie } from "@/utils";
 import { getStore } from "@/store";
