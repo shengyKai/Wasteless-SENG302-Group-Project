@@ -115,7 +115,7 @@ const routes = [
     meta: { title: 'Not Found' }
   },
   {
-    path: '/salesreport',
+    path: '/salesreport', //TODO change the page to include the businessId
     component: SalesReportPage,
     meta: { title: 'Business sales report' },
   },

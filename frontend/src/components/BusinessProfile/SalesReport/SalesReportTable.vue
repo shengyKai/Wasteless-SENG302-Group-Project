@@ -21,8 +21,10 @@ export default {
        */
       baseHeaders: [
         { text: 'Year', value: 'year' },
-        { text: 'No. of Listings Created', value: 'numberCreated' },
-        { text: 'No. of Expired Listings', value: 'numberExpired' },
+        { text: 'No. of Unique Buyers', value: 'numberBuyers' },
+        { text: 'No. of Unique Products', value: 'numberProducts' },
+        { text: 'Average Time to Sell (days)', value: 'averageTime' },
+        { text: 'Average Like Count', value: 'averageLikes' },
         { text: 'No. of Purchases', value: 'numberPurchases' },
         { text: 'Currency', value: 'currency' },
         { text: 'Total Value of all Purchases ($)', value: 'totalValue' },
@@ -51,8 +53,10 @@ export default {
       reportValues: [
         {
           year: 2021,
-          numberCreated: 3,
-          numberExpired: 4,
+          numberBuyers: 3,
+          numberProducts: 4,
+          averageTime: 1,
+          averageLikes: 20,
           numberPurchases: 5,
           currency: "NZD",
           totalValue: 300,
@@ -62,8 +66,10 @@ export default {
         },
         {
           year: 2021,
-          numberCreated: 3,
-          numberExpired: 4,
+          numberBuyers: 3,
+          numberProducts: 4,
+          averageTime: 1,
+          averageLikes: 20,
           numberPurchases: 5,
           currency: "NZD",
           totalValue: 300,
@@ -73,8 +79,10 @@ export default {
         },
         {
           year: 2021,
-          numberCreated: 3,
-          numberExpired: 4,
+          numberBuyers: 3,
+          numberProducts: 4,
+          averageTime: 1,
+          averageLikes: 20,
           numberPurchases: 5,
           currency: "NZD",
           totalValue: 300,
@@ -84,8 +92,10 @@ export default {
         },
         {
           year: 2021,
-          numberCreated: 3,
-          numberExpired: 4,
+          numberBuyers: 3,
+          numberProducts: 4,
+          averageTime: 1,
+          averageLikes: 20,
           numberPurchases: 5,
           currency: "NZD",
           totalValue: 300,
@@ -95,8 +105,10 @@ export default {
         },
         {
           year: 2021,
-          numberCreated: 3,
-          numberExpired: 4,
+          numberBuyers: 3,
+          numberProducts: 4,
+          averageTime: 1,
+          averageLikes: 20,
           numberPurchases: 5,
           currency: "NZD",
           totalValue: 300,
@@ -106,8 +118,10 @@ export default {
         },
         {
           year: 2021,
-          numberCreated: 3,
-          numberExpired: 4,
+          numberBuyers: 3,
+          numberProducts: 4,
+          averageTime: 1,
+          averageLikes: 20,
           numberPurchases: 5,
           currency: "NZD",
           totalValue: 300,
@@ -117,8 +131,10 @@ export default {
         },
         {
           year: 2021,
-          numberCreated: 3,
-          numberExpired: 4,
+          numberBuyers: 3,
+          numberProducts: 4,
+          averageTime: 1,
+          averageLikes: 20,
           numberPurchases: 5,
           currency: "NZD",
           totalValue: 300,
@@ -128,8 +144,10 @@ export default {
         },
         {
           year: 2021,
-          numberCreated: 3,
-          numberExpired: 4,
+          numberBuyers: 3,
+          numberProducts: 4,
+          averageTime: 1,
+          averageLikes: 20,
           numberPurchases: 5,
           currency: "NZD",
           totalValue: 300,
@@ -146,7 +164,7 @@ export default {
      * Otherwise, the headers are just the baseHeaders.
      */
     headers() {
-      if (this.reportType === ("yearly" || "periodically")) {
+      if (this.reportType === ("yearly" || "periodic")) {
         return this.baseHeaders;
       } else {
         return this.distinctHeaders[this.reportType].concat(this.baseHeaders);
