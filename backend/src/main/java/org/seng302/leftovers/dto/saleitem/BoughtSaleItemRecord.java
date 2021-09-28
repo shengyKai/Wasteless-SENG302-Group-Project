@@ -1,4 +1,4 @@
-package org.seng302.leftovers.dto.business;
+package org.seng302.leftovers.dto.saleitem;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Getter;
