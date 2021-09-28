@@ -21,6 +21,7 @@ import org.seng302.leftovers.persistence.MarketplaceCardRepository;
 import org.seng302.leftovers.persistence.SearchMarketplaceCardHelper;
 import org.seng302.leftovers.persistence.UserRepository;
 import org.seng302.leftovers.persistence.event.ExpiryEventRepository;
+import org.seng302.leftovers.service.CardService;
 import org.seng302.leftovers.tools.AuthenticationTokenManager;
 import org.seng302.leftovers.service.search.SearchPageConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -50,14 +51,18 @@ public class CardController {
     private final KeywordRepository keywordRepository;
     private final UserRepository userRepository;
     private final ExpiryEventRepository expiryEventRepository;
+    private final CardService cardService;
     private final Logger logger = LogManager.getLogger(CardController.class.getName());
 
     @Autowired
-    public CardController(MarketplaceCardRepository marketplaceCardRepository, KeywordRepository keywordRepository, UserRepository userRepository, ExpiryEventRepository expiryEventRepository) {
+    public CardController(MarketplaceCardRepository marketplaceCardRepository, KeywordRepository keywordRepository,
+                          UserRepository userRepository, ExpiryEventRepository expiryEventRepository,
+                          CardService cardService) {
         this.marketplaceCardRepository = marketplaceCardRepository;
         this.keywordRepository = keywordRepository;
         this.userRepository = userRepository;
         this.expiryEventRepository = expiryEventRepository;
+        this.cardService = cardService;
     }
 
     /**
@@ -164,7 +169,7 @@ public class CardController {
 
             Optional<ExpiryEvent> expiryEvent = expiryEventRepository.getByExpiringCard(card);
             expiryEvent.ifPresent(expiryEventRepository::delete);
-            marketplaceCardRepository.delete(card);
+            cardService.deleteCardWithRelations(card);
 
         } catch (Exception e) {
             logger.error(e.getMessage());

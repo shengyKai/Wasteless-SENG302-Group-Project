@@ -24,6 +24,7 @@ import org.seng302.leftovers.persistence.MarketplaceCardRepository;
 import org.seng302.leftovers.persistence.SearchMarketplaceCardHelper;
 import org.seng302.leftovers.persistence.UserRepository;
 import org.seng302.leftovers.persistence.event.ExpiryEventRepository;
+import org.seng302.leftovers.service.CardService;
 import org.seng302.leftovers.tools.AuthenticationTokenManager;
 import org.seng302.leftovers.service.search.SearchPageConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -71,6 +72,8 @@ class CardControllerTest {
     private UserRepository userRepository;
     @Mock
     private ExpiryEventRepository expiryEventRepository;
+    @Mock
+    private CardService cardService;
     @Mock
     private MarketplaceCard mockCard;
     @Mock
@@ -241,7 +244,8 @@ class CardControllerTest {
         when(sectionSpec.and(keywordSpec)).thenReturn(combinedSpec);
 
         // Tell MockMvc to use controller with mocked repositories for tests
-        cardController = new CardController(marketplaceCardRepository, keywordRepository, userRepository, expiryEventRepository);
+        cardController = new CardController(marketplaceCardRepository, keywordRepository, userRepository,
+                expiryEventRepository, cardService);
         mockMvc = MockMvcBuilders.standaloneSetup(cardController).build();
 
         constructValidCreateCardJson();
@@ -877,10 +881,8 @@ class CardControllerTest {
     /**
      * Creates several marketplace cards based on a product. These items have
      * differing attributes to identify them.
-     * 
-     * @throws Exception Exception
      */
-    public void addSeveralMarketplaceCards(List<MarketplaceCard> cards) throws Exception {
+    public void addSeveralMarketplaceCards(List<MarketplaceCard> cards) {
         cards.add(new MarketplaceCard.Builder().withCreator(testUser).withCloses(Instant.now().plus(1, ChronoUnit.HOURS))
             .withSection("ForSale").withTitle("abcd").build());
         cards.add(new MarketplaceCard.Builder().withCreator(testUser1).withCloses(Instant.now().plus(2, ChronoUnit.HOURS))
@@ -956,7 +958,7 @@ class CardControllerTest {
     @Test
     void deleteCard_cardExistsAndIsAuthorised_200ResponseAndDeleted() throws Exception {
         mockMvc.perform(delete("/cards/1")).andExpect(status().isOk());
-        verify(marketplaceCardRepository, times(1)).delete(mockCard);
+        verify(cardService, times(1)).deleteCardWithRelations(mockCard);
     }
 
     @Test
@@ -965,7 +967,7 @@ class CardControllerTest {
         when(expiryEventRepository.getByExpiringCard(mockCard)).thenReturn(optionalExpiryEvent);
         mockMvc.perform(delete("/cards/1")).andExpect(status().isOk());
         verify(expiryEventRepository, times(1)).delete(mockEvent);
-        verify(marketplaceCardRepository, times(1)).delete(mockCard);
+        verify(cardService, times(1)).deleteCardWithRelations(mockCard);
     }
 
     @Test
