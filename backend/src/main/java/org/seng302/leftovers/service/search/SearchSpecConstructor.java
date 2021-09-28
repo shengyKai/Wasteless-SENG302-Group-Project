@@ -1,8 +1,6 @@
 package org.seng302.leftovers.service.search;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.apache.logging.log4j.LogManager;
-import org.seng302.leftovers.controllers.BusinessController;
 import org.seng302.leftovers.dto.business.BusinessType;
 import org.seng302.leftovers.dto.product.ProductFilterOption;
 import org.seng302.leftovers.dto.saleitem.SaleListingSearchDTO;
@@ -12,6 +10,7 @@ import org.seng302.leftovers.exceptions.ValidationResponseException;
 import org.seng302.leftovers.persistence.SpecificationsBuilder;
 import org.seng302.leftovers.persistence.SearchCriteria.Pred;
 import org.springframework.data.jpa.domain.Specification;
+
 import javax.persistence.criteria.Predicate;
 import java.math.BigDecimal;
 import java.time.Instant;
@@ -62,27 +61,23 @@ public class SearchSpecConstructor {
      * will be returned. If neither is provided then an exception will be thrown.
      * @param searchQuery A search query provided by the user, used to find matching business names.
      * @param businessType A business type provided by the user, used to find businesses with matching type.
-     * @param minPoints  A minimum points boundary provided by user to find business with more than or equal to the minPoints
      * @return A specification for businesses matching the provided search query and type.
      */
-    public static Specification<Business> constructSpecificationFromBusinessSearch(String searchQuery, BusinessType businessType, Integer minPoints) {
-        Specification<Business> searchSpec = Specification.where(null);
-        if (searchQuery == null && businessType == null && minPoints == null) {
+    public static Specification<Business> constructSpecificationFromBusinessSearch(String searchQuery, BusinessType businessType) {
+        if (searchQuery == null && businessType == null) {
             ValidationResponseException exception =
-                    new ValidationResponseException("Provide either a search query or business type or minPoints to find matching businesses");
+                    new ValidationResponseException("Provide either a search query or business type to find matching businesses");
             SearchQueryParser.logger.error(exception.getMessage());
             throw exception;
         }
-        if (searchQuery != null && !searchQuery.isBlank()) {
-            searchSpec = searchSpec.and(constructBusinessSpecificationFromSearchQuery(searchQuery));
+        if (searchQuery == null) {
+            return constructBusinessSpecificationFromType(businessType);
         }
-        if (businessType != null) {
-            searchSpec = searchSpec.and(constructBusinessSpecificationFromType(businessType));
+        if (businessType == null) {
+            return constructBusinessSpecificationFromSearchQuery(searchQuery);
         }
-//        if (minPoints != null) {
-//            searchSpec = searchSpec.and(constructBusinessSpecificationFromPoints(minPoints));
-//        }
-        return searchSpec;
+        return constructBusinessSpecificationFromSearchQuery(searchQuery)
+                .and(constructBusinessSpecificationFromType(businessType));
     }
 
     /**

@@ -55,7 +55,7 @@ public class BusinessController {
     private final ImageRepository imageRepository;
     private static final Logger logger = LogManager.getLogger(BusinessController.class.getName());
 
-    private static final Set<String> VALID_BUSINESS_ORDERINGS = Set.of("created", "name", "location", "businessType");
+    private static final Set<String> VALID_BUSINESS_ORDERINGS = Set.of("created", "name", "location", "businessType", "points");
 
     @Autowired
     public BusinessController(BusinessRepository businessRepository, UserRepository userRepository, ImageService imageService, ImageRepository imageRepository) {
@@ -279,22 +279,19 @@ public class BusinessController {
      * @param orderBy Order by term. Can be one of "created", "name", "location", "businessType"
      * @param reverse Boolean. Reverse ordering of results
      * @param businessTypeString Type of business. Can by one of "Accommodation and Food Services", "Retail Trade","Charitable organisation", "Non-profit organisation".
-     * @param minPoints Lower boundary of the points. E.g minPoints= 100, search business.points >= 100
      * @return A JSON object containing the total count and paginated results.
      */
     @GetMapping("/businesses/search")
-    public ResultPageDTO<BusinessResponseDTO> search(HttpServletRequest request,
-                                @RequestParam(required = false) String searchQuery,
+    public ResultPageDTO<BusinessResponseDTO> search(HttpServletRequest request, @RequestParam(required = false) String searchQuery,
                                 @RequestParam(required = false) Integer page,
                                 @RequestParam(required = false) Integer resultsPerPage,
                                 @RequestParam(required = false) String orderBy,
                                 @RequestParam(required = false) Boolean reverse,
-                                @RequestParam(required = false) Integer minPoints,
                                 @RequestParam(required = false, name = "businessType") String businessTypeString) {
 
         AuthenticationTokenManager.checkAuthenticationToken(request);
         logger.info("Performing Business search for query \"{}\" and type \"{}\"", searchQuery, businessTypeString);
-        logger.info(minPoints + " aaa");
+
         BusinessType businessType;
         try {
             businessType = objectMapper.convertValue(businessTypeString, new TypeReference<>() {});
@@ -319,7 +316,7 @@ public class BusinessController {
         }
 
         PageRequest pageRequest = SearchPageConstructor.getPageRequest(page, resultsPerPage, Sort.by(sortOrder));
-        Specification<Business> specification = SearchSpecConstructor.constructSpecificationFromBusinessSearch(searchQuery, businessType, minPoints);
+        Specification<Business> specification = SearchSpecConstructor.constructSpecificationFromBusinessSearch(searchQuery, businessType);
 
         Page<Business> results = businessRepository.findAll(specification, pageRequest);
         return new ResultPageDTO<>(results.map(BusinessResponseDTO::withoutAdmins));
