@@ -397,9 +397,11 @@ describe("ModifyUserPage.vue", () => {
         ...user,
         password: undefined,
         newPassword: undefined,
+        imageIds: [],
       };
       delete expectedUser.businessesAdministered;
       delete expectedUser.id;
+      delete expectedUser.images;
       expect(modifyUser.mock.calls.length).toBe(1);
       expect(modifyUser.mock.calls[0][0]).toBe(1);
       expect(modifyUser.mock.calls[0][1]).toStrictEqual(expectedUser);

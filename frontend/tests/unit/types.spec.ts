@@ -19,6 +19,7 @@ it('Testing valid user is a user', () => {
     },
     nickname: 'davy',
     role: 'user',
+    images: []
   })).toBeTruthy();
 });
 
@@ -64,7 +65,8 @@ it('Testing valid user with businesses', () => {
       district: "Ashburton",
       postcode: "8041",
       region: "Canterbury"
-    }
+    },
+    images: []
   })).toBeTruthy();
 });
 
@@ -133,7 +135,8 @@ it('Testing valid business', () => {
         middleName:"Percy",
         id:2,
         email:"123andyelliot@gmail.com",
-        homeAddress:{ country:"New Zealand", region:"Canterbury",city:"Christchurch" }
+        homeAddress:{ country:"New Zealand", region:"Canterbury",city:"Christchurch" },
+        images: []
       }
     ]
   })).toBeTruthy();
@@ -151,6 +154,7 @@ it('Testing user with invalid role is not a user', () => {
     },
     nickname: 'davy',
     role: 'pirate',
+    images: []
   })).toBeFalsy();
 });
 
@@ -164,5 +168,6 @@ it('Testing user without id is not a user', () => {
       country: 'Africa'
     },
     nickname: 'davy',
+    images: []
   })).toBeFalsy();
 });
