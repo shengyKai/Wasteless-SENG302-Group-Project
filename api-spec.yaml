@@ -1240,28 +1240,33 @@ paths:
       parameters:
         - name: id
           in: path
-          description: ID of the business to generate a report for
+          description: ID of the business to generate a report for.
           required: true
           schema:
             type: integer
         - name: startDate
           in: query
+          description: 'The start date of the range to generate the report for. <br/>
+          Omitting this value will return all values up to endDate (or all).'
           schema:
             type: string
             example: '2021-08-12'
-            description: The start date of the range to generate the report for
+          
         - name: endDate
           in: query
+          description: 'The end date of the range to generate the report for. <br/>
+          Omitting this value will return all values starting from startDate (or all).'
           schema:
             type: string
             example: '2021-09-15'
-            description: The end date of the range to generate the report for
         - name: granularity
           in: query
+          description: 'The granularity of the generated report. Daily, Weekly, Monthly, Yearly.
+          <br/> Omitting this value will return the total for the given period.'
           schema:
             type: string
             example: 'daily'
-            description: The granularity of the generated report. Daily, Monthly, Yearly
+          
             enum:
               - daily
               - monthly
