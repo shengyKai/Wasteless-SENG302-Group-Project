@@ -25,7 +25,7 @@ public class DescriptionGenerator {
      */
     public String randomDescription() {
         int start = random.nextInt(descriptions.length()-10);
-        int end = start + random.nextInt(190) + 10;  // 10-199 char
+        int end = start + random.nextInt(189) + 10;  // 10-199 char
         if (end > descriptions.length()) end = descriptions.length();
         String desc = descriptions.substring(start, end).trim() + ".";
         return desc.substring(0,1).toUpperCase() + desc.substring(1);
