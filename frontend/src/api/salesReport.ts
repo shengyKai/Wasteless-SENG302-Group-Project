@@ -4,17 +4,16 @@ import {instance, MaybeError} from '@/api/internal';
 export type ReportGranularity = 'daily' | 'weekly' | 'monthly' | 'yearly';
 
 
-export type Record = {
+export type SaleRecord = {
   date: string,
   uniqueListingsSold?: number,
   uniqueBuyers?: number,
   uniqueProducts?: number,
-  totalInterestCount?: number,
-  averageInterestCount?: number,
+  totalInterest?: number,
   totalQuantitySold?: number,
-  averageTimeToSell?: number,
+  averageDaysToSell?: number,
   averageListingPrice?: number,
-  totalValue?: number
+  totalPriceSold?: number
 }
 
 
@@ -25,10 +24,10 @@ export type Record = {
  * @param endDate The date to generate sales to
  * @param granularity The granularity of the generated report. Can be one of: daily, weekly, monthly, yearly
  */
-export async function generateReport(businessId: number, startDate: string, endDate: string, granularity: ReportGranularity): Promise<MaybeError<Record[]>> {
+export async function generateReport(businessId: number, startDate: string, endDate: string, granularity: ReportGranularity): Promise<MaybeError<SaleRecord[]>> {
   let response;
   try {
-    response = await instance.get(`/businesses/${businessId}/reports`, {data:{
+    response = await instance.get(`/businesses/${businessId}/reports`, {params:{
       startDate,
       endDate,
       granularity
@@ -42,7 +41,7 @@ export async function generateReport(businessId: number, startDate: string, endD
     return 'Request failed: ' + status;
   }
 
-  if(!is<Record[]>(response.data)) {
+  if(!is<SaleRecord[]>(response.data)) {
     return "Invalid response type";
   }
 

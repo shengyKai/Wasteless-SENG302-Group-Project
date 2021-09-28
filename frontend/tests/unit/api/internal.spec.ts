@@ -9,10 +9,11 @@ import {CreateProduct, Product, createProduct, uploadProductImage, getProducts, 
 import {InventoryItem} from "@/api/inventory";
 import {Sale, getBusinessSales, setListingInterest, getListingInterest, purchaseListing } from "@/api/sale";
 import {getMessagesInConversation, Message} from "@/api/marketplace";
+import {generateReport, SaleRecord} from "@/api/salesReport";
 
 const api = {
   login, createUser, createProduct, uploadProductImage, getProducts, modifyProduct,
-  getBusinessSales, getMessagesInConversation, setListingInterest, getListingInterest, purchaseListing
+  getBusinessSales, getMessagesInConversation, setListingInterest, getListingInterest, purchaseListing, generateReport
 };
 
 jest.mock('axios', () => ({
@@ -114,6 +115,18 @@ const testCreateProduct: CreateProduct = {
   description: 'test_description',
   manufacturer: 'test_manufacturer',
   recommendedRetailPrice: 100,
+};
+
+const testRecord: SaleRecord = {
+  date: '2022-09-09',
+  uniqueListingsSold: 12,
+  uniqueBuyers: 12,
+  uniqueProducts: 3,
+  totalInterest: 40,
+  totalQuantitySold: 90,
+  averageDaysToSell: 5,
+  averageListingPrice: 40.3,
+  totalPriceSold: 1032.10
 };
 
 const testProduct: Product = {
@@ -373,6 +386,23 @@ const apiCalls: ApiCalls = {
     },
     usesServerMessage: true,
   },
+  generateReport: {
+    parameters: [1, "2022-08-08", "2022-09-09", "daily"],
+    httpMethod: 'get',
+    url: "/businesses/1/reports",
+    body: { params:{
+      startDate: "2022-08-08",
+      endDate: "2022-09-09",
+      granularity: "daily"
+    }},
+    result: [testRecord],
+    failedTypeCheckResponse: "Invalid response type",
+    extraStatusMessages: {
+      401: 'You have been logged out. Please login again and retry',
+      406: 'Business not found',
+    },
+    usesServerMessage: false
+  }
 };
 
 
