@@ -122,10 +122,8 @@ const testRecord: SaleRecord = {
   uniqueListingsSold: 12,
   uniqueBuyers: 12,
   uniqueProducts: 3,
-  totalInterest: 40,
-  totalQuantitySold: 90,
+  averageLikeCount: 40,
   averageDaysToSell: 5,
-  averageListingPrice: 40.3,
   totalPriceSold: 1032.10
 };
 

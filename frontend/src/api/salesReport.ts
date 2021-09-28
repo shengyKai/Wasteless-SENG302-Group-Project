@@ -9,10 +9,8 @@ export type SaleRecord = {
   uniqueListingsSold?: number,
   uniqueBuyers?: number,
   uniqueProducts?: number,
-  totalInterest?: number,
-  totalQuantitySold?: number,
+  averageLikeCount?: number,
   averageDaysToSell?: number,
-  averageListingPrice?: number,
   totalPriceSold?: number
 }
 

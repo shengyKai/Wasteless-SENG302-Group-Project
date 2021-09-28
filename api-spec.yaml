@@ -3086,14 +3086,10 @@ components:
           description: The number of unique products sold for the given period
           type: number
           example: 10
-        totalInterest:
-          description: The total number of likes for the given period
+        averageLikeCount:
+          description: The average number of likes for listings sold for the given period
           type: number
           example: 60
-        totalQuantitySold:
-          description: The total quantity of Inventory items sold for the given period
-          type: number
-          example: 10
         averageDaysToSell:
           description: The average number of days listings were open before being sold, for listings sold within the given period
           type: number
