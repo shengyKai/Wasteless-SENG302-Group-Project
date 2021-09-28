@@ -170,6 +170,9 @@ export default {
         return this.distinctHeaders[this.reportType].concat(this.baseHeaders);
       }
     },
+    /**
+     * Generates the report title based on the reportType in the format '"reportType" Report'
+     */
     reportTitle() {
       return `${this.reportType.charAt(0).toUpperCase() + this.reportType.slice(1)} Report`;
     }
