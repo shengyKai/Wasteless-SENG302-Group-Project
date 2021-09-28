@@ -11,11 +11,18 @@
             <a class="link" @click="viewBusinessProfile">
               {{ business.name }}
             </a>
-
+            <v-avatar
+              :size="30"
+              :color="badgeColour"
+              class="headline">
+              <v-icon small color="primary darken-4">
+                mdi-vuetify
+              </v-icon>
+            </v-avatar>
           </v-list-item-title>
           <v-list-item-subtitle>{{ insertAddress(business.address) }}</v-list-item-subtitle>
           <v-list-item-subtitle>{{ business.businessType }}</v-list-item-subtitle>
-          <v-list-item-subtitle><strong>Rank: </strong>Bronze ({{business.points}} points)</v-list-item-subtitle>
+          <v-list-item-subtitle><strong>Rank: </strong> {{business.rank.name}} ({{business.points}} points) </v-list-item-subtitle>
         </v-list-item-content>
       </v-col>
     </v-row>
@@ -32,6 +39,25 @@ export default {
   },
   components: {
     Avatar,
+  },
+  computed: {
+    /**
+     * Changes the badge colour based on business rank
+     */
+    badgeColour() {
+      if (this.business.rank.name === 'bronze') {
+        return "brown lighten-2";
+      }
+      if (this.business.rank.name === 'silver') {
+        return "grey";
+      }
+      if (this.business.rank.name === 'gold') {
+        return "yellow darken-1";
+      }
+      else {
+        return "secondary";
+      }
+    },
   },
   methods: {
     insertAddress(address) {
