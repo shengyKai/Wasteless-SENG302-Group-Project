@@ -25,6 +25,7 @@ import org.seng302.leftovers.exceptions.AccessTokenResponseException;
 import org.seng302.leftovers.persistence.*;
 import org.seng302.leftovers.persistence.event.EventRepository;
 import org.seng302.leftovers.persistence.event.InterestEventRepository;
+import org.seng302.leftovers.service.ReportService;
 import org.seng302.leftovers.service.search.SearchQueryParser;
 import org.seng302.leftovers.tools.AuthenticationTokenManager;
 import org.seng302.leftovers.service.search.SearchPageConstructor;
@@ -77,6 +78,8 @@ class SaleControllerTest {
     private BoughtSaleItemRepository boughtSaleItemRepository;
     @Mock
     private EventRepository eventRepository;
+    @Mock
+    private ReportService reportService;
     @Mock
     private Business business;
     @Mock
@@ -163,7 +166,7 @@ class SaleControllerTest {
         when(userRepository.findById(not(eq(4L)))).thenReturn(Optional.empty());
 
         saleController = spy(new SaleController(userRepository, businessRepository, saleItemRepository,
-                inventoryItemRepository, interestEventRepository, boughtSaleItemRepository, eventRepository));
+                inventoryItemRepository, interestEventRepository, boughtSaleItemRepository, eventRepository, reportService));
         mockMvc = MockMvcBuilders.standaloneSetup(saleController).build();
     }
 

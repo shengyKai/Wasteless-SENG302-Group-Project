@@ -12,12 +12,11 @@ import java.time.temporal.TemporalAdjusters;
 /**
  * Enum representing valid granularities for a sale listing report
  */
-@ToString
 public enum ReportGranularity {
     @JsonProperty("daily")
     DAILY(null),
     @JsonProperty("weekly")
-    WEEKLY(TemporalAdjusters.next(DayOfWeek.MONDAY)),
+    WEEKLY(TemporalAdjusters.nextOrSame(DayOfWeek.SUNDAY)),
     @JsonProperty("monthly")
     MONTHLY(TemporalAdjusters.lastDayOfMonth()),
     @JsonProperty("yearly")

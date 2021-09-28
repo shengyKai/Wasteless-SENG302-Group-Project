@@ -56,9 +56,12 @@ public class SaleController {
     private final EventRepository eventRepository;
     private final ReportService reportService;
 
-    public SaleController(UserRepository userRepository, BusinessRepository businessRepository,
-                          SaleItemRepository saleItemRepository, InventoryItemRepository inventoryItemRepository,
-                          InterestEventRepository interestEventRepository, BoughtSaleItemRepository boughtSaleItemRepository,
+    public SaleController(UserRepository userRepository,
+                          BusinessRepository businessRepository,
+                          SaleItemRepository saleItemRepository,
+                          InventoryItemRepository inventoryItemRepository,
+                          InterestEventRepository interestEventRepository,
+                          BoughtSaleItemRepository boughtSaleItemRepository,
                           EventRepository eventRepository,
                           ReportService reportService) {
         this.userRepository = userRepository;
