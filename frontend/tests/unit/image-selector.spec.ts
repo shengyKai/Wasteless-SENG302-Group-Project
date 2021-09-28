@@ -1,7 +1,7 @@
 import Vue from 'vue';
 import Vuetify from 'vuetify';
 import { createLocalVue, Wrapper, mount } from '@vue/test-utils';
-import ImageSelector from "@/components/utils/ImageSelector.vue";
+import ImageSelector from "@/components/image/ImageSelector.vue";
 import { findButtonWithText } from './utils';
 
 Vue.use(Vuetify);

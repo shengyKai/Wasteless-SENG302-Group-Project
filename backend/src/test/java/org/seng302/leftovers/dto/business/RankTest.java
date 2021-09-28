@@ -72,8 +72,21 @@ class RankTest {
     @ParameterizedTest
     @NullSource
     @ValueSource(strings = {"foo", "bronzes"})
-    void forValues_invalidThreshold_noRankReturned(String rankName) {
+    void forValues_invalidName_noRankReturned(String rankName) {
         var parsedRank = Rank.forValues(rankName, Rank.BRONZE.getThreshold());
         assertNull(parsedRank);
+    }
+
+    @ParameterizedTest
+    @CsvSource({"0,BRONZE", "4,BRONZE", "5,SILVER", "35,GOLD", "2000000,PLATINUM"})
+    void getRankFromPoints_expectedRankReturned(int points, Rank expectedRank) {
+        var rank = Rank.getRankFromPoints(points);
+        assertEquals(expectedRank, rank);
+    }
+
+    @ParameterizedTest
+    @CsvSource({"BRONZE,SILVER", "SILVER,GOLD", "GOLD,PLATINUM", "PLATINUM,"})
+    void getNextRank_expectedRankReturned(Rank currentRank, Rank nextRank) {
+        assertEquals(nextRank, Rank.getNextRank(currentRank));
     }
 }

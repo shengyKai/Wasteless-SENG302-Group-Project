@@ -301,7 +301,7 @@
 <script>
 //This component requires two other custom components, one to display the product image, one to view more of the product's description
 import FullProductDescription from "../utils/FullProductDescription.vue";
-import ImageCarousel from "../utils/ImageCarousel.vue";
+import ImageCarousel from "../image/ImageCarousel.vue";
 import InventoryItemForm from "../BusinessProfile/InventoryItemForm.vue";
 import { currencyFromCountry } from "@/api/currency";
 import { formatDate, formatPrice, trimToLength } from '@/utils';
