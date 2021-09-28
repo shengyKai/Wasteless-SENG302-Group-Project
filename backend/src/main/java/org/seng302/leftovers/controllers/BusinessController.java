@@ -294,7 +294,7 @@ public class BusinessController {
 
         AuthenticationTokenManager.checkAuthenticationToken(request);
         logger.info("Performing Business search for query \"{}\" and type \"{}\"", searchQuery, businessTypeString);
-        logger.info(minPoints);
+        logger.info(minPoints + " aaa");
         BusinessType businessType;
         try {
             businessType = objectMapper.convertValue(businessTypeString, new TypeReference<>() {});
