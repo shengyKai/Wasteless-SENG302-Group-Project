@@ -15,13 +15,18 @@ import lombok.SneakyThrows;
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
 import net.minidev.json.parser.JSONParser;
+import net.minidev.json.parser.ParseException;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.junit.Assert;
+import org.seng302.datagenerator.ExampleDataFileReader;
 import org.seng302.leftovers.dto.LocationDTO;
 import org.seng302.leftovers.dto.business.BusinessType;
 import org.seng302.leftovers.entities.*;
+import org.seng302.leftovers.exceptions.DoesNotExistResponseException;
+import org.seng302.leftovers.exceptions.ValidationResponseException;
 import org.seng302.leftovers.persistence.BusinessRepository;
+import org.seng302.leftovers.persistence.ImageRepository;
 import org.seng302.leftovers.service.ImageService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -30,9 +35,7 @@ import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.web.servlet.MvcResult;
 
 import javax.transaction.Transactional;
-import java.io.BufferedInputStream;
-import java.io.File;
-import java.io.UnsupportedEncodingException;
+import java.io.*;
 import java.nio.file.Path;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -52,6 +55,8 @@ public class BusinessStepDefinition {
     private BusinessRepository businessRepository;
     @Autowired
     private ImageContext imageContext;
+    @Autowired
+    private ImageRepository imageRepository;
     @Autowired
     private ImageService imageService;
     @Autowired
@@ -254,11 +259,30 @@ public class BusinessStepDefinition {
     }
 
     @When("I try to upload the image {string} to the business")
-    public void i_try_to_upload_the_image_to_the_business(String filename) {
-        MockMultipartFile file = new MockMultipartFile(filename, filename, "image/jpeg", new byte[100]);
+    public void i_try_to_upload_the_png_image_to_the_business(String filename) throws IOException, ParseException {
+        String contentType;
+        if (filename.endsWith(".png")) {
+            contentType = "image/png";
+        } else if (filename.endsWith(".jpg")) {
+            contentType = "image/jpeg";
+        } else if (filename.endsWith(".txt")) {
+            contentType = "text/plain";
+        } else {
+            fail("Could not parse content type for: \"" + filename + "\"");
+            return;
+        }
+
+        InputStream stream = ExampleDataFileReader.class.getResourceAsStream("/" + filename);
         requestContext.performRequest(multipart("/media/images")
-                .contentType("multipart/form-data")
-                .content(file.toString()));
+                .file(new MockMultipartFile("file", filename, contentType, stream)));
+
+        var result = requestContext.getLastResult();
+        JSONParser parser = new JSONParser(JSONParser.MODE_PERMISSIVE);
+        JSONObject response = (JSONObject) parser.parse(result.getResponse().getContentAsString());
+        JSONArray images = (JSONArray) response.get("results");
+        Image image = imageRepository.findById((Long) ((JSONObject) images.get(0)).get("id")).orElse(null);
+        Business business = businessRepository.getBusinessById(businessContext.getLast().getId());
+        business.setImages(Collections.singletonList(image));
     }
 
     @Transactional
