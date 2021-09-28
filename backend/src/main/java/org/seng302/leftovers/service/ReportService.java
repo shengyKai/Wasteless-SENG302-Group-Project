@@ -7,20 +7,16 @@ import org.seng302.leftovers.dto.saleitem.ReportGranularity;
 import org.seng302.leftovers.entities.Business;
 import org.seng302.leftovers.persistence.BoughtSaleItemRepository;
 import org.seng302.leftovers.service.search.SearchSpecConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.time.Clock;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
-import java.time.temporal.TemporalAdjusters;
-import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 
 /**
- * TODO
+ * Service for generating reports
  */
 @Service
 public class ReportService {

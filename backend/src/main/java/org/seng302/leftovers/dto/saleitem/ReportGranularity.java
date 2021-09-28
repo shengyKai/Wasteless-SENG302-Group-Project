@@ -1,5 +1,6 @@
 package org.seng302.leftovers.dto.saleitem;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.ToString;
 
 import java.time.DayOfWeek;
@@ -8,13 +9,20 @@ import java.time.temporal.Temporal;
 import java.time.temporal.TemporalAdjuster;
 import java.time.temporal.TemporalAdjusters;
 
+/**
+ * Enum representing valid granularities for a sale listing report
+ */
 @ToString
 public enum ReportGranularity {
-    // TODO @JsonValue
+    @JsonProperty("daily")
     DAILY(null),
+    @JsonProperty("weekly")
     WEEKLY(TemporalAdjusters.next(DayOfWeek.MONDAY)),
+    @JsonProperty("monthly")
     MONTHLY(TemporalAdjusters.lastDayOfMonth()),
+    @JsonProperty("yearly")
     YEARLY(TemporalAdjusters.lastDayOfYear()),
+    @JsonProperty("none")
     NONE(new MaximumAdjuster());
 
     private final TemporalAdjuster endPeriodAdjuster;
@@ -24,9 +32,9 @@ public enum ReportGranularity {
     }
 
     /**
-     * TODO
-     * @param date
-     * @return
+     * Adjusts the provided date into the end of the current period for this granularity
+     * @param date Date to shift back
+     * @return Shifted back date
      */
     public LocalDate adjustEnd(LocalDate date) {
         if (endPeriodAdjuster == null) {
@@ -36,7 +44,7 @@ public enum ReportGranularity {
     }
 
     /**
-     * TODO
+     * Temporal adjuster that shifts all inputs to their maximum values
      */
     private static class MaximumAdjuster implements TemporalAdjuster {
         @Override

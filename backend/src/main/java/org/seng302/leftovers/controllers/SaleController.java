@@ -3,19 +3,15 @@ package org.seng302.leftovers.controllers;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.Setter;
 import lombok.ToString;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.seng302.leftovers.dto.saleitem.*;
 import org.seng302.leftovers.dto.ResultPageDTO;
-
+import org.seng302.leftovers.dto.saleitem.*;
 import org.seng302.leftovers.entities.*;
 import org.seng302.leftovers.entities.event.InterestEvent;
 import org.seng302.leftovers.entities.event.InterestPurchasedEvent;
-import org.seng302.leftovers.dto.saleitem.CreateSaleItemDTO;
-import org.seng302.leftovers.dto.saleitem.SaleItemResponseDTO;
-import org.seng302.leftovers.dto.saleitem.SetSaleItemInterestDTO;
-
 import org.seng302.leftovers.entities.event.PurchasedEvent;
 import org.seng302.leftovers.exceptions.DoesNotExistResponseException;
 import org.seng302.leftovers.exceptions.InsufficientPermissionResponseException;
@@ -24,18 +20,15 @@ import org.seng302.leftovers.persistence.*;
 import org.seng302.leftovers.persistence.event.EventRepository;
 import org.seng302.leftovers.persistence.event.InterestEventRepository;
 import org.seng302.leftovers.service.ReportService;
-import org.seng302.leftovers.tools.AuthenticationTokenManager;
 import org.seng302.leftovers.service.search.SearchPageConstructor;
 import org.seng302.leftovers.service.search.SearchSpecConstructor;
-import org.springframework.beans.factory.ObjectProvider;
+import org.seng302.leftovers.tools.AuthenticationTokenManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ResponseStatusException;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -390,23 +383,53 @@ public class SaleController {
         }
     }
 
+    /**
+     * Object representing the parameters passed to GET /businesses/:id/reports before type conversion
+     */
+    @Getter
+    @Setter
+    @ToString
+    private static class ReportRequestParamsExternal {
+        /**
+         * The start date of the report. If null, is the creation of the business
+         */
+        private String startDate;
+
+        /**
+         * The end date of the report. If null, is the current date
+         */
+        private String endDate;
+
+        /**
+         * A string representing the granularity type.
+         */
+        private String granularity = "none";
+    }
+
+    /**
+     * Object representing the parameters passed to GET /businesses/:id/reports after type conversion
+     */
+    @Getter
+    @ToString
+    private static class ReportRequestParams {
+        private Optional<LocalDate> startDate;
+        private Optional<LocalDate> endDate;
+        private ReportGranularity granularity;
+    }
+
 
     /**
      * Generates a list of BoughtSaleItemRecords within a given date range.
      *
-     * @param startDate The start date of the report. If null, is the creation of the business
-     * @param endDate The end date of the report. If null, is the current date
      * @param businessId ID of the business to generate the report for
-     * @param granularityString A string representing the granularity type.
+     * @param requestParamsExternal Collection of parameters for the report
      * @return List of BoughtSaleItemRecords within the given date range
      */
     @GetMapping("/businesses/{id}/reports")
     public List<BoughtSaleItemRecord> generateReportForBusiness(
             HttpServletRequest request,
-            @RequestParam(value = "startDate", required = false) LocalDate startDate,
-            @RequestParam(value = "endDate", required = false) LocalDate endDate,
             @PathVariable("id") Long businessId,
-            @RequestParam(value = "granularity", required = false, defaultValue = "none") String granularityString) {
+            ReportRequestParamsExternal requestParamsExternal) {
         AuthenticationTokenManager.checkAuthenticationToken(request);
         try {
             logger.info("Generating sales report for business with id {}",businessId);
@@ -414,20 +437,21 @@ public class SaleController {
 
             business.checkSessionPermissions(request);
 
-            startDate = Optional.ofNullable(startDate).orElse(LocalDateTime.ofInstant(business.getCreated(), Clock.systemDefaultZone().getZone()).toLocalDate());
-            endDate = Optional.ofNullable(endDate).orElse(LocalDate.now());
+            ReportRequestParams requestParams;
+            try {
+                requestParams = objectMapper.convertValue(requestParamsExternal, ReportRequestParams.class);
+            } catch (IllegalArgumentException e) {
+                throw new ValidationResponseException("Invalid arguments");
+            }
+
+            LocalDate startDate = requestParams.getStartDate()
+                    .orElse(LocalDateTime.ofInstant(business.getCreated(), Clock.systemDefaultZone().getZone()).toLocalDate());
+            LocalDate endDate = requestParams.getEndDate()
+                    .orElse(LocalDate.now());
 
            if (startDate.isAfter(endDate)) throw new ValidationResponseException("The end date cannot be before the start date");
 
-           ReportGranularity granularity;
-           try {
-               granularity = objectMapper.convertValue(granularityString, ReportGranularity.class);
-           } catch (IllegalArgumentException exception) {
-               throw new ValidationResponseException("Could not parse report granularity");
-           }
-
-           return  reportService.generateReport(business, startDate, endDate, granularity);
-
+           return  reportService.generateReport(business, startDate, endDate, requestParams.getGranularity());
         } catch (Exception error) {
             logger.error(error.getMessage());
             throw error;
