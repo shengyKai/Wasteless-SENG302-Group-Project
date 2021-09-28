@@ -9,7 +9,7 @@ let dailyHeaders = ["Day of the Month", "Week No.", "Month"];
 let weeklyHeaders = ["Week No.", "Month"];
 let monthlyHeaders = ["Month"];
 let baseHeaders = ['Year', 'No. of Unique Buyers','No. of Unique Products', 'Average Time to Sell (days)', 'Average Like Count', 
-                      'No. of Purchases','Total Value of all Purchases ($)']
+                      'Total Value of all Purchases ($)']
 
 describe('SalesReportTable.vue', () => {
   let wrapper: Wrapper<any>;
