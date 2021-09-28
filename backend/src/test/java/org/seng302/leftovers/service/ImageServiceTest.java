@@ -69,7 +69,7 @@ class ImageServiceTest {
         // Return input value
         when(imageRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
 
-        imageService = new ImageServiceImpl(imageRepository, storageService);
+        imageService = new ImageService(imageRepository, storageService);
     }
 
     @AfterEach
