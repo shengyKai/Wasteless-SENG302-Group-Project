@@ -23,21 +23,29 @@ import org.seng302.leftovers.exceptions.ValidationResponseException;
 import org.seng302.leftovers.persistence.*;
 import org.seng302.leftovers.persistence.event.EventRepository;
 import org.seng302.leftovers.persistence.event.InterestEventRepository;
+import org.seng302.leftovers.service.ReportService;
 import org.seng302.leftovers.tools.AuthenticationTokenManager;
 import org.seng302.leftovers.service.search.SearchPageConstructor;
 import org.seng302.leftovers.service.search.SearchSpecConstructor;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
+import java.time.Clock;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 public class SaleController {
@@ -53,11 +61,13 @@ public class SaleController {
     private final InterestEventRepository interestEventRepository;
     private final BoughtSaleItemRepository boughtSaleItemRepository;
     private final EventRepository eventRepository;
+    private final ReportService reportService;
 
     public SaleController(UserRepository userRepository, BusinessRepository businessRepository,
                           SaleItemRepository saleItemRepository, InventoryItemRepository inventoryItemRepository,
                           InterestEventRepository interestEventRepository, BoughtSaleItemRepository boughtSaleItemRepository,
-                          EventRepository eventRepository) {
+                          EventRepository eventRepository,
+                          ReportService reportService) {
         this.userRepository = userRepository;
         this.businessRepository = businessRepository;
         this.saleItemRepository = saleItemRepository;
@@ -65,6 +75,7 @@ public class SaleController {
         this.interestEventRepository = interestEventRepository;
         this.boughtSaleItemRepository = boughtSaleItemRepository;
         this.eventRepository = eventRepository;
+        this.reportService = reportService;
     }
 
     /**
@@ -373,6 +384,50 @@ public class SaleController {
                     .orElseThrow(() -> new DoesNotExistResponseException(SaleItem.class));
 
             return new GetSaleItemInterestDTO(saleItem.getInterestedUsers().contains(user));
+        } catch (Exception error) {
+            logger.error(error.getMessage());
+            throw error;
+        }
+    }
+
+
+    /**
+     * Generates a list of BoughtSaleItemRecords within a given date range.
+     *
+     * @param startDate The start date of the report. If null, is the creation of the business
+     * @param endDate The end date of the report. If null, is the current date
+     * @param businessId ID of the business to generate the report for
+     * @param granularityString A string representing the granularity type.
+     * @return List of BoughtSaleItemRecords within the given date range
+     */
+    @GetMapping("/businesses/{id}/reports")
+    public List<BoughtSaleItemRecord> generateReportForBusiness(
+            HttpServletRequest request,
+            @RequestParam(value = "startDate", required = false) LocalDate startDate,
+            @RequestParam(value = "endDate", required = false) LocalDate endDate,
+            @PathVariable("id") Long businessId,
+            @RequestParam(value = "granularity", required = false, defaultValue = "none") String granularityString) {
+        AuthenticationTokenManager.checkAuthenticationToken(request);
+        try {
+            logger.info("Generating sales report for business with id {}",businessId);
+            Business business = businessRepository.getBusinessById(businessId);
+
+            business.checkSessionPermissions(request);
+
+            startDate = Optional.ofNullable(startDate).orElse(LocalDateTime.ofInstant(business.getCreated(), Clock.systemDefaultZone().getZone()).toLocalDate());
+            endDate = Optional.ofNullable(endDate).orElse(LocalDate.now());
+
+           if (startDate.isAfter(endDate)) throw new ValidationResponseException("The end date cannot be before the start date");
+
+           ReportGranularity granularity;
+           try {
+               granularity = objectMapper.convertValue(granularityString, ReportGranularity.class);
+           } catch (IllegalArgumentException exception) {
+               throw new ValidationResponseException("Could not parse report granularity");
+           }
+
+           return  reportService.generateReport(business, startDate, endDate, granularity);
+
         } catch (Exception error) {
             logger.error(error.getMessage());
             throw error;

@@ -77,6 +77,7 @@ public class ReportService {
 
 
     /**
+     * Generates a list of BoughtSaleItemRecords within a given date range
      * @param business The business to generate the report for
      * @param start Date of the start of the report
      * @param end Date of the end of the report
