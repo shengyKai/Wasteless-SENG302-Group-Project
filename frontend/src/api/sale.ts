@@ -45,15 +45,15 @@ type SalesOrderBy = 'created' | 'closing' | 'productCode' | 'productName' | 'qua
 type SaleListingOrderBy = "price" | "productName" |"businessName" | "businessLocation" | "expiry" | "closing" | "created" | "quantity";
 
 type AdvanceSearch = {
-  productQuery: string,
-  businessQuery: string,
-  locationQuery: string,
-  closesBefore: string,
-  closesAfter: string,
+  productSearchQuery: string,
+  businessSearchQuery: string,
+  locationSearchQuery: string,
+  closeLower: string,
+  closeUpper: string,
   orderBy: SalesOrderBy,
   businessTypes: BusinessType[],
-  lowestPrice: string,
-  highestPrice: string,
+  priceLower: string,
+  priceUpper: string,
   reverse: boolean
 }
 /**
@@ -188,17 +188,17 @@ export async function advanceSearchSaleitem(advanceSearch: AdvanceSearch, page: 
   let response;
   try {
     let params : URLSearchParams = new URLSearchParams(
-      {"productSearchQuery": advanceSearch.productQuery,
-        "businessSearchQuery":  advanceSearch.businessQuery,
-        "locationSearchQuery": advanceSearch.locationQuery,
-        "closeLower": advanceSearch.closesBefore,
-        "closeUpper": advanceSearch.closesAfter,
+      {"productSearchQuery": advanceSearch.productSearchQuery,
+        "businessSearchQuery":  advanceSearch.businessSearchQuery,
+        "locationSearchQuery": advanceSearch.locationSearchQuery,
+        "closeLower": advanceSearch.closeLower,
+        "closeUpper": advanceSearch.closeUpper,
         "orderBy": advanceSearch.orderBy,
         "page": page.toString(),
         "resultsPerPage": resultsPerPage.toString(),
         "reverse": advanceSearch.reverse.toString(),
-        "priceLower": advanceSearch.lowestPrice,
-        "priceUpper": advanceSearch.highestPrice,
+        "priceLower": advanceSearch.priceLower,
+        "priceUpper": advanceSearch.priceUpper,
       });
     advanceSearch.businessTypes.map(type => params.append("businessTypes", type));
     response = await instance.get('/businesses/listings/search', {

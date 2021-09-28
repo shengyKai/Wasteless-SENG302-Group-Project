@@ -148,7 +148,7 @@ export default {
     advanceSearchParams: {
       deep: true,
       handler() {
-        this.simpleSearch();
+        this.advancedSearch();
       }
     },
     currentPage() {
