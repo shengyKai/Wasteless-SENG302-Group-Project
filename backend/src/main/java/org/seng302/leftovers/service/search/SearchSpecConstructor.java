@@ -148,17 +148,12 @@ public class SearchSpecConstructor {
         return (root, query, criteriaBuilder) -> criteriaBuilder.equal(root.get("businessType"), businessType);
     }
 
-    private static Specification<Business> constructBusinessSpecificationFromPoints(Integer minPoints) {
-        return (root, query, criteriaBuilder) -> criteriaBuilder.equal(root.get("businessType"), minPoints);
-    }
-
     /**
      * Returns a specification for Keywords which is used to filter keywords using a search term.
      * @param searchQuery The term to search for
      * @return Specification of type Keyword
      */
     public static Specification<Keyword> constructKeywordSpecificationFromSearchQuery(String searchQuery) {
-//        TODO something
         return buildPartialMatchSpec(searchQuery, Collections.singletonList("name"));
     }
 
