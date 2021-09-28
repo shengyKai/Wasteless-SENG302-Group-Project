@@ -354,7 +354,7 @@ export default {
         this.errorMessage = undefined;
         let newEvent = this.event;
         newEvent.status = status;
-        this.$store.commit('addEvent', newEvent);
+        this.$store.dispatch('refreshEventFeed');
       }
     },
   },
