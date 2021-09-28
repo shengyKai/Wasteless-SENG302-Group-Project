@@ -92,19 +92,31 @@
           </v-menu>
         </v-col>
         <v-col cols="4">
-          <v-select
-            v-model="periodBefore"
-            flat
-            solo-inverted
-            hide-details
-            label="Preset periods"
-            :items="periodBeforeOptions"
-            item-text="periodLevel"
-            item-value="periodValue"
-            prepend-inner-icon="mdi-clock-time-four"
-            color="secondary"
-          />
+          <v-row align="center" justify="center">
+            <v-col cols="2">
+              <div class="text-h5 text-center">
+                <strong>
+                  OR
+                </strong>
+              </div>
+            </v-col>
+            <v-col cols="10">
+              <v-select
+                v-model="periodBefore"
+                flat
+                solo-inverted
+                hide-details
+                label="Preset periods"
+                :items="periodBeforeOptions"
+                item-text="periodLevel"
+                item-value="periodValue"
+                prepend-inner-icon="mdi-clock-time-four"
+                color="secondary"
+              />
+            </v-col>
+          </v-row>
         </v-col>
+        <v-divider vertical dark/>
         <v-col cols="2">
           <v-select
             v-model="granularity"
@@ -134,8 +146,8 @@ export default {
   name: "ReportGenerationBar",
   data() {
     return {
-      fromDate: new Date().toISOString().slice(0, 10),
-      toDate: new Date().toISOString().slice(0, 10),
+      fromDate: null,
+      toDate: null,
       fromDateMenu: false,
       toDateMenu: false,
       periodBefore: null,
@@ -156,10 +168,14 @@ export default {
   },
   computed: {
     /**
-     * Max date of the fromDate has to be the same as the toDate
+     * Max date of the fromDate has to be the same as the toDate or the present day
      */
     maxFromDate() {
-      return this.toDate;
+      if (this.toDate !== null) {
+        return this.toDate;
+      } else {
+        return new Date().toISOString().slice(0, 10);
+      }
     },
     /**
      * Max date of the toDate is the present day
@@ -170,20 +186,48 @@ export default {
   },
   watch: {
     /**
+     * If the fromDate value is null and a value is being set for the toDate, the fromDate value is also set to the toDate value.
+     * This is to ensure both fields are filled in at all times.
+     * If toDate is not null, periodBefore must be null as both options cannot be used at the same time.
      * If the toDate date is before the fromDate date, change the fromDate to that value
      */
     toDate(value) {
+      if (this.fromDate === null) {
+        this.fromDate = value;
+      }
+      if (value !== null) {
+        this.periodBefore = null;
+      }
       if (new Date(value) < new Date(this.fromDate)) {
         this.fromDate = value;
       }
     },
     /**
+     * If the toDate value is null and a value is being set for the fromDate, the toDate value is also set to the fromDate value.
+     * This is to ensure both fields are filled in at all times.
+     * If fromDate is not null, periodBefore must be null as both options cannot be used at the same time.
      * If the fromDate date is after the toDate date, change the toDate to that value
      * Technically this situation should not have a chance to occur, but acts as a sanity check
      */
     fromDate(value) {
+      if (this.toDate === null) {
+        this.toDate = value;
+      }
+      if (value !== null) {
+        this.periodBefore = null;
+      }
       if (new Date(value) > new Date(this.toDate)) {
         this.toDate = value;
+      }
+    },
+    /**
+     * This watches the periodBefore variable so that if the period is not null, the toDate and fromDate
+     * must be null, as both options cannot be used at the same time.
+     */
+    periodBefore(value) {
+      if (value !== null) {
+        this.toDate = null;
+        this.fromDate = null;
       }
     }
   }
