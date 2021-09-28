@@ -87,9 +87,9 @@ describe('index.vue', () => {
                 lastName: "Another Last Name"
               }
             ],
-            rank: { 
+            rank: {
               name: "bronze",
-              threshold: 1 
+              threshold: 1
             }
           },
           readableAddress: "1 Some Street Name",
@@ -135,6 +135,6 @@ describe('index.vue', () => {
   });
 
   it("Must contain the business rank name", () => {
-    expect(wrapper.text()).toContain('Rank: bronze');
+    expect(wrapper.text()).toContain('Rank: Bronze');
   });
 });

@@ -53,7 +53,7 @@
           </v-row>
           <p>
             <strong>Created:</strong> {{ createdMsg }}
-            <strong class="rank">Rank:</strong> {{ business.rank.name }}
+            <strong class="rank">Rank:</strong> {{ business.rank.name.charAt(0).toUpperCase() + business.rank.name.slice(1) }}
           </p>
           <v-btn outlined color="primary" @click="goSalePage" :value="false" width="150">
             Sale listings
