@@ -2,7 +2,7 @@
   <v-card color="secondary" dark>
     <v-card-actions>
       <v-row align="center" justify="center">
-        <v-col cols="2" class="mt-1">
+        <v-col cols="12" md="2" sm="12" class="mt-1">
           <v-menu
             ref="fromMenu"
             v-model="fromDateMenu"
@@ -46,7 +46,7 @@
             </v-date-picker>
           </v-menu>
         </v-col>
-        <v-col cols="2">
+        <v-col cols="12" md="2" sm="12">
           <v-menu
             class="mb-0 pb-0"
             ref="toMenu"
@@ -91,31 +91,27 @@
             </v-date-picker>
           </v-menu>
         </v-col>
-        <v-col cols="4">
-          <v-row align="center" justify="center">
-            <v-col cols="2">
-              <h4 class="font-weight-bold text-center">
-                OR
-              </h4>
-            </v-col>
-            <v-col cols="10">
-              <v-select
-                v-model="periodBefore"
-                flat
-                solo-inverted
-                hide-details
-                label="Preset periods"
-                :items="periodBeforeOptions"
-                item-text="periodLevel"
-                item-value="periodValue"
-                prepend-inner-icon="mdi-clock-time-four"
-                color="secondary"
-              />
-            </v-col>
-          </v-row>
+        <v-col cols="12" md="1" sm="12">
+          <h4 class="font-weight-bold text-center">
+            OR
+          </h4>
+        </v-col>
+        <v-col cols="12" md="3" sm="12">
+          <v-select
+            v-model="periodBefore"
+            flat
+            solo-inverted
+            hide-details
+            label="Preset periods"
+            :items="periodBeforeOptions"
+            item-text="periodLevel"
+            item-value="periodValue"
+            prepend-inner-icon="mdi-clock-time-four"
+            color="secondary"
+          />
         </v-col>
         <v-divider vertical dark/>
-        <v-col cols="2">
+        <v-col cols="12" md="2" sm="12">
           <v-select
             v-model="granularity"
             flat
@@ -128,7 +124,7 @@
             label="Report Granularity"
           />
         </v-col>
-        <v-col cols="auto">
+        <v-col cols="12" md="1" sm="12" class="text-center">
           <v-btn
             color="primary">
             Generate
