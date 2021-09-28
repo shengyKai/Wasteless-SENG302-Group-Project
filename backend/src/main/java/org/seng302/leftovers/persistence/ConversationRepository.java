@@ -7,6 +7,7 @@ import org.seng302.leftovers.exceptions.DoesNotExistResponseException;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface ConversationRepository extends CrudRepository<Conversation, Long> {
@@ -18,6 +19,8 @@ public interface ConversationRepository extends CrudRepository<Conversation, Lon
      * @return An optional containing the result, if the conversation exists else an empty optional
      */
     Optional<Conversation> findByCardAndBuyer(@Param("card") MarketplaceCard card, @Param("buyer") User buyer);
+
+    List<Conversation> findAllByCard(@Param("card") MarketplaceCard card);
 
     /**
      * Will retrieve the conversation regarding the given card and expected buyer, or throw a 406 response status
