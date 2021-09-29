@@ -1,12 +1,11 @@
 <template>
   <div>
-    <div class="ml-2">
-      <div class="float-left">{{points}}</div>
-      <div v-if="threshold" class="float-left">/ {{threshold}}</div>
-    </div>
-    <div class="maxXP">
-      <div v-bind:style="currentXP"/>
-    </div>
+    <v-progress-linear class="maxXP" height="25" :value="progress">
+      <strong class="ml-2">
+        <div class="float-left">{{points}}</div>
+        <div v-if="threshold" class="float-left">/ {{threshold}}</div>
+      </strong>
+    </v-progress-linear>
   </div>
 </template>
 
@@ -27,14 +26,8 @@ export default {
       return this.business.rank.threshold;
     },
     progress() {
-      return this.points/this.threshold*600;
-    },
-    currentXP() {
-      return {
-        height: '20px',
-        width: this.progress + 'px',
-        backgroundColor: 'greenyellow',
-      };
+      if (this.threshold === null) return 100;
+      return this.points/this.threshold*100;
     }
   }
 };
@@ -42,8 +35,8 @@ export default {
 
 <style scoped>
 .maxXP {
-  height: 20px;
-  width: 600px;
-  background-color: darkgrey;
+  width: 500px;
+  color: darkgreen;
+  background-color: lightgrey;
 }
 </style>
