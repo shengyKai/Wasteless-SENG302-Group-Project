@@ -4,6 +4,7 @@
       {{ reportTitle }}
     </strong>
     <v-data-table
+      generateReport='0'
       :headers="headers"
       :items="fullReport.reportData"
     />
@@ -28,8 +29,8 @@ export default {
         { text: 'No. of Unique Products', value: 'uniqueProducts' },
         { text: 'No. of Unique Listings', value: 'uniqueListingsSold' },
         { text: 'Average Time to Sell (days)', value: 'averageDaysToSell' },
-        { text: 'Total Quantity Sold', value: 'totalQuantitySold' },
         { text: 'Average Like Count', value: 'averageLikeCount' },
+        { text: 'Total Quantity Sold', value: 'totalQuantitySold' },
         { text: 'Total Value of all Purchases ($)', value: 'totalPriceSold' },
       ],
       /**

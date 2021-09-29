@@ -148,7 +148,7 @@ export default {
       fromDateMenu: false,
       toDateMenu: false,
       periodBefore: null,
-      granularity: "year",
+      granularity: "yearly",
       periodBeforeOptions: [
         { periodLevel:'One day before', periodValue:'day' },
         { periodLevel:'One week before', periodValue:'week' },
@@ -186,8 +186,34 @@ export default {
      * Method to send the report generation specifications to the parent, SalesReportPage
      */
     async sendReportSpecifications() {
-      this.$emit("sendRequestParams", {businessId: this.businessId, fromDate: this.fromDate, toDate: this.toDate, granularity: this.granularity});
+      let [startDate, endDate] = this.getDatesForReport();
+      this.$emit("sendRequestParams", {businessId: this.businessId, fromDate: startDate, toDate: endDate, granularity: this.granularity});
     },
+    /**
+     * Method to break down the dates from the report generation options so that it can provide logical values to the endpoint
+     */
+    getDatesForReport() {
+      let startDate = new Date();
+      let endDate = new Date();
+      if (this.periodBefore === "day") {
+        startDate.setDate( startDate.getDate() - 1);
+      } else if (this.periodBefore === "week") {
+        startDate.setDate( startDate.getDate() - 7);
+      } else if (this.periodBefore === "month") {
+        startDate.setMonth( startDate.getMonth() - 1);
+      } else if (this.periodBefore === "year") {
+        startDate.setFullYear( startDate.getFullYear() - 1);
+      }
+
+      startDate = startDate.toISOString().slice(0, 10);
+      endDate = endDate.toISOString().slice(0, 10);
+
+      if (this.fromDate !== null && this.toDate !== null) {
+        startDate = this.fromDate;
+        endDate = this.endDate;
+      }
+      return [startDate, endDate];
+    }
   },
   watch: {
     /**

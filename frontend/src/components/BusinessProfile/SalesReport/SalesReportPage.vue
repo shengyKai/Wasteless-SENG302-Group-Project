@@ -30,19 +30,27 @@ export default {
      */
     async generateFullReport(requestParams) {
       let reportData = await generateReport(requestParams.businessId, requestParams.fromDate, requestParams.toDate, requestParams.granularity);
-      this.breakDownDate(reportData);
+      this.formatReportData(reportData);
       this.fullReport = {reportData: reportData, reportType: requestParams.granularity};
     },
     /**
      * Breakdown the dates retrieved from the backend so that it can be presented in the table later. This is done here
      * because we are not able to mutate the reportData as a prop later on in SalesReportTable.
+     * If the results from the backend are omitting averageLikeCount or averageDaysToSell due to no values for them,
+     * default those column values to 0.
      */
-    breakDownDate(reportData) {
+    formatReportData(reportData) {
       for (let row in reportData) {
         reportData[row]["day"] = new Date(reportData[row]["endDate"]).getDate();
         reportData[row]["week"] = this.getWeekNo(new Date(reportData[row]["endDate"]));
         reportData[row]["month"] = new Date(reportData[row]["endDate"]).toLocaleString('default', {month: 'long'});
         reportData[row]["year"] = new Date(reportData[row]["endDate"]).getFullYear();
+        if (!Object.prototype.hasOwnProperty.call(reportData[row], "averageLikeCount")) {
+          reportData[row]["averageLikeCount"] = 0;
+        }
+        if (!Object.prototype.hasOwnProperty.call(reportData[row], "averageDaysToSell")) {
+          reportData[row]["averageDaysToSell"] = 0;
+        }
       }
     },
     /**
