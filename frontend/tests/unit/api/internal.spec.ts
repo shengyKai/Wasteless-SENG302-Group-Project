@@ -196,7 +196,7 @@ type ApiCalls = {[k in keyof ApiMethods]: {
   usesServerMessage: boolean,                       // Whether the "message" attribute in the response is used for unspecialised error messages
 }};
 
-const temp = new URLSearchParams({
+const urlParams = new URLSearchParams({
   "productSearchQuery": "Apple",
   "businessSearchQuery":  "Nathan",
   "locationSearchQuery": "New Zealand",
@@ -411,20 +411,20 @@ const apiCalls: Partial<ApiCalls> = {
   },
   advanceSearchSaleitem: {
     parameters: [{
-      productSearchQuery: "Apple",
-      businessSearchQuery: "Nathan",
-      locationSearchQuery: "New Zealand",
-      closeLower: "21/01/2030",
-      closeUpper: "11/01/2030",
+      productQuery: "Apple",
+      businessQuery: "Nathan",
+      locationQuery: "New Zealand",
+      closesAfter: "21/01/2030",
+      closesBefore: "11/01/2030",
       orderBy: "productName",
       businessTypes: ["Retail Trade"],
-      priceLower: "1",
-      priceUpper: "50",
+      lowestPrice: "1",
+      highestPrice: "50",
       reverse: false}, 1, 10],
     httpMethod: 'get',
     url: '/businesses/listings/search',
     body: {
-      params: temp,
+      params: urlParams,
     },
     result: searchResult([testSaleItem]),
     failedTypeCheckResponse: 'Response is not Sale Item Listing array',

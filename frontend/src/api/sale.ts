@@ -45,15 +45,15 @@ type SalesOrderBy = 'created' | 'closing' | 'productCode' | 'productName' | 'qua
 type SaleListingOrderBy = "price" | "productName" |"businessName" | "businessLocation" | "expiry" | "closing" | "created" | "quantity";
 
 type AdvanceSearch = {
-  productSearchQuery: string,
-  businessSearchQuery: string,
-  locationSearchQuery: string,
-  closeLower: string,
-  closeUpper: string,
-  orderBy: SalesOrderBy,
+  productQuery: string,
+  businessQuery: string,
+  locationQuery: string,
+  closesBefore: string,
+  closesAfter: string,
+  orderBy: SaleListingOrderBy,
   businessTypes: BusinessType[],
-  priceLower: string,
-  priceUpper: string,
+  lowestPrice: string,
+  highestPrice: string,
   reverse: boolean
 }
 /**
@@ -188,17 +188,17 @@ export async function advanceSearchSaleitem(advanceSearch: AdvanceSearch, page: 
   let response;
   try {
     let params : URLSearchParams = new URLSearchParams(
-      {"productSearchQuery": advanceSearch.productSearchQuery,
-        "businessSearchQuery":  advanceSearch.businessSearchQuery,
-        "locationSearchQuery": advanceSearch.locationSearchQuery,
-        "closeLower": advanceSearch.closeLower,
-        "closeUpper": advanceSearch.closeUpper,
+      {"productSearchQuery": advanceSearch.productQuery,
+        "businessSearchQuery":  advanceSearch.businessQuery,
+        "locationSearchQuery": advanceSearch.locationQuery,
+        "closeLower": advanceSearch.closesAfter,
+        "closeUpper": advanceSearch.closesBefore,
         "orderBy": advanceSearch.orderBy,
         "page": page.toString(),
         "resultsPerPage": resultsPerPage.toString(),
         "reverse": advanceSearch.reverse.toString(),
-        "priceLower": advanceSearch.priceLower,
-        "priceUpper": advanceSearch.priceUpper,
+        "priceLower": advanceSearch.lowestPrice,
+        "priceUpper": advanceSearch.highestPrice,
       });
     advanceSearch.businessTypes.map(type => params.append("businessTypes", type));
     response = await instance.get('/businesses/listings/search', {

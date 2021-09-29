@@ -82,7 +82,6 @@ export default {
      * @returns {Promise<void>}
      */
     async populateSales() {
-      console.log("A");
       const result = await getBusinessSales(this.businessId, this.page, this.resultsPerPage, this.orderBy, this.reversed);
       if (typeof result === 'string') {
         this.$store.commit('setError', result);

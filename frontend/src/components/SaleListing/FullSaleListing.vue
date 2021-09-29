@@ -163,7 +163,6 @@ export default {
    */
   mounted() {
     this.interestCount = this.saleItem.interestCount;
-    console.log(this.saleItem);
   },
   computed: {
     /**
