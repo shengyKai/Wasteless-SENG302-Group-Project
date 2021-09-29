@@ -10,7 +10,6 @@ let weeklyHeaders = ["Week No.", "Month"];
 let monthlyHeaders = ["Month"];
 let baseHeaders = ['Year', 'No. of Unique Buyers','No. of Unique Products', 'Average Time to Sell (days)', 'Average Like Count', 
                       'Total Value of all Purchases ($)']
-let titles = ["daily", "weekly", "monthly", "yearly"];
 
 describe('SalesReportTable.vue', () => {
   let wrapper: Wrapper<any>;
@@ -38,14 +37,6 @@ describe('SalesReportTable.vue', () => {
 
   afterEach(() => {
     wrapper.destroy();
-  });
-
-  it.each(titles)("Shows the correct report title based on the reportType", async (title) => {
-    await wrapper.setProps({
-      reportType: title
-    });
-    console.log(wrapper.vm.reportTitle);
-    expect(wrapper.text()).toContain(`${title.charAt(0).toUpperCase() + title.slice(1)} Report`);
   });
 
   it.each(dailyHeaders.concat(baseHeaders))("If the reportType is daily, the appropriate table headers are shown", (header) => {

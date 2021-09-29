@@ -21,7 +21,7 @@ export default {
   },
   data(){
     return {
-      businessName: "Sheep Biz",
+      businessName: undefined,
       fullReport: undefined,
       errorMessage: undefined,
     };
@@ -36,6 +36,7 @@ export default {
       let reportData = await generateReport(requestParams.businessId, requestParams.fromDate, requestParams.toDate, requestParams.granularity);
       if (typeof reportData === 'string') {
         this.errorMessage = reportData;
+        this.fullReport = undefined;
       } else {
         this.formatReportData(reportData);
         this.fullReport = {reportData: reportData, reportType: requestParams.granularity};
