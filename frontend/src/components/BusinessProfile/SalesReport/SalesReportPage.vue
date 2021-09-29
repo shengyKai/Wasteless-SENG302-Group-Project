@@ -2,7 +2,8 @@
   <v-container>
     <h2 class="font-weight-bold text-center">{{ title }}</h2>
     <ReportOptionsBar @sendRequestParams="generateFullReport"/>
-    <SalesReportTable v-if="fullReport !== null" :fullReport="fullReport"/>
+    <p class="error-text text-center" v-if ="errorMessage !== undefined"> {{errorMessage}} </p>
+    <SalesReportTable v-if="fullReport !== undefined" :fullReport="fullReport"/>
   </v-container>
 </template>
 
@@ -10,6 +11,7 @@
 import ReportOptionsBar from "./ReportOptionsBar.vue";
 import SalesReportTable from "./SalesReportTable.vue";
 import { generateReport } from "@/api/salesReport.ts";
+import { getBusiness } from "@/api/business";
 
 export default {
   name: "ReportGenerationBar",
@@ -20,7 +22,8 @@ export default {
   data(){
     return {
       businessName: "Sheep Biz",
-      fullReport: null
+      fullReport: undefined,
+      errorMessage: undefined,
     };
   },
   methods: {
@@ -30,8 +33,12 @@ export default {
      */
     async generateFullReport(requestParams) {
       let reportData = await generateReport(requestParams.businessId, requestParams.fromDate, requestParams.toDate, requestParams.granularity);
-      this.formatReportData(reportData);
-      this.fullReport = {reportData: reportData, reportType: requestParams.granularity};
+      if (typeof reportData === 'string') {
+        this.errorMessage = reportData;
+      } else {
+        this.formatReportData(reportData);
+        this.fullReport = {reportData: reportData, reportType: requestParams.granularity};
+      }
     },
     /**
      * Breakdown the dates retrieved from the backend so that it can be presented in the table later. This is done here
@@ -70,6 +77,10 @@ export default {
       return `Sales Report - ${this.businessName}`;
     }
   },
+  async mounted() {
+    let business = await getBusiness(this.$route.params.id);
+    this.businessName = business.name;
+  }
 };
 
 </script>

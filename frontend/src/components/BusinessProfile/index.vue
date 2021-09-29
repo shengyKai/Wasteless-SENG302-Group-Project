@@ -114,13 +114,14 @@ import {
   alphabetExtendedMultilineRules,
   alphabetExtendedSingleLineRules, alphabetRules,
   mandatoryRules,
-  maxCharRules, postCodeRules, streetNumRules
+  maxCharRules, postCodeRules, streetNumRules, USER_ROLES
 } from "@/utils";
 import ImageCarousel from "@/components/image/ImageCarousel";
 import {getBusiness} from "@/api/business";
 import SilverRank from "@/components/ranks/SilverRank";
 import GoldRank from "@/components/ranks/GoldRank";
 import PlatinumRank from "@/components/ranks/PlatinumRank";
+
 export default {
   name: 'BusinessProfile',
   components: {
