@@ -40,7 +40,7 @@
                 <v-list-item-title >Sale Listing</v-list-item-title>
               </v-list-item-content>
             </v-list-item>
-            <v-list-item v-if="isAdmin" @click="goSaleReports">
+            <v-list-item @click="goSaleReports">
               <v-list-item-icon>
                 <v-icon>mdi-view-list</v-icon>
               </v-list-item-icon>
@@ -71,25 +71,12 @@
 </template>
 
 <script>
-import { USER_ROLES } from "@/utils";
-import { getBusiness } from "@/api/business.ts";
-
 export default {
   name: "BusinessActionPanel",
   data() {
     return {
       showingCreateProduct: false,
-      business: Object
     };
-  },
-  computed: {
-    /**
-     * Checks to see if the user is a admin of the business
-     */
-    isAdmin() {
-      return this.business.administrators.map(admin => admin.id).includes(this.$store.state.user.id) ||
-      [USER_ROLES.DGAA, USER_ROLES.GAA].includes(this.$store.getters.role);
-    }
   },
   methods: {
     /**
@@ -124,11 +111,6 @@ export default {
       this.$router.push(`/salesreport/${this.$store.state.activeRole.id}`);
     }
   },
-  beforeMount: {
-    async setBusiness() {
-      this.business = await getBusiness(this.$store.state.activeRole.id);
-    }
-  }
 };
 </script>
 

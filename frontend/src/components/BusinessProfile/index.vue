@@ -61,7 +61,7 @@
         <v-btn class="business-btn" outlined color="primary" @click="goSalePage" :value="false" width="150">
           Sale listings
         </v-btn>
-        <v-btn class="business-btn" outlined color="primary" @click="goSaleReports" :value="false" width="150">
+        <v-btn v-if="isAdmin" class="business-btn" outlined color="primary" @click="goSaleReports" :value="false" width="150">
           Sale reports
         </v-btn>
         <v-container fluid>
@@ -105,6 +105,7 @@
 </template>
 
 <script>
+import { USER_ROLES } from "@/utils";
 import ModifyBusiness from '@/components/BusinessProfile/ModifyBusiness';
 import convertAddressToReadableText from '@/components/utils/Methods/convertAddressToReadableText';
 import {
@@ -173,6 +174,13 @@ export default {
   },
 
   computed: {
+    /**
+     * Checks to see if the user is a admin of the business
+     */
+    isAdmin() {
+      return this.business.administrators.map(admin => admin.id).includes(this.$store.state.user.id) ||
+      [USER_ROLES.DGAA, USER_ROLES.GAA].includes(this.$store.getters.role);
+    },
     createdMsg() {
       if (this.business.created === undefined) return '';
 
