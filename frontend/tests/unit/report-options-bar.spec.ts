@@ -150,4 +150,24 @@ describe('ReportOptionsBar.vue', () => {
     let today = new Date();
     expect(wrapper.emitted().sendRequestParams as any[1]).toEqual([[{fromDate: new Date(today.setFullYear(today.getFullYear() - 1)).toISOString().slice(0, 10), toDate: new Date().toISOString().slice(0, 10), granularity: "yearly"}]]);
   });
+
+  it("If fromDate is null but toDate is not null or vice versa, both will default to null", async() => {
+    // The setData has to be at two separate calls because it would not invoke the watcher otherwise
+    await wrapper.setData({
+      fromDate: new Date("2021-01-01").toISOString().slice(0, 10)
+    });
+    await wrapper.setData({
+      toDate: null
+    });
+    expect(wrapper.vm.fromDate).toBe(null);
+
+    // The setData has to be at two separate calls because it would not invoke the watcher otherwise
+    await wrapper.setData({
+      toDate: new Date("2021-01-01").toISOString().slice(0, 10)
+    });
+    await wrapper.setData({
+      fromDate: null
+    });
+    expect(wrapper.vm.toDate).toBe(null);
+  });
 });
