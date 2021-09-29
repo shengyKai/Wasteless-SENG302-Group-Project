@@ -9,7 +9,9 @@ import org.mockito.*;
 import org.seng302.leftovers.entities.MarketplaceCard;
 import org.seng302.leftovers.entities.User;
 import org.seng302.leftovers.entities.event.ExpiryEvent;
+import org.seng302.leftovers.persistence.ConversationRepository;
 import org.seng302.leftovers.persistence.MarketplaceCardRepository;
+import org.seng302.leftovers.persistence.MessageRepository;
 import org.seng302.leftovers.persistence.event.EventRepository;
 import org.seng302.leftovers.persistence.event.ExpiryEventRepository;
 
@@ -37,6 +39,10 @@ class CardServiceTest {
     EventRepository eventRepository;
     @Mock
     ExpiryEventRepository expiryEventRepository;
+    @Mock
+    MessageRepository messageRepository;
+    @Mock
+    ConversationRepository conversationRepository;
     @Mock
     SessionFactory sessionFactory;
     @Mock
@@ -68,7 +74,8 @@ class CardServiceTest {
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
-        cardService = new CardService(marketplaceCardRepository, eventRepository, expiryEventRepository, sessionFactory);
+        cardService = new CardService(marketplaceCardRepository, eventRepository, expiryEventRepository,
+                messageRepository, conversationRepository, sessionFactory);
         setUpCards();
         mockCurrentTime();
         when(sessionFactory.openSession()).thenReturn(mockSession);

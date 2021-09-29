@@ -372,7 +372,9 @@ class ImageTests {
         var image = imageRepository.save(new Image("foo.png", "bar.png"));
 
         var business = createBusiness(userRepository.save(createUser()));
-        business.addImage(image);
+        List<Image> images = business.getImages();
+        images.add(image);
+        business.setImages(images);
         businessRepository.save(business);
 
         try (Session session = sessionFactory.openSession()) {
@@ -404,7 +406,9 @@ class ImageTests {
         var image = imageRepository.save(new Image("foo.png", "bar.png"));
 
         var business = createBusiness(userRepository.save(createUser()));
-        business.addImage(image);
+        List<Image> images = business.getImages();
+        images.add(image);
+        business.setImages(images);
         business = businessRepository.save(business);
 
         var product = createProduct(business);

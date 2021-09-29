@@ -2,6 +2,8 @@ package org.seng302.leftovers.entities.event;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.EqualsAndHashCode;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 import org.seng302.leftovers.dto.event.MessageEventDTO;
 import org.seng302.leftovers.entities.Conversation;
 import org.seng302.leftovers.entities.Message;
@@ -21,6 +23,7 @@ public class MessageEvent extends Event {
 
     @ManyToOne
     @JoinColumn(name = "message_id", nullable = false)
+    @OnDelete(action = OnDeleteAction.CASCADE)
     private Message message;
 
     @ManyToOne

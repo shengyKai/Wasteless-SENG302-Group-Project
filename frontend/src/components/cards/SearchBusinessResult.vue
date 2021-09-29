@@ -8,13 +8,14 @@
         <v-list-item-content>
           <v-list-item-title>
 
-            <a style="color: black;" @click="viewBusinessProfile">
+            <a class="link" @click="viewBusinessProfile">
               {{ business.name }}
             </a>
 
           </v-list-item-title>
-          <v-list-item-subtitle> {{ business.businessType }} </v-list-item-subtitle>
-          <v-list-item-subtitle> {{ insertAddress(business.address) }} </v-list-item-subtitle>
+          <v-list-item-subtitle>{{ insertAddress(business.address) }}</v-list-item-subtitle>
+          <v-list-item-subtitle>{{ business.businessType }}</v-list-item-subtitle>
+          <v-list-item-subtitle><strong>Rank: </strong>Bronze ({{business.points}} points)</v-list-item-subtitle>
         </v-list-item-content>
       </v-col>
     </v-row>
@@ -52,5 +53,4 @@ export default {
 .link:hover {
     text-decoration: underline;
 }
-
 </style>

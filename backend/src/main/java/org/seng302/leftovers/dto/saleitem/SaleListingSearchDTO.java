@@ -2,7 +2,6 @@ package org.seng302.leftovers.dto.saleitem;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.exc.InvalidFormatException;
 import lombok.*;
 import org.seng302.leftovers.dto.business.BusinessType;
 import org.seng302.leftovers.exceptions.ValidationResponseException;
