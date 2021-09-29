@@ -46,10 +46,10 @@ export default {
         reportData[row]["month"] = new Date(reportData[row]["endDate"]).toLocaleString('default', {month: 'long'});
         reportData[row]["year"] = new Date(reportData[row]["endDate"]).getFullYear();
         if (!Object.prototype.hasOwnProperty.call(reportData[row], "averageLikeCount")) {
-          reportData[row]["averageLikeCount"] = 0;
+          reportData[row]["averageLikeCount"] = "-";
         }
         if (!Object.prototype.hasOwnProperty.call(reportData[row], "averageDaysToSell")) {
-          reportData[row]["averageDaysToSell"] = 0;
+          reportData[row]["averageDaysToSell"] = "-";
         }
       }
     },

@@ -195,10 +195,11 @@ export default {
     getDatesForReport() {
       let startDate = new Date();
       let endDate = new Date();
+
       if (this.periodBefore === "day") {
         startDate.setDate( startDate.getDate() - 1);
       } else if (this.periodBefore === "week") {
-        startDate.setDate( startDate.getDate() - 7);
+        startDate.setDate( startDate.getDate() - 6);
       } else if (this.periodBefore === "month") {
         startDate.setMonth( startDate.getMonth() - 1);
       } else if (this.periodBefore === "year") {
@@ -220,6 +221,8 @@ export default {
      * If the fromDate value is null and a value is being set for the toDate, the fromDate value is also set to the toDate value.
      * This is to ensure both fields are filled in at all times.
      * If toDate is not null, periodBefore must be null as both options cannot be used at the same time.
+     * Else if toDate is null and fromDate is not null, make fromDate null. This is to ensure both dates are filled in or not at all
+     * times.
      * If the toDate date is before the fromDate date, change the fromDate to that value
      */
     toDate(value) {
@@ -228,6 +231,8 @@ export default {
       }
       if (value !== null) {
         this.periodBefore = null;
+      } else if (value === null && this.fromDate !== null) {
+        this.fromDate = null;
       }
       if (new Date(value) < new Date(this.fromDate)) {
         this.fromDate = value;
@@ -237,6 +242,8 @@ export default {
      * If the toDate value is null and a value is being set for the fromDate, the toDate value is also set to the fromDate value.
      * This is to ensure both fields are filled in at all times.
      * If fromDate is not null, periodBefore must be null as both options cannot be used at the same time.
+     * Else if fromDate is null and toDate is not null, make toDate null. This is to ensure both dates are filled in or not at all
+     * times.
      * If the fromDate date is after the toDate date, change the toDate to that value
      * Technically this situation should not have a chance to occur, but acts as a sanity check
      */
@@ -246,6 +253,8 @@ export default {
       }
       if (value !== null) {
         this.periodBefore = null;
+      } else if (value === null && this.toDate !== null) {
+        this.toDate = null;
       }
       if (new Date(value) > new Date(this.toDate)) {
         this.toDate = value;
