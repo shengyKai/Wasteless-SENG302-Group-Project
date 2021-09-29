@@ -29,7 +29,7 @@
                 <v-icon>mdi-view-list</v-icon>
               </v-list-item-icon>
               <v-list-item-content>
-                <v-list-item-title >Inventory</v-list-item-title>
+                <v-list-item-title>Inventory</v-list-item-title>
               </v-list-item-content>
             </v-list-item>
             <v-list-item @click="goSalePage">
@@ -37,7 +37,7 @@
                 <v-icon>mdi-view-list</v-icon>
               </v-list-item-icon>
               <v-list-item-content>
-                <v-list-item-title >Sale Listing</v-list-item-title>
+                <v-list-item-title>Sale Listing</v-list-item-title>
               </v-list-item-content>
             </v-list-item>
             <v-list-item @click="goSaleReports">
@@ -45,7 +45,7 @@
                 <v-icon>mdi-view-list</v-icon>
               </v-list-item-icon>
               <v-list-item-content>
-                <v-list-item-title >Sale Reports</v-list-item-title>
+                <v-list-item-title>Sale Reports</v-list-item-title>
               </v-list-item-content>
             </v-list-item>
           </v-list-item-group>
@@ -64,6 +64,9 @@
         <v-icon large>mdi-view-list</v-icon>
       </v-btn>
       <v-btn icon @click="goSalePage" class="action-button">
+        <v-icon large>mdi-view-list</v-icon>
+      </v-btn>
+      <v-btn icon @click="goSaleReports" class="action-button">
         <v-icon large>mdi-view-list</v-icon>
       </v-btn>
     </v-card>
