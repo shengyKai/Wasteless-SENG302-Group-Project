@@ -40,6 +40,14 @@
                 <v-list-item-title >Sale Listing</v-list-item-title>
               </v-list-item-content>
             </v-list-item>
+            <v-list-item @click="goSaleReport">
+              <v-list-item-icon>
+                <v-icon>mdi-view-list</v-icon>
+              </v-list-item-icon>
+              <v-list-item-content>
+                <v-list-item-title >Sale Reports</v-list-item-title>
+              </v-list-item-content>
+            </v-list-item>
           </v-list-item-group>
         </v-list>
       </v-card-text>
@@ -91,9 +99,18 @@ export default {
     goInventoryPage() {
       this.$router.push(`/business/${this.$store.state.activeRole.id}/inventory`);
     },
+    /**
+     * Shows the Sale Listing page
+     */
     goSalePage() {
       this.$router.push(`/business/${this.$store.state.activeRole.id}/listings`);
     },
+    /**
+     * Shows the Sale Reports page
+     */
+    goSaleReport() {
+      this.$router.push(`/salesreport/${this.$store.state.activeRole.id}`);
+    }
   },
 };
 </script>

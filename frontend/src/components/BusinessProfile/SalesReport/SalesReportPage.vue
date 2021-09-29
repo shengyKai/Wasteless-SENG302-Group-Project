@@ -27,7 +27,10 @@ export default {
      */
     title() {
       return `Sales Report - ${this.businessName}`;
-    }
+    },
+    businessId() {
+      return this.$store.state.createSaleItemDialog.businessId;
+    },
   }
 };
 
