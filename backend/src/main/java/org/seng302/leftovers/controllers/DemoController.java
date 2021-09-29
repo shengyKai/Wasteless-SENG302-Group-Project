@@ -173,12 +173,14 @@ public class DemoController {
       private int inventoryItemCount = 0;
       private int cardCount = 0;
       private int saleItemCount = 0;
+      private int boughtSaleItemCount = 0;
 
       private List<Long> userInitial = new ArrayList<>();
       private List<Long> businessInitial = new ArrayList<>();
       private List<Long> productInitial = new ArrayList<>();
       private List<Long> inventoryItemInitial = new ArrayList<>();
       private List<Long> saleItemInitial = new ArrayList<>();
+      private List<Long> boughtSaleItemInitial = new ArrayList<>();
       private Boolean generateProductImages = false;
       private Boolean generateBusinessImages = false;
       private int businessImageMin = 0;
@@ -198,6 +200,7 @@ public class DemoController {
         private List<Long> generatedInventoryItems;
         private List<Long> generatedSaleItems;
         private List<Long> generatedCards;
+        private List<Long> generatedBoughtSaleItems;
     }
 
     /**
@@ -222,6 +225,7 @@ public class DemoController {
             var inventoryItemGenerator = new InventoryItemGenerator(connection);
             var saleItemGenerator = new SaleItemGenerator(connection);
             var cardGenerator = new MarketplaceCardGenerator(connection);
+            var boughtSaleItemGenerator = new BoughtSaleItemGenerator(connection);
             var businessImageGenerator = new BusinessImageGenerator(connection);
 
             List<Long> userIds = userGenerator.generateUsers(options.userCount);
@@ -240,11 +244,13 @@ public class DemoController {
 
             List<Long> cardIds = cardGenerator.generateCards(allUsers, options.getCardCount());
 
+            List<Long> boughtSaleItemIds = boughtSaleItemGenerator.generateBoughtSaleItems(allProducts, allUsers, options.getBoughtSaleItemCount());
+
             if (options.getGenerateBusinessImages()) {
                 businessImageGenerator.generateBusinessImages(allBusinesses, options.getBusinessImageMin(), options.getBusinessImageMax());
             }
 
-            return new GenerateResponseDTO(userIds, businessIds, productIds, inventoryIds, saleItemIds, cardIds);
+            return new GenerateResponseDTO(userIds, businessIds, productIds, inventoryIds, saleItemIds, cardIds, boughtSaleItemIds);
         });
     }
 }
