@@ -149,7 +149,7 @@ export default {
       fromDateMenu: false,
       toDateMenu: false,
       periodBefore: null,
-      granularity: null,
+      granularity: "year",
       periodBeforeOptions: [
         { periodLevel:'One day before', periodValue:'day' },
         { periodLevel:'One week before', periodValue:'week' },
@@ -185,7 +185,7 @@ export default {
   methods: {
     async callGenerateReport() {
       const reportData = await generateReport(1, this.fromDate, this.toDate, this.granularity);
-      this.$emit("retrievedData", reportData);
+      this.$emit("retrievedData", {reportData: reportData, reportType: this.granularity});
     }
   },
   watch: {

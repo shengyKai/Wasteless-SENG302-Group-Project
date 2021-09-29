@@ -5,12 +5,14 @@ export type ReportGranularity = 'daily' | 'weekly' | 'monthly' | 'yearly';
 
 
 export type SaleRecord = {
-  date: string,
+  startDate: string,
+  endDate: string,
   uniqueListingsSold?: number,
   uniqueBuyers?: number,
   uniqueProducts?: number,
   averageLikeCount?: number,
   averageDaysToSell?: number,
+  totalQuantitySold?: number,
   totalPriceSold?: number
 }
 

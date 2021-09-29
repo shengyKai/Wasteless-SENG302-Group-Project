@@ -2,7 +2,7 @@
   <v-container>
     <h2 class="font-weight-bold text-center">{{ title }}</h2>
     <ReportOptionsBar @retrievedData="passToTable"/>
-    <SalesReportTable :reportData="reportData"/>
+    <SalesReportTable v-if="reportDetails !== null" :reportDetails="reportDetails"/>
   </v-container>
 </template>
 
@@ -19,12 +19,12 @@ export default {
   data(){
     return {
       businessName: "Sheep Biz",
-      reportData: null
+      reportDetails: null
     };
   },
   methods: {
-    passToTable(reportData) {
-      this.reportData = reportData;
+    passToTable(reportDetails) {
+      this.reportDetails = reportDetails;
     }
   },
   computed: {
