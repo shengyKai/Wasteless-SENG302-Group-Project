@@ -2,12 +2,18 @@ import Vue from 'vue';
 import Vuetify from 'vuetify';
 import { createLocalVue, mount, Wrapper } from '@vue/test-utils';
 import ReportOptionsBar from "@/components/BusinessProfile/SalesReport/ReportOptionsBar.vue";
+import {findButtonWithText} from "./utils";
 
 Vue.use(Vuetify);
 
 describe('ReportOptionsBar.vue', () => {
   let wrapper: Wrapper<any>;
   let vuetify: Vuetify;
+
+
+  function findButton(component:string) {
+    return findButtonWithText(wrapper, component);
+  }
 
   beforeEach(async () => {
     const localVue = createLocalVue();
@@ -18,8 +24,9 @@ describe('ReportOptionsBar.vue', () => {
       vuetify,
       data() {
         return {
-          fromDate: new Date("01-01-2021").toISOString().slice(0, 10),
-          toDate: new Date("01-01-2021").toISOString().slice(0, 10),
+          fromDate: new Date("2021-01-01").toISOString().slice(0, 10),
+          toDate: new Date("2021-01-01").toISOString().slice(0, 10),
+          granularity: "yearly",
         };
       }
     });
@@ -100,5 +107,47 @@ describe('ReportOptionsBar.vue', () => {
       fromDate: new Date().toISOString().slice(0, 10)
     });
     expect(wrapper.vm.toDate).toEqual(new Date().toISOString().slice(0, 10));
+  });
+
+  it("Clicking on generate will emit an event to SalesReportPage along with the specified report options", async () => {
+    await findButton("Generate").trigger("click");
+    expect(wrapper.emitted().sendRequestParams).toBeTruthy();
+    expect(wrapper.emitted().sendRequestParams as any[1]).toEqual([[{fromDate: new Date("2021-01-01").toISOString().slice(0, 10), toDate: new Date("2021-01-01").toISOString().slice(0, 10), granularity: "yearly"}]]);
+  });
+
+  it("If periodBefore is set to day(One day before), the emitted event parameters will show the present date and the present date - 1 as the fromDate and toDate respectively", async () => {
+    await wrapper.setData({
+      periodBefore: "day"
+    });
+    await findButton("Generate").trigger("click");
+    let today = new Date();
+    expect(wrapper.emitted().sendRequestParams as any[1]).toEqual([[{fromDate: new Date(today.setDate(today.getDate() - 1)).toISOString().slice(0, 10), toDate: new Date().toISOString().slice(0, 10), granularity: "yearly"}]]);
+  });
+
+  it("If periodBefore is set to week(One week before), the emitted event parameters will show the present date and the present date - 6(inclusive of present day) as the fromDate and toDate respectively", async () => {
+    await wrapper.setData({
+      periodBefore: "week"
+    });
+    await findButton("Generate").trigger("click");
+    let today = new Date();
+    expect(wrapper.emitted().sendRequestParams as any[1]).toEqual([[{fromDate: new Date(today.setDate(today.getDate() - 6)).toISOString().slice(0, 10), toDate: new Date().toISOString().slice(0, 10), granularity: "yearly"}]]);
+  });
+
+  it("If periodBefore is set to month(One month before), the emitted event parameters will show the present month and the present month - 1 as the fromDate and toDate respectively", async () => {
+    await wrapper.setData({
+      periodBefore: "month"
+    });
+    await findButton("Generate").trigger("click");
+    let today = new Date();
+    expect(wrapper.emitted().sendRequestParams as any[1]).toEqual([[{fromDate: new Date(today.setMonth(today.getMonth() - 1)).toISOString().slice(0, 10), toDate: new Date().toISOString().slice(0, 10), granularity: "yearly"}]]);
+  });
+
+  it("If periodBefore is set to year(One year before), the emitted event parameters will show the present year and the present year - 1 as the fromDate and toDate respectively", async () => {
+    await wrapper.setData({
+      periodBefore: "year"
+    });
+    await findButton("Generate").trigger("click");
+    let today = new Date();
+    expect(wrapper.emitted().sendRequestParams as any[1]).toEqual([[{fromDate: new Date(today.setFullYear(today.getFullYear() - 1)).toISOString().slice(0, 10), toDate: new Date().toISOString().slice(0, 10), granularity: "yearly"}]]);
   });
 });

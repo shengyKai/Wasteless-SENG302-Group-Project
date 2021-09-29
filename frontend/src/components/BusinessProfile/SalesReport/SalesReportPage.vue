@@ -33,7 +33,7 @@ export default {
      */
     async generateFullReport(requestParams) {
       this.errorMessage = undefined;
-      let reportData = await generateReport(requestParams.businessId, requestParams.fromDate, requestParams.toDate, requestParams.granularity);
+      let reportData = await generateReport(this.$route.params.id, requestParams.fromDate, requestParams.toDate, requestParams.granularity);
       if (typeof reportData === 'string') {
         this.errorMessage = reportData;
         this.fullReport = undefined;

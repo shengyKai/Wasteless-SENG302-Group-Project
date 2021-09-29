@@ -142,7 +142,6 @@ export default {
   name: "ReportGenerationBar",
   data() {
     return {
-      businessId: 1,
       fromDate: null,
       toDate: null,
       fromDateMenu: false,
@@ -187,7 +186,7 @@ export default {
      */
     async sendReportSpecifications() {
       let [startDate, endDate] = this.getDatesForReport();
-      this.$emit("sendRequestParams", {businessId: this.businessId, fromDate: startDate, toDate: endDate, granularity: this.granularity});
+      this.$emit("sendRequestParams", {fromDate: startDate, toDate: endDate, granularity: this.granularity});
     },
     /**
      * Method to break down the dates from the report generation options so that it can provide logical values to the endpoint
@@ -211,7 +210,7 @@ export default {
 
       if (this.fromDate !== null && this.toDate !== null) {
         startDate = this.fromDate;
-        endDate = this.endDate;
+        endDate = this.toDate;
       }
       return [startDate, endDate];
     }
