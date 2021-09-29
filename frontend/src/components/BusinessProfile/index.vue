@@ -108,7 +108,6 @@
 </template>
 
 <script>
-import { USER_ROLES } from "@/utils";
 import ModifyBusiness from '@/components/BusinessProfile/ModifyBusiness';
 import convertAddressToReadableText from '@/components/utils/Methods/convertAddressToReadableText';
 import {

@@ -50,10 +50,10 @@ export default {
      */
     formatReportData(reportData) {
       for (let row in reportData) {
-        reportData[row]["day"] = new Date(reportData[row]["endDate"]).getDate();
-        reportData[row]["week"] = this.getWeekNo(new Date(reportData[row]["endDate"]));
-        reportData[row]["month"] = new Date(reportData[row]["endDate"]).toLocaleString('default', {month: 'long'});
-        reportData[row]["year"] = new Date(reportData[row]["endDate"]).getFullYear();
+        reportData[row]["day"] = new Date(reportData[row]["startDate"]).getDate();
+        reportData[row]["week"] = this.getWeekNo(new Date(reportData[row]["startDate"]));
+        reportData[row]["month"] = new Date(reportData[row]["startDate"]).toLocaleString('default', {month: 'long'});
+        reportData[row]["year"] = new Date(reportData[row]["startDate"]).getFullYear();
         if (!Object.prototype.hasOwnProperty.call(reportData[row], "averageLikeCount")) {
           reportData[row]["averageLikeCount"] = "-";
         }

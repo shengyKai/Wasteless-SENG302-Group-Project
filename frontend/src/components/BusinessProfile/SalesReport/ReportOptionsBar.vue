@@ -190,6 +190,7 @@ export default {
     },
     /**
      * Method to break down the dates from the report generation options so that it can provide logical values to the endpoint
+     * ISSUE MAY BE HERE
      */
     getDatesForReport() {
       let startDate = new Date();
