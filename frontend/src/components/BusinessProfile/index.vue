@@ -64,7 +64,7 @@
         <v-btn class="business-btn" outlined color="primary" @click="goSalePage" :value="false" width="150">
           Sale listings
         </v-btn>
-        <v-btn v-if="!isadmin" class="business-btn" outlined color="primary" @click="goSaleReports" :value="false" width="150">
+        <v-btn v-if="isAdmin" class="business-btn" outlined color="primary" @click="goSaleReports" :value="false" width="150">
           Sale reports
         </v-btn>
         <v-container fluid>
