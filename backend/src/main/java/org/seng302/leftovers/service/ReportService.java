@@ -1,12 +1,14 @@
 package org.seng302.leftovers.service;
 
 import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
 import lombok.ToString;
 import org.seng302.leftovers.dto.saleitem.BoughtSaleItemRecord;
 import org.seng302.leftovers.dto.saleitem.ReportGranularity;
 import org.seng302.leftovers.entities.Business;
 import org.seng302.leftovers.persistence.BoughtSaleItemRepository;
 import org.seng302.leftovers.service.search.SearchSpecConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
@@ -20,11 +22,10 @@ import java.util.List;
  */
 @Service
 public class ReportService {
-
-
     private final BoughtSaleItemRepository boughtSaleItemRepository;
 
 
+    @Autowired
     public ReportService(BoughtSaleItemRepository boughtSaleItemRepository) {
         this.boughtSaleItemRepository = boughtSaleItemRepository;
     }
@@ -33,15 +34,25 @@ public class ReportService {
      * Object representing a start and end date
      */
     @ToString
+    @EqualsAndHashCode
     @AllArgsConstructor
-    private static class DateRange {
-        LocalDate start;
-        LocalDate end;
+    public static class DateRange {
+        public final LocalDate start;
+        public final LocalDate end;
 
-        Instant startInstant() {
+        /**
+         * Gets the instant at the start of the date range
+         * @return Start of range moment
+         */
+        public Instant startInstant() {
             return start.atStartOfDay(ZoneId.systemDefault()).toInstant();
         }
-        Instant endInstant() {
+
+        /**
+         * Gets the instant at the end of the date range (exclusive)
+         * @return End of range moment
+         */
+        public Instant endInstant() {
             return end.plusDays(1).atStartOfDay(ZoneId.systemDefault()).toInstant();
         }
     }
@@ -57,17 +68,13 @@ public class ReportService {
     public List<DateRange> getRanges(LocalDate start, LocalDate end, ReportGranularity granularity) {
         List<DateRange> ranges = new ArrayList<>();
 
-        ranges.add(new DateRange(start, granularity.adjustEnd(start)));
-
-        while (true) {
-            var previousRange = ranges.get(ranges.size() - 1);
-            if (!end.isAfter(previousRange.end)) {
-                ranges.set(ranges.size() - 1, new DateRange(previousRange.start, end)); // Trim off excess
-                break;
-            }
-            var nextStart = previousRange.end.plusDays(1);
-            ranges.add(new DateRange(nextStart, granularity.adjustEnd(nextStart)));
+        var currentRange = new DateRange(start, granularity.adjustEnd(start));
+        while (end.isAfter(currentRange.end)) {
+            ranges.add(currentRange);
+            var rangeStart = currentRange.end.plusDays(1);
+            currentRange = new DateRange(rangeStart, granularity.adjustEnd(rangeStart));
         }
+        ranges.add(new DateRange(currentRange.start, end));
         return ranges;
     }
 
