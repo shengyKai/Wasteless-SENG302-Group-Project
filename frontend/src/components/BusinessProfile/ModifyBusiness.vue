@@ -214,7 +214,9 @@
                 Are you sure?
               </v-card-title>
               <v-card-text>
-                Updating location for catalogue entries will change all of the listed product(s) currency accordingly
+                <span>Updating location for catalogue entries will change all of the listed product(s) currency accordingly</span><br>
+                <span>Current currency: {{previousCountryCode}}</span><br>
+                <span>New currency: {{newCountryCode}}</span>
               </v-card-text>
               <v-card-actions>
                 <v-spacer/>
@@ -253,6 +255,7 @@ import {
 } from "@/utils";
 import { modifyBusiness } from '@/api/business';
 import { getUser } from '@/api/user';
+import {currencyFromCountry} from "@/api/currency";
 export default {
   name: 'ModifyBusiness',
   components: {
@@ -301,6 +304,8 @@ export default {
       postcodeRules: ()=> postCodeRules,
       isLoading: false,
       images: this.business.images,
+      previousCountryCode: "",
+      newCountryCode: "",
     };
   },
   computed: {
@@ -323,17 +328,18 @@ export default {
      */
     imageIds() {
       return this.images.map(image => image.id);
-    }
+    },
   },
   methods: {
     /**
      * Opens the currency confirmation dialog if the updateProductCountry is checked
      */
-    openCurrencyDialog() {
-      if (this.updateProductCountry === false) {
-        this.proceedWithModifyBusiness();
-      } else {
+    async openCurrencyDialog() {
+      this.newCountryCode = await this.currencyCodeFromCountry(this.country);
+      if (this.updateProductCountry === true && this.newCountryCode !== this.previousCountryCode) {
         this.currencyConfirmDialog = true;
+      } else {
+        await this.proceedWithModifyBusiness();
       }
     },
     /**
@@ -424,6 +430,16 @@ export default {
       }
       this.primaryAdministratorId = admin.id;
     },
+    async currencyCodeFromCountry(country) {
+      const result = await currencyFromCountry(country);
+      console.log(result.code);
+      return result.code;
+    }
+  },
+  async mounted() {
+    const initialCountryCode = await this.currencyCodeFromCountry(this.country);
+    this.previousCountryCode = initialCountryCode;
+    this.newCountryCode = initialCountryCode;
   },
 };
 </script>
