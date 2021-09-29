@@ -5,8 +5,8 @@ import {SearchResults} from '@/api/internal';
 import { castMock } from '../utils';
 import { is, Reason } from 'typescript-is';
 import {CreateUser, login, createUser, userSearch, User, getUser, makeAdmin, revokeAdmin} from "@/api/user";
-import {CreateProduct, Product, createProduct, uploadProductImage, getProducts, modifyProduct} from "@/api/product";
-import {InventoryItem} from "@/api/inventory";
+import {CreateProduct, Product, createProduct, uploadProductImage, getProducts, modifyProduct, makeProductImagePrimary, deleteProductImage} from "@/api/product";
+import {InventoryItem, CreateInventoryItem, createInventoryItem} from "@/api/inventory";
 import {Sale, getBusinessSales, setListingInterest, getListingInterest, purchaseListing } from "@/api/sale";
 import {getMessagesInConversation, Message} from "@/api/marketplace";
 import {generateReport, SaleRecord} from "@/api/salesReport";
@@ -14,8 +14,8 @@ import { CreateBusiness, createBusiness, getBusiness, Business, makeBusinessAdmi
 
 const api = {
   login, createUser, createBusiness, getBusiness, makeBusinessAdmin, removeBusinessAdmin, userSearch, getUser, makeAdmin, revokeAdmin,
-  createProduct, uploadProductImage, getProducts, modifyProduct, getBusinessSales, getMessagesInConversation, setListingInterest, 
-  getListingInterest, purchaseListing, generateReport
+  createProduct, uploadProductImage, getProducts, modifyProduct, makeProductImagePrimary, deleteProductImage, getBusinessSales,
+  getMessagesInConversation, setListingInterest, getListingInterest, purchaseListing, generateReport, createInventoryItem
 };
 
 jest.mock('axios', () => ({
@@ -127,6 +127,12 @@ const testCreateProduct: CreateProduct = {
   description: 'test_description',
   manufacturer: 'test_manufacturer',
   recommendedRetailPrice: 100,
+};
+
+const testCreateInventoryItem: CreateInventoryItem = {
+  productId: 'FOOBAR',
+  quantity: 13,
+  expires: '2022-09-09',
 };
 
 const testRecord: SaleRecord = {
@@ -466,6 +472,32 @@ const apiCalls: ApiCalls = {
     },
     usesServerMessage: false,
   },
+  makeProductImagePrimary: {
+    parameters: [888, 'FOO-BAR', 42],
+    httpMethod: 'put',
+    url: '/businesses/888/products/FOO-BAR/images/42/makeprimary',
+    body: undefined,
+    result: undefined,
+    extraStatusMessages: {
+      401: 'You have been logged out. Please login again and retry',
+      403: 'Operation not permitted',
+      406: 'Product/Business not found',
+    },
+    usesServerMessage: false,
+  },
+  deleteProductImage: {
+    parameters: [888, 'FOO-BAR', 42],
+    httpMethod: 'delete',
+    url: '/businesses/888/products/FOO-BAR/images/42',
+    body: undefined,
+    result: undefined,
+    extraStatusMessages: {
+      401: 'You have been logged out. Please login again and retry',
+      403: 'Operation not permitted',
+      406: 'Product/Business not found',
+    },
+    usesServerMessage: false,
+  },
   getMessagesInConversation: {
     parameters: [3, 5, 2, 10],
     httpMethod: 'get',
@@ -555,6 +587,20 @@ const apiCalls: ApiCalls = {
       406: 'Business not found',
     },
     usesServerMessage: false
+  },
+  createInventoryItem: {
+    parameters: [
+      17, testCreateInventoryItem
+    ],
+    httpMethod: 'post',
+    url: '/businesses/17/inventory',
+    body: testCreateInventoryItem,
+    result: undefined,
+    extraStatusMessages: {
+      401: 'You have been logged out. Please login again and retry',
+      403: 'Operation not permitted'
+    },
+    usesServerMessage: true,
   }
 };
 
