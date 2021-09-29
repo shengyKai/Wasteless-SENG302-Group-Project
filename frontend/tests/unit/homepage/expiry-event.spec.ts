@@ -73,6 +73,10 @@ describe('ExpiryEvent.vue', () => {
     getEvents.mockResolvedValue([]);
   });
 
+  afterEach(() => {
+    wrapper.destroy();
+  });
+
   /**
      * Finds the delay expiry button in the ExpiryEvent.
      *

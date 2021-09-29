@@ -66,6 +66,10 @@ describe('SaleResult.vue', () => {
     });
   });
 
+  afterEach(() => {
+    wrapper.destroy();
+  });
+
   it('FullSaleListing should not initial be shown', async () => {
     expect(wrapper.findComponent({name: 'FullSaleListing'}).exists()).toBeFalsy();
   });

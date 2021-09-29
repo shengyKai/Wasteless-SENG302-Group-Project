@@ -90,6 +90,10 @@ describe('PurchasedEvent.vue', () => {
     });
   });
 
+  afterEach(() => {
+    wrapper.destroy();
+  });
+
   it("Title has quantity and name", () => {
     expect(wrapper.text()).toContain("Purchased 27x Humongous Vinegar");
   });

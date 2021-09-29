@@ -91,6 +91,10 @@ describe('SaleItem.vue', () => {
     });
   });
 
+  afterEach(() => {
+    wrapper.destroy();
+  });
+
   it("Must contain the product name and quantity", () => {
     expect(wrapper.text()).toContain("3 × Watties Baked Beans - 420g can");
   });

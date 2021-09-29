@@ -102,7 +102,8 @@ function makeTestUser(userId: number, businesses?: number[], role?: UserRole) {
       district: 'test_district',
       country: 'test_country' + userId
     },
-    role: role ?? 'user'
+    role: role ?? 'user',
+    images: [],
   };
 
   if (businesses !== undefined) {
@@ -196,7 +197,7 @@ describe('UserProfile.vue', () => {
     document.body.appendChild(elem);
     const vuetify = new Vuetify();
     appWrapper = mount(App, {
-      stubs: ['router-link', 'router-view'],
+      stubs: ['router-link', 'router-view', 'Avatar'],
       mocks: {
         $route: {
           params: {

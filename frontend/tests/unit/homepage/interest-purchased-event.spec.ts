@@ -83,6 +83,10 @@ describe("InterestEvent.vue", () => {
     });
   });
 
+  afterEach(() => {
+    wrapper.destroy();
+  });
+
   it("The event contains the product name", () => {
     expect(wrapper.text()).toContain("Complex Omelette");
   });
