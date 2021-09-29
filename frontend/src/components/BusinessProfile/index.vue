@@ -57,10 +57,13 @@
             </v-col>
           </v-row>
           <p><strong>Created:</strong> {{ createdMsg }}</p>
-          <v-btn outlined color="primary" @click="goSalePage" :value="false" width="150">
-            Sale listings
-          </v-btn>
         </div>
+        <v-btn class="business-btn" outlined color="primary" @click="goSalePage" :value="false" width="150">
+          Sale listings
+        </v-btn>
+        <v-btn class="business-btn" outlined color="primary" @click="goSaleReport" :value="false" width="150">
+          Sale reports
+        </v-btn>
         <v-container fluid>
           <v-row>
             <v-col cols="12" sm="6">
@@ -240,6 +243,12 @@ export default {
       this.updateProductCountry = !this.updateProductCountry;
     },
     /**
+     * Shows the Sale Reports page
+     */
+    goSaleReport() {
+      this.$router.push(`/salesreport/${this.$store.state.activeRole.id}`);
+    },
+    /**
      * Updates the business profile page to show the updated details of the business.
      * This method is separated from the $route watcher as it is reused for the ModifyBusiness page on a successful
      * api call, which will update the business profile page to the latest information.
@@ -258,7 +267,6 @@ export default {
         }
         this.rank = this.business.rank.name;
       });
-
     },
   }
 };
@@ -286,5 +294,10 @@ export default {
   display: inline;
   height: 40px;
   margin-left: 10px;
+}
+
+.business-btn {
+  display: inline;
+  margin-right: 10px;
 }
 </style>
