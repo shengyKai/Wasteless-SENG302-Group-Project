@@ -36,14 +36,14 @@ export default {
        * These headers are the distinctive headers that differentiates between report types
        */
       distinctHeaders: {
-        "month": [
+        "monthly": [
           { text: 'Month', value: 'month' }
         ],
-        "week": [
+        "weekly": [
           { text: 'Week No.', value: 'week' },
           { text: 'Month', value: 'month' }
         ],
-        "day": [
+        "daily": [
           { text: 'Day of the Month', value: 'day' },
           { text: 'Week No.', value: 'week' },
           { text: 'Month', value: 'month' }
@@ -57,7 +57,7 @@ export default {
      * Otherwise, the headers are just the baseHeaders.
      */
     headers() {
-      if (this.reportDetails.reportType === "year") {
+      if (this.reportDetails.reportType === "yearly") {
         return this.baseHeaders;
       } else {
         return this.distinctHeaders[this.reportDetails.reportType].concat(this.baseHeaders);
@@ -67,15 +67,8 @@ export default {
      * Generates the report title based on the reportType in the format '"reportType" Report'
      */
     reportTitle() {
-      if (this.reportDetails.reportType === "day") {
-        return `Daily Report`;
-      } else {
-        return `${this.reportDetails.reportType.charAt(0).toUpperCase() + this.reportDetails.reportType.slice(1)}ly Report`;
-      }
+      return `${this.reportDetails.reportType.charAt(0).toUpperCase() + this.reportDetails.reportType.slice(1)} Report`;
     },
   },
-  mounted() {
-    console.log(this.reportDetails.reportData);
-  }
 };
 </script>

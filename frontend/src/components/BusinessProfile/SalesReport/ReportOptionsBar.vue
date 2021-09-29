@@ -127,7 +127,7 @@
         <v-col cols="12" md="1" sm="12" class="text-center">
           <v-btn
             color="primary"
-            @click="callGenerateReport"
+            @click="getFullReport"
           >
             Generate
           </v-btn>
@@ -157,10 +157,10 @@ export default {
         { periodLevel:'One year before', periodValue:'year' }
       ],
       granularityOptions: [
-        { granularityLevel:'Day', granularityValue:'day' },
-        { granularityLevel:'Week', granularityValue:'week' },
-        { granularityLevel:'Month', granularityValue:'month' },
-        { granularityLevel:'Year', granularityValue:'year' }
+        { granularityLevel:'Day', granularityValue:'daily' },
+        { granularityLevel:'Week', granularityValue:'weekly' },
+        { granularityLevel:'Month', granularityValue:'monthly' },
+        { granularityLevel:'Year', granularityValue:'yearly' }
       ]
     };
   },
@@ -183,9 +183,35 @@ export default {
     }
   },
   methods: {
-    async callGenerateReport() {
-      const reportData = await generateReport(1, this.fromDate, this.toDate, this.granularity);
+    /**
+     * Method to call the api endpoint, generateReport, and breaks down the report dates into the appropriate fields.
+     * Finally emits the data to the SalesReportPage
+     */
+    async getFullReport() {
+      /** TODO replace the business id below with the correct id */
+      let reportData = await generateReport(1, this.fromDate, this.toDate, this.granularity);
+      this.breakDownDate(reportData);
       this.$emit("retrievedData", {reportData: reportData, reportType: this.granularity});
+    },
+    /**
+     * Breakdown the dates retrieved from the backend so that it can be presented in the table later. This is done here
+     * because we are not able to mutate the reportData as a prop later on in SalesReportTable.
+     */
+    breakDownDate(reportData) {
+      for (let row in reportData) {
+        reportData[row]["day"] = new Date(reportData[row]["endDate"]).getDate();
+        reportData[row]["week"] = this.getWeekNo(new Date(reportData[row]["endDate"]));
+        reportData[row]["month"] = new Date(reportData[row]["endDate"]).toLocaleString('default', {month: 'long'});
+        reportData[row]["year"] = new Date(reportData[row]["endDate"]).getFullYear();
+      }
+    },
+    /**
+     * Gets the week number from a given date object.
+     */
+    getWeekNo(date) {
+      const firstDayOfYear = new Date(date.getFullYear(), 0, 1);
+      const pastDaysOfYear = (date - firstDayOfYear) / 86400000;
+      return Math.ceil((pastDaysOfYear + firstDayOfYear.getDay() + 1) / 7);
     }
   },
   watch: {
