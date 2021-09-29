@@ -4,10 +4,10 @@ exports[`DeleteEvent.vue Card has been deleted from the database Must match snap
 <div>
   <div class="row">
     <div class="col">
-      <div aria-haspopup="true" aria-expanded="false" class="v-card__title"><span class="v-badge v-badge--icon v-badge--overlap theme--light">
+      <div aria-haspopup="true" aria-expanded="false" class="v-card__title pb-1"><span class="v-badge v-badge--icon v-badge--overlap theme--light">
                 Your marketplace card has been deleted
               <span class="v-badge__wrapper"><transition-stub name="scale-rotate-transition"><span aria-atomic="true" aria-label="Badge" aria-live="polite" role="status" class="v-badge__badge primary" style="bottom: calc(100% - 8px); left: calc(100% - -2px);"><i aria-hidden="true" class="v-icon notranslate mdi mdi-email theme--light"></i></span></transition-stub></span></span></div><span class="v-tooltip v-tooltip--top"><!----></span>
-      <div class="v-card__subtitle">
+      <div class="v-card__subtitle py-0">
         02 Jan 2021, 01:00
       </div>
     </div>

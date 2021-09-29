@@ -1,5 +1,5 @@
 <template>
-  <Event :event="event">
+  <Event :event="event" :title="`${event.saleItem.inventoryItem.product.name} from ${business.name}`">
     <template v-slot:title>
       <div>
         {{ event.saleItem.inventoryItem.product.name }}
