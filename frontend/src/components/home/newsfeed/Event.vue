@@ -21,6 +21,7 @@
                    nudge-left="70">
           <template v-slot:activator="{ on, attrs }">
             <v-card-title
+              class="pb-1"
               v-bind="attrs"
               v-on="on">
               <v-badge
@@ -30,16 +31,18 @@
                 :icon="readBadgeIcon"
                 :color="readColour"
               >
-                <template  v-if="title !== undefined">
+                <slot v-if="hasStylisedTitle" name="title"/>
+                <template  v-else>
                   {{ title }}
                 </template>
-                <slot v-else name="title"/>
               </v-badge>
             </v-card-title>
           </template>
           <span>{{envelopToolTip}}</span>
         </v-tooltip>
-        <v-card-subtitle>
+        <v-card-subtitle
+          class="py-0"
+        >
           {{ date }}, {{ time }}
         </v-card-subtitle>
       </v-col>
@@ -179,7 +182,7 @@ export default {
   props: {
     title: {
       type: String,
-      required: false,
+      required: true,
     },
     event: {
       type: Object,
@@ -267,7 +270,13 @@ export default {
         }
       }
       return 0;
-    }
+    },
+    /**
+     * Whether this event component is using a custom <slot> for its title
+     */
+    hasStylisedTitle() {
+      return !!this.$slots.title;
+    },
   },
   methods: {
     /**
@@ -354,7 +363,7 @@ export default {
         this.errorMessage = undefined;
         let newEvent = this.event;
         newEvent.status = status;
-        this.$store.commit('addEvent', newEvent);
+        this.$store.dispatch('refreshEventFeed');
       }
     },
   },

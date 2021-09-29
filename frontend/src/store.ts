@@ -90,6 +90,13 @@ function createOptions(): StoreOptions<StoreData> {
         state.business = payload;
       },
       /**
+       * Remove all of the events from the eventMap
+       * @param state Current state
+       */
+      clearEvents(state) {
+        state.eventMap = {};
+      },
+      /**
        * Adds or replaces a event in the event list
        * @param state Current state
        * @param payload New event
@@ -317,16 +324,11 @@ function createOptions(): StoreOptions<StoreData> {
       async refreshEventFeed(context) {
         const userId = context.state.user?.id;
         if (!userId) return;
-        let mostRecentModified = undefined;
-        for (let event of Object.values(context.state.eventMap)) {
-          if (mostRecentModified === undefined || new Date(event.lastModified) > new Date(mostRecentModified)) {
-            mostRecentModified = event.lastModified;
-          }
-        }
-        let response = await getEvents(userId, mostRecentModified);
+        let response = await getEvents(userId, undefined);
         if (typeof response === 'string') {
           console.error(response);
         } else {
+          context.commit('clearEvents');
           for (let event of response) {
             context.commit('addEvent', event);
           }

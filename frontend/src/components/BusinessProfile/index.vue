@@ -31,7 +31,12 @@
           </v-row>
           <v-row>
             <v-col cols="11">
-              <span><h1>{{ business.name }}</h1></span>
+              <span>
+                <h1 class="business-name">{{ business.name }}</h1>
+                <SilverRank v-if="rank === 'silver'" class="rank"/>
+                <GoldRank v-if="rank === 'gold'" class="rank"/>
+                <PlatinumRank v-if="rank === 'platinum'" class="rank"/>
+              </span>
             </v-col>
             <v-col class="text-right" v-if='!modifyBusiness && permissionToActAsBusiness'>
               <v-tooltip bottom>
@@ -42,7 +47,7 @@
                     color="primary"
                     v-bind="attrs"
                     v-on="on"
-                    @click="modifyBusiness = true;"
+                    @click="modifyBusiness = true"
                   >
                     <v-icon>mdi-cog</v-icon>
                   </v-btn>
@@ -51,7 +56,10 @@
               </v-tooltip>
             </v-col>
           </v-row>
-          <p><strong>Created:</strong> {{ createdMsg }}</p>
+          <p>
+            <strong>Created:</strong> {{ createdMsg }}
+            <strong class="rank">Rank:</strong> {{ business.rank.name.charAt(0).toUpperCase() + business.rank.name.slice(1) }}
+          </p>
           <v-btn outlined color="primary" @click="goSalePage" :value="false" width="150">
             Sale listings
           </v-btn>
@@ -107,11 +115,17 @@ import {
 } from "@/utils";
 import ImageCarousel from "@/components/image/ImageCarousel";
 import {getBusiness} from "@/api/business";
+import SilverRank from "@/components/ranks/SilverRank";
+import GoldRank from "@/components/ranks/GoldRank";
+import PlatinumRank from "@/components/ranks/PlatinumRank";
 export default {
   name: 'BusinessProfile',
   components: {
     ImageCarousel,
-    ModifyBusiness
+    ModifyBusiness,
+    SilverRank,
+    GoldRank,
+    PlatinumRank
   },
   data() {
     return {
@@ -129,6 +143,7 @@ export default {
       region: '',
       country: '',
       postcode: '',
+      rank: '',
       businessTypes: [
         'Accommodation and Food Services',
         'Charitable organisation',
@@ -195,7 +210,7 @@ export default {
     },
     businessImages() {
       return this.business.images;
-    }
+    },
   },
 
   methods: {
@@ -244,8 +259,10 @@ export default {
           this.business = value;
           this.readableAddress = convertAddressToReadableText(value.address, "full");
         }
+        this.rank = this.business.rank.name;
       });
-    }
+
+    },
   }
 };
 </script>
@@ -264,16 +281,17 @@ export default {
   margin-right: 4px;
 }
 
-.business-modify {
-  margin-top: 20px;
+.business-name {
+  display: inline;
 }
 
-.modify-business-button {
-  display: block;
-  margin-right: 48%;
+.rank {
+  display: inline;
+  height: 40px;
+  margin-left: 10px;
 }
 
-.expand-icon {
-  padding-right: 10px;
+.rank {
+  padding-left: 30px;
 }
 </style>

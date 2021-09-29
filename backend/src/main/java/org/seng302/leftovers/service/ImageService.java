@@ -1,6 +1,7 @@
 package org.seng302.leftovers.service;
 
 import org.seng302.leftovers.entities.Image;
+import org.seng302.leftovers.exceptions.DoesNotExistResponseException;
 import org.seng302.leftovers.exceptions.InternalErrorResponseException;
 import org.seng302.leftovers.exceptions.ValidationResponseException;
 import org.seng302.leftovers.persistence.ImageRepository;
@@ -13,6 +14,8 @@ import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 /**
@@ -103,5 +106,20 @@ public class ImageService {
         if (image.getFilenameThumbnail() != null && !image.getFilenameThumbnail().equals(image.getFilename())) {
             storageService.deleteOne(image.getFilenameThumbnail());
         }
+    }
+
+    /**
+     * Converts of image ids into their respective image objects
+     * @param imageIds a list of image ids
+     * @return a list of image objects
+     */
+    public List<Image> getListOfImagesFromIds(List<Long> imageIds) {
+        List<Image> images = new ArrayList<>();
+        for (Long imageId : imageIds) {
+            Image image = imageRepository.findById(imageId)
+                    .orElseThrow(() -> new DoesNotExistResponseException(Image.class));
+            images.add(image);
+        }
+        return images;
     }
 }

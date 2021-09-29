@@ -26,13 +26,17 @@ describe('SaleResult.vue', () => {
     wrapper = mount(SaleResult, {
       localVue,
       vuetify,
-      stubs: ['FullSaleListing'],
+      stubs: ['FullSaleListing', 'router-link'],
       propsData: {
         saleItem: {
           "id": 57,
           "inventoryItem": {
             "id": 101,
             "product": {
+              "business": {
+                "id": 5,
+                "name": "This Inc.",
+              },
               "id": "WATT-420-BEANS",
               "name": "Watties Baked Beans - 420g can",
               "description": "Baked Beans as they should be.",
