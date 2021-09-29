@@ -8,6 +8,7 @@ import {castMock, findButtonWithText} from "./utils";
 import {Location} from '@/api/internal';
 import {getStore, resetStoreForTesting} from '@/store';
 import {getUser as getUser1, User} from "@/api/user";
+import {currencyFromCountry} from "@/api/currency";
 import {modifyBusiness as modifyBusiness1, Business} from "@/api/business";
 import ImageManager from "@/components/image/ImageManager.vue";
 
@@ -17,8 +18,11 @@ jest.mock('@/api/user', () => ({
 jest.mock('@/api/business', () => ({
   modifyBusiness: jest.fn(),
 }));
+jest.mock('@/api/currency', () => ({
+  currencyFromCountry: jest.fn(),
+}));
 
-
+const currencyAPI = castMock(currencyFromCountry);
 const getUser = castMock(getUser1);
 const modifyBusiness = castMock(modifyBusiness1);
 Vue.use(Vuetify);
@@ -132,6 +136,7 @@ describe('modifyBusiness.vue', () => {
     let store = getStore();
     store.state.user = testUser;
     getUser.mockResolvedValueOnce(testUser);
+    currencyAPI.mockResolvedValue({symbol:"$",name:"NZD",code:"NZD"});
     const vuetify = new Vuetify();
     const App = localVue.component('App', {
       components: { ModifyBusiness },
@@ -502,6 +507,7 @@ describe('modifyBusiness.vue', () => {
     await populateRequiredFields();
     const submitButton = findButton("Submit");
     await submitButton.trigger('click');
+    await Vue.nextTick();
     expect(modifyBusiness).toHaveBeenCalled();
   });
 

@@ -21,13 +21,9 @@
         <v-icon>mdi-currency-usd</v-icon>
       </v-btn>
       <!-- Thumb up/down button to show and allow user the like & unlike feature -->
-      <v-btn v-if="!interested" class="ml-2 blue--text" color="grey lighten-2">
-        Like {{interestCount}}
-        <v-icon class="ml-1">mdi-thumb-up</v-icon>
-      </v-btn>
-      <v-btn v-else color="ml-2 grey lighten-2">
-        Unlike {{interestCount}}
-        <v-icon class="ml-1">mdi-thumb-down</v-icon>
+      <v-btn ref="likeButton" class=" pl-2 pr-2 ml-2" color="grey lighten-2" @click="changeInterest">
+        {{thumbMessage}} {{interestCount}}
+        <v-icon class="ml-1">{{thumbIcon}}</v-icon>
       </v-btn>
       <!-- A return button for user to go back to business profile-->
       <v-btn class="ml-2 pl-3" color="secondary" @click="fullSaleOpen=true">
@@ -44,6 +40,7 @@
 <script>
 import Event from "@/components/home/newsfeed/Event";
 import FullSaleListing from "@/components/SaleListing/FullSaleListing.vue";
+import {setListingInterest} from "@/api/sale";
 export default {
   name: "InterestEvent",
   components: {
@@ -59,6 +56,8 @@ export default {
   data() {
     return {
       fullSaleOpen: false,
+      interestCount: this.event.saleItem.interestCount,
+      interested: this.event.interested,
     };
   },
   computed: {
@@ -84,6 +83,26 @@ export default {
       return this.event.interested? "liked" : "unliked";
     },
     /**
+     * Compute the thumb icon base on user interest status
+     */
+    thumbIcon() {
+      if (this.interested) {
+        return "mdi-thumb-up";
+      } else {
+        return "mdi-thumb-up-outline";
+      }
+    },
+    /**
+     * Compute the message to be render beside the like icon
+     */
+    thumbMessage() {
+      if (this.interested) {
+        return "Liked";
+      } else {
+        return "Like";
+      }
+    },
+    /**
      * The rounded number of days until the sale listing closes
      * @returns {number} Days until sale listing close date
      */
@@ -105,19 +124,24 @@ export default {
         }
       };
     },
-    /**
-     * Returns the status of interested for the event
-     */
-    interested() {
-      return this.event.interested;
-    },
-    /**
-     * Returns the number of likes for the sale listing
-     */
-    interestCount()  {
-      return this.event.saleItem.interestCount;
-    }
   },
+  methods: {
+    /** Change the user interest status on the listing (toggle)
+     */
+    async changeInterest() {
+      const result = await setListingInterest(
+        this.event.saleItem.id,
+        {userId: this.$store.state.user.id, interested: !this.interested});
+      if (typeof result === 'string'){
+        this.errorMessage = result;
+      } else {
+        this.errorMessage = undefined;
+        this.interested = !this.interested;
+        if(this.interested) this.interestCount += 1;
+        else this.interestCount -= 1;
+      }
+    },
+  }
 };
 </script>
 
