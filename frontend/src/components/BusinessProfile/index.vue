@@ -60,13 +60,13 @@
             <strong>Created:</strong> {{ createdMsg }}
             <strong class="rank">Rank:</strong> {{ business.rank.name.charAt(0).toUpperCase() + business.rank.name.slice(1) }}
           </p>
-          <v-btn outlined color="primary" @click="goSalePage" :value="false" width="150">
-            Sale listings
-          </v-btn>
-          <v-btn class="business-btn" outlined color="primary" @click="goSalePage" :value="false" width="150">
-            Sale listings
-          </v-btn>
         </div>
+        <v-btn class="business-btn" outlined color="primary" @click="goSalePage" :value="false" width="150">
+          Sale listings
+        </v-btn>
+        <v-btn v-if="!isadmin" class="business-btn" outlined color="primary" @click="goSaleReports" :value="false" width="150">
+          Sale reports
+        </v-btn>
         <v-container fluid>
           <v-row>
             <v-col cols="12" sm="6">
@@ -108,6 +108,7 @@
 </template>
 
 <script>
+import { USER_ROLES } from "@/utils";
 import ModifyBusiness from '@/components/BusinessProfile/ModifyBusiness';
 import convertAddressToReadableText from '@/components/utils/Methods/convertAddressToReadableText';
 import {
