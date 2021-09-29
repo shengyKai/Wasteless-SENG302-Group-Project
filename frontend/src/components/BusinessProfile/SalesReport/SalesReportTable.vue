@@ -11,8 +11,12 @@
 </template>
 
 <script>
+
 export default {
   name: "SalesReportTable",
+  props: {
+    reportData: Array
+  },
   data() {
     return {
       reportType: "daily", // TODO Should be replaced with a value retrieved from the backend
@@ -167,6 +171,9 @@ export default {
     reportTitle() {
       return `${this.reportType.charAt(0).toUpperCase() + this.reportType.slice(1)} Report`;
     }
+  },
+  mounted() {
+    console.log(this.reportData);
   }
 };
 </script>

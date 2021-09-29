@@ -126,7 +126,9 @@
         </v-col>
         <v-col cols="12" md="1" sm="12" class="text-center">
           <v-btn
-            color="primary">
+            color="primary"
+            @click="callGenerateReport"
+          >
             Generate
           </v-btn>
         </v-col>
@@ -136,6 +138,8 @@
 </template>
 
 <script>
+import { generateReport } from "@/api/salesReport.ts";
+
 export default {
   name: "ReportGenerationBar",
   data() {
@@ -176,6 +180,12 @@ export default {
      */
     maxToDate() {
       return new Date().toISOString().slice(0, 10);
+    }
+  },
+  methods: {
+    async callGenerateReport() {
+      const reportData = await generateReport(1, this.fromDate, this.toDate, this.granularity);
+      this.$emit("retrievedData", reportData);
     }
   },
   watch: {

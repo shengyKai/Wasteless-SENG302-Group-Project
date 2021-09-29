@@ -1,8 +1,8 @@
 <template>
   <v-container>
     <h2 class="font-weight-bold text-center">{{ title }}</h2>
-    <ReportOptionsBar/>
-    <SalesReportTable/>
+    <ReportOptionsBar @retrievedData="passToTable"/>
+    <SalesReportTable :reportData="reportData"/>
   </v-container>
 </template>
 
@@ -18,8 +18,14 @@ export default {
   },
   data(){
     return {
-      businessName: "Sheep Biz"
+      businessName: "Sheep Biz",
+      reportData: null
     };
+  },
+  methods: {
+    passToTable(reportData) {
+      this.reportData = reportData;
+    }
   },
   computed: {
     /**
