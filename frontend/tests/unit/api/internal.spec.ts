@@ -4,7 +4,7 @@ import { AxiosResponse } from 'axios';
 import {SearchResults} from '@/api/internal';
 import { castMock } from '../utils';
 import { is, Reason } from 'typescript-is';
-import {CreateUser, login, createUser} from "@/api/user";
+import {CreateUser, login, createUser, userSearch, User, getUser, makeAdmin, revokeAdmin} from "@/api/user";
 import {CreateProduct, Product, createProduct, uploadProductImage, getProducts, modifyProduct} from "@/api/product";
 import {InventoryItem} from "@/api/inventory";
 import {Sale, getBusinessSales, setListingInterest, getListingInterest, purchaseListing } from "@/api/sale";
@@ -13,8 +13,9 @@ import {generateReport, SaleRecord} from "@/api/salesReport";
 import { CreateBusiness, createBusiness, getBusiness, Business, makeBusinessAdmin, removeBusinessAdmin } from "@/api/business";
 
 const api = {
-  login, createUser, createBusiness, getBusiness, makeBusinessAdmin, removeBusinessAdmin, createProduct, uploadProductImage, getProducts, modifyProduct,
-  getBusinessSales, getMessagesInConversation, setListingInterest, getListingInterest, purchaseListing, generateReport
+  login, createUser, createBusiness, getBusiness, makeBusinessAdmin, removeBusinessAdmin, userSearch, getUser, makeAdmin, revokeAdmin,
+  createProduct, uploadProductImage, getProducts, modifyProduct, getBusinessSales, getMessagesInConversation, setListingInterest, 
+  getListingInterest, purchaseListing, generateReport
 };
 
 jest.mock('axios', () => ({
@@ -184,6 +185,20 @@ const testBusiness: Business = {
   }
 };
 
+const testUser: User = {
+  id: 88,
+  firstName: 'test_firstname',
+  lastName: 'test_lastname',
+  middleName: 'test_middlename',
+  nickname: 'test_nickname',
+  bio: 'test_bio',
+  email: 'test_email',
+  dateOfBirth: 'test_date_of_birth',
+  phoneNumber: 'test_phone_number',
+  homeAddress: { country: 'test_country'},
+  images: [],
+};
+
 function searchResult<T>(list: T[]) : SearchResults<T> {
   return {
     count: list.length,
@@ -320,6 +335,60 @@ const apiCalls: ApiCalls = {
       401: 'You have been logged out. Please login again and retry',
       403: 'Current user cannot perform this action',
       406: 'Business not found',
+    },
+    usesServerMessage: false,
+  },
+  userSearch: {
+    parameters: ['test_query', 3, 14, 'firstName', false],
+    httpMethod: 'get',
+    url: '/users/search',
+    body: {
+      params: {
+        searchQuery: 'test_query',
+        orderBy: "firstName",
+        page: 3,
+        resultsPerPage: 14,
+        reverse: "false",
+      }
+    },
+    result: { results: [testUser], count: 77},
+    extraStatusMessages: {},
+    usesServerMessage: true,
+    failedTypeCheckResponse: 'Response is not user array',
+  },
+  getUser: {
+    parameters: [88],
+    httpMethod: 'get',
+    url: '/users/88',
+    body: undefined,
+    result: testUser,
+    extraStatusMessages: {},
+    usesServerMessage: true,
+    failedTypeCheckResponse: 'Response is not user',
+  },
+  makeAdmin: {
+    parameters: [88],
+    httpMethod: 'put',
+    url: '/users/88/makeAdmin',
+    body: undefined,
+    result: undefined,
+    extraStatusMessages: {
+      401: 'You have been logged out. Please login again and retry',
+      403: 'Operation not permitted',
+      406: 'User does not exist'
+    },
+    usesServerMessage: false,
+  },
+  revokeAdmin: {
+    parameters: [88],
+    httpMethod: 'put',
+    url: '/users/88/revokeAdmin',
+    body: undefined,
+    result: undefined,
+    extraStatusMessages: {
+      401: 'You have been logged out. Please login again and retry',
+      403: 'Operation not permitted',
+      406: 'User does not exist'
     },
     usesServerMessage: false,
   },
