@@ -32,6 +32,7 @@ export default {
      * Finally adds in the report type
      */
     async generateFullReport(requestParams) {
+      this.errorMessage = undefined;
       let reportData = await generateReport(requestParams.businessId, requestParams.fromDate, requestParams.toDate, requestParams.granularity);
       if (typeof reportData === 'string') {
         this.errorMessage = reportData;
@@ -79,7 +80,11 @@ export default {
   },
   async mounted() {
     let business = await getBusiness(this.$route.params.id);
-    this.businessName = business.name;
+    if (typeof business === 'string') {
+      this.errorMessage = business;
+    } else {
+      this.businessName = business.name;
+    }
   }
 };
 
