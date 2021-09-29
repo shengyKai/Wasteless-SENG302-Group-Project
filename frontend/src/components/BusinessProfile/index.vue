@@ -32,10 +32,11 @@
           <v-row>
             <v-col cols="11">
               <span>
-                <h1 class="business-name">{{ business.name }}</h1>
-                <SilverRank v-if="rank === 'silver'" class="rank"/>
+                <h1 class="d-inline-block">{{ business.name }}</h1>
+                <RankIcon v-if="rank !== 'bronze'"/>
+                <!-- <SilverRank v-if="rank === 'silver'" class="rank"/>
                 <GoldRank v-if="rank === 'gold'" class="rank"/>
-                <PlatinumRank v-if="rank === 'platinum'" class="rank"/>
+                <PlatinumRank v-if="rank === 'platinum'" class="rank"/> -->
               </span>
             </v-col>
             <v-col class="text-right" v-if='!modifyBusiness && permissionToActAsBusiness'>
@@ -119,17 +120,19 @@ import {
 } from "@/utils";
 import ImageCarousel from "@/components/image/ImageCarousel";
 import {getBusiness} from "@/api/business";
-import SilverRank from "@/components/ranks/SilverRank";
-import GoldRank from "@/components/ranks/GoldRank";
-import PlatinumRank from "@/components/ranks/PlatinumRank";
+import RankIcon from "@/components/ranks/RankIcon";
+// import SilverRank from "@/components/ranks/SilverRank";
+// import GoldRank from "@/components/ranks/GoldRank";
+// import PlatinumRank from "@/components/ranks/PlatinumRank";
 export default {
   name: 'BusinessProfile',
   components: {
     ImageCarousel,
     ModifyBusiness,
-    SilverRank,
-    GoldRank,
-    PlatinumRank
+    RankIcon,
+    // SilverRank,
+    // GoldRank,
+    // PlatinumRank
   },
   data() {
     return {
@@ -296,20 +299,6 @@ export default {
 
 .link-chip {
   margin-right: 4px;
-}
-
-.business-name {
-  display: inline;
-}
-
-.rank {
-  display: inline;
-  height: 40px;
-  margin-left: 10px;
-}
-
-.rank {
-  padding-left: 30px;
 }
 
 .business-btn {
