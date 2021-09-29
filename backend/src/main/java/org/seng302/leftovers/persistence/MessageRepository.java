@@ -14,5 +14,7 @@ public interface MessageRepository extends CrudRepository<Message, Long> {
 
     Page<Message> findAllByConversation(Conversation conversation, Pageable pageable);
 
+    List<Message> findAllByConversation(Conversation conversation);
+
     List<Message> findAllByConversationOrderByCreatedDesc(Conversation conversation);
 }

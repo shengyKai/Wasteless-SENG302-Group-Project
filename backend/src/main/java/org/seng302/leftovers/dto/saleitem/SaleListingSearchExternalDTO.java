@@ -4,7 +4,6 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
-import org.seng302.leftovers.dto.business.BusinessType;
 
 import java.math.BigDecimal;
 import java.util.List;
