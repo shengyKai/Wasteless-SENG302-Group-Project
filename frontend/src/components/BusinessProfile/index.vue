@@ -63,6 +63,9 @@
           <v-btn outlined color="primary" @click="goSalePage" :value="false" width="150">
             Sale listings
           </v-btn>
+          <v-btn class="business-btn" outlined color="primary" @click="goSalePage" :value="false" width="150">
+            Sale listings
+          </v-btn>
         </div>
         <v-container fluid>
           <v-row>
@@ -173,6 +176,13 @@ export default {
   },
 
   computed: {
+    /**
+     * Checks to see if the user is a admin of the business
+     */
+    isAdmin() {
+      return this.business.administrators.map(admin => admin.id).includes(this.$store.state.user.id) ||
+      [USER_ROLES.DGAA, USER_ROLES.GAA].includes(this.$store.getters.role);
+    },
     createdMsg() {
       if (this.business.created === undefined) return '';
 
@@ -243,6 +253,12 @@ export default {
       this.updateProductCountry = !this.updateProductCountry;
     },
     /**
+     * Shows the Sale Reports page
+     */
+    goSaleReports() {
+      this.$router.push(`/salesreport/${this.$store.state.activeRole.id}`);
+    },
+    /**
      * Updates the business profile page to show the updated details of the business.
      * This method is separated from the $route watcher as it is reused for the ModifyBusiness page on a successful
      * api call, which will update the business profile page to the latest information.
@@ -293,5 +309,10 @@ export default {
 
 .rank {
   padding-left: 30px;
+}
+
+.business-btn {
+  display: inline;
+  margin-right: 10px;
 }
 </style>
