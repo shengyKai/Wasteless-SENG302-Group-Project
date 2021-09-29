@@ -10,9 +10,10 @@ import {InventoryItem} from "@/api/inventory";
 import {Sale, getBusinessSales, setListingInterest, getListingInterest, purchaseListing } from "@/api/sale";
 import {getMessagesInConversation, Message} from "@/api/marketplace";
 import {generateReport, SaleRecord} from "@/api/salesReport";
+import { CreateBusiness, createBusiness, getBusiness, Business, makeBusinessAdmin, removeBusinessAdmin } from "@/api/business";
 
 const api = {
-  login, createUser, createProduct, uploadProductImage, getProducts, modifyProduct,
+  login, createUser, createBusiness, getBusiness, makeBusinessAdmin, removeBusinessAdmin, createProduct, uploadProductImage, getProducts, modifyProduct,
   getBusinessSales, getMessagesInConversation, setListingInterest, getListingInterest, purchaseListing, generateReport
 };
 
@@ -109,6 +110,16 @@ const testCreateUser: CreateUser = {
   password: 'test_password',
 };
 
+const testCreateBusiness: CreateBusiness = {
+  primaryAdministratorId: 4,
+  name: 'test_name',
+  description: 'test_description',
+  address: {
+    country: 'test_country',
+  },
+  businessType: 'Retail Trade'
+};
+
 const testCreateProduct: CreateProduct = {
   id: 'ID-VALUE',
   name: 'test_name',
@@ -155,6 +166,22 @@ const testMessage: Message = {
   created: '1-1-1900',
   senderId: 100,
   content: 'Hello world',
+};
+
+const testBusiness: Business = {
+  id: 17,
+  primaryAdministratorId: 33,
+  name: 'test_name',
+  description: 'test_description',
+  address: {
+    country: 'test_country',
+  },
+  businessType: 'Retail Trade',
+  points: 88,
+  rank: {
+    name: 'gold',
+    threshold: 100
+  }
 };
 
 function searchResult<T>(list: T[]) : SearchResults<T> {
@@ -235,6 +262,64 @@ const apiCalls: ApiCalls = {
     failedTypeCheckResponse: 'Invalid response',
     extraStatusMessages: {
       400: 'Invalid credentials',
+    },
+    usesServerMessage: false,
+  },
+  createBusiness: {
+    parameters: [
+      testCreateBusiness
+    ],
+    httpMethod: 'post',
+    url: '/businesses',
+    body: testCreateBusiness,
+    result: undefined,
+    extraStatusMessages: {
+      401: 'You have been logged out. Please login again and retry',
+    },
+    usesServerMessage: true,
+  },
+  getBusiness: {
+    parameters: [17],
+    httpMethod: 'get',
+    url: '/businesses/17',
+    body: undefined,
+    result: testBusiness,
+    failedTypeCheckResponse: 'Invalid response type',
+    extraStatusMessages: {
+      401: 'You have been logged out. Please login again and retry',
+      406: 'Business not found',
+    },
+    usesServerMessage: false,
+  },
+  makeBusinessAdmin: {
+    parameters: [17, 88],
+    httpMethod: 'put',
+    url: '/businesses/17/makeAdministrator',
+    body: {
+      userId: 88
+    },
+    result: undefined,
+    extraStatusMessages: {
+      400: 'User doesn\'t exist, is already an admin or is under 16',
+      401: 'You have been logged out. Please login again and retry',
+      403: 'Current user cannot perform this action',
+      406: 'Business not found',
+    },
+    usesServerMessage: false,
+  },
+  removeBusinessAdmin: {
+    parameters: [17, 88],
+    httpMethod: 'put',
+    url: '/businesses/17/removeAdministrator',
+    body: {
+      userId: 88
+    },
+    result: undefined,
+    extraStatusMessages: {
+      400: 'User doesn\'t exist or is not an admin',
+      401: 'You have been logged out. Please login again and retry',
+      403: 'Current user cannot perform this action',
+      406: 'Business not found',
     },
     usesServerMessage: false,
   },
