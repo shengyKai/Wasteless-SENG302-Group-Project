@@ -1282,7 +1282,9 @@ class SaleControllerTest {
 
     @Test
     void generateReportForBusiness_validParameters_200ResponseAndReportReturned() throws Exception {
-        var expected = List.of(new BoughtSaleItemRecord(10, 1, 5, 3, BigDecimal.TEN, 1, 0.5));
+        var expected = List.of(
+                new BoughtSaleItemRecord(LocalDate.parse("2021-01-01"), LocalDate.parse("2021-01-10"), 10, 1, 5, 3, BigDecimal.TEN, 1.0, 0.5)
+        );
         when(reportService.generateReport(any(), any(), any(), any())).thenReturn(expected);
 
 
@@ -1301,7 +1303,9 @@ class SaleControllerTest {
 
     @Test
     void generateReportForBusiness_noStartDate_200ResponseAndUsedBusinessCreationDate() throws Exception {
-        var expected = List.of(new BoughtSaleItemRecord(10, 1, 5, 3, BigDecimal.TEN, 1, 0.5));
+        var expected = List.of(
+                new BoughtSaleItemRecord(LocalDate.parse("2021-01-01"), LocalDate.parse("2021-01-10"), 10, 1, 5, 3, BigDecimal.TEN, 1.0, 0.5)
+        );
         when(reportService.generateReport(any(), any(), any(), any())).thenReturn(expected);
 
 
@@ -1319,7 +1323,9 @@ class SaleControllerTest {
 
     @Test
     void generateReportForBusiness_noEndDate_200ResponseAndUsedToday() throws Exception {
-        var expected = List.of(new BoughtSaleItemRecord(10, 1, 5, 3, BigDecimal.TEN, 1, 0.5));
+        var expected = List.of(
+                new BoughtSaleItemRecord(LocalDate.parse("2021-01-01"), LocalDate.parse("2021-01-10"), 10, 1, 5, 3, BigDecimal.TEN, 1.0, 0.5)
+        );
         when(reportService.generateReport(any(), any(), any(), any())).thenReturn(expected);
 
 
@@ -1329,7 +1335,10 @@ class SaleControllerTest {
                 .andExpect(status().isOk())
                 .andReturn();
 
-        List<BoughtSaleItemRecord> records = objectMapper.readValue(result.getResponse().getContentAsString(), new TypeReference<>() {});
+        var a = result.getResponse().getContentAsString();
+        System.out.println(a);
+
+        List<BoughtSaleItemRecord> records = objectMapper.readValue(a, new TypeReference<>() {});
         assertEquals(expected, records);
 
         verify(reportService, times(1)).generateReport(business, LocalDate.parse("2021-01-01"), LocalDate.now(), ReportGranularity.YEARLY);

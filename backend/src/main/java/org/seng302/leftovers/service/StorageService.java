@@ -26,7 +26,7 @@ public class StorageService {
     private Path root;
 
     public void init() {
-        logger.warn("Initialising StorageServiceImpl");
+        logger.warn("Initialising StorageService");
         try {
             Files.createDirectory(root);
         } catch (FileAlreadyExistsException ignored) {

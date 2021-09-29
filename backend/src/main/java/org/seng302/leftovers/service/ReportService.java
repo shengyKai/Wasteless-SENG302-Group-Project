@@ -98,7 +98,7 @@ public class ReportService {
 
             var items = boughtSaleItemRepository.findAll(specification);
 
-            records.add(new BoughtSaleItemRecord(items));
+            records.add(new BoughtSaleItemRecord(range.start, range.end, items));
         }
 
         return records;
