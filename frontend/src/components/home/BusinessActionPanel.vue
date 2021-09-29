@@ -40,7 +40,7 @@
                 <v-list-item-title >Sale Listing</v-list-item-title>
               </v-list-item-content>
             </v-list-item>
-            <v-list-item @click="goSaleReport">
+            <v-list-item @click="goSaleReports">
               <v-list-item-icon>
                 <v-icon>mdi-view-list</v-icon>
               </v-list-item-icon>
@@ -108,7 +108,7 @@ export default {
     /**
      * Shows the Sale Reports page
      */
-    goSaleReport() {
+    goSaleReports() {
       this.$router.push(`/salesreport/${this.$store.state.activeRole.id}`);
     }
   },

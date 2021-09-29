@@ -61,7 +61,7 @@
         <v-btn class="business-btn" outlined color="primary" @click="goSalePage" :value="false" width="150">
           Sale listings
         </v-btn>
-        <v-btn class="business-btn" outlined color="primary" @click="goSaleReport" :value="false" width="150">
+        <v-btn class="business-btn" outlined color="primary" @click="goSaleReports" :value="false" width="150">
           Sale reports
         </v-btn>
         <v-container fluid>
@@ -245,7 +245,7 @@ export default {
     /**
      * Shows the Sale Reports page
      */
-    goSaleReport() {
+    goSaleReports() {
       this.$router.push(`/salesreport/${this.$store.state.activeRole.id}`);
     },
     /**
