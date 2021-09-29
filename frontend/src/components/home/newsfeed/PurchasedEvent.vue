@@ -1,5 +1,5 @@
 <template>
-  <Event :event="event" :title="title" :error="errorMessage">
+  <Event :event="event" :title="title">
     <v-card-text class="pb-1">
       You have purchased <strong>{{itemBought}}</strong> from
       <strong>

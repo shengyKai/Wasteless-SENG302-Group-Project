@@ -26,6 +26,10 @@ describe('UserCards.vue', () => {
     });
   });
 
+  afterEach(() => {
+    wrapper.destroy();
+  });
+
   it('Cards should be shown correctly in MarketplaceCard subcomponents', async () => {
     const cards = Array.from({ length: 5 }, (_, i) => ({id: i}));
 

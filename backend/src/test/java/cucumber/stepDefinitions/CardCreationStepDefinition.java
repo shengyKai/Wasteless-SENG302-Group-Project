@@ -14,6 +14,7 @@ import org.seng302.leftovers.persistence.KeywordRepository;
 import org.seng302.leftovers.persistence.MarketplaceCardRepository;
 import org.seng302.leftovers.persistence.UserRepository;
 import org.seng302.leftovers.persistence.event.ExpiryEventRepository;
+import org.seng302.leftovers.service.CardService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
@@ -41,6 +42,8 @@ public class CardCreationStepDefinition {
     private KeywordRepository keywordRepository;
     @Autowired
     private ExpiryEventRepository expiryEventRepository;
+    @Autowired
+    private CardService cardService;
     private MarketplaceCard createdCard;
 
     /**
@@ -102,7 +105,8 @@ public class CardCreationStepDefinition {
             keywordRepository.save(keyword);
 
         }
-        CardController controller = new CardController(marketplaceCardRepository, keywordRepository, userRepository, expiryEventRepository);
+        CardController controller = new CardController(marketplaceCardRepository, keywordRepository, userRepository,
+                expiryEventRepository, cardService);
         mockMvc = MockMvcBuilders.standaloneSetup(controller).build();
     }
 

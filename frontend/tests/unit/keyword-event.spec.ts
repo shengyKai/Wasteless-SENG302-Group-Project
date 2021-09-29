@@ -33,6 +33,10 @@ describe('KeywordCreated.vue', () => {
     });
   });
 
+  afterEach(() => {
+    wrapper.destroy();
+  });
+
   it("Title is correct", () => {
     let eventWrapper = wrapper.findComponent({ name: 'Event'});
     expect(eventWrapper.props().title).toBe('Keyword "TestKeywordName" has been created');

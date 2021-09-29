@@ -36,6 +36,10 @@ describe('App.vue', () => {
     getEvents.mockResolvedValue([]);
   });
 
+  afterEach(() => {
+    wrapper.destroy();
+  });
+
   /**
    * Finds the current error message component if it exists.
    *
@@ -54,6 +58,7 @@ describe('App.vue', () => {
         localVue,
         store,
         router,
+        stubs: ['Avatar'],
         vuetify: new Vuetify(),
       });
     });

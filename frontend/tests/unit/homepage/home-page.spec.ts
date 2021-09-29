@@ -27,6 +27,7 @@ const testUser: User = {
   lastName: 'test_lastname',
   email: 'test_email',
   homeAddress: { country: 'test_country', city: 'test_city', district: 'test_district'},
+  images: [],
 };
 
 const testKeyword: Keyword = {
@@ -69,6 +70,10 @@ describe('HomePage.vue', () => {
       vuetify,
       store,
     });
+  });
+
+  afterEach(() => {
+    wrapper.destroy();
   });
 
   it('If an global message event is posted to the store then it should be contained in mainEvents', async () => {

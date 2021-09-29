@@ -17,6 +17,7 @@ import SalePage from "../components/SalePage.vue";
 import Marketplace from "../components/marketplace/Marketplace.vue";
 import UserCards from "../components/marketplace/UserCards.vue";
 import ImageManager from "../components/image/ImageManager.vue";
+import SalesReportPage from "../components/BusinessProfile/SalesReport/SalesReportPage.vue";
 import { COOKIE, getCookie } from "@/utils";
 import { getStore } from "@/store";
 
@@ -112,7 +113,12 @@ const routes = [
     path: "*",
     component: NotFound,
     meta: { title: 'Not Found' }
-  }
+  },
+  {
+    path: '/salesreport/:id',
+    component: SalesReportPage,
+    meta: { title: 'Business sales report' },
+  },
 ];
 
 

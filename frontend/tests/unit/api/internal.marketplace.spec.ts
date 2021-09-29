@@ -31,7 +31,8 @@ describe("Test GET /cards endpoint", () => {
           email: "someemail",
           homeAddress: {
             country: "somecountry",
-          }
+          },
+          images: [],
         },
         section: "ForSale",
         created: "somedate",

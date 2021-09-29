@@ -76,6 +76,7 @@ tags:
       Grouping of endpoints related to system-wide keywords that can be added by
       users and attached to marketplace cards
   - name: Images
+  - name: "U41: Sales report" 
 security:
   - CookieAuth:
       - user
@@ -436,133 +437,6 @@ paths:
             Forbidden: Returned when the user making the request is not the
             primary administrator of the business AND is not a global
             application admin.
-        '406':
-          $ref: '#/components/responses/NotAcceptableError'
-  '/businesses/{businessId}/images':
-    post:
-      tags:
-        - 'U11: Modifying Businesses'
-        - Business Images
-        - Business Accounts
-      summary: Upload a new image for some photo
-      security:
-        - CookieAuth:
-            - user
-            - globalApplicationAdmin
-            - defaultGlobalApplicationAdmin
-      parameters:
-        - name: businessId
-          in: path
-          description: ID of business
-          required: true
-          schema:
-            type: integer
-      requestBody:
-        content:
-          multipart/form-data:
-            schema:
-              type: object
-              properties:
-                filename:
-                  type: array
-                  items:
-                    type: string
-                    format: binary
-      responses:
-        '201':
-          description: Image created successfully
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  imageId:
-                    type: integer
-                    description: The ID of the image that has just been created
-                    example: 1234
-        '400':
-          $ref: '#/components/responses/BadRequestError'
-        '401':
-          $ref: '#/components/responses/UnauthorizedError'
-        '403':
-          description: >-
-            Forbidden: Returned when a user tries to add an image for the business
-            when they do not administer AND
-            the user is not a global application admin
-        '406':
-          $ref: '#/components/responses/NotAcceptableError'
-  '/businesses/{businessId}/images/{imageId}':
-    delete:
-      tags:
-        - 'U11: Modifying Businesses'
-        - Business Images
-        - Business Accounts
-      summary: Delete an image of a business
-      security:
-        - CookieAuth:
-            - user
-            - globalApplicationAdmin
-            - defaultGlobalApplicationAdmin
-      parameters:
-        - name: businessId
-          in: path
-          description: ID of business
-          required: true
-          schema:
-            type: integer
-        - name: imageId
-          in: path
-          description: ID of the image to delete
-          required: true
-          schema:
-            type: integer
-      responses:
-        '200':
-          description: Image deleted successfully
-        '401':
-          $ref: '#/components/responses/UnauthorizedError'
-        '403':
-          description: >-
-            Forbidden: Returned when a user tries to delete an image for a
-            business that it is in a catalogue for a business they do not
-            administer AND the user is not a global application admin
-        '406':
-          $ref: '#/components/responses/NotAcceptableError'
-  '/businesses/{businessId}/images/{imageId}/makeprimary':
-    put:
-      tags:
-        - 'U11: Modifying Businesses'
-        - Business Images
-        - Business Accounts
-      summary: Set an existing image to be the new primary image for the business
-      security:
-        - CookieAuth:
-            - user
-            - globalApplicationAdmin
-            - defaultGlobalApplicationAdmin
-      parameters:
-        - name: businessId
-          in: path
-          description: ID of business
-          required: true
-          schema:
-            type: integer
-        - name: imageId
-          in: path
-          description: ID of the image to set as being the primary image for product
-          required: true
-          schema:
-            type: integer
-      responses:
-        '200':
-          description: Primary image successfully updated
-        '401':
-          $ref: '#/components/responses/UnauthorizedError'
-        '403':
-          description: >-
-            Forbidden: Returned when a user tries to update the primary image
-            for the business that the user dont
-            administer AND the user is not a global application admin
         '406':
           $ref: '#/components/responses/NotAcceptableError'
   '/businesses/{id}/makeAdministrator':
@@ -1225,6 +1099,72 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/Listing'
+  '/businesses/{id}/reports':
+    get:
+      tags:
+        - 'U41: Sales report'
+        - 'Business Accounts'
+      summary: Generates a sales report for the given time period.
+      security:
+      - CookieAuth:
+        - user
+        - globalApplicationAdmin
+        - defaultGlobalApplicationAdmin
+      parameters:
+        - name: id
+          in: path
+          description: ID of the business to generate a report for.
+          required: true
+          schema:
+            type: integer
+        - name: startDate
+          in: query
+          description: 'The start date of the range to generate the report for. <br/>
+          Omitting this value will return all values up to endDate (or all).'
+          schema:
+            type: string
+            example: '2021-08-12'
+          
+        - name: endDate
+          in: query
+          description: 'The end date of the range to generate the report for. <br/>
+          Omitting this value will return all values starting from startDate (or all).'
+          schema:
+            type: string
+            example: '2021-09-15'
+        - name: granularity
+          in: query
+          description: 'The granularity of the generated report. Daily, Weekly, Monthly, Yearly.
+          <br/> Omitting this value will return the total for the given period.'
+          schema:
+            type: string
+            example: 'daily'
+          
+            enum:
+              - daily
+              - monthly
+              - yearly
+      responses:
+        '200':
+          description: 'Request successful, a list of Report Records is returned. <br/> The number of records returned will be equal to the range of the report divided by the granularity'
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ReportRecord'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          description: >-
+            Forbidden: Returned when a user tries to generate a report
+            for a business they do not administer AND the user is not a global
+            application admin
+        '406':
+          $ref: '#/components/responses/NotAcceptableError'
+                
   '/listings/{id}/interest':
     put:
       tags:
@@ -2994,6 +2934,41 @@ components:
             - platinum
         threshold:
           description: The points required to reach the next rank. This value is omitted for 'platinum'
+          type: number
+          example: 10
+    ReportRecord:
+      type: object
+      description: An object representing a single record of a report.
+      readOnly: true
+      required:
+        - name
+      properties:
+        date:
+          description: The date period of this report. Accurate only to the level of granularity
+          type: string
+          example: '2020-09-12'
+        uniqueListingsSold:
+          description: The number of unique listings sold for the given period
+          type: number
+          example: 10
+        uniqueBuyers:
+          description: The number of unique buyers for the given period
+          type: number
+          example: 5
+        uniqueProducts:
+          description: The number of unique products sold for the given period
+          type: number
+          example: 10
+        averageLikeCount:
+          description: The average number of likes for listings sold for the given period
+          type: number
+          example: 60
+        averageDaysToSell:
+          description: The average number of days listings were open before being sold, for listings sold within the given period
+          type: number
+          example: 10
+        totalPriceSold:
+          description: The total price of listings sold for the given period
           type: number
           example: 10
     Address:

@@ -96,7 +96,8 @@ describe('store.ts', () => {
         email: "email@email.com",
         homeAddress: {
           country: "Country"
-        }
+        },
+        images: [],
       };
     });
 
@@ -106,7 +107,7 @@ describe('store.ts', () => {
         expect(Object.keys(store.state.eventMap).length).toBe(0);
       });
 
-      it('Calls getEvents method with id of current user and undefined for date parameter if there are no events in eventMap', async() => {
+      it('Calls getEvents method with id of current user and undefined for date parameter', async() => {
         await store.dispatch('refreshEventFeed');
         expect(getEvents).toBeCalledTimes(1);
         expect(getEvents).toBeCalledWith(6, undefined);
@@ -157,13 +158,13 @@ describe('store.ts', () => {
         expect(Object.keys(store.state.eventMap).length).toBe(3);
       });
 
-      it('Calls getEvents method with id of current user and latest lastModified date from events if there are events in eventMap', async() => {
+      it('Calls getEvents method with id of current user and undefined for date parameter', async() => {
         await store.dispatch('refreshEventFeed');
         expect(getEvents).toBeCalledTimes(1);
-        expect(getEvents).toBeCalledWith(6, '2021-11-15T05:10:00Z');
+        expect(getEvents).toBeCalledWith(6, undefined);
       });
 
-      it('Adds returned events to eventMap if response from getEvents is a list of events', async () => {
+      it('Removes old event from eventmap and adds returned events to eventMap if response from getEvents is a list of events', async () => {
         const returnedEvents: events.AnyEvent[] = [
           {
             type: 'GlobalMessageEvent',
@@ -188,7 +189,7 @@ describe('store.ts', () => {
         ];
         getEvents.mockResolvedValueOnce(returnedEvents);
         await store.dispatch('refreshEventFeed');
-        expect(Object.keys(store.state.eventMap).length).toBe(5);
+        expect(Object.keys(store.state.eventMap).length).toBe(2);
         expect(store.state.eventMap[12]).toStrictEqual(returnedEvents[0]);
         expect(store.state.eventMap[33]).toStrictEqual(returnedEvents[1]);
       });

@@ -28,8 +28,6 @@ export type Business = {
   rank: Rank,
 };
 
-
-
 export type CreateBusiness = {
   primaryAdministratorId: number,
   name: string,
