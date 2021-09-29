@@ -246,6 +246,8 @@ public class DemoController {
 
             List<Long> boughtSaleItemIds = boughtSaleItemGenerator.generateBoughtSaleItems(allProducts, allUsers, options.getBoughtSaleItemCount());
 
+            businessGenerator.setBusinessPointsFromSaleItems(allBusinesses);
+
             if (options.getGenerateBusinessImages()) {
                 businessImageGenerator.generateBusinessImages(allBusinesses, options.getBusinessImageMin(), options.getBusinessImageMax());
             }

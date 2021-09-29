@@ -117,7 +117,7 @@ class BoughtSaleItemGeneratorTest {
 
     @ParameterizedTest
     @ValueSource(ints = {1, 2, 10, 100})
-    void generateInvItems_generateHundredInvItemsAndConsistentData_hundredInvItemsGenerated(int count) throws SQLException {
+    void generateBoughtSaleItems_generateManyBoughtSaleItems_manyBoughtSaleItemsGenerated(int count) throws SQLException {
         List<Long> userIds = generateUsers(1);
         System.out.println(userIds);
         List<Long> productIds = generateBusinessAndProduct(userIds, 1, 1);
@@ -130,7 +130,7 @@ class BoughtSaleItemGeneratorTest {
     }
 
     @Test
-    void generateInvItems_generateZeroInvItemsAndConsistentData_NoInvItemGenerated() throws SQLException {
+    void generateBoughtSaleItems_generateZeroBoughtSaleItems_noBoughtSaleItemsGenerated() throws SQLException {
         long boughtSaleItemsInDB = getNumBoughtSaleItemsInDB();
         List<Long> userIds = generateUsers(1);
         List<Long> productIds = generateBusinessAndProduct(userIds, 1, 1);
@@ -140,7 +140,7 @@ class BoughtSaleItemGeneratorTest {
     }
 
     @Test
-    void generateInvItems_generateNegativeOneInvItemsAndConsistentData_NoInvItemGenerated() throws SQLException {
+    void generateBoughtSaleItems_generateNegativeOneBoughtSaleItems_noBoughtSaleItemsGenerated() throws SQLException {
         long boughtSaleItemsInDB = getNumBoughtSaleItemsInDB();
         List<Long> userIds = generateUsers(1);
         List<Long> productIds = generateBusinessAndProduct(userIds, 1, 1);
@@ -150,7 +150,7 @@ class BoughtSaleItemGeneratorTest {
     }
 
     @Test
-    void generateInvItems_generateNegativeTenInvItemsAndConsistentData_NoInvItemGenerated() throws SQLException {
+    void generateBoughtSaleItems_generateNegativeTenBoughtSaleItems_noBoughtSaleItemsGenerated() throws SQLException {
         long boughtSaleItemsInDB = getNumBoughtSaleItemsInDB();
         List<Long> userIds = generateUsers(1);
         List<Long> productIds = generateBusinessAndProduct(userIds, 1, 1);
