@@ -1,11 +1,11 @@
 <template>
   <!-- use the v-dialog to show a pop up for the carousel -->
-  <v-dialog v-model="dialog" width="min(90vh, 100vw)" v-if="imagesList !== undefined">
+  <v-dialog v-model="dialog" width="min(90vh, 100vw)" v-if="imagesList && imagesList.length > 0">
     <template v-slot:activator="{ on, attrs }">
       <!-- put an image over a link, such that now the image will be clickable to activate the pop up dialog -->
       <!--  The v-bind to attrs allows the v-dialog to use this link as the activator for the dialog box -->
       <a v-bind="attrs" v-on="on">
-        <!-- productImages[0] will be the primary image for the product. -->
+        <!-- imagesList[0] will be the primary image. -->
         <v-img height="200px" :src="imageUrl(imagesList[0].filename)" />
       </a>
     </template>
@@ -16,7 +16,7 @@
         hide-delimiters
         height="auto"
       >
-        <!-- iterate through each photo in productImages -->
+        <!-- iterate through each photo in imagesList -->
         <v-carousel-item
           v-for="(item, i) in imagesList"
           :key="i"
