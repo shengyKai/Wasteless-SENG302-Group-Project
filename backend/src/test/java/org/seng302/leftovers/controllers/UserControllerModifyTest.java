@@ -15,6 +15,7 @@ import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.seng302.leftovers.dto.LocationDTO;
+import org.seng302.leftovers.dto.user.UserRole;
 import org.seng302.leftovers.entities.Image;
 import org.seng302.leftovers.entities.Location;
 import org.seng302.leftovers.entities.User;
@@ -81,6 +82,7 @@ class UserControllerModifyTest {
 
         when(userRepository.getUser(mockUserId)).thenReturn(mockUser);
         when(userRepository.findById(mockUserId)).thenReturn(Optional.of(mockUser));
+        when(mockUser.getRole()).thenReturn(UserRole.USER);
 
         when(mockUser.getUserID()).thenReturn(mockUserId);
         when(mockUser.getBio()).thenReturn("Some bio");
@@ -363,7 +365,6 @@ class UserControllerModifyTest {
     @Test
     void modifyUser_modifyInvalidNickname_userNotModified400() throws Exception {
         var jsonBody = createValidRequest();
-
         doThrow(new ResponseStatusException(HttpStatus.BAD_REQUEST))
                 .when(mockUser).setNickname(any());
 

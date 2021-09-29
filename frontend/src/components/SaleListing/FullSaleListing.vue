@@ -5,7 +5,7 @@
       <div>
         <ImageCarousel v-if="imagesList.length > 0" :imagesList="product.images" :productId="product.id"/>
         <div/>
-        <!-- Product titile and core information -->
+        <!-- Product title and core information -->
         <v-row>
           <v-col cols="12" sm="8">
             <v-card flat>
