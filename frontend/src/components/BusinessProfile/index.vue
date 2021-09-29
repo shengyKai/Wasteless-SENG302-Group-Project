@@ -80,7 +80,7 @@
             </v-col>
             <v-col cols="12" sm="6">
               <h4>Points</h4>
-              {{ business.points }}
+              <LevelUp :business="this.business"/>
             </v-col>
             <v-col cols="12">
               <h4>Administrators</h4>
@@ -118,6 +118,7 @@ import {getBusiness} from "@/api/business";
 import SilverRank from "@/components/ranks/SilverRank";
 import GoldRank from "@/components/ranks/GoldRank";
 import PlatinumRank from "@/components/ranks/PlatinumRank";
+import LevelUp from "./LevelUp";
 export default {
   name: 'BusinessProfile',
   components: {
@@ -125,7 +126,8 @@ export default {
     ModifyBusiness,
     SilverRank,
     GoldRank,
-    PlatinumRank
+    PlatinumRank,
+    LevelUp
   },
   data() {
     return {
