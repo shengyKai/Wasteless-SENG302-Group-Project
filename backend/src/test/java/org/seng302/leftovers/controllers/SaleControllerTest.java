@@ -1,5 +1,6 @@
 package org.seng302.leftovers.controllers;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
@@ -15,6 +16,8 @@ import org.junit.runner.RunWith;
 import org.mockito.*;
 import org.mockito.internal.matchers.apachecommons.ReflectionEquals;
 import org.seng302.leftovers.dto.business.BusinessType;
+import org.seng302.leftovers.dto.saleitem.BoughtSaleItemRecord;
+import org.seng302.leftovers.dto.saleitem.ReportGranularity;
 import org.seng302.leftovers.dto.saleitem.SaleListingSearchDTO;
 import org.seng302.leftovers.entities.*;
 import org.seng302.leftovers.entities.event.Event;
@@ -22,6 +25,7 @@ import org.seng302.leftovers.entities.event.InterestEvent;
 import org.seng302.leftovers.entities.event.InterestPurchasedEvent;
 import org.seng302.leftovers.entities.event.PurchasedEvent;
 import org.seng302.leftovers.exceptions.AccessTokenResponseException;
+import org.seng302.leftovers.exceptions.InsufficientPermissionResponseException;
 import org.seng302.leftovers.persistence.*;
 import org.seng302.leftovers.persistence.event.EventRepository;
 import org.seng302.leftovers.persistence.event.InterestEventRepository;
@@ -47,6 +51,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.math.BigDecimal;
 import java.text.ParseException;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
@@ -63,6 +68,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 class SaleControllerTest {
 
     private MockMvc mockMvc;
+
+    @Autowired
+    private ObjectMapper objectMapper;
 
     @Mock
     private UserRepository userRepository;
@@ -103,9 +111,6 @@ class SaleControllerTest {
 
     private SaleController saleController;
 
-    @Autowired
-    private ObjectMapper objectMapper;
-
     @Captor
     ArgumentCaptor<Specification<SaleItem>> specificationArgumentCaptor;
     @Captor
@@ -138,6 +143,7 @@ class SaleControllerTest {
         when(business.getId()).thenReturn(1L);
         when(business.getAddress()).thenReturn(businessAddress);
         when(business.getPrimaryOwner()).thenReturn(businessPrimaryOwner);
+        when(business.getCreated()).thenReturn(Instant.parse("2021-09-08T08:47:59Z"));
 
         when(businessRepository.getBusinessById(1L)).thenReturn(business);
         when(businessRepository.getBusinessById(not(eq(1L)))).thenThrow(new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE));
@@ -166,7 +172,7 @@ class SaleControllerTest {
         when(userRepository.findById(not(eq(4L)))).thenReturn(Optional.empty());
 
         saleController = spy(new SaleController(userRepository, businessRepository, saleItemRepository,
-                inventoryItemRepository, interestEventRepository, boughtSaleItemRepository, eventRepository, reportService));
+                inventoryItemRepository, interestEventRepository, boughtSaleItemRepository, eventRepository, reportService, objectMapper));
         mockMvc = MockMvcBuilders.standaloneSetup(saleController).build();
     }
 
@@ -1214,5 +1220,118 @@ class SaleControllerTest {
         assertEquals(allSavedEvents.get(1).getClass(), InterestPurchasedEvent.class);
         assertEquals(allSavedEvents.get(2).getClass(), InterestPurchasedEvent.class);
         assertEquals(allSavedEvents.get(3).getClass(), PurchasedEvent.class);
+    }
+
+    @Test
+    void generateReportForBusiness_notLoggedIn_401Response() throws Exception {
+        // Mock the AuthenticationTokenManager to respond as it would when the authentication token is missing or invalid
+        authenticationTokenManager.when(() -> AuthenticationTokenManager.checkAuthenticationToken(any()))
+                .thenThrow(new AccessTokenResponseException());
+
+        // Verify that a 401 response is received in response to the GET request
+        mockMvc.perform(get("/businesses/1/reports"))
+                .andExpect(status().isUnauthorized());
+
+        // Check that the authentication token manager was called
+        authenticationTokenManager.verify(() -> AuthenticationTokenManager.checkAuthenticationToken(any()));
+        verifyNoInteractions(reportService);
+    }
+
+    @Test
+    void generateReportForBusiness_invalidBusiness_406Response() throws Exception {
+        // Verify that a 406 response is received in response to the GET request
+        mockMvc.perform(get("/businesses/9999/reports"))
+                .andExpect(status().isNotAcceptable());
+
+        verify(businessRepository, times(1)).getBusinessById(9999L);
+
+        verifyNoInteractions(reportService);
+    }
+
+    @Test
+    void generateReportForBusiness_doesNotHavePermission_403Response() throws Exception {
+        doThrow(new InsufficientPermissionResponseException("foo")).when(business).checkSessionPermissions(any());
+
+        // Verify that a 403 response is received in response to the GET request
+        mockMvc.perform(get("/businesses/1/reports"))
+                .andExpect(status().isForbidden());
+
+        verify(businessRepository, times(1)).getBusinessById(1L);
+        verify(business, times(1)).checkSessionPermissions(any());
+
+        verifyNoInteractions(reportService);
+    }
+
+    @ParameterizedTest
+    @CsvSource({
+            "2021-aa-01,2021-11-01,none",
+            "2020-01-01,2021-aa-01,none",
+            "2021-01-01,2021-11-01,nan",
+            "2021-10-01,2021-05-01,none", // End date before start date
+    })
+    void generateReportForBusiness_invalidQueryParams_400Response(String startDate, String endDate, String granularity) throws Exception {
+        // Verify that a 400 response is received in response to the GET request
+        mockMvc.perform(get("/businesses/1/reports")
+                .param("startDate", startDate)
+                .param("endDate", endDate)
+                .param("granularity", granularity))
+                .andExpect(status().isBadRequest());
+
+        verifyNoInteractions(reportService);
+    }
+
+    @Test
+    void generateReportForBusiness_validParameters_200ResponseAndReportReturned() throws Exception {
+        var expected = List.of(new BoughtSaleItemRecord(10, 1, 5, 3, BigDecimal.TEN, 1, 0.5));
+        when(reportService.generateReport(any(), any(), any(), any())).thenReturn(expected);
+
+
+        var result = mockMvc.perform(get("/businesses/1/reports")
+                .param("startDate", "2021-01-01")
+                .param("endDate", "2021-01-10")
+                .param("granularity", "daily"))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        List<BoughtSaleItemRecord> records = objectMapper.readValue(result.getResponse().getContentAsString(), new TypeReference<>() {});
+        assertEquals(expected, records);
+
+        verify(reportService, times(1)).generateReport(business, LocalDate.parse("2021-01-01"), LocalDate.parse("2021-01-10"), ReportGranularity.DAILY);
+    }
+
+    @Test
+    void generateReportForBusiness_noStartDate_200ResponseAndUsedBusinessCreationDate() throws Exception {
+        var expected = List.of(new BoughtSaleItemRecord(10, 1, 5, 3, BigDecimal.TEN, 1, 0.5));
+        when(reportService.generateReport(any(), any(), any(), any())).thenReturn(expected);
+
+
+        var result = mockMvc.perform(get("/businesses/1/reports")
+                .param("endDate", "2021-10-10")
+                .param("granularity", "monthly"))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        List<BoughtSaleItemRecord> records = objectMapper.readValue(result.getResponse().getContentAsString(), new TypeReference<>() {});
+        assertEquals(expected, records);
+
+        verify(reportService, times(1)).generateReport(business, LocalDate.parse("2021-09-08"), LocalDate.parse("2021-10-10"), ReportGranularity.MONTHLY);
+    }
+
+    @Test
+    void generateReportForBusiness_noEndDate_200ResponseAndUsedToday() throws Exception {
+        var expected = List.of(new BoughtSaleItemRecord(10, 1, 5, 3, BigDecimal.TEN, 1, 0.5));
+        when(reportService.generateReport(any(), any(), any(), any())).thenReturn(expected);
+
+
+        var result = mockMvc.perform(get("/businesses/1/reports")
+                .param("startDate", "2021-01-01")
+                .param("granularity", "yearly"))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        List<BoughtSaleItemRecord> records = objectMapper.readValue(result.getResponse().getContentAsString(), new TypeReference<>() {});
+        assertEquals(expected, records);
+
+        verify(reportService, times(1)).generateReport(business, LocalDate.parse("2021-01-01"), LocalDate.now(), ReportGranularity.YEARLY);
     }
 }

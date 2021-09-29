@@ -42,8 +42,6 @@ import java.util.Optional;
 
 @RestController
 public class SaleController {
-    @Autowired
-    private ObjectMapper objectMapper;
 
     private static final Logger logger = LogManager.getLogger(SaleController.class);
 
@@ -55,6 +53,7 @@ public class SaleController {
     private final BoughtSaleItemRepository boughtSaleItemRepository;
     private final EventRepository eventRepository;
     private final ReportService reportService;
+    private final ObjectMapper objectMapper;
 
     public SaleController(UserRepository userRepository,
                           BusinessRepository businessRepository,
@@ -63,7 +62,8 @@ public class SaleController {
                           InterestEventRepository interestEventRepository,
                           BoughtSaleItemRepository boughtSaleItemRepository,
                           EventRepository eventRepository,
-                          ReportService reportService) {
+                          ReportService reportService,
+                          ObjectMapper objectMapper) {
         this.userRepository = userRepository;
         this.businessRepository = businessRepository;
         this.saleItemRepository = saleItemRepository;
@@ -72,6 +72,7 @@ public class SaleController {
         this.boughtSaleItemRepository = boughtSaleItemRepository;
         this.eventRepository = eventRepository;
         this.reportService = reportService;
+        this.objectMapper = objectMapper;
     }
 
     /**
