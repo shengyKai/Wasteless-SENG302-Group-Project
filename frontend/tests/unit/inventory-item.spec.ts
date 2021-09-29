@@ -93,6 +93,10 @@ describe('InventoryItem.vue', () => {
     });
   });
 
+  afterEach(() => {
+    wrapper.destroy();
+  });
+
   it("Must contain the product name", () => {
     expect(wrapper.text()).toContain('test_product_name');
   });

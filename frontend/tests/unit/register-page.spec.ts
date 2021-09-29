@@ -35,6 +35,10 @@ describe('index.vue', () => {
     } as any);
   });
 
+  afterEach(() => {
+    wrapper.destroy();
+  });
+
   it("Testing out the register page link, should redirect to Login Page from Register Page", async () => {
     //if login is false, the Register component should exist and the Login component should not exist
     expect(wrapper.findComponent(Login).exists()).toBeFalsy();

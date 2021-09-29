@@ -86,13 +86,22 @@ describe('index.vue', () => {
                 firstName: "Another First Name",
                 lastName: "Another Last Name"
               }
-            ]
+            ],
+            rank: {
+              name: "bronze",
+              threshold: 1
+            }
           },
           readableAddress: "1 Some Street Name",
         };
       },
     });
   });
+
+  afterEach(() => {
+    wrapper.destroy();
+  });
+
   it("Must contain the business name", () => {
     expect(wrapper.text()).toContain('Some Business Name');
   });
@@ -128,5 +137,9 @@ describe('index.vue', () => {
 
   it("Router link can have multiple endpoints with different admin id", () => {
     expect(wrapper.findAllComponents(RouterLinkStub).at(1).props().to).toBe('/profile/2');
+  });
+
+  it("Must contain the business rank name", () => {
+    expect(wrapper.text()).toContain('Rank: Bronze');
   });
 });

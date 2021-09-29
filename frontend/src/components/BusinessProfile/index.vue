@@ -1,11 +1,11 @@
 <template>
   <div>
-    <v-row v-if="fromSearch && !modifyBusiness" class="mb-n16 mt-6">
-      <v-col class="text-right mt-10 mb-n10">
+    <v-row v-if="fromSearch && !modifyBusiness" class="mt-6 mb-n10">
+      <v-col class="text-right">
         <v-btn @click="returnToSearch" color="primary">Return to search</v-btn>
       </v-col>
     </v-row>
-    <div v-if='!modifyBusiness' style="margin-top: 100px">
+    <div v-if='!modifyBusiness' class="mt-16">
       <v-card v-if="businessImages && businessImages.length > 0">
         <ImageCarousel
           :imagesList="businessImages"
@@ -56,14 +56,17 @@
               </v-tooltip>
             </v-col>
           </v-row>
-          <p><strong>Created:</strong> {{ createdMsg }}</p>
+          <p>
+            <strong>Created:</strong> {{ createdMsg }}
+            <strong class="rank">Rank:</strong> {{ business.rank.name.charAt(0).toUpperCase() + business.rank.name.slice(1) }}
+          </p>
+          <v-btn outlined color="primary" @click="goSalePage" :value="false" width="150">
+            Sale listings
+          </v-btn>
+          <v-btn class="business-btn" outlined color="primary" @click="goSalePage" :value="false" width="150">
+            Sale listings
+          </v-btn>
         </div>
-        <v-btn class="business-btn" outlined color="primary" @click="goSalePage" :value="false" width="150">
-          Sale listings
-        </v-btn>
-        <v-btn v-if="isAdmin" class="business-btn" outlined color="primary" @click="goSaleReports" :value="false" width="150">
-          Sale reports
-        </v-btn>
         <v-container fluid>
           <v-row>
             <v-col cols="12" sm="6">
@@ -105,7 +108,6 @@
 </template>
 
 <script>
-import { USER_ROLES } from "@/utils";
 import ModifyBusiness from '@/components/BusinessProfile/ModifyBusiness';
 import convertAddressToReadableText from '@/components/utils/Methods/convertAddressToReadableText';
 import {
@@ -275,6 +277,7 @@ export default {
         }
         this.rank = this.business.rank.name;
       });
+
     },
   }
 };
@@ -302,6 +305,10 @@ export default {
   display: inline;
   height: 40px;
   margin-left: 10px;
+}
+
+.rank {
+  padding-left: 30px;
 }
 
 .business-btn {

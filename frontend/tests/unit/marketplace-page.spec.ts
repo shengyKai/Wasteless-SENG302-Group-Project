@@ -29,6 +29,7 @@ const testUser: User = {
   lastName: 'test_lastname',
   email: 'test_email',
   homeAddress: { country: 'test_country', city: 'test_city', district: 'test_district'},
+  images: [],
 };
 
 const testMarketplaceCard: MarketplaceCard = {
@@ -72,6 +73,10 @@ describe('Marketplace.vue', () => {
       created: "2020-01-02",
     }]);
     createWrapper();
+  });
+
+  afterEach(() => {
+    wrapper.destroy();
   });
 
   it('When card order field is changed, API call to get cards is made with new order field', async () => {
