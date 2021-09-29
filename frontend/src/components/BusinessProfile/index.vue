@@ -1,11 +1,11 @@
 <template>
   <div>
-    <v-row v-if="fromSearch && !modifyBusiness" class="mb-n16 mt-6">
-      <v-col class="text-right mt-10 mb-n10">
+    <v-row v-if="fromSearch && !modifyBusiness" class="mt-6 mb-n10">
+      <v-col class="text-right">
         <v-btn @click="returnToSearch" color="primary">Return to search</v-btn>
       </v-col>
     </v-row>
-    <div v-if='!modifyBusiness' style="margin-top: 100px">
+    <div v-if='!modifyBusiness' class="mt-16">
       <v-card v-if="businessImages && businessImages.length > 0">
         <ImageCarousel
           :imagesList="businessImages"

@@ -100,7 +100,8 @@ export function makeTestUser(userId: number, businesses?: number[], role?: UserR
       district: 'test_district',
       country: 'test_country' + userId
     },
-    role: role ?? 'user'
+    role: role ?? 'user',
+    images: [],
   };
   if (businesses !== undefined) {
     user.businessesAdministered = businesses.map(businessId => makeTestBusiness(businessId));

@@ -1,6 +1,7 @@
 import {is} from 'typescript-is';
 import {Location, MaybeError, SearchResults, instance} from "@/api/internal";
 import {Business} from "@/api/business";
+import {Image} from "@/api/images";
 
 export type UserRole = "user" | "globalApplicationAdmin" | "defaultGlobalApplicationAdmin"
 type UserOrderBy = 'userId' | 'relevance' | 'firstName' | 'middleName' | 'lastName' | 'nickname' | 'email';
@@ -19,6 +20,7 @@ export type User = {
   created?: string,
   role?: UserRole,
   businessesAdministered?: Business[],
+  images: Image[],
 };
 
 export type BaseUser = {

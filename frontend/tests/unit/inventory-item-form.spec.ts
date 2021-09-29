@@ -144,8 +144,7 @@ describe("InventoryItemForm.vue", () => {
      *
      * This function makes sure that the ItemFormInventory component is removed from the global document
      */
-  afterEach(async() => {
-    await flushQueue();
+  afterEach(() => {
     appWrapper.destroy();
   });
 

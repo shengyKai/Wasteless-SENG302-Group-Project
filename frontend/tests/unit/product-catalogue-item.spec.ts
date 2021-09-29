@@ -98,6 +98,10 @@ describe('ProductCatalogueItem.vue', () => {
     });
   });
 
+  afterEach(() => {
+    wrapper.destroy();
+  });
+
   /**
    * Finds the edit button in the ProductCatalogueItem
    *
