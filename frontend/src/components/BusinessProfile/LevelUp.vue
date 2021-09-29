@@ -24,7 +24,7 @@ export default {
       return this.business.points;
     },
     threshold() {
-      return null;//this.business.rank.threshold;
+      return this.business.rank.threshold;
     },
     progress() {
       return this.points/this.threshold*600;
