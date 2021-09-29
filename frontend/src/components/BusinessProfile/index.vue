@@ -306,9 +306,6 @@ export default {
   display: inline;
   height: 40px;
   margin-left: 10px;
-}
-
-.rank {
   padding-left: 30px;
 }
 

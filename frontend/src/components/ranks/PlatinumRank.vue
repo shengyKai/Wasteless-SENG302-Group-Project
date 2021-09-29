@@ -1,7 +1,7 @@
 <template>
   <v-tooltip top>
     <template #activator="{ on, attrs }">
-      <img src="../../assets/platinum-rank-icon.png" v-bind="attrs" v-on="on" class="rank">
+      <img src="../../assets/platinum-rank-icon.png" alt="platinum star" v-bind="attrs" v-on="on" class="rank">
     </template>
     <span>Platinum Business Rank</span>
   </v-tooltip>
