@@ -1,7 +1,8 @@
 <template>
   <div>
-    <v-card v-if="userImages && userImages.length > 0" class="mt-16 mb-0">
+    <v-card class="mt-16 mb-0">
       <ImageCarousel
+        v-if="userImages && userImages.length > 0"
         :imagesList="userImages"
         :showMakePrimary="false"
         :showDelete="false"

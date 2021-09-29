@@ -360,7 +360,6 @@ export default {
       showConfirmPassword: false,
       showOldPassword: false,
       errorMessage: undefined,
-      images: []
     };
   },
   async mounted () {
@@ -419,7 +418,7 @@ export default {
       this.user.homeAddress = this.previousUser.homeAddress;
       this.streetAddress = this.previousUser.homeAddress.streetNumber + ' ' + this.previousUser.homeAddress.streetName;
 
-      this.user.images = this.previousUser.images ?? [];
+      this.user.images = [...this.previousUser.images];
       if (this.previousUser.phoneNumber !== undefined) {
         let parts = this.previousUser.phoneNumber.split(' ');
         this.countryCode = parts[0];
@@ -557,7 +556,7 @@ export default {
      */
     imageIds() {
       return this.user.images.map(image => image.id);
-    }
+    },
   }
 
 };
