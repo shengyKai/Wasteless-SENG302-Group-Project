@@ -5,7 +5,7 @@
     </strong>
     <v-data-table
       :headers="headers"
-      :items="reportDetails.reportData"
+      :items="fullReport.reportData"
     />
   </div>
 </template>
@@ -15,7 +15,7 @@
 export default {
   name: "SalesReportTable",
   props: {
-    reportDetails: Object
+    fullReport: Object
   },
   data() {
     return {
@@ -57,17 +57,17 @@ export default {
      * Otherwise, the headers are just the baseHeaders.
      */
     headers() {
-      if (this.reportDetails.reportType === "yearly") {
+      if (this.fullReport.reportType === "yearly") {
         return this.baseHeaders;
       } else {
-        return this.distinctHeaders[this.reportDetails.reportType].concat(this.baseHeaders);
+        return this.distinctHeaders[this.fullReport.reportType].concat(this.baseHeaders);
       }
     },
     /**
      * Generates the report title based on the reportType in the format '"reportType" Report'
      */
     reportTitle() {
-      return `${this.reportDetails.reportType.charAt(0).toUpperCase() + this.reportDetails.reportType.slice(1)} Report`;
+      return `${this.fullReport.reportType.charAt(0).toUpperCase() + this.fullReport.reportType.slice(1)} Report`;
     },
   },
 };
