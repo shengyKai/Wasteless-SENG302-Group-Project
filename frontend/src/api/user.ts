@@ -98,9 +98,9 @@ export async function getUser(id: number): Promise<MaybeError<User>> {
     return `Request failed: ${status}`;
   }
 
-  /*if (!is<User>(response.data)) {
+  if (!is<User>(response.data)) {
     return 'Response is not user';
-  }*/
+  }
 
   return response.data;
 }
