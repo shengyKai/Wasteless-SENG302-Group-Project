@@ -3,12 +3,55 @@
 exports[`SaleResult.vue Component matches snapshot 1`] = `
 <div businessid="1">
   <div tabindex="-1" class="v-list-item theme--light purple--text">
+<<<<<<< HEAD
     <div class="v-avatar v-list-item__avatar" style="height: 70px; min-width: 40px; width: 70px;"><img src="../../assets/grumpy.webp"></div>
     <div class="v-list-item__content">
       <div class="v-list-item__title"><a class="result-title">Watties Baked Beans - 420g can</a> <label class="result-title-join">From </label> <label class="result-title-business">test_business</label></div>
       <div class="v-list-item__subtitle"><label>More Info: Seller may be willing to consider near offers.</label></div>
       <div class="v-list-item__subtitle"><label class="total-price-label">Total Price:</label> <label>$17.99</label> <label class="divider1"></label> <label class="quantity-label">Quantity:</label> <label>3</label></div>
       <div class="v-list-item__subtitle"><label class="creation-date-label">Creation Date:</label> <label>14 Jul 2021</label> <label class="divider2"></label> <label class="closing-date-label">Closing Date:</label> <label>22 Jul 2021</label></div>
+=======
+    <div class="pl-0 col col-auto align-self-center">
+      <div class="v-avatar white--text headline secondary" style="height: 80px; min-width: 80px; width: 80px; font-size: 40px;">W</div>
+    </div>
+    <div class="col">
+      <div class="row row--dense">
+        <div class="col">
+          <h4><a>Watties Baked Beans - 420g can</a>
+            from
+            <router-link-stub to="/business/5" class="text--secondary">
+              This Inc.
+            </router-link-stub>
+          </h4>
+        </div>
+      </div>
+      <div class="row my-0 py-0">
+        <div class="my-0 py-0 col"><label class="font-weight-bold">More Info:</label> Seller may be willing to consider near offers.
+        </div>
+      </div>
+      <div class="row mt-0 row--dense">
+        <div class="font-weight-bold col col-auto">
+          Total Price:
+          <br>
+          Creation Date:
+        </div>
+        <div class="col col-auto">
+          $17.99
+          <br>
+          14 Jul 2021
+        </div>
+        <div class="font-weight-bold col col-auto">
+          Quantity:
+          <br>
+          Closing Date:
+        </div>
+        <div class="col col-auto">
+          3
+          <br>
+          22 Jul 2021
+        </div>
+      </div>
+>>>>>>> dev
     </div>
   </div>
 </div>

@@ -1,11 +1,11 @@
 <template>
   <div>
-    <v-row v-if="fromSearch && !modifyBusiness" class="mb-n16 mt-6">
-      <v-col class="text-right mt-10 mb-n10">
+    <v-row v-if="fromSearch && !modifyBusiness" class="mt-6 mb-n10">
+      <v-col class="text-right">
         <v-btn @click="returnToSearch" color="primary">Return to search</v-btn>
       </v-col>
     </v-row>
-    <div v-if='!modifyBusiness' style="margin-top: 100px">
+    <div v-if='!modifyBusiness' class="mt-16">
       <v-card v-if="businessImages && businessImages.length > 0">
         <ImageCarousel
           :imagesList="businessImages"
@@ -56,11 +56,17 @@
               </v-tooltip>
             </v-col>
           </v-row>
-          <p><strong>Created:</strong> {{ createdMsg }}</p>
-          <v-btn outlined color="primary" @click="goSalePage" :value="false" width="150">
-            Sale listings
-          </v-btn>
+          <p>
+            <strong>Created:</strong> {{ createdMsg }}
+            <strong class="rank">Rank:</strong> {{ business.rank.name.charAt(0).toUpperCase() + business.rank.name.slice(1) }}
+          </p>
         </div>
+        <v-btn class="business-btn" outlined color="primary" @click="goSalePage" :value="false" width="150">
+          Sale listings
+        </v-btn>
+        <v-btn v-if="!isadmin" class="business-btn" outlined color="primary" @click="goSaleReports" :value="false" width="150">
+          Sale reports
+        </v-btn>
         <v-container fluid>
           <v-row>
             <v-col cols="12" sm="6">
@@ -102,6 +108,7 @@
 </template>
 
 <script>
+import { USER_ROLES } from "@/utils";
 import ModifyBusiness from '@/components/BusinessProfile/ModifyBusiness';
 import convertAddressToReadableText from '@/components/utils/Methods/convertAddressToReadableText';
 import {
@@ -170,6 +177,13 @@ export default {
   },
 
   computed: {
+    /**
+     * Checks to see if the user is a admin of the business
+     */
+    isAdmin() {
+      return this.business.administrators.map(admin => admin.id).includes(this.$store.state.user.id) ||
+      [USER_ROLES.DGAA, USER_ROLES.GAA].includes(this.$store.getters.role);
+    },
     createdMsg() {
       if (this.business.created === undefined) return '';
 
@@ -240,6 +254,12 @@ export default {
       this.updateProductCountry = !this.updateProductCountry;
     },
     /**
+     * Shows the Sale Reports page
+     */
+    goSaleReports() {
+      this.$router.push(`/salesreport/${this.$store.state.activeRole.id}`);
+    },
+    /**
      * Updates the business profile page to show the updated details of the business.
      * This method is separated from the $route watcher as it is reused for the ModifyBusiness page on a successful
      * api call, which will update the business profile page to the latest information.
@@ -286,5 +306,14 @@ export default {
   display: inline;
   height: 40px;
   margin-left: 10px;
+}
+
+.rank {
+  padding-left: 30px;
+}
+
+.business-btn {
+  display: inline;
+  margin-right: 10px;
 }
 </style>

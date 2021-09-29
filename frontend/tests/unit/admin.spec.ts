@@ -44,6 +44,10 @@ describe("Admin.vue", () => {
     });
   });
 
+  afterEach(() => {
+    wrapper.destroy();
+  });
+
   it('Calls searchKeywords with empty string', () => {
     expect(searchKeywords.mock.calls.length).toBe(1);
     expect(searchKeywords.mock.calls[0][0]).toBe("");

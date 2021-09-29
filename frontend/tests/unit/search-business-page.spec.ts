@@ -75,6 +75,10 @@ describe('SearchBusinessPage.vue', () => {
     });
   }
 
+  afterEach(() => {
+    wrapper.destroy();
+  });
+
   /**
    * Sets the mock api results.
    *

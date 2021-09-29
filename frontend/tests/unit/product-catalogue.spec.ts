@@ -128,6 +128,7 @@ describe('ProductCatalogue.vue', () => {
 
   afterEach(() => {
     jest.clearAllMocks();
+    wrapper.destroy();
   });
 
   /**
