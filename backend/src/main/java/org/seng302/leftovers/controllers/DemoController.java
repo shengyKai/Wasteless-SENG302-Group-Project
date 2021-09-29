@@ -167,22 +167,28 @@ public class DemoController {
     @Getter
     @ToString
     public static class GeneratorRequestDTO {
-      private int userCount = 0;
-      private int businessCount = 0;
-      private int productCount = 0;
-      private int inventoryItemCount = 0;
-      private int cardCount = 0;
-      private int saleItemCount = 0;
+        private int userCount = 0;
+        private int businessCount = 0;
+        private int productCount = 0;
+        private int inventoryItemCount = 0;
+        private int cardCount = 0;
+        private int saleItemCount = 0;
 
-      private List<Long> userInitial = new ArrayList<>();
-      private List<Long> businessInitial = new ArrayList<>();
-      private List<Long> productInitial = new ArrayList<>();
-      private List<Long> inventoryItemInitial = new ArrayList<>();
-      private List<Long> saleItemInitial = new ArrayList<>();
-      private Boolean generateProductImages = false;
-      private Boolean generateBusinessImages = false;
-      private int businessImageMin = 0;
-      private int businessImageMax = 3;
+        private List<Long> userInitial = new ArrayList<>();
+        private List<Long> businessInitial = new ArrayList<>();
+        private List<Long> productInitial = new ArrayList<>();
+        private List<Long> inventoryItemInitial = new ArrayList<>();
+        private List<Long> saleItemInitial = new ArrayList<>();
+
+        private Boolean generateProductImages = false;
+
+        private Boolean generateBusinessImages = false;
+        private int businessImageMin = 0;
+        private int businessImageMax = 3;
+
+        private Boolean generateUserImages = false;
+        private int userImageMin = 0;
+        private int userImageMax = 2;
     }
 
     /**
@@ -222,7 +228,7 @@ public class DemoController {
             var inventoryItemGenerator = new InventoryItemGenerator(connection);
             var saleItemGenerator = new SaleItemGenerator(connection);
             var cardGenerator = new MarketplaceCardGenerator(connection);
-            var businessImageGenerator = new BusinessImageGenerator(connection);
+            var imageGenerator = new ImageGenerator(connection);
 
             List<Long> userIds = userGenerator.generateUsers(options.userCount);
             allUsers.addAll(userIds);
@@ -241,7 +247,11 @@ public class DemoController {
             List<Long> cardIds = cardGenerator.generateCards(allUsers, options.getCardCount());
 
             if (options.getGenerateBusinessImages()) {
-                businessImageGenerator.generateBusinessImages(allBusinesses, options.getBusinessImageMin(), options.getBusinessImageMax());
+                imageGenerator.generateEntityImages(allBusinesses, options.getBusinessImageMin(), options.getBusinessImageMax(), ImageGenerator.ImageEntityType.BUSINESS);
+            }
+
+            if (options.getGenerateUserImages()) {
+                imageGenerator.generateEntityImages(allUsers, options.getUserImageMin(), options.getUserImageMax(), ImageGenerator.ImageEntityType.USER);
             }
 
             return new GenerateResponseDTO(userIds, businessIds, productIds, inventoryIds, saleItemIds, cardIds);
