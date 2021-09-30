@@ -117,6 +117,8 @@ export default {
       if(this.advancedSearchParams.productQuery === null) this.advancedSearchParams.productQuery = "";
       if(this.advancedSearchParams.businessQuery === null) this.advancedSearchParams.businessQuery = "";
       if(this.advancedSearchParams.locationQuery === null) this.advancedSearchParams.locationQuery = "";
+      if(this.advancedSearchParams.closesBefore === null) this.advancedSearchParams.closesBefore = "";
+      if(this.advancedSearchParams.closesAfter === null) this.advancedSearchParams.closesAfter = "";
       this.previousQuery = {...this.advancedSearchParams};
       const result = await advanceSearchSaleitem(this.advancedSearchParams, this.currentPage, this.resultsPerPage);
       if (typeof result === 'string'){
