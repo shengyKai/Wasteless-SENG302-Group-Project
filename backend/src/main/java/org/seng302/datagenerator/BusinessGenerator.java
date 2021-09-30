@@ -6,6 +6,8 @@ import org.seng302.leftovers.dto.business.BusinessType;
 
 import java.sql.*;
 import java.time.Instant;
+import java.time.LocalDate;
+import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -38,7 +40,7 @@ public class BusinessGenerator {
             stmt.setObject(4, commerceNameGenerator.randomBusinessName());
             stmt.setObject(5, addressId);
             stmt.setObject(6, ownerId);
-            stmt.setObject(7, random.nextInt(100));
+            stmt.setObject(7, 0);
             stmt.executeUpdate();
             ResultSet keys = stmt.getGeneratedKeys();
             keys.next();
@@ -100,5 +102,74 @@ public class BusinessGenerator {
         }
 
         return generatedBusinessIds;
+    }
+
+    /**
+     * Use an SQL query to find the number of sale items listed for the business with the given id.
+     * @param businessId The ID number of the business to find the number of sale items for.
+     * @return The number of sale items for the business with the given ID.
+     */
+    private long getSaleItemCountForBusiness(long businessId) throws SQLException {
+        try (PreparedStatement stmt = conn.prepareStatement(
+                "SELECT COUNT(*) FROM sale_item WHERE inventory_item_id IN (" +
+                        "SELECT id FROM inventory_item WHERE product_id IN (" +
+                        "SELECT id FROM product WHERE business_id = ?))"
+        )) {
+            stmt.setObject(1, businessId);
+            stmt.executeQuery();
+            ResultSet results = stmt.getResultSet();
+            results.next();
+            return results.getLong(1);
+        }
+    }
+
+    /**
+     * Use an SQL query to find the number of bought sale items for the business with the given id.
+     * @param businessId The ID number of the business to find the number of bought sale items for.
+     * @return The number of sale items for the business with the given ID.
+     */
+    private long getBoughtSaleItemCountForBusiness(long businessId) throws SQLException {
+        try (PreparedStatement stmt = conn.prepareStatement(
+                "SELECT COUNT(*) FROM bought_sale_item WHERE product_id IN (" +
+                        "SELECT id FROM product WHERE business_id = ?)"
+        )) {
+            stmt.setObject(1, businessId);
+            stmt.executeQuery();
+            ResultSet results = stmt.getResultSet();
+            results.next();
+            return results.getLong(1);
+        }
+    }
+
+    /**
+     * Set the number of points for the business with the given id to the given number.
+     * @param businessId The id of the business to set the points for.
+     * @param points The number of points for the business's points to be set to.
+     */
+    private void setBusinessPoints(long businessId, long points) throws SQLException {
+        try (PreparedStatement stmt = conn.prepareStatement(
+                "UPDATE business SET points = ? WHERE id = ?",
+                Statement.RETURN_GENERATED_KEYS
+        )) {
+            stmt.setObject(1, points);
+            stmt.setObject(2, businessId);
+            stmt.executeUpdate();
+        }
+    }
+
+    /**
+     * Set the number of points for each business to the sum of their number of sale items and bought sale items.
+     * @param businessIds The ID numbers of the businesses to update the points for.
+     */
+    public void setBusinessPointsFromSaleItems(List<Long> businessIds) {
+        try {
+            for (long businessId : businessIds) {
+                long saleItemCount = getSaleItemCountForBusiness(businessId);
+                long boughtSaleItemCount = getBoughtSaleItemCountForBusiness(businessId);
+                setBusinessPoints(businessId, saleItemCount + boughtSaleItemCount);
+            }
+        } catch (SQLException e) {
+            logger.error(e.getStackTrace());
+        }
     }
 }

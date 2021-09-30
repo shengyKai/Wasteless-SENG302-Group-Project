@@ -64,7 +64,7 @@
         <v-btn class="business-btn" outlined color="primary" @click="goSalePage" :value="false" width="150">
           Sale listings
         </v-btn>
-        <v-btn v-if="!isadmin" class="business-btn" outlined color="primary" @click="goSaleReports" :value="false" width="150">
+        <v-btn v-if="isAdmin" class="business-btn" outlined color="primary" @click="goSaleReports" :value="false" width="150">
           Sale reports
         </v-btn>
         <v-container fluid>
@@ -83,7 +83,7 @@
             </v-col>
             <v-col cols="12" sm="6">
               <h4>Points</h4>
-              {{ business.points }}
+              <LevelUp :business="this.business"/>
             </v-col>
             <v-col cols="12">
               <h4>Administrators</h4>
@@ -121,6 +121,7 @@ import {getBusiness} from "@/api/business";
 import SilverRank from "@/components/ranks/SilverRank";
 import GoldRank from "@/components/ranks/GoldRank";
 import PlatinumRank from "@/components/ranks/PlatinumRank";
+import LevelUp from "./LevelUp";
 
 export default {
   name: 'BusinessProfile',
@@ -129,7 +130,8 @@ export default {
     ModifyBusiness,
     SilverRank,
     GoldRank,
-    PlatinumRank
+    PlatinumRank,
+    LevelUp
   },
   data() {
     return {
@@ -306,9 +308,6 @@ export default {
   display: inline;
   height: 40px;
   margin-left: 10px;
-}
-
-.rank {
   padding-left: 30px;
 }
 
