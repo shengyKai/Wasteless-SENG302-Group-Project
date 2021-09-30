@@ -80,7 +80,7 @@ export default {
      * @returns {string} Liked or Unliked
      */
     interestString() {
-      return this.event.interested? "liked" : "unliked";
+      return this.interested? "liked" : "unliked";
     },
     /**
      * Compute the thumb icon base on user interest status

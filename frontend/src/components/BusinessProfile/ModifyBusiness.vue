@@ -214,9 +214,10 @@
                 Are you sure?
               </v-card-title>
               <v-card-text>
-                <span>Updating location for catalogue entries will change all of the listed product(s) currency accordingly</span><br>
-                <span>Current currency: {{previousCountryCode}}</span><br>
-                <span>New currency: {{newCountryCode}}</span>
+                <span>Updating location for catalogue entries will change all of the listed product(s) currency accordingly</span>
+                <br><br>
+                <span><strong>Current currency:</strong> {{previousCountryCode}}</span><br>
+                <span><strong>New currency:</strong> {{newCountryCode}}</span>
               </v-card-text>
               <v-card-actions>
                 <v-spacer/>
@@ -432,7 +433,6 @@ export default {
     },
     async currencyCodeFromCountry(country) {
       const result = await currencyFromCountry(country);
-      console.log(result.code);
       return result.code;
     }
   },
