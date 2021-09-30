@@ -7,7 +7,7 @@ import { is, Reason } from 'typescript-is';
 import {CreateUser, login, createUser, userSearch, User, getUser, makeAdmin, revokeAdmin} from "@/api/user";
 import {CreateProduct, Product, createProduct, uploadProductImage, getProducts, modifyProduct, makeProductImagePrimary, deleteProductImage} from "@/api/product";
 import {InventoryItem, CreateInventoryItem, createInventoryItem} from "@/api/inventory";
-import {Sale, getBusinessSales, setListingInterest, getListingInterest, purchaseListing } from "@/api/sale";
+import {Sale, getBusinessSales, setListingInterest, getListingInterest, purchaseListing, basicSearchSaleitem, advanceSearchSaleitem } from "@/api/sale";
 import {getMessagesInConversation, Message} from "@/api/marketplace";
 import {generateReport, SaleRecord} from "@/api/salesReport";
 import { CreateBusiness, createBusiness, getBusiness, Business, makeBusinessAdmin, removeBusinessAdmin } from "@/api/business";
@@ -15,7 +15,7 @@ import { CreateBusiness, createBusiness, getBusiness, Business, makeBusinessAdmi
 const api = {
   login, createUser, createBusiness, getBusiness, makeBusinessAdmin, removeBusinessAdmin, userSearch, getUser, makeAdmin, revokeAdmin,
   createProduct, uploadProductImage, getProducts, modifyProduct, makeProductImagePrimary, deleteProductImage, getBusinessSales,
-  getMessagesInConversation, setListingInterest, getListingInterest, purchaseListing, generateReport, createInventoryItem
+  getMessagesInConversation, setListingInterest, getListingInterest, purchaseListing, generateReport, createInventoryItem, basicSearchSaleitem, advanceSearchSaleitem
 };
 
 jest.mock('axios', () => ({
@@ -244,7 +244,22 @@ type ApiCalls = {[k in keyof ApiMethods]: {
   usesServerMessage: boolean,                       // Whether the "message" attribute in the response is used for unspecialised error messages
 }};
 
-const apiCalls: ApiCalls = {
+const urlParams = new URLSearchParams({
+  "productSearchQuery": "Apple",
+  "businessSearchQuery":  "Nathan",
+  "locationSearchQuery": "New Zealand",
+  "closeLower": "21/01/2030",
+  "closeUpper": "11/01/2030",
+  "orderBy": "productName",
+  "page": "1",
+  "resultsPerPage": "10",
+  "reverse": "false",
+  "priceLower": "1",
+  "priceUpper": "50",
+  "businessTypes": "Retail Trade",
+});
+
+const apiCalls: Partial<ApiCalls> = {
   createProduct: {
     parameters: [
       7,
@@ -558,6 +573,54 @@ const apiCalls: ApiCalls = {
     },
     usesServerMessage: true,
   },
+  basicSearchSaleitem: {
+    parameters: ["deezNuts", "productName", 1, 10, false],
+    httpMethod: 'get',
+    url: '/businesses/listings/search',
+    body: {
+      params: {
+        basicSearchQuery: "deezNuts",
+        orderBy: 'productName',
+        page: 1,
+        resultsPerPage: 10,
+        reverse: "false",
+      }
+    },
+    result: searchResult([testSaleItem]),
+    failedTypeCheckResponse: 'Response is not Sale Item Listing array',
+    extraStatusMessages: {
+      401: 'You have been logged out. Please login again and retry',
+      403: 'Operation not permitted',
+      406: 'Sale Listing does not exist',
+    },
+    usesServerMessage: true,
+  },
+  advanceSearchSaleitem: {
+    parameters: [{
+      productQuery: "Apple",
+      businessQuery: "Nathan",
+      locationQuery: "New Zealand",
+      closesAfter: "21/01/2030",
+      closesBefore: "11/01/2030",
+      orderBy: "productName",
+      businessTypes: ["Retail Trade"],
+      lowestPrice: "1",
+      highestPrice: "50",
+      reverse: false}, 1, 10],
+    httpMethod: 'get',
+    url: '/businesses/listings/search',
+    body: {
+      params: urlParams,
+    },
+    result: searchResult([testSaleItem]),
+    failedTypeCheckResponse: 'Response is not Sale Item Listing array',
+    extraStatusMessages: {
+      401: 'You have been logged out. Please login again and retry',
+      403: 'Operation not permitted',
+      406: 'Sale Listing does not exist',
+    },
+    usesServerMessage: true,
+  },
   purchaseListing: {
     parameters: [6, 5],
     httpMethod: 'post',
@@ -605,7 +668,6 @@ const apiCalls: ApiCalls = {
     usesServerMessage: true,
   }
 };
-
 
 describe('api', () => {
   // Makes sure the the mocks are clean
@@ -661,7 +723,6 @@ describe('api', () => {
         expect(response).toBe('Request failed: ' + statusCode);
       });
     }
-
     it('Method should be called with the expected url and body', async () => {
       instance[fields.httpMethod].mockResolvedValueOnce(makeAxiosResponse(fields.apiResult));
 
@@ -674,7 +735,6 @@ describe('api', () => {
       if (fields.headers !== undefined) {
         parameters.push({headers: fields.headers });
       }
-
       expect(instance[fields.httpMethod]).toBeCalledWith(...parameters);
     });
 

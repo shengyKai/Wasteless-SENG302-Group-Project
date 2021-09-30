@@ -65,8 +65,6 @@ class BusinessControllerMockedTest {
     @Mock
     private ImageService imageService;
     @Mock
-    private ImageRepository imageRepository;
-    @Mock
     private Business mockBusiness;
     @Mock
     private User mockOwner;
@@ -116,11 +114,7 @@ class BusinessControllerMockedTest {
         when(businessRepository.findById(not(eq(mockBusinessId)))).thenReturn(Optional.empty());
         when(businessRepository.getBusinessById(any())).thenAnswer(CALLS_REAL_METHODS);
 
-        when(imageRepository.findById(mockImageId)).thenReturn(Optional.of(mockImage));
-        when(imageRepository.findById(mockImageId2)).thenReturn(Optional.of(mockImage2));
-        when(imageRepository.findById(mockImageId3)).thenReturn(Optional.of(mockImage3));
-
-        BusinessController businessController = new BusinessController(businessRepository, userRepository, imageService, imageRepository);
+        BusinessController businessController = new BusinessController(businessRepository, userRepository, imageService);
         mockMvc = MockMvcBuilders.standaloneSetup(businessController).build();
     }
 

@@ -1,6 +1,7 @@
 import {is} from 'typescript-is';
 import {InventoryItem} from "@/api/inventory";
 import {MaybeError, SearchResults, instance} from "@/api/internal";
+import {BusinessType} from "@/api/business";
 import { User } from './user';
 import { Product } from './product';
 
@@ -41,6 +42,20 @@ export type BoughtSale = {
 
 type SalesOrderBy = 'created' | 'closing' | 'productCode' | 'productName' | 'quantity' | 'price'
 
+type SaleListingOrderBy = "price" | "productName" |"businessName" | "businessLocation" | "expiry" | "closing" | "created" | "quantity";
+
+type AdvanceSearch = {
+  productQuery: string,
+  businessQuery: string,
+  locationQuery: string,
+  closesBefore: string,
+  closesAfter: string,
+  orderBy: SaleListingOrderBy,
+  businessTypes: BusinessType[],
+  lowestPrice: string,
+  highestPrice: string,
+  reverse: boolean
+}
 /**
  * Adds a sale item to the business sales listing
  *
@@ -139,6 +154,74 @@ export async function getListingInterest(listingId: number, userId: number): Pro
   return response.data.isInterested;
 }
 
+export async function basicSearchSaleitem(query: string, orderBy: SaleListingOrderBy, page: number, resultsPerPage: number, reverse: boolean): Promise<MaybeError<SearchResults<Sale>>> {
+  let response;
+  try {
+    response = await instance.get('/businesses/listings/search', {
+      params: {
+        basicSearchQuery: query,
+        orderBy,
+        page,
+        resultsPerPage,
+        reverse: reverse.toString(),
+      }
+    });
+  } catch (error) {
+    let status: number | undefined = error.response?.status;
+    if (status === undefined) return 'Failed to reach backend';
+    if (status === 400) return 'Invalid user provided';
+    if (status === 401) return 'You have been logged out. Please login again and retry';
+    if (status === 403) return 'Operation not permitted';
+    if (status === 406) return 'Sale Listing does not exist';
+
+    return error.response?.data.message;
+  }
+
+  if (!is<SearchResults<Sale>>(response.data)) {
+    return 'Response is not Sale Item Listing array';
+  }
+
+  return response.data;
+}
+
+export async function advanceSearchSaleitem(advanceSearch: AdvanceSearch, page: number, resultsPerPage: number): Promise<MaybeError<SearchResults<Sale>>> {
+  let response;
+  try {
+    let params : URLSearchParams = new URLSearchParams(
+      {"productSearchQuery": advanceSearch.productQuery,
+        "businessSearchQuery":  advanceSearch.businessQuery,
+        "locationSearchQuery": advanceSearch.locationQuery,
+        "closeLower": advanceSearch.closesAfter,
+        "closeUpper": advanceSearch.closesBefore,
+        "orderBy": advanceSearch.orderBy,
+        "page": page.toString(),
+        "resultsPerPage": resultsPerPage.toString(),
+        "reverse": advanceSearch.reverse.toString(),
+        "priceLower": advanceSearch.lowestPrice,
+        "priceUpper": advanceSearch.highestPrice,
+      });
+    advanceSearch.businessTypes.map(type => params.append("businessTypes", type));
+    response = await instance.get('/businesses/listings/search', {
+      params: params
+    });
+  } catch (error) {
+    let status: number | undefined = error.response?.status;
+    if (status === undefined) return 'Failed to reach backend';
+    if (status === 400) return 'Invalid user provided';
+    if (status === 401) return 'You have been logged out. Please login again and retry';
+    if (status === 403) return 'Operation not permitted';
+    if (status === 406) return 'Sale Listing does not exist';
+
+    return error.response?.data.message;
+  }
+
+  if (!is<SearchResults<Sale>>(response.data)) {
+    return 'Response is not Sale Item Listing array';
+  }
+
+  return response.data;
+}
+
 /**
  * Sents a request to purchase a sale listing
  * @param listingId Listing to purchase
@@ -155,7 +238,6 @@ export async function purchaseListing(listingId: number, purchaserId: number): P
     if (status === undefined) return 'Failed to reach backend';
     if (status === 401) return 'You have been logged out. Please login again and retry';
     if (status === 406) return 'Listing does not exist';
-
     return error.response?.data.message;
   }
   return undefined;

@@ -1,6 +1,5 @@
 package org.seng302.leftovers.dto.saleitem;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.*;
 import org.seng302.leftovers.entities.BoughtSaleItem;

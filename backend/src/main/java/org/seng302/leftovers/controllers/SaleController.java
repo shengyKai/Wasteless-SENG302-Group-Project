@@ -23,7 +23,6 @@ import org.seng302.leftovers.service.ReportService;
 import org.seng302.leftovers.service.search.SearchPageConstructor;
 import org.seng302.leftovers.service.search.SearchSpecConstructor;
 import org.seng302.leftovers.tools.AuthenticationTokenManager;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -118,6 +117,9 @@ public class SaleController {
      */
     private List<Sort.Order> getSaleItemSearchOrder(String orderBy, Sort.Direction direction) {
         if (orderBy == null || orderBy.isEmpty()) orderBy = "created";
+        if (orderBy.equals("expiry")) {
+            return List.of(new Sort.Order(direction, "inventoryItem.expires").ignoreCase());
+        }
         if (orderBy.equals("businessName")) {
             return List.of(new Sort.Order(direction, "inventoryItem.product.business.name").ignoreCase());
         }

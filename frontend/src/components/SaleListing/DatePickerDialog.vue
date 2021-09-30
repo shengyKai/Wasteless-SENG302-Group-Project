@@ -9,6 +9,7 @@
     <template v-slot:activator="{ on, attrs }">
       <v-text-field
         :label="label"
+        clearable
         prepend-inner-icon="mdi-calendar"
         readonly
         v-bind="attrs"
