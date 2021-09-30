@@ -1,5 +1,6 @@
 package org.seng302.datagenerator;
 
+import lombok.Getter;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.http.HttpStatus;
@@ -16,8 +17,6 @@ import java.util.*;
 public class ImageGenerator {
     private final Path imageUploadsRoot;
     private final Connection conn;
-    private Resource[] businessImages;
-    private Resource[] userImages;
     private Random random = new Random();
 
     public ImageGenerator(Connection conn) {
@@ -27,8 +26,8 @@ public class ImageGenerator {
         try {
             var loader = ImageGenerator.class.getClassLoader();
             PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver(loader);
-            this.businessImages = resolver.getResources("classpath*:org/seng302/datagenerator/example-business-images/**");
-            this.userImages = resolver.getResources("classpath*:org/seng302/datagenerator/example-user-images/**");
+            ImageEntityType.BUSINESS.setImages(resolver.getResources("classpath*:org/seng302/datagenerator/example-business-images/**"));
+            ImageEntityType.USER.setImages(resolver.getResources("classpath*:org/seng302/datagenerator/example-user-images/**"));
         } catch (IOException e) {
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,"Could not initialize example images folder for businesses and users.");
         }
@@ -37,9 +36,21 @@ public class ImageGenerator {
     /**
      * Represents one of two entity types to generate images for
      */
+    @Getter
     public enum ImageEntityType {
-        BUSINESS,
-        USER,
+        BUSINESS("business_id"),
+        USER("user_id");
+
+        public void setImages(Resource[] images) {
+            this.imageList = images;
+        }
+
+        private String field;
+        private Resource[] imageList;
+
+        ImageEntityType(String field) {
+            this.field = field;
+        }
     }
 
     /**
@@ -70,7 +81,7 @@ public class ImageGenerator {
         List<Long> generatedIds = new ArrayList<>();
         var numberOfImagesToGenerate = random.nextInt(upperBound-lowerBound+1) + lowerBound;
         for (int imageOrder = 0; imageOrder < numberOfImagesToGenerate; imageOrder++) {
-            var image = entityType == ImageEntityType.BUSINESS? findRandomImageBusiness() : findRandomImageUser();
+            var image = findRandomImage(entityType);
             String filename = UUID.randomUUID().toString();
             String fileType = getExtension(image.getFilename()).orElseThrow(() -> new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Could not locate file type for:" + image.getFilename()));
             filename += "." + fileType;
@@ -82,26 +93,16 @@ public class ImageGenerator {
     }
 
     /**
-     * Returns a random image from the set of available images for businesses
+     * Returns a random image from the set of available images for the given type
      * @return Resource pointing at an image
      */
-    private Resource findRandomImageBusiness() {
-        var maxValue = businessImages.length;
+    private Resource findRandomImage(ImageEntityType entity) {
+        var maxValue = entity.getImageList().length;
         Resource image;
-        do image = businessImages[random.nextInt(maxValue)]; while (image.getFilename() != null && image.getFilename().isEmpty());
+        do image = entity.getImageList()[random.nextInt(maxValue)]; while (image.getFilename() != null && image.getFilename().isEmpty());
         return image;
     }
 
-    /**
-     * Returns a random image from the set of available images for users
-     * @return Resource pointing at an image
-     */
-    private Resource findRandomImageUser() {
-        var maxValue = userImages.length;
-        Resource image;
-        do image = userImages[random.nextInt(maxValue)]; while (image.getFilename() != null && image.getFilename().isEmpty());
-        return image;
-    }
 
     /**
      * Inserts a record into the image table to add an image to a business or user
@@ -112,9 +113,8 @@ public class ImageGenerator {
      * @return The ID of the generated image
      */
     private long createInsertImageSQL(Long Id, String filename, int order, ImageEntityType entityType) {
-        var fieldName = entityType == ImageEntityType.BUSINESS ? "business_id" : "user_id";
         try (PreparedStatement stmt = conn.prepareStatement(
-                "INSERT INTO image (filename, " + fieldName + ", image_order, filename_thumbnail, created) " +
+                "INSERT INTO image (filename, " + entityType.getField() + ", image_order, filename_thumbnail, created) " +
                         "VALUES (?,?,?,?,?)",
                     Statement.RETURN_GENERATED_KEYS
             )) {
