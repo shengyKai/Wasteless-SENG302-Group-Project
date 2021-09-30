@@ -63,7 +63,8 @@ function createTestUser(userId: number) {
     phoneNumber: 'test_phone_number' + userId,
     dateOfBirth: '1/1/1900',
     created: '1/5/2005',
-    homeAddress: createTestLocation()
+    homeAddress: createTestLocation(),
+    images: [],
   };
   return user;
 }

@@ -116,14 +116,15 @@ public class UserController {
                 throw new InsufficientPermissionResponseException(
                         "You do not have permission to modify another user");
             }
-            
-            // check if email changed
+            if(user.getRole().equals(UserRole.DGAA)) {
+                throw new InsufficientPermissionResponseException(
+                        "DGAA profile are not permitted to be modified.");
+            }
             if (!body.getEmail().equals(user.getEmail())) {
                 Account.checkEmailUniqueness(body.getEmail(), userRepository);
                 PasswordAuthenticator.verifyPassword(body.getPassword(),user.getAuthenticationCode());
                 user.setEmail(body.getEmail());
             }
-            // check if password changed
             if (body.getNewPassword() != null) {
                 PasswordAuthenticator.verifyPassword(body.getPassword(), user.getAuthenticationCode());
                 user.setAuthenticationCodeFromPassword(body.getNewPassword());

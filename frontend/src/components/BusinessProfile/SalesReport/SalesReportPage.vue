@@ -28,7 +28,7 @@ export default {
     title() {
       return `Sales Report - ${this.businessName}`;
     }
-  }
+  },
 };
 
 </script>

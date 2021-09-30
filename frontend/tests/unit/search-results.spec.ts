@@ -43,6 +43,7 @@ function createTestUsers(count: number) {
       email: 'test_email' + i,
       dateOfBirth: '1/1/1900',
       homeAddress: { country: 'test_country' + i },
+      images: [],
     });
   }
   return result;
@@ -70,6 +71,10 @@ describe('SearchResults.vue', () => {
       vuetify: new Vuetify(),
     });
   }
+
+  afterEach(() => {
+    wrapper.destroy();
+  });
 
   /**
    * Sets the mock api results.

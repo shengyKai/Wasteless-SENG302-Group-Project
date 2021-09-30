@@ -1,14 +1,17 @@
 package org.seng302.datagenerator;
 
+import io.cucumber.java.sl.In;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.junit.runner.RunWith;
 import org.seng302.leftovers.Main;
-import org.seng302.leftovers.persistence.BusinessRepository;
-import org.seng302.leftovers.persistence.UserRepository;
+import org.seng302.leftovers.entities.Business;
+import org.seng302.leftovers.entities.Product;
+import org.seng302.leftovers.persistence.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -26,11 +29,23 @@ class BusinessGeneratorTest {
     private Connection conn;
     private UserGenerator userGenerator;
     private BusinessGenerator businessGenerator;
+    private ProductGenerator productGenerator;
+    private InventoryItemGenerator inventoryItemGenerator;
+    private SaleItemGenerator saleItemGenerator;
+    private BoughtSaleItemGenerator boughtSaleItemGenerator;
 
     @Autowired
     private UserRepository userRepository;
     @Autowired
     private BusinessRepository businessRepository;
+    @Autowired
+    private ProductRepository productRepository;
+    @Autowired
+    private InventoryItemRepository inventoryItemRepository;
+    @Autowired
+    private SaleItemRepository saleItemRepository;
+    @Autowired
+    private BoughtSaleItemRepository boughtSaleItemRepository;
 
     @BeforeEach
     public void setup() throws SQLException {
@@ -43,10 +58,18 @@ class BusinessGeneratorTest {
         //Creates Generators
         this.userGenerator = new UserGenerator(conn);
         this.businessGenerator = new BusinessGenerator(conn);
+        this.productGenerator = new ProductGenerator(conn);
+        this.inventoryItemGenerator = new InventoryItemGenerator(conn);
+        this.saleItemGenerator = new SaleItemGenerator(conn);
+        this.boughtSaleItemGenerator = new BoughtSaleItemGenerator(conn);
     }
 
     @AfterEach
     public void teardown() throws SQLException {
+        boughtSaleItemRepository.deleteAll();
+        saleItemRepository.deleteAll();
+        inventoryItemRepository.deleteAll();
+        productRepository.deleteAll();
         businessRepository.deleteAll();
         userRepository.deleteAll();
         conn.close();
@@ -118,4 +141,19 @@ class BusinessGeneratorTest {
         long businessesInDBAfter = getNumBusinessesInDB();
         assertEquals(businessesInDB, businessesInDBAfter);
     }
+
+    @ParameterizedTest
+    @CsvSource({"13,0,13", "0,101,101", "0,0,0", "44,18,62"})
+    void setBusinessPointsFromSaleItems_pointsSetToSumOfBoughtAndCurrentSaleItems(int saleItemCount, int boughtSaleItemCount, long expectedPoints) throws SQLException {
+        List<Long> userIds = userGenerator.generateUsers(1);
+        List<Long> businessIds = businessGenerator.generateBusinesses(userIds, 1);
+        List<Long> productIds = productGenerator.generateProducts(businessIds, 1);
+        List<Long> invItemIds = inventoryItemGenerator.generateInventoryItems(productIds, 1);
+        saleItemGenerator.generateSaleItems(invItemIds, saleItemCount);
+        boughtSaleItemGenerator.generateBoughtSaleItems(productIds, userIds, boughtSaleItemCount);
+        businessGenerator.setBusinessPointsFromSaleItems(businessIds);
+        Business business = businessRepository.findById(businessIds.get(0)).orElseThrow();
+        assertEquals(expectedPoints, business.getPoints());
+    }
+
 }

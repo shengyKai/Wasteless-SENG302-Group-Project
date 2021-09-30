@@ -10,7 +10,6 @@ describe("SearchSaleItems.vue", () => {
 
   const localVue = createLocalVue();
   let wrapper : Wrapper<any>;
-  let appWrapper : Wrapper<any>;
 
   beforeEach(() => {
     const vuetify = new Vuetify();
@@ -19,6 +18,10 @@ describe("SearchSaleItems.vue", () => {
       localVue,
       vuetify,
     });
+  });
+
+  afterEach(() => {
+    wrapper.destroy();
   });
 
   it("If results is undefined, total results will be zero", async () => {

@@ -5,7 +5,7 @@ import Vuex, { Store } from 'vuex';
 import { createLocalVue, Wrapper, mount } from '@vue/test-utils';
 import App from '@/App.vue';
 import { getStore, resetStoreForTesting, StoreData } from '@/store';
-import router from "@/plugins/vue-router";
+import router from "@/plugins/router";
 import { castMock, makeTestUser } from './utils';
 import * as events from '@/api/events';
 
@@ -36,6 +36,10 @@ describe('App.vue', () => {
     getEvents.mockResolvedValue([]);
   });
 
+  afterEach(() => {
+    wrapper.destroy();
+  });
+
   /**
    * Finds the current error message component if it exists.
    *
@@ -54,6 +58,7 @@ describe('App.vue', () => {
         localVue,
         store,
         router,
+        stubs: ['Avatar'],
         vuetify: new Vuetify(),
       });
     });

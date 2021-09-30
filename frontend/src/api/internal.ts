@@ -29,8 +29,6 @@
  * Declare all available services here
  */
 import axios from 'axios';
-import { is } from 'typescript-is';
-import { EventTag } from './events';
 
 const SERVER_URL = process.env.VUE_APP_SERVER_ADD;
 

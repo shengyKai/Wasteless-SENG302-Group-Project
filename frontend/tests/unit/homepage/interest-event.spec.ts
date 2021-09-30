@@ -97,7 +97,9 @@ describe("InterestEvent.vue", () => {
     });
   });
 
-
+  afterEach(() => {
+    wrapper.destroy();
+  });
 
   it("The title contains the product name", ()=>{
     expect(wrapper.text()).toContain("Complex Omelette");

@@ -1,33 +1,49 @@
 <template>
-  <div v-if="!showFullListing">
+  <div v-if="!showFullListing" @click="showFullListing = !showFullListing">
     <v-list-item color="purple">
-      <v-list-item-avatar width="70" height="70">
-        <img src="../../assets/grumpy.webp">
-      </v-list-item-avatar>
-      <v-list-item-content>
-        <v-list-item-title>
-          <a ref="title" class="result-title" @click="showFullListing = !showFullListing">{{ product.name }}</a>
-          <label class="result-title-join">From </label>
-          <label class="result-title-business">{{ product.manufacturer }}</label>
-        </v-list-item-title>
-        <v-list-item-subtitle>
-          <label>More Info: {{ saleItem.moreInfo }}</label>
-        </v-list-item-subtitle>
-        <v-list-item-subtitle>
-          <label class="total-price-label">Total Price:</label>
-          <label>${{ saleItem.price }}</label>
-          <label class="divider1"/>
-          <label class="quantity-label">Quantity:</label>
-          <label>{{ saleItem.quantity }}</label>
-        </v-list-item-subtitle>
-        <v-list-item-subtitle>
-          <label class="creation-date-label">Creation Date:</label>
-          <label>{{ createdFormatted }}</label>
-          <label class="divider2"/>
-          <label class="closing-date-label">Closing Date:</label>
-          <label>{{ closesFormatted }}</label>
-        </v-list-item-subtitle>
-      </v-list-item-content>
+      <v-col cols="auto" class="pl-0" align-self="center">
+        <Avatar :product="product" size="medium-large"/>
+      </v-col>
+      <v-col>
+        <v-row dense>
+          <v-col>
+            <h4>
+              <a ref="title">{{ product.name }}</a>
+              from
+              <router-link :to="'/business/' + product.business.id" class="text--secondary">
+                {{ product.business.name }}
+              </router-link>
+            </h4>
+          </v-col>
+        </v-row>
+        <v-row class="my-0 py-0">
+          <v-col class="my-0 py-0">
+            <label class="font-weight-bold">More Info:</label> {{ saleItem.moreInfo }}
+          </v-col>
+        </v-row>
+        <v-row dense class="mt-0">
+          <v-col cols="auto" class="font-weight-bold">
+            Total Price:
+            <br>
+            Creation Date:
+          </v-col>
+          <v-col cols="auto">
+            ${{ saleItem.price }}
+            <br>
+            {{ createdFormatted }}
+          </v-col>
+          <v-col cols="auto" class="font-weight-bold">
+            Quantity:
+            <br>
+            Closing Date:
+          </v-col>
+          <v-col cols="auto">
+            {{ saleItem.quantity }}
+            <br>
+            {{ closesFormatted }}
+          </v-col>
+        </v-row>
+      </v-col>
     </v-list-item>
   </div>
   <div v-else>
@@ -43,11 +59,13 @@
 import { currencyFromCountry } from "@/api/currency";
 import { formatDate } from '@/utils';
 import FullSaleListing from "@/components/SaleListing/FullSaleListing.vue";
+import Avatar from '@/components/utils/Avatar.vue';
 
 export default {
   name: "SaleResult",
   components: {
-    FullSaleListing
+    FullSaleListing,
+    Avatar
   },
   data() {
     return {
@@ -98,54 +116,3 @@ export default {
   }
 };
 </script>
-
-<style scoped>
-.result-title {
-  font-size: 19px;
-  font-weight: bold;
-}
-
-.result-title-join {
-  font-size: 15px;
-  margin-left: 10px;
-}
-
-.result-title-business {
-  font-size: 15px;
-}
-
-.divider1 {
-  margin-right: 74px;
-}
-
-.divider2 {
-  margin-right: 30px;
-}
-
-.total-price-label {
-  margin-right: 28px;
-}
-
-.quantity-label {
-  margin-right: 37px;
-}
-
-.creation-date-label {
-  margin-right: 10px;
-}
-
-.closing-date-label {
-  margin-right: 10px;
-}
-
-.vertical-line {
-  border-left: 1px solid black;
-  margin-top: 3px;
-  margin-right: 10px;
-  height: 15px;
-}
-
-.result-image {
-  height: 100px;
-}
-</style>

@@ -97,6 +97,11 @@ describe('index.vue', () => {
       },
     });
   });
+
+  afterEach(() => {
+    wrapper.destroy();
+  });
+
   it("Must contain the business name", () => {
     expect(wrapper.text()).toContain('Some Business Name');
   });

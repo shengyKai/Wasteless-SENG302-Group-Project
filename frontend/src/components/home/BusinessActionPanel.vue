@@ -29,7 +29,7 @@
                 <v-icon>mdi-view-list</v-icon>
               </v-list-item-icon>
               <v-list-item-content>
-                <v-list-item-title >Inventory</v-list-item-title>
+                <v-list-item-title>Inventory</v-list-item-title>
               </v-list-item-content>
             </v-list-item>
             <v-list-item @click="goSalePage">
@@ -37,7 +37,15 @@
                 <v-icon>mdi-view-list</v-icon>
               </v-list-item-icon>
               <v-list-item-content>
-                <v-list-item-title >Sale Listing</v-list-item-title>
+                <v-list-item-title>Sale Listing</v-list-item-title>
+              </v-list-item-content>
+            </v-list-item>
+            <v-list-item @click="goSaleReports">
+              <v-list-item-icon>
+                <v-icon>mdi-view-list</v-icon>
+              </v-list-item-icon>
+              <v-list-item-content>
+                <v-list-item-title>Sale Reports</v-list-item-title>
               </v-list-item-content>
             </v-list-item>
           </v-list-item-group>
@@ -58,12 +66,14 @@
       <v-btn icon @click="goSalePage" class="action-button">
         <v-icon large>mdi-view-list</v-icon>
       </v-btn>
+      <v-btn icon @click="goSaleReports" class="action-button">
+        <v-icon large>mdi-view-list</v-icon>
+      </v-btn>
     </v-card>
   </div>
 </template>
 
 <script>
-
 export default {
   name: "BusinessActionPanel",
   data() {
@@ -91,9 +101,18 @@ export default {
     goInventoryPage() {
       this.$router.push(`/business/${this.$store.state.activeRole.id}/inventory`);
     },
+    /**
+     * Shows the Sale Listing page
+     */
     goSalePage() {
       this.$router.push(`/business/${this.$store.state.activeRole.id}/listings`);
     },
+    /**
+     * Shows the Sale Reports page
+     */
+    goSaleReports() {
+      this.$router.push(`/salesreport/${this.$store.state.activeRole.id}`);
+    }
   },
 };
 </script>
