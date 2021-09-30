@@ -1,5 +1,8 @@
 <template>
-  <Event :event="event" :title="`${event.saleItem.inventoryItem.product.name} from ${business.name}`">
+  <Event
+    :event="event"
+    :title="`${event.saleItem.inventoryItem.product.name} from ${business.name}`"
+    :error="errorMessage">
     <template v-slot:title>
       <div>
         {{ event.saleItem.inventoryItem.product.name }}
@@ -16,7 +19,7 @@
       {{ eventText }}
     </v-card-text>
     <v-card-actions class="justify-center">
-      <v-btn class="pl-3" color="primary darken-1">
+      <v-btn class="pl-3" color="primary darken-1" @click="purchaseListing">
         Buy
         <v-icon>mdi-currency-usd</v-icon>
       </v-btn>
@@ -27,7 +30,11 @@
       </v-btn>
     </v-card-actions>
     <v-dialog v-model="fullSaleOpen" max-width="1200" class="white">
-      <FullSaleListing :saleItem="event.saleItem" @goBack="fullSaleOpen=false" @refresh="fullSaleOpen=false"/>
+      <FullSaleListing
+        :saleItem="event.saleItem"
+        @goBack="fullSaleOpen=false"
+        @refresh="fullSaleOpen=false"
+        @interestUpdate="updateInterest"/>
     </v-dialog>
   </Event>
 </template>
@@ -35,6 +42,7 @@
 <script>
 import Event from "@/components/home/newsfeed/Event";
 import FullSaleListing from "@/components/SaleListing/FullSaleListing.vue";
+import {purchaseListing} from "@/api/sale";
 export default {
   name: "InterestEvent",
   components: {
@@ -52,6 +60,7 @@ export default {
       fullSaleOpen: false,
       interestCount: this.event.saleItem.interestCount,
       interested: this.event.interested,
+      errorMessage: undefined,
     };
   },
   computed: {
@@ -99,5 +108,31 @@ export default {
       };
     },
   },
+  methods: {
+    /**
+     * Updates the interest status.
+     * Used for when the interest changes outside of the component
+     * @param interest Interest value
+     */
+    updateInterest(interest) {
+      this.interested = interest;
+    },
+    /**
+     * Purchases the listing related to this InterestEvent
+     * Adds a small delay before purchasing to prevent simultaneous read/delete
+     */
+    async purchaseListing() {
+      this.errorMessage = undefined;
+      setTimeout(async () => {
+        let response = await purchaseListing(this.event.saleItem.id, this.$store.state.user.id);
+        if (typeof response === 'string') {
+          this.errorMessage = response;
+          return;
+        }
+        await this.$store.dispatch('refreshEventFeed');
+      }, 100);
+      console.log("WOOO");
+    }
+  }
 };
 </script>

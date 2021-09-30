@@ -274,6 +274,7 @@ export default {
         this.isInterested = !this.isInterested;
         if(this.isInterested) this.interestCount += 1;
         else this.interestCount -= 1;
+        this.$emit("interestUpdate", this.isInterested);
       }
     },
     /**
