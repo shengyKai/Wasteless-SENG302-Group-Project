@@ -49,17 +49,14 @@ export default {
      * default those column values to 0.
      */
     formatReportData(reportData) {
-      for (let row in reportData) {
-        reportData[row]["day"] = new Date(reportData[row]["startDate"]).getDate();
-        reportData[row]["week"] = this.getWeekNo(new Date(reportData[row]["startDate"]));
-        reportData[row]["month"] = new Date(reportData[row]["startDate"]).toLocaleString('default', {month: 'long'});
-        reportData[row]["year"] = new Date(reportData[row]["startDate"]).getFullYear();
-        if (!Object.prototype.hasOwnProperty.call(reportData[row], "averageLikeCount")) {
-          reportData[row]["averageLikeCount"] = "-";
-        }
-        if (!Object.prototype.hasOwnProperty.call(reportData[row], "averageDaysToSell")) {
-          reportData[row]["averageDaysToSell"] = "-";
-        }
+      for (let row of reportData) {
+        row.day = new Date(row.startDate).getDate();
+        row.week = this.getWeekNo(new Date(row.startDate));
+        row.month = new Date(row.startDate).toLocaleString('default', {month: 'long'});
+        row.year = new Date(row.startDate).getFullYear();
+
+        row.averageLikeCount = row.averageLikeCount?.toFixed(1) ?? '-';
+        row.averageDaysToSell = row.averageDaysToSell?.toFixed(1) ?? '-';
       }
     },
     /**

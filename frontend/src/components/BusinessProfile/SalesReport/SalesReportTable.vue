@@ -4,7 +4,7 @@
       {{ reportTitle }}
     </strong>
     <v-data-table
-      generateReport='0'
+      disable-sort
       :headers="headers"
       :items="fullReport.reportData"
     />
@@ -24,30 +24,36 @@ export default {
        * These headers are shared throughout report types
        */
       baseHeaders: [
-        { text: 'Year', value: 'year' },
         { text: 'No. of Unique Buyers', value: 'uniqueBuyers' },
         { text: 'No. of Unique Products', value: 'uniqueProducts' },
-        { text: 'No. of Unique Listings', value: 'uniqueListingsSold' },
+        { text: 'No. of Listings Sold', value: 'uniqueListingsSold' },
         { text: 'Average Time to Sell (days)', value: 'averageDaysToSell' },
         { text: 'Average Like Count', value: 'averageLikeCount' },
         { text: 'Total Quantity Sold', value: 'totalQuantitySold' },
         { text: 'Total Value of all Purchases ($)', value: 'totalPriceSold' },
       ],
       /**
-       * These headers are the distinctive headers that differentiates between report types
+       * These headers are the unique headers that differentiates between report types
        */
-      distinctHeaders: {
-        "monthly": [
-          { text: 'Month', value: 'month' }
+      uniqueHeaders: {
+        none: [],
+        yearly: [
+          { text: 'Year', value: 'year' },
         ],
-        "weekly": [
-          { text: 'Week No.', value: 'week' },
-          { text: 'Month', value: 'month' }
+        monthly: [
+          { text: 'Year', value: 'year' },
+          { text: 'Month', value: 'month' },
         ],
-        "daily": [
-          { text: 'Day of the Month', value: 'day' },
+        weekly: [
+          { text: 'Year', value: 'year' },
+          { text: 'Month', value: 'month' },
           { text: 'Week No.', value: 'week' },
-          { text: 'Month', value: 'month' }
+        ],
+        daily: [
+          { text: 'Year', value: 'year' },
+          { text: 'Month', value: 'month' },
+          { text: 'Week No.', value: 'week' },
+          { text: 'Day in Month', value: 'day' },
         ]
       },
     };
@@ -58,17 +64,21 @@ export default {
      * Otherwise, the headers are just the baseHeaders.
      */
     headers() {
-      if (this.fullReport.reportType === "yearly") {
-        return this.baseHeaders;
-      } else {
-        return this.distinctHeaders[this.fullReport.reportType].concat(this.baseHeaders);
-      }
+      return this.uniqueHeaders[this.fullReport.reportType].concat(this.baseHeaders);
     },
     /**
      * Generates the report title based on the reportType in the format '"reportType" Report'
      */
     reportTitle() {
-      return `${this.fullReport.reportType.charAt(0).toUpperCase() + this.fullReport.reportType.slice(1)} Report`;
+      const reportType = this.fullReport.reportType;
+      let reportTypeName;
+      if (reportType === 'none') {
+        reportTypeName = 'Whole Period';
+      } else {
+        reportTypeName = this.fullReport.reportType.charAt(0).toUpperCase() + this.fullReport.reportType.slice(1);
+      }
+
+      return `${reportTypeName} Report`;
     },
   },
 };

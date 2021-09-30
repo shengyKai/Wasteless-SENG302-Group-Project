@@ -1,7 +1,7 @@
 import {is} from 'typescript-is';
 import {instance, MaybeError} from '@/api/internal';
 
-export type ReportGranularity = 'daily' | 'weekly' | 'monthly' | 'yearly';
+export type ReportGranularity = 'none' | 'daily' | 'weekly' | 'monthly' | 'yearly';
 
 
 export type SaleRecord = {
