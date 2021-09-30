@@ -73,6 +73,14 @@ export function formatPrice(price : number) {
 }
 
 /**
+ * Converts a date into an iso date string using the local timezone.
+ * @param date Date to convert
+ */
+export function getLocalDate(date: Date): string {
+  return `${date.getFullYear().toString().padStart(2, '0')}-${(date.getMonth() + 1).toString().padStart(2, '0')}-${date.getDate().toString().padStart(2, '0')}`;
+}
+
+/**
  * User roles.
  */
 export const USER_ROLES = {

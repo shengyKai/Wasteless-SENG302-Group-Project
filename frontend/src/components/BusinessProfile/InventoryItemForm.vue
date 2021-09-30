@@ -159,7 +159,7 @@
 
 <script>
 import { currencyFromCountry } from "@/api/currency";
-import {hugePriceRules, mandatoryRules, quantityRules, smallPriceRules} from "@/utils";
+import {hugePriceRules, mandatoryRules, quantityRules, smallPriceRules, getLocalDate} from "@/utils";
 import {getProducts} from "@/api/product";
 import {createInventoryItem, modifyInventoryItem} from "@/api/inventory";
 
@@ -186,7 +186,7 @@ export default {
       sellByValid: true,
       bestBefore: this.previousItem?.bestBefore ?? "",
       bestBeforeValid: true,
-      expires: this.previousItem?.expires ?? new Date().toISOString().slice(0,10),
+      expires: this.previousItem?.expires ?? getLocalDate(new Date()),
       expiresValid: true,
       datesValid: true,
       productFilter: '',

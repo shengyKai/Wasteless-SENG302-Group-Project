@@ -132,6 +132,7 @@
 </template>
 
 <script>
+import { getLocalDate } from '@/utils';
 export default {
   name: "ReportOptionsBar",
   data() {
@@ -144,9 +145,9 @@ export default {
       granularity: "none",
       presetPeriods: [
         { level: 'Today',          value:'day' },
-        { level: 'Previous Week',  value:'week' },
-        { level: 'Previous Month', value:'month' },
-        { level: 'Previous Year',  value:'year' }
+        { level: 'Current Week',  value:'week' },
+        { level: 'Current Month', value:'month' },
+        { level: 'Current Year',  value:'year' }
       ],
       granularityOptions: [
         { level: 'Day',   value: 'daily'   },
@@ -178,15 +179,17 @@ export default {
       if (this.presetPeriod === 'day') {
         // End day is already correct
       } else if (this.presetPeriod === 'week') {
-        start.setDate(start.getDate() - 6);
+        while (start.getDay() !== 1) { // While not Monday
+          start.setDate(start.getDate() - 1);
+        }
       } else if (this.presetPeriod === 'month') {
-        start.setMonth(start.getMonth() - 1);
+        start.setDate(1); // Set start to first day of month
       } else if (this.presetPeriod === 'year') {
-        start.setFullYear(start.getFullYear() - 1);
+        start.setMonth(0, 1); // Set start to first day in year
       }
       return {
-        fromDate: start.toISOString().slice(0, 10),
-        toDate: now.toISOString().slice(0, 10)
+        fromDate: getLocalDate(start),
+        toDate: getLocalDate(now),
       };
     },
     /**
@@ -196,14 +199,14 @@ export default {
       if (this.toDate !== undefined) {
         return this.toDate;
       } else {
-        return new Date().toISOString().slice(0, 10);
+        return getLocalDate(new Date());
       }
     },
     /**
      * Max date of the toDate is the present day
      */
     maxToDate() {
-      return new Date().toISOString().slice(0, 10);
+      return getLocalDate(new Date());
     },
     /**
      * Min date of the toDate is the fromDate

@@ -32,8 +32,8 @@ describe('ReportOptionsBar.vue', () => {
       vuetify,
       data() {
         return {
-          fromDate: new Date("2012-01-01").toISOString().slice(0, 10),
-          toDate: new Date("2012-02-01").toISOString().slice(0, 10),
+          fromDate: "2012-01-01",
+          toDate: "2012-02-01",
           granularity: "yearly",
         };
       }
@@ -57,30 +57,30 @@ describe('ReportOptionsBar.vue', () => {
     expect(new Date(wrapper.vm.maxFromDate)).toStrictEqual(currentDate);
   });
 
-  it('If preset period "Previous Year" is selected, then the fromDate/toDate should be set accordingly', async () => {
+  it('If preset period "Current Year" is selected, then the fromDate/toDate should be set accordingly', async () => {
     await wrapper.setData({
-      presetPeriodUserString: 'Previous Year',
+      presetPeriodUserString: 'Current Year',
     });
 
-    expect(new Date(wrapper.vm.fromDate)).toStrictEqual(new Date("2011-12-21"));
+    expect(new Date(wrapper.vm.fromDate)).toStrictEqual(new Date("2012-01-01"));
     expect(new Date(wrapper.vm.toDate)).toStrictEqual(currentDate);
   });
 
-  it('If preset period "Previous Month" is selected, then the fromDate/toDate should be set accordingly', async () => {
+  it('If preset period "Current Month" is selected, then the fromDate/toDate should be set accordingly', async () => {
     await wrapper.setData({
-      presetPeriodUserString: 'Previous Month',
+      presetPeriodUserString: 'Current Month',
     });
 
-    expect(new Date(wrapper.vm.fromDate)).toStrictEqual(new Date("2012-11-21"));
+    expect(new Date(wrapper.vm.fromDate)).toStrictEqual(new Date("2012-12-01"));
     expect(new Date(wrapper.vm.toDate)).toStrictEqual(currentDate);
   });
 
-  it('If preset period "Previous Week" is selected, then the fromDate/toDate should be set accordingly', async () => {
+  it('If preset period "Current Week" is selected, then the fromDate/toDate should be set accordingly', async () => {
     await wrapper.setData({
-      presetPeriodUserString: 'Previous Week',
+      presetPeriodUserString: 'Current Week',
     });
 
-    expect(new Date(wrapper.vm.fromDate)).toStrictEqual(new Date("2012-12-15"));
+    expect(new Date(wrapper.vm.fromDate)).toStrictEqual(new Date("2012-12-17"));
     expect(new Date(wrapper.vm.toDate)).toStrictEqual(currentDate);
   });
 
@@ -97,8 +97,8 @@ describe('ReportOptionsBar.vue', () => {
     await findButton("Generate").trigger("click");
     expect(wrapper.emitted().sendRequestParams).toBeTruthy();
     expect(wrapper.emitted().sendRequestParams as any[1]).toEqual([[{
-      fromDate: new Date("2012-01-01").toISOString().slice(0, 10),
-      toDate: new Date("2012-02-01").toISOString().slice(0, 10),
+      fromDate: "2012-01-01",
+      toDate: "2012-02-01",
       granularity: "yearly"
     }]]);
   });
