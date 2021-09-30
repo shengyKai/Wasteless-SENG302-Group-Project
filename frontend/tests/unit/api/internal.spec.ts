@@ -4,18 +4,18 @@ import { AxiosResponse } from 'axios';
 import {SearchResults} from '@/api/internal';
 import { castMock } from '../utils';
 import { is, Reason } from 'typescript-is';
-import {CreateUser, login, createUser} from "@/api/user";
-import {CreateProduct, Product, createProduct, uploadProductImage, getProducts, modifyProduct} from "@/api/product";
-import {InventoryItem} from "@/api/inventory";
-import {Sale, getBusinessSales, setListingInterest, getListingInterest, basicSearchSaleitem, advanceSearchSaleitem, purchaseListing } from "@/api/sale";
+import {CreateUser, login, createUser, userSearch, User, getUser, makeAdmin, revokeAdmin} from "@/api/user";
+import {CreateProduct, Product, createProduct, uploadProductImage, getProducts, modifyProduct, makeProductImagePrimary, deleteProductImage} from "@/api/product";
+import {InventoryItem, CreateInventoryItem, createInventoryItem} from "@/api/inventory";
+import {Sale, getBusinessSales, setListingInterest, getListingInterest, purchaseListing, basicSearchSaleitem, advanceSearchSaleitem } from "@/api/sale";
 import {getMessagesInConversation, Message} from "@/api/marketplace";
 import {generateReport, SaleRecord} from "@/api/salesReport";
+import { CreateBusiness, createBusiness, getBusiness, Business, makeBusinessAdmin, removeBusinessAdmin } from "@/api/business";
 
 const api = {
-  login, createUser, createProduct, uploadProductImage, getProducts, modifyProduct,
-
-  getBusinessSales, getMessagesInConversation, setListingInterest, getListingInterest,
-  basicSearchSaleitem, advanceSearchSaleitem, purchaseListing, generateReport
+  login, createUser, createBusiness, getBusiness, makeBusinessAdmin, removeBusinessAdmin, userSearch, getUser, makeAdmin, revokeAdmin,
+  createProduct, uploadProductImage, getProducts, modifyProduct, makeProductImagePrimary, deleteProductImage, getBusinessSales,
+  getMessagesInConversation, setListingInterest, getListingInterest, purchaseListing, generateReport, createInventoryItem, basicSearchSaleitem, advanceSearchSaleitem
 };
 
 jest.mock('axios', () => ({
@@ -111,12 +111,28 @@ const testCreateUser: CreateUser = {
   password: 'test_password',
 };
 
+const testCreateBusiness: CreateBusiness = {
+  primaryAdministratorId: 4,
+  name: 'test_name',
+  description: 'test_description',
+  address: {
+    country: 'test_country',
+  },
+  businessType: 'Retail Trade'
+};
+
 const testCreateProduct: CreateProduct = {
   id: 'ID-VALUE',
   name: 'test_name',
   description: 'test_description',
   manufacturer: 'test_manufacturer',
   recommendedRetailPrice: 100,
+};
+
+const testCreateInventoryItem: CreateInventoryItem = {
+  productId: 'FOOBAR',
+  quantity: 13,
+  expires: '2022-09-09',
 };
 
 const testRecord: SaleRecord = {
@@ -157,6 +173,36 @@ const testMessage: Message = {
   created: '1-1-1900',
   senderId: 100,
   content: 'Hello world',
+};
+
+const testBusiness: Business = {
+  id: 17,
+  primaryAdministratorId: 33,
+  name: 'test_name',
+  description: 'test_description',
+  address: {
+    country: 'test_country',
+  },
+  businessType: 'Retail Trade',
+  points: 88,
+  rank: {
+    name: 'gold',
+    threshold: 100
+  }
+};
+
+const testUser: User = {
+  id: 88,
+  firstName: 'test_firstname',
+  lastName: 'test_lastname',
+  middleName: 'test_middlename',
+  nickname: 'test_nickname',
+  bio: 'test_bio',
+  email: 'test_email',
+  dateOfBirth: 'test_date_of_birth',
+  phoneNumber: 'test_phone_number',
+  homeAddress: { country: 'test_country'},
+  images: [],
 };
 
 function searchResult<T>(list: T[]) : SearchResults<T> {
@@ -255,6 +301,118 @@ const apiCalls: Partial<ApiCalls> = {
     },
     usesServerMessage: false,
   },
+  createBusiness: {
+    parameters: [
+      testCreateBusiness
+    ],
+    httpMethod: 'post',
+    url: '/businesses',
+    body: testCreateBusiness,
+    result: undefined,
+    extraStatusMessages: {
+      401: 'You have been logged out. Please login again and retry',
+    },
+    usesServerMessage: true,
+  },
+  getBusiness: {
+    parameters: [17],
+    httpMethod: 'get',
+    url: '/businesses/17',
+    body: undefined,
+    result: testBusiness,
+    failedTypeCheckResponse: 'Invalid response type',
+    extraStatusMessages: {
+      401: 'You have been logged out. Please login again and retry',
+      406: 'Business not found',
+    },
+    usesServerMessage: false,
+  },
+  makeBusinessAdmin: {
+    parameters: [17, 88],
+    httpMethod: 'put',
+    url: '/businesses/17/makeAdministrator',
+    body: {
+      userId: 88
+    },
+    result: undefined,
+    extraStatusMessages: {
+      400: 'User doesn\'t exist, is already an admin or is under 16',
+      401: 'You have been logged out. Please login again and retry',
+      403: 'Current user cannot perform this action',
+      406: 'Business not found',
+    },
+    usesServerMessage: false,
+  },
+  removeBusinessAdmin: {
+    parameters: [17, 88],
+    httpMethod: 'put',
+    url: '/businesses/17/removeAdministrator',
+    body: {
+      userId: 88
+    },
+    result: undefined,
+    extraStatusMessages: {
+      400: 'User doesn\'t exist or is not an admin',
+      401: 'You have been logged out. Please login again and retry',
+      403: 'Current user cannot perform this action',
+      406: 'Business not found',
+    },
+    usesServerMessage: false,
+  },
+  userSearch: {
+    parameters: ['test_query', 3, 14, 'firstName', false],
+    httpMethod: 'get',
+    url: '/users/search',
+    body: {
+      params: {
+        searchQuery: 'test_query',
+        orderBy: "firstName",
+        page: 3,
+        resultsPerPage: 14,
+        reverse: "false",
+      }
+    },
+    result: { results: [testUser], count: 77},
+    extraStatusMessages: {},
+    usesServerMessage: true,
+    failedTypeCheckResponse: 'Response is not user array',
+  },
+  getUser: {
+    parameters: [88],
+    httpMethod: 'get',
+    url: '/users/88',
+    body: undefined,
+    result: testUser,
+    extraStatusMessages: {},
+    usesServerMessage: true,
+    failedTypeCheckResponse: 'Response is not user',
+  },
+  makeAdmin: {
+    parameters: [88],
+    httpMethod: 'put',
+    url: '/users/88/makeAdmin',
+    body: undefined,
+    result: undefined,
+    extraStatusMessages: {
+      401: 'You have been logged out. Please login again and retry',
+      403: 'Operation not permitted',
+      406: 'User does not exist'
+    },
+    usesServerMessage: false,
+  },
+  revokeAdmin: {
+    parameters: [88],
+    httpMethod: 'put',
+    url: '/users/88/revokeAdmin',
+    body: undefined,
+    result: undefined,
+    extraStatusMessages: {
+      401: 'You have been logged out. Please login again and retry',
+      403: 'Operation not permitted',
+      406: 'User does not exist'
+    },
+    usesServerMessage: false,
+  },
   uploadProductImage: {
     parameters: [100, 'TEST-PRODUCT', testFile],
     httpMethod: 'post',
@@ -329,6 +487,32 @@ const apiCalls: Partial<ApiCalls> = {
     },
     usesServerMessage: false,
   },
+  makeProductImagePrimary: {
+    parameters: [888, 'FOO-BAR', 42],
+    httpMethod: 'put',
+    url: '/businesses/888/products/FOO-BAR/images/42/makeprimary',
+    body: undefined,
+    result: undefined,
+    extraStatusMessages: {
+      401: 'You have been logged out. Please login again and retry',
+      403: 'Operation not permitted',
+      406: 'Product/Business not found',
+    },
+    usesServerMessage: false,
+  },
+  deleteProductImage: {
+    parameters: [888, 'FOO-BAR', 42],
+    httpMethod: 'delete',
+    url: '/businesses/888/products/FOO-BAR/images/42',
+    body: undefined,
+    result: undefined,
+    extraStatusMessages: {
+      401: 'You have been logged out. Please login again and retry',
+      403: 'Operation not permitted',
+      406: 'Product/Business not found',
+    },
+    usesServerMessage: false,
+  },
   getMessagesInConversation: {
     parameters: [3, 5, 2, 10],
     httpMethod: 'get',
@@ -390,7 +574,7 @@ const apiCalls: Partial<ApiCalls> = {
   basicSearchSaleitem: {
     parameters: ["deezNuts", "productName", 1, 10, false],
     httpMethod: 'get',
-    url: '/businesses/listings/search',
+    url: '/businesses/listings/search',difyProduct, makeProductImagePrimary, dele
     body: {
       params: {
         basicSearchQuery: "deezNuts",
@@ -466,6 +650,20 @@ const apiCalls: Partial<ApiCalls> = {
       406: 'Business not found',
     },
     usesServerMessage: false
+  },
+  createInventoryItem: {
+    parameters: [
+      17, testCreateInventoryItem
+    ],
+    httpMethod: 'post',
+    url: '/businesses/17/inventory',
+    body: testCreateInventoryItem,
+    result: undefined,
+    extraStatusMessages: {
+      401: 'You have been logged out. Please login again and retry',
+      403: 'Operation not permitted'
+    },
+    usesServerMessage: true,
   }
 };
 
