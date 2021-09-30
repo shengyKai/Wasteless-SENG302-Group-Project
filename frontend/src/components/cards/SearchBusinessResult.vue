@@ -7,18 +7,22 @@
       <v-col class="pl-0">
         <v-list-item-content>
           <v-list-item-title>
-
             <a class="link" @click="viewBusinessProfile">
               {{ business.name }}
+              <RankIcon
+                v-if="business.rank.name !== 'bronze'"
+                :rankName="business.rank.name"
+                :size="'small'"
+              />
             </a>
-            <v-avatar
+            <!-- <v-avatar
               :size="30"
               :color="badgeColour"
               class="headline">
               <v-icon small color="primary darken-4">
                 mdi-vuetify
               </v-icon>
-            </v-avatar>
+            </v-avatar> -->
           </v-list-item-title>
           <v-list-item-subtitle>{{ insertAddress(business.address) }}</v-list-item-subtitle>
           <v-list-item-subtitle>{{ business.businessType }}</v-list-item-subtitle>
@@ -32,6 +36,7 @@
 <script>
 import Avatar from '../utils/Avatar.vue';
 import convertAddressToReadableText from '../utils/Methods/convertAddressToReadableText';
+import RankIcon from "@/components/ranks/RankIcon";
 
 export default {
   props: {
@@ -39,6 +44,7 @@ export default {
   },
   components: {
     Avatar,
+    RankIcon
   },
   computed: {
     /**
