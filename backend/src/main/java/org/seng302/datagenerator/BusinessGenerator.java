@@ -3,12 +3,9 @@ package org.seng302.datagenerator;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.seng302.leftovers.dto.business.BusinessType;
-import org.seng302.leftovers.dto.business.Rank;
 
 import java.sql.*;
 import java.time.Instant;
-import java.time.LocalDate;
-import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
