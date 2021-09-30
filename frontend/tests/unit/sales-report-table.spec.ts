@@ -5,11 +5,17 @@ import SalesReportTable from "@/components/BusinessProfile/SalesReport/SalesRepo
 
 Vue.use(Vuetify);
 
-let dailyHeaders = ["Day of the Month", "Week No.", "Month"];
-let weeklyHeaders = ["Week No.", "Month"];
-let monthlyHeaders = ["Month"];
-let baseHeaders = ['Year', 'No. of Unique Buyers','No. of Unique Products', 'Average Time to Sell (days)', 'Average Like Count', 
-                      'Total Value of all Purchases ($)']
+let dailyHeaders = ['Year', "Day in Month", "Week No.", "Month"];
+let weeklyHeaders = ['Year', "Week No.", "Month"];
+let monthlyHeaders = ['Year', "Month"];
+let yearlyHeaders = ['Year'];
+let baseHeaders = [
+  'No. of Unique Buyers',
+  'No. of Unique Products',
+  'Average Time to Sell (days)',
+  'Average Like Count',
+  'Total Value of all Purchases ($)',
+];
 
 describe('SalesReportTable.vue', () => {
   let wrapper: Wrapper<any>;
@@ -39,11 +45,13 @@ describe('SalesReportTable.vue', () => {
     wrapper.destroy();
   });
 
-  it.each(dailyHeaders.concat(baseHeaders))("If the reportType is daily, the appropriate table headers are shown", (header) => {
-    expect(wrapper.text()).toContain(header);
+  it("If the reportType is daily, the appropriate table headers are shown", () => {
+    for (const header of dailyHeaders.concat(baseHeaders)) {
+      expect(wrapper.text()).toContain(header);
+    }
   });
 
-  it.each(weeklyHeaders.concat(baseHeaders))("If the reportType is weekly, the appropriate table headers are shown", async (header) => {
+  it("If the reportType is weekly, the appropriate table headers are shown", async () => {
     await wrapper.setProps({
       reportData: [
         {
@@ -52,10 +60,12 @@ describe('SalesReportTable.vue', () => {
       ],
       reportType: "weekly"
     });
-    expect(wrapper.text()).toContain(header);
+    for (const header of weeklyHeaders.concat(baseHeaders)) {
+      expect(wrapper.text()).toContain(header);
+    }
   });
 
-  it.each(monthlyHeaders.concat(baseHeaders))("If the reportType is monthly, the appropriate table headers are shown", async (header) => {
+  it("If the reportType is monthly, the appropriate table headers are shown", async () => {
     await wrapper.setProps({
       reportData: [
         {
@@ -64,10 +74,12 @@ describe('SalesReportTable.vue', () => {
       ],
       reportType: "monthly"
     });
-    expect(wrapper.text()).toContain(header);
+    for (const header of monthlyHeaders.concat(baseHeaders)) {
+      expect(wrapper.text()).toContain(header);
+    }
   });
 
-  it.each(baseHeaders)("If the reportType is yearly, the appropriate table headers are shown", async (header) => {
+  it("If the reportType is yearly, the appropriate table headers are shown", async () => {
     await wrapper.setProps({
       reportData: [
         {
@@ -76,6 +88,22 @@ describe('SalesReportTable.vue', () => {
       ],
       reportType: "yearly"
     });
-    expect(wrapper.text()).toContain(header);
+    for (const header of yearlyHeaders.concat(baseHeaders)) {
+      expect(wrapper.text()).toContain(header);
+    }
+  });
+
+  it("If the reportType is none, the appropriate table headers are shown", async () => {
+    await wrapper.setProps({
+      reportData: [
+        {
+          somedata : 'blah'
+        }
+      ],
+      reportType: "none"
+    });
+    for (const header of baseHeaders) {
+      expect(wrapper.text()).toContain(header);
+    }
   });
 });
