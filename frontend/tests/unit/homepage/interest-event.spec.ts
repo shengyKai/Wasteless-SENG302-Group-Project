@@ -109,17 +109,6 @@ describe("InterestEvent.vue", () => {
     expect(wrapper.text()).toContain("Hillary Cresenct Jewelers");
   });
 
-  it("When the event is not liked, the like count is shown", async ()=>{
-    let newEvent = {...event};
-    newEvent.interested = false;
-    await wrapper.setProps({event:newEvent});
-    expect(wrapper.text()).toContain("Like 7");
-  });
-
-  it("When the event is liked, the like count is shown", async ()=>{
-    expect(wrapper.text()).toContain("Unlike 7");
-  });
-
   const closesDays = [1, 2, 10, 35];
 
   it.each(closesDays)("Correctly displays the number of days remaining on the sale", async (day)=>{

@@ -8,6 +8,7 @@ import {castMock, findButtonWithText} from "./utils";
 import {Location} from '@/api/internal';
 import {getStore, resetStoreForTesting} from '@/store';
 import {getUser as getUser1, User} from "@/api/user";
+import {currencyFromCountry} from "@/api/currency";
 import {modifyBusiness as modifyBusiness1, Business} from "@/api/business";
 import ImageManager from "@/components/image/ImageManager.vue";
 
@@ -17,8 +18,11 @@ jest.mock('@/api/user', () => ({
 jest.mock('@/api/business', () => ({
   modifyBusiness: jest.fn(),
 }));
+jest.mock('@/api/currency', () => ({
+  currencyFromCountry: jest.fn(),
+}));
 
-
+const currencyAPI = castMock(currencyFromCountry);
 const getUser = castMock(getUser1);
 const modifyBusiness = castMock(modifyBusiness1);
 Vue.use(Vuetify);
@@ -133,9 +137,10 @@ describe('modifyBusiness.vue', () => {
     let store = getStore();
     store.state.user = testUser;
     getUser.mockResolvedValueOnce(testUser);
+    currencyAPI.mockResolvedValue({symbol: "$", name: "NZD", code: "NZD"});
     const vuetify = new Vuetify();
     const App = localVue.component('App', {
-      components: { ModifyBusiness },
+      components: {ModifyBusiness},
       template: '<div data-app><ModifyBusiness :business="thingy"/></div>',
     });
 
@@ -146,7 +151,9 @@ describe('modifyBusiness.vue', () => {
       stubs: ['router-link', 'router-view'],
       mocks: {
         $router: {
-          go: () => {return;},
+          go: () => {
+            return;
+          },
         }
       },
       localVue,
@@ -176,7 +183,7 @@ describe('modifyBusiness.vue', () => {
    *
    * @returns A wrapper around the update button
    */
-  function findButton(component:string) {
+  function findButton(component: string) {
     return findButtonWithText(wrapper, component);
   }
 
@@ -400,7 +407,7 @@ describe('modifyBusiness.vue', () => {
     expect(wrapper.vm.valid).toBeFalsy();
   });
 
-  it('Invalid if the street address only contains a number', async() => {
+  it('Invalid if the street address only contains a number', async () => {
     await populateRequiredFields();
     await wrapper.setData({
       streetAddress: '69'
@@ -409,7 +416,7 @@ describe('modifyBusiness.vue', () => {
     expect(wrapper.vm.valid).toBeFalsy();
   });
 
-  it('Invalid if the street address only contains a word', async() => {
+  it('Invalid if the street address only contains a word', async () => {
     await populateRequiredFields();
     await wrapper.setData({
       streetAddress: 'Elizabeth Street'
@@ -503,11 +510,12 @@ describe('modifyBusiness.vue', () => {
     await populateRequiredFields();
     const submitButton = findButton("Submit");
     await submitButton.trigger('click');
+    await Vue.nextTick();
     expect(modifyBusiness).toHaveBeenCalled();
   });
 
   describe('changing primary administrator', () => {
-    it('Primary admin is changed and alert message is shown when non-primary admin is selected', async() => {
+    it('Primary admin is changed and alert message is shown when non-primary admin is selected', async () => {
       const currentPrimaryAdmin = testAdmins[0];
       const newPrimaryAdmin = testAdmins[1];
       expect(wrapper.vm.adminIsPrimary(newPrimaryAdmin)).toBeFalsy();
@@ -516,7 +524,7 @@ describe('modifyBusiness.vue', () => {
       expect(wrapper.vm.primaryAdminAlertMsg).toEqual(`Primary admin will be changed to ${newPrimaryAdmin.firstName} ${newPrimaryAdmin.lastName}`);
     });
 
-    it('Primary admin stays the same and alert message is not shown when primary admin is selected', async() => {
+    it('Primary admin stays the same and alert message is not shown when primary admin is selected', async () => {
       const primaryAdmin = testAdmins[0];
       expect(wrapper.vm.adminIsPrimary(primaryAdmin)).toBeTruthy();
       wrapper.vm.changePrimaryOwner(primaryAdmin);
