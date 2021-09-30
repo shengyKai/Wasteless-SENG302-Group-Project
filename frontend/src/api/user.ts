@@ -71,7 +71,7 @@ export async function userSearch(query: string, pageIndex: number, resultsPerPag
     let status: number | undefined = error.response?.status;
 
     if (status === undefined) return 'Failed to reach backend';
-    return `Request failed: ${error.response.data.message}`;
+    return error.response.data.message;
   }
 
   if (!is<SearchResults<User>>(response.data)) {
@@ -95,7 +95,7 @@ export async function getUser(id: number): Promise<MaybeError<User>> {
     let status: number | undefined = error.response?.status;
 
     if (status === undefined) return 'Failed to reach backend';
-    return `Request failed: ${status}`;
+    return error.response.data.message;
   }
 
   if (!is<User>(response.data)) {
@@ -209,6 +209,8 @@ export async function revokeAdmin(userId: number): Promise<MaybeError<undefined>
     await instance.put(`/users/${userId}/revokeAdmin`);
   } catch (error) {
     let status: number | undefined = error.response?.status;
+
+    if (status === undefined) return 'Failed to reach backend';
     if (status === 401) return 'You have been logged out. Please login again and retry';
     if (status === 403) return 'Operation not permitted';
     if (status === 406) return 'User does not exist';

@@ -147,7 +147,7 @@ export async function makeBusinessAdmin(businessId: number, userId: number): Pro
   } catch (error) {
     let status: number | undefined = error.response?.status;
     if (status === undefined) return 'Failed to reach backend';
-    if (status === 400) return 'User doesn\'t exist or is already an admin';
+    if (status === 400) return 'User doesn\'t exist, is already an admin or is under 16';
     if (status === 401) return 'You have been logged out. Please login again and retry';
     if (status === 403) return 'Current user cannot perform this action';
     if (status === 406) return 'Business not found';
@@ -176,7 +176,7 @@ export async function removeBusinessAdmin(businessId: number, userId: number): P
     if (status === 400) return 'User doesn\'t exist or is not an admin';
     if (status === 401) return 'You have been logged out. Please login again and retry';
     if (status === 403) return 'Current user cannot perform this action';
-    if (status === 406) return 'The new business admin should be at least 16 years old';
+    if (status === 406) return 'Business not found';
 
     return 'Request failed: ' + status;
   }

@@ -81,7 +81,7 @@
             </v-col>
             <v-col cols="12" sm="6">
               <h4>Points</h4>
-              {{ business.points }}
+              <LevelUp :business="this.business"/>
             </v-col>
             <v-col cols="12">
               <h4>Administrators</h4>

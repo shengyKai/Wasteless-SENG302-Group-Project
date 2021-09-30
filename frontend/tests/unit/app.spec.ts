@@ -5,7 +5,7 @@ import Vuex, { Store } from 'vuex';
 import { createLocalVue, Wrapper, mount } from '@vue/test-utils';
 import App from '@/App.vue';
 import { getStore, resetStoreForTesting, StoreData } from '@/store';
-import router from "@/plugins/vue-router";
+import router from "@/plugins/router";
 import { castMock, makeTestUser } from './utils';
 import * as events from '@/api/events';
 

@@ -40,7 +40,7 @@ import AppFooter from "./components/AppFooter";
 import CreateBusiness from "./components/BusinessProfile/CreateBusiness";
 import CreateSaleItem from "./components/BusinessProfile/CreateSaleItem";
 
-import router from "./plugins/vue-router";
+import router from "./plugins/router";
 import { getStore } from './store';
 
 // Vue app instance
