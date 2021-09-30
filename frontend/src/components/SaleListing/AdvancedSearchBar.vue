@@ -151,12 +151,12 @@ export default {
   data() {
     return {
       orderByOptions: [
-        { text: "Name", value: "name" },
         { text: "Price", value: "price" },
+        { text: "Name", value: "productName" },
         { text: "Seller", value: "businessName" },
         { text: "Location", value: "businessLocation" },
         { text: "Expiry date", value: "expiry" },
-        { text: "Closing date", value: "closes" },
+        { text: "Closing date", value: "closing" },
         { text: "Created date", value: "created" },
         { text: "Quantity", value: "quantity" },
       ],
