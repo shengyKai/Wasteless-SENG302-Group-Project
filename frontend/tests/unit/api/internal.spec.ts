@@ -574,7 +574,7 @@ const apiCalls: Partial<ApiCalls> = {
   basicSearchSaleitem: {
     parameters: ["deezNuts", "productName", 1, 10, false],
     httpMethod: 'get',
-    url: '/businesses/listings/search',difyProduct, makeProductImagePrimary, dele
+    url: '/businesses/listings/search',
     body: {
       params: {
         basicSearchQuery: "deezNuts",
