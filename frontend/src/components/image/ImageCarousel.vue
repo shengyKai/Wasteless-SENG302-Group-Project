@@ -6,7 +6,22 @@
       <!--  The v-bind to attrs allows the v-dialog to use this link as the activator for the dialog box -->
       <a v-bind="attrs" v-on="on">
         <!-- imagesList[0] will be the primary image. -->
-        <v-img height="200px" :src="imageUrl(imagesList[0].filename)" />
+        <v-img class="text-right" height="200px" :src="imageUrl(imagesList[0].filename)">
+          <v-tooltip bottom>
+            <template v-slot:activator="{ on, attrs }">
+              <v-icon
+                left
+                color="green"
+                class="shadow-icon mt-1"
+                v-bind="attrs"
+                v-on="on"
+              >
+                mdi-arrow-expand
+              </v-icon>
+            </template>
+            <span>View more images</span>
+          </v-tooltip>
+        </v-img>
       </a>
     </template>
     <template>

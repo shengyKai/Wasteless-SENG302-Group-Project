@@ -14,7 +14,7 @@
           ref="businessImageCarousel"
         />
       </v-card>
-      <v-card class="body">
+      <v-card class="pa-5 pt-0">
         <div class="d-flex flex-column" no-gutters>
           <v-row>
             <v-col cols="12">
@@ -32,10 +32,8 @@
           <v-row>
             <v-col cols="11">
               <span>
-                <h1 class="business-name">{{ business.name }}</h1>
-                <SilverRank v-if="business.rank.name === 'silver'" class="rank"/>
-                <GoldRank v-if="business.rank.name === 'gold'" class="rank"/>
-                <PlatinumRank v-if="business.rank.name === 'platinum'" class="rank"/>
+                <h1 class="d-inline-block">{{ business.name }}</h1>
+                <RankIcon v-if="business.rank.name !== 'bronze'" :rankName="business.rank.name"/>
               </span>
             </v-col>
             <v-col class="text-right" v-if='!modifyBusiness && permissionToActAsBusiness'>
@@ -61,10 +59,10 @@
             <strong class="rank">Rank:</strong> {{ business.rank.name.charAt(0).toUpperCase() + business.rank.name.slice(1) }}
           </p>
         </div>
-        <v-btn class="business-btn" outlined color="primary" @click="goSalePage" :value="false" width="150">
+        <v-btn class="mr-2" outlined color="primary" @click="goSalePage" :value="false" width="150">
           Sale listings
         </v-btn>
-        <v-btn v-if="isAdmin" class="business-btn" outlined color="primary" @click="goSaleReports" :value="false" width="150">
+        <v-btn v-if="!isAdmin" class="" outlined color="primary" @click="goSaleReports" :value="false" width="150">
           Sale reports
         </v-btn>
         <v-container fluid>
@@ -89,7 +87,7 @@
               <h4>Administrators</h4>
               <span v-for="admin in administrators" :key="admin.id">
                 <router-link :to="'/profile/' + admin.id">
-                  <v-chip class="link-chip link" :color="getAdminColour(admin)" text-color="white"> {{ admin.firstName }} {{ admin.lastName }} </v-chip>
+                  <v-chip class="mr-1 link" :color="getAdminColour(admin)" text-color="white"> {{ admin.firstName }} {{ admin.lastName }} </v-chip>
                 </router-link>
               </span>
             </v-col>
@@ -115,20 +113,16 @@ import {
 } from "@/utils";
 import ImageCarousel from "@/components/image/ImageCarousel";
 import {getBusiness} from "@/api/business";
-import SilverRank from "@/components/ranks/SilverRank";
-import GoldRank from "@/components/ranks/GoldRank";
-import PlatinumRank from "@/components/ranks/PlatinumRank";
-import LevelUp from "./LevelUp";
+import RankIcon from "@/components/ranks/RankIcon";
+import LevelUp from '@/components/BusinessProfile/LevelUp.vue';
 
 export default {
   name: 'BusinessProfile',
   components: {
     ImageCarousel,
     ModifyBusiness,
-    SilverRank,
-    GoldRank,
-    PlatinumRank,
-    LevelUp
+    RankIcon,
+    LevelUp,
   },
   data() {
     return {
@@ -254,34 +248,3 @@ export default {
   }
 };
 </script>
-
-<style scoped>
-.body {
-    padding: 16px;
-}
-
-.top-section {
-  display: flex;
-  flex-wrap: wrap;
-}
-
-.link-chip {
-  margin-right: 4px;
-}
-
-.business-name {
-  display: inline;
-}
-
-.rank {
-  display: inline;
-  height: 40px;
-  margin-left: 10px;
-  padding-left: 30px;
-}
-
-.business-btn {
-  display: inline;
-  margin-right: 10px;
-}
-</style>

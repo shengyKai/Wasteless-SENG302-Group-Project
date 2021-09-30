@@ -102,7 +102,7 @@ describe("Avatar.vue", () => {
     expect(wrapper.vm.image).toBe("http://localhost:9500/userThumbnail.jpg");
   });
 
-  it("When user is provided, initials are derived from user\'s first and last name", async () => {
+  it("When user is provided, initials are derived from user's first and last name", async () => {
     await wrapper.setProps({
       user: {
         firstName: "Jeff",
