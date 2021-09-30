@@ -21,6 +21,7 @@ npm-install:
   script:
     - cd frontend
     - npm install
+    - rm -rf /home/gitlab-runner/uploads
 
 junit:
   stage: test
