@@ -23,7 +23,6 @@ import org.seng302.leftovers.service.ReportService;
 import org.seng302.leftovers.service.search.SearchPageConstructor;
 import org.seng302.leftovers.service.search.SearchSpecConstructor;
 import org.seng302.leftovers.tools.AuthenticationTokenManager;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;

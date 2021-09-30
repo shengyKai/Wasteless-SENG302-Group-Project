@@ -11,7 +11,6 @@ import org.seng302.leftovers.dto.business.BusinessType;
 import org.seng302.leftovers.dto.business.CreateBusinessDTO;
 import org.seng302.leftovers.dto.business.ModifyBusinessDTO;
 import org.seng302.leftovers.entities.Business;
-import org.seng302.leftovers.entities.Image;
 import org.seng302.leftovers.entities.Product;
 import org.seng302.leftovers.entities.User;
 import org.seng302.leftovers.exceptions.DoesNotExistResponseException;
@@ -32,7 +31,6 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
@@ -50,17 +48,15 @@ public class BusinessController {
     private final BusinessRepository businessRepository;
     private final UserRepository userRepository;
     private final ImageService imageService;
-    private final ImageRepository imageRepository;
     private static final Logger logger = LogManager.getLogger(BusinessController.class.getName());
 
     private static final Set<String> VALID_BUSINESS_ORDERINGS = Set.of("created", "name", "location", "businessType", "points");
 
     @Autowired
-    public BusinessController(BusinessRepository businessRepository, UserRepository userRepository, ImageService imageService, ImageRepository imageRepository) {
+    public BusinessController(BusinessRepository businessRepository, UserRepository userRepository, ImageService imageService) {
         this.businessRepository = businessRepository;
         this.userRepository = userRepository;
         this.imageService = imageService;
-        this.imageRepository = imageRepository;
     }
 
     /**

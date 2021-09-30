@@ -1,7 +1,6 @@
 package org.seng302.leftovers.dto.saleitem;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.ToString;
 
 import java.time.DayOfWeek;
 import java.time.LocalDate;
