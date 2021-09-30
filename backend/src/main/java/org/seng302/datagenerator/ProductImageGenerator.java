@@ -89,7 +89,6 @@ public class ProductImageGenerator {
     }
 
     /**
-     * This is copied and modified from storageServiceImpl
      * Saves a given file to the system
      * @param file The file to save
      * @param filename The name of the new file.

@@ -1,10 +1,10 @@
 package org.seng302.leftovers.persistence;
 
+import org.seng302.leftovers.persistence.SearchCriteria.Pred;
 import org.springframework.data.jpa.domain.Specification;
 
 import javax.persistence.Transient;
 import javax.persistence.criteria.*;
-import org.seng302.leftovers.persistence.SearchCriteria.Pred;
 
 /**
  * Defines a specification for type User

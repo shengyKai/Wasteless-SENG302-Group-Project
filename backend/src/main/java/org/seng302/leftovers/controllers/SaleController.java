@@ -3,19 +3,15 @@ package org.seng302.leftovers.controllers;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.Setter;
 import lombok.ToString;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.seng302.leftovers.dto.saleitem.*;
 import org.seng302.leftovers.dto.ResultPageDTO;
-
+import org.seng302.leftovers.dto.saleitem.*;
 import org.seng302.leftovers.entities.*;
 import org.seng302.leftovers.entities.event.InterestEvent;
 import org.seng302.leftovers.entities.event.InterestPurchasedEvent;
-import org.seng302.leftovers.dto.saleitem.CreateSaleItemDTO;
-import org.seng302.leftovers.dto.saleitem.SaleItemResponseDTO;
-import org.seng302.leftovers.dto.saleitem.SetSaleItemInterestDTO;
-
 import org.seng302.leftovers.entities.event.PurchasedEvent;
 import org.seng302.leftovers.exceptions.DoesNotExistResponseException;
 import org.seng302.leftovers.exceptions.InsufficientPermissionResponseException;
@@ -23,10 +19,10 @@ import org.seng302.leftovers.exceptions.ValidationResponseException;
 import org.seng302.leftovers.persistence.*;
 import org.seng302.leftovers.persistence.event.EventRepository;
 import org.seng302.leftovers.persistence.event.InterestEventRepository;
-import org.seng302.leftovers.tools.AuthenticationTokenManager;
+import org.seng302.leftovers.service.ReportService;
 import org.seng302.leftovers.service.search.SearchPageConstructor;
 import org.seng302.leftovers.service.search.SearchSpecConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.seng302.leftovers.tools.AuthenticationTokenManager;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -37,12 +33,14 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
+import java.time.Clock;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 public class SaleController {
-    @Autowired
-    private ObjectMapper objectMapper;
 
     private static final Logger logger = LogManager.getLogger(SaleController.class);
 
@@ -53,11 +51,18 @@ public class SaleController {
     private final InterestEventRepository interestEventRepository;
     private final BoughtSaleItemRepository boughtSaleItemRepository;
     private final EventRepository eventRepository;
+    private final ReportService reportService;
+    private final ObjectMapper objectMapper;
 
-    public SaleController(UserRepository userRepository, BusinessRepository businessRepository,
-                          SaleItemRepository saleItemRepository, InventoryItemRepository inventoryItemRepository,
-                          InterestEventRepository interestEventRepository, BoughtSaleItemRepository boughtSaleItemRepository,
-                          EventRepository eventRepository) {
+    public SaleController(UserRepository userRepository,
+                          BusinessRepository businessRepository,
+                          SaleItemRepository saleItemRepository,
+                          InventoryItemRepository inventoryItemRepository,
+                          InterestEventRepository interestEventRepository,
+                          BoughtSaleItemRepository boughtSaleItemRepository,
+                          EventRepository eventRepository,
+                          ReportService reportService,
+                          ObjectMapper objectMapper) {
         this.userRepository = userRepository;
         this.businessRepository = businessRepository;
         this.saleItemRepository = saleItemRepository;
@@ -65,6 +70,8 @@ public class SaleController {
         this.interestEventRepository = interestEventRepository;
         this.boughtSaleItemRepository = boughtSaleItemRepository;
         this.eventRepository = eventRepository;
+        this.reportService = reportService;
+        this.objectMapper = objectMapper;
     }
 
     /**
@@ -110,6 +117,9 @@ public class SaleController {
      */
     private List<Sort.Order> getSaleItemSearchOrder(String orderBy, Sort.Direction direction) {
         if (orderBy == null || orderBy.isEmpty()) orderBy = "created";
+        if (orderBy.equals("expiry")) {
+            return List.of(new Sort.Order(direction, "inventoryItem.expires").ignoreCase());
+        }
         if (orderBy.equals("businessName")) {
             return List.of(new Sort.Order(direction, "inventoryItem.product.business.name").ignoreCase());
         }
@@ -373,6 +383,81 @@ public class SaleController {
                     .orElseThrow(() -> new DoesNotExistResponseException(SaleItem.class));
 
             return new GetSaleItemInterestDTO(saleItem.getInterestedUsers().contains(user));
+        } catch (Exception error) {
+            logger.error(error.getMessage());
+            throw error;
+        }
+    }
+
+    /**
+     * Object representing the parameters passed to GET /businesses/:id/reports before type conversion
+     */
+    @Getter
+    @Setter
+    @ToString
+    private static class ReportRequestParamsExternal {
+        /**
+         * The start date of the report. If null, is the creation of the business
+         */
+        private String startDate;
+
+        /**
+         * The end date of the report. If null, is the current date
+         */
+        private String endDate;
+
+        /**
+         * A string representing the granularity type.
+         */
+        private String granularity = "none";
+    }
+
+    /**
+     * Object representing the parameters passed to GET /businesses/:id/reports after type conversion
+     */
+    @Getter
+    @ToString
+    private static class ReportRequestParams {
+        private Optional<LocalDate> startDate;
+        private Optional<LocalDate> endDate;
+        private ReportGranularity granularity;
+    }
+
+
+    /**
+     * Generates a list of BoughtSaleItemRecords within a given date range.
+     *
+     * @param businessId ID of the business to generate the report for
+     * @param requestParamsExternal Collection of parameters for the report
+     * @return List of BoughtSaleItemRecords within the given date range
+     */
+    @GetMapping("/businesses/{id}/reports")
+    public List<BoughtSaleItemRecord> generateReportForBusiness(
+            HttpServletRequest request,
+            @PathVariable("id") Long businessId,
+            ReportRequestParamsExternal requestParamsExternal) {
+        AuthenticationTokenManager.checkAuthenticationToken(request);
+        try {
+            logger.info("Generating sales report for business with id {}",businessId);
+            Business business = businessRepository.getBusinessById(businessId);
+
+            business.checkSessionPermissions(request);
+
+            ReportRequestParams requestParams;
+            try {
+                requestParams = objectMapper.convertValue(requestParamsExternal, ReportRequestParams.class);
+            } catch (IllegalArgumentException e) {
+                throw new ValidationResponseException("Invalid arguments");
+            }
+
+            LocalDate startDate = requestParams.getStartDate()
+                    .orElse(LocalDateTime.ofInstant(business.getCreated(), Clock.systemDefaultZone().getZone()).toLocalDate());
+            LocalDate endDate = requestParams.getEndDate()
+                    .orElse(LocalDate.now());
+
+           if (startDate.isAfter(endDate)) throw new ValidationResponseException("The end date cannot be before the start date");
+
+           return  reportService.generateReport(business, startDate, endDate, requestParams.getGranularity());
         } catch (Exception error) {
             logger.error(error.getMessage());
             throw error;

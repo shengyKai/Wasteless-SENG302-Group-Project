@@ -8,8 +8,8 @@ Vue.use(Vuetify);
 let dailyHeaders = ["Day of the Month", "Week No.", "Month"];
 let weeklyHeaders = ["Week No.", "Month"];
 let monthlyHeaders = ["Month"];
-let baseHeaders = ['Year', 'No. of Unique Buyers','No. of Unique Products', 'Average Time to Sell (days)', 'Average Like Count', 
-                      'Total Value of all Purchases ($)']
+let baseHeaders = ['Year', 'No. of Unique Buyers','No. of Unique Products', 'Average Time to Sell (days)', 'Average Like Count',
+  'Total Value of all Purchases ($)'];
 
 describe('SalesReportTable.vue', () => {
   let wrapper: Wrapper<any>;

@@ -79,7 +79,7 @@ describe('ReportOptionsBar.vue', () => {
   });
 
   it("If toDate is set and fromDate is null, fromDate will be set to toDate's value", async() => {
-    // Have to separate the setData for both of it because the watcher will not be triggered if both is set 
+    // Have to separate the setData for both of it because the watcher will not be triggered if both is set
     // at the same time
     await wrapper.setData({
       fromDate: null
@@ -91,7 +91,7 @@ describe('ReportOptionsBar.vue', () => {
   });
 
   it("If fromDate is set and toDate is null, toDate will be set to fromDate's value", async() => {
-    // Have to separate the setData for both of it because the watcher will not be triggered if both is set 
+    // Have to separate the setData for both of it because the watcher will not be triggered if both is set
     // at the same time
     await wrapper.setData({
       toDate: null,
