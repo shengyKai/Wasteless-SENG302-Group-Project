@@ -2080,6 +2080,17 @@ paths:
                   type: integer
                   example: 3
                   description: Maximum number of images to add per business (inclusive)
+                generateUserImages:
+                  type: boolean
+                  description: Whether to generate user image data
+                userImageMin:
+                  type: integer
+                  example: 0
+                  description: Minimum number of images to add per user (inclusive)
+                userImageMax:
+                  type: integer
+                  example: 3
+                  description: Maximum number of images to add per user (inclusive)
       responses:
         '200':
           description: Demo data created successfully

@@ -1,5 +1,8 @@
 <template>
-  <Event :event="event" :title="`${event.saleItem.inventoryItem.product.name} from ${business.name}`">
+  <Event
+    :event="event"
+    :title="`${event.saleItem.inventoryItem.product.name} from ${business.name}`"
+    :error="errorMessage">
     <template v-slot:title>
       <div>
         {{ event.saleItem.inventoryItem.product.name }}
@@ -16,18 +19,9 @@
       {{ eventText }}
     </v-card-text>
     <v-card-actions class="justify-center">
-      <v-btn class="pl-3" color="primary darken-1">
+      <v-btn class="pl-3" color="primary darken-1" @click="purchaseListing">
         Buy
         <v-icon>mdi-currency-usd</v-icon>
-      </v-btn>
-      <!-- Thumb up/down button to show and allow user the like & unlike feature -->
-      <v-btn v-if="!interested" class="ml-2 blue--text" color="grey lighten-2">
-        Like {{interestCount}}
-        <v-icon class="ml-1">mdi-thumb-up</v-icon>
-      </v-btn>
-      <v-btn v-else color="ml-2 grey lighten-2">
-        Unlike {{interestCount}}
-        <v-icon class="ml-1">mdi-thumb-down</v-icon>
       </v-btn>
       <!-- A return button for user to go back to business profile-->
       <v-btn class="ml-2 pl-3" color="secondary" @click="fullSaleOpen=true">
@@ -36,7 +30,11 @@
       </v-btn>
     </v-card-actions>
     <v-dialog v-model="fullSaleOpen" max-width="1200" class="white">
-      <FullSaleListing :saleItem="event.saleItem"/>
+      <FullSaleListing
+        :saleItem="event.saleItem"
+        @goBack="fullSaleOpen=false"
+        @refresh="fullSaleOpen=false"
+        @interestUpdate="updateInterest"/>
     </v-dialog>
   </Event>
 </template>
@@ -44,6 +42,7 @@
 <script>
 import Event from "@/components/home/newsfeed/Event";
 import FullSaleListing from "@/components/SaleListing/FullSaleListing.vue";
+import {purchaseListing} from "@/api/sale";
 export default {
   name: "InterestEvent",
   components: {
@@ -59,6 +58,9 @@ export default {
   data() {
     return {
       fullSaleOpen: false,
+      interestCount: this.event.saleItem.interestCount,
+      interested: this.event.interested,
+      errorMessage: undefined,
     };
   },
   computed: {
@@ -81,7 +83,7 @@ export default {
      * @returns {string} Liked or Unliked
      */
     interestString() {
-      return this.event.interested? "liked" : "unliked";
+      return this.interested? "liked" : "unliked";
     },
     /**
      * The rounded number of days until the sale listing closes
@@ -105,25 +107,31 @@ export default {
         }
       };
     },
+  },
+  methods: {
     /**
-     * Returns the status of interested for the event
+     * Updates the interest status.
+     * Used for when the interest changes outside of the component
+     * @param interest Interest value
      */
-    interested() {
-      return this.event.interested;
+    updateInterest(interest) {
+      this.interested = interest;
     },
     /**
-     * Returns the number of likes for the sale listing
+     * Purchases the listing related to this InterestEvent
+     * Adds a small delay before purchasing to prevent simultaneous read/delete
      */
-    interestCount()  {
-      return this.event.saleItem.interestCount;
+    async purchaseListing() {
+      this.errorMessage = undefined;
+      setTimeout(async () => {
+        let response = await purchaseListing(this.event.saleItem.id, this.$store.state.user.id);
+        if (typeof response === 'string') {
+          this.errorMessage = response;
+          return;
+        }
+        await this.$store.dispatch('refreshEventFeed');
+      }, 100);
     }
-  },
+  }
 };
 </script>
-
-<style scoped>
-.dirty-centre {
-  left: 50%;
-  transform: translate(-50%, 0%);
-}
-</style>

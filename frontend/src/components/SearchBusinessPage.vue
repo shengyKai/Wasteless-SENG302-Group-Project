@@ -135,7 +135,7 @@ export default {
         {text: "Name", value: "name"},
         {text: "Location", value: "location"},
         {text: "Business Type", value: "businessType"},
-        {text: "Points", value: "points"}
+        {text: "Rank", value: "points"}
       ],
     };
   },
