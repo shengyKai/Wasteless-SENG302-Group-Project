@@ -10,9 +10,9 @@
             <h4>
               <a ref="title">{{ product.name }}</a>
               from
-              <router-link :to="'/business/' + product.business.id" class="text--secondary">
+              <span class="text--secondary link text-decoration-underline" @click="viewProfile(product.business.id)">
                 {{ product.business.name }}
-              </router-link>
+              </span>
             </h4>
           </v-col>
         </v-row>
@@ -51,6 +51,7 @@
       :saleItem="saleItem"
       @goBack="goBack"
       @refresh="$emit('refresh')"
+      @viewProfile="viewProfile"
     />
   </div>
 </template>
@@ -116,6 +117,13 @@ export default {
      */
     computeCurrency() {
       this.currency = currencyFromCountry(this.product.countryOfSale);
+    },
+    /**
+     * Emits an event to visit the profile of the given business
+     * @param businessId ID of the business to visit
+     */
+    viewProfile(businessId) {
+      this.$emit('viewProfile', businessId);
     }
   },
   beforeMount() {

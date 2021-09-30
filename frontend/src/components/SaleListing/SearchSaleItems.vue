@@ -23,7 +23,7 @@
     <v-list three-line v-if="resultsPage">
       <template v-for="(sale, index) in resultsPage.results">
         <v-divider v-if="sale === undefined" :key="'divider-'+index"/>
-        <SaleResult v-else :key="sale.id" :saleItem="sale" @goBack="updatePage" @refresh="updatePage"/>
+        <SaleResult v-else :key="sale.id" :saleItem="sale" @goBack="updatePage" @refresh="updatePage" @viewProfile="viewProfile"/>
       </template>
     </v-list>
     <!--paginate results-->
@@ -61,6 +61,7 @@ export default {
       resultsPerPage: 10,
       resultsPage: undefined,
       showAdvancedSearch: false,
+      wasAdvancedSearch: false,
       simpleSearchParams: {
         query: "",
         orderBy: "created",
@@ -124,7 +125,7 @@ export default {
       if (this.showAdvancedSearch) {
         this.updateAdvancedSearchQuery();
       }
-      this.updatePage();
+      await this.updatePage();
     },
     /**
      * Call basic search endpoint with the simpleSearchParams
@@ -144,6 +145,7 @@ export default {
       } else {
         this.errorMessage = undefined;
         this.resultsPage = result;
+        this.wasAdvancedSearch = false;
       }
     },
     /**
@@ -167,8 +169,35 @@ export default {
       } else {
         this.errorMessage = undefined;
         this.resultsPage = result;
+        this.wasAdvancedSearch = true;
       }
     },
+    async viewProfile(businessId) {
+      if (this.wasAdvancedSearch) {
+        const advancedParams = JSON.stringify(this.advancedSearchParams);
+        await this.$router.push({name:'businessProfile', params:{id:businessId}, query:{advancedParams, currentPage:this.currentPage, fromPage:"saleSearch"}});
+      } else {
+        const simpleParams = JSON.stringify(this.simpleSearchParams);
+        await this.$router.push({name:'businessProfile', params:{id:businessId}, query:{simpleParams, currentPage:this.currentPage, fromPage:"saleSearch"}});
+
+      }
+    },
+    async updateSearchFromRoute() {
+      if (this.$route.query.currentPage) {
+        this.currentPage = parseInt(this.$route.query.currentPage);
+      }
+      if (this.$route.query.advancedParams) {
+        this.advancedSearchParams = JSON.parse(this.$route.query.advancedParams);
+        this.showAdvancedSearch = true;
+        this.updateAdvancedSearchQuery();
+        await this.advancedSearch();
+      }
+      else if (this.$route.query.simpleParams) {
+        this.simpleSearchParams = JSON.parse(this.$route.query.simpleParams);
+        await this.simpleSearch();
+      }
+
+    }
   },
   watch: {
     /**
@@ -198,7 +227,8 @@ export default {
     },
   },
   async beforeMount() {
-    this.updatePage();
+    await this.updatePage();
+    await this.updateSearchFromRoute();
   }
 };
 </script>
