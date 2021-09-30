@@ -4,7 +4,6 @@
       {{ reportTitle }}
     </strong>
     <v-data-table
-      disable-sort
       :headers="headers"
       :items="fullReport.reportData"
     />

@@ -57,27 +57,36 @@ describe('ReportOptionsBar.vue', () => {
     expect(new Date(wrapper.vm.maxFromDate)).toStrictEqual(currentDate);
   });
 
-  it('If preset period "One year before" is selected, then the fromDate/toDate should be set accordingly', async () => {
+  it('If preset period "Previous Year" is selected, then the fromDate/toDate should be set accordingly', async () => {
     await wrapper.setData({
-      presetPeriodUserString: 'One year before',
+      presetPeriodUserString: 'Previous Year',
     });
 
     expect(new Date(wrapper.vm.fromDate)).toStrictEqual(new Date("2011-12-21"));
     expect(new Date(wrapper.vm.toDate)).toStrictEqual(currentDate);
   });
 
-  it('If preset period "One month before" is selected, then the fromDate/toDate should be set accordingly', async () => {
+  it('If preset period "Previous Month" is selected, then the fromDate/toDate should be set accordingly', async () => {
     await wrapper.setData({
-      presetPeriodUserString: 'One month before',
+      presetPeriodUserString: 'Previous Month',
     });
 
     expect(new Date(wrapper.vm.fromDate)).toStrictEqual(new Date("2012-11-21"));
     expect(new Date(wrapper.vm.toDate)).toStrictEqual(currentDate);
   });
 
-  it('If preset period "One day before" is selected, then the fromDate/toDate should be set accordingly', async () => {
+  it('If preset period "Previous Week" is selected, then the fromDate/toDate should be set accordingly', async () => {
     await wrapper.setData({
-      presetPeriodUserString: 'One day before',
+      presetPeriodUserString: 'Previous Week',
+    });
+
+    expect(new Date(wrapper.vm.fromDate)).toStrictEqual(new Date("2012-12-15"));
+    expect(new Date(wrapper.vm.toDate)).toStrictEqual(currentDate);
+  });
+
+  it('If preset period "Today" is selected, then the fromDate/toDate should be set accordingly', async () => {
+    await wrapper.setData({
+      presetPeriodUserString: 'Today',
     });
 
     expect(new Date(wrapper.vm.fromDate)).toStrictEqual(currentDate);

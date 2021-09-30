@@ -143,16 +143,16 @@ export default {
       presetPeriodUserString: undefined,
       granularity: "none",
       presetPeriods: [
-        { level: 'One day before',   value:'day' },
-        { level: 'One week before',  value:'week' },
-        { level: 'One month before', value:'month' },
-        { level: 'One year before',  value:'year' }
+        { level: 'Today',          value:'day' },
+        { level: 'Previous Week',  value:'week' },
+        { level: 'Previous Month', value:'month' },
+        { level: 'Previous Year',  value:'year' }
       ],
       granularityOptions: [
-        { level: 'Day',      value: 'daily'   },
-        { level: 'Week',     value: 'weekly'  },
-        { level: 'Month',    value: 'monthly' },
-        { level: 'Year',     value: 'yearly'  },
+        { level: 'Day',   value: 'daily'   },
+        { level: 'Week',  value: 'weekly'  },
+        { level: 'Month', value: 'monthly' },
+        { level: 'Year',  value: 'yearly'  },
         { level: 'Whole', value: 'none'    },
       ]
     };
@@ -178,7 +178,7 @@ export default {
       if (this.presetPeriod === 'day') {
         // End day is already correct
       } else if (this.presetPeriod === 'week') {
-        start.setDate(start.getDate() - 7);
+        start.setDate(start.getDate() - 6);
       } else if (this.presetPeriod === 'month') {
         start.setMonth(start.getMonth() - 1);
       } else if (this.presetPeriod === 'year') {
