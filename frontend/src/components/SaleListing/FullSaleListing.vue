@@ -5,7 +5,7 @@
       <div>
         <ImageCarousel v-if="imagesList.length > 0" :imagesList="product.images" :productId="product.id"/>
         <div/>
-        <!-- Product titile and core information -->
+        <!-- Product title and core information -->
         <v-row>
           <v-col cols="12" sm="8">
             <v-card flat>
@@ -21,25 +21,22 @@
             </v-card>
           </v-col>
           <!-- Buy feature will not be implemented yet -->
-          <v-row>
-            <v-col class="align-self-center text-center">
-              <v-btn class="pl-2 pr-2" color="primary darken-1" @click="buy">
-                Buy
-                <v-icon>mdi-currency-usd</v-icon>
-              </v-btn>
-              <!-- Thumb up/down button to show and allow user the like & unlike feature -->
-              <v-btn ref="likeButton" class=" pl-2 pr-2 ml-2" color="grey lighten-2" @click="changeInterest">
-                {{thumbMessage}} {{interestCount}}
-                <v-icon class="ml-1">{{thumbIcon}}</v-icon>
-              </v-btn>
-              <!-- A return button for user to hide full sale listing-->
-              <v-btn class="ml-2 mr-1 pl-2 pr-1" color="secondary" @click="hideExpand">
-                Hide
-                <v-icon class="ml-1">mdi-arrow-left</v-icon>
-              </v-btn>
-            </v-col>
-          </v-row>
-          <!-- </v-col> -->
+          <v-col class="align-self-center text-center">
+            <v-btn class="pl-2 pr-2" color="primary darken-1" @click="buy">
+              Buy
+              <v-icon>mdi-currency-usd</v-icon>
+            </v-btn>
+            <!-- Thumb up/down button to show and allow user the like & unlike feature -->
+            <v-btn ref="likeButton" class=" pl-2 pr-2 ml-2" color="grey lighten-2" @click="changeInterest">
+              {{thumbMessage}} {{interestCount}}
+              <v-icon class="ml-1">{{thumbIcon}}</v-icon>
+            </v-btn>
+            <!-- A return button for user to hide full sale listing-->
+            <v-btn class="ml-2 mr-1 pl-2 pr-1" color="secondary" @click="hideExpand">
+              Hide
+              <v-icon class="ml-1">mdi-arrow-left</v-icon>
+            </v-btn>
+          </v-col>
         </v-row>
       </div>
       <v-alert

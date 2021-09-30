@@ -75,7 +75,12 @@ describe("ModifyUserPage.vue", () => {
         postcode: "1234",
       },
       businessesAdministered: business,
+      images: [],
     };
+  });
+
+  afterEach(() => {
+    wrapper.destroy();
   });
 
   describe('User is modifying their own profile', () => {
@@ -87,6 +92,7 @@ describe("ModifyUserPage.vue", () => {
         localVue,
         vuetify,
         store,
+        stubs: ['Avatar','ImageManager'],
         mocks: {
           $route: {
             params: {
@@ -94,7 +100,7 @@ describe("ModifyUserPage.vue", () => {
             },
           },
           $router: {
-            push: () => {return;},
+            push: () => undefined,
           }
         },
       });
@@ -391,9 +397,11 @@ describe("ModifyUserPage.vue", () => {
         ...user,
         password: undefined,
         newPassword: undefined,
+        imageIds: [],
       };
       delete expectedUser.businessesAdministered;
       delete expectedUser.id;
+      delete expectedUser.images;
       expect(modifyUser.mock.calls.length).toBe(1);
       expect(modifyUser.mock.calls[0][0]).toBe(1);
       expect(modifyUser.mock.calls[0][1]).toStrictEqual(expectedUser);
@@ -433,7 +441,7 @@ describe("ModifyUserPage.vue", () => {
       getUser.mockResolvedValue(userBeingModified);
       let vuetify = new Vuetify();
       wrapper = mount(ModifyUserPage, {
-        stubs: ["router-link", "router-view"],
+        stubs: ["router-link", "router-view", 'Avatar','ImageManager'],
         localVue,
         vuetify,
         store,

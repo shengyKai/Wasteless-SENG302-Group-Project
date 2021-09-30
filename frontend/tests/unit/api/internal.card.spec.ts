@@ -297,7 +297,8 @@ describe("Test GET /users/{userId}/cards endpoint", () => {
     email: "some email",
     homeAddress: {
       country: "some country"
-    }
+    },
+    images: [],
   };
 
   const marketplaceCard : MarketplaceCard = {
@@ -471,7 +472,8 @@ describe("Test GET /users/{userId}/cards endpoint", () => {
       email: "some email",
       homeAddress: {
         country: "some country"
-      }
+      },
+      images: [],
     };
     const marketplaceCard : MarketplaceCard = {
       id: 2,

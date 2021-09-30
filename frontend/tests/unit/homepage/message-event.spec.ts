@@ -89,6 +89,10 @@ describe('MessageEvent.vue', () => {
     getEvents.mockResolvedValue([]);
   });
 
+  afterEach(() => {
+    wrapper.destroy();
+  });
+
   /**
    * Finds the button that controls sending a new message
    * @returns A wrapper around the send button

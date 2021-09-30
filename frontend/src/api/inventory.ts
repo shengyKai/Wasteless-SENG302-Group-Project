@@ -79,7 +79,7 @@ export async function modifyInventoryItem(businessId: number, inventoryItemId: n
   } catch (error) {
     let status: number | undefined = error.response?.status;
     if (status === undefined) return 'Failed to reach backend';
-    if (status === 401) return 'Missing/Invalid access token';
+    if (status === 401) return 'You have been logged out. Please login again and retry';
     if (status === 403) return 'Operation not permitted';
     if (status === 406) return 'Inventory item/Business not found';
     if (status === 400) return 'Invalid parameters: ' + error.response?.data.message;
@@ -101,9 +101,10 @@ export async function createInventoryItem(businessId: number, inventoryItem: Cre
   } catch (error) {
     let status: number | undefined = error.response?.status;
     if (status === undefined) return 'Failed to reach backend';
+    if (status === 401) return 'You have been logged out. Please login again and retry';
     if (status === 403) return 'Operation not permitted';
 
-    return 'Request failed: ' + error.response?.data.message;
+    return error.response?.data.message;
   }
   return undefined;
 }

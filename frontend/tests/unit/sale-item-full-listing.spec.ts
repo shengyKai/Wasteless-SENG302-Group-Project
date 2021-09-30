@@ -16,6 +16,7 @@ const testUser: User = {
   lastName: 'test_lastname',
   email: 'test_email',
   homeAddress: { country: 'test_country', city: 'test_city', district: 'test_district'},
+  images: [],
 };
 
 jest.mock('@/api/currency', () => ({
@@ -97,6 +98,10 @@ describe('FullSaleListing.vue', () => {
       },
       interestCount: "1",
     });
+  });
+
+  afterEach(() => {
+    wrapper.destroy();
   });
 
   it("Must contain the product name and quantity", () => {

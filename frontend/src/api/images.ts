@@ -1,4 +1,3 @@
-import axios from 'axios';
 import { is } from 'typescript-is';
 import { MaybeError, instance } from './internal';
 
