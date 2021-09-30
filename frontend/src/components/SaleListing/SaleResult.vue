@@ -49,7 +49,7 @@
   <div v-else>
     <FullSaleListing
       :saleItem="saleItem"
-      @goBack="showFullListing = false"
+      @goBack="goBack"
       @refresh="$emit('refresh')"
     />
   </div>
@@ -104,6 +104,13 @@ export default {
     }
   },
   methods: {
+    /**
+     * emit the goBack to update parent components
+     */
+    goBack() {
+      this.showFullListing = false;
+      this.$emit("goBack");
+    },
     /**
      * Computes the currency
      */
