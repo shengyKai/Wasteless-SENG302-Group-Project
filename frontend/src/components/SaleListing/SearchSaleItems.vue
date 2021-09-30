@@ -1,7 +1,16 @@
 <template>
   <v-container>
-    <SimpleSearchBar v-model="simpleSearchParams" v-show="!showAdvancedSearch" @showAdvancedSearch="showAdvancedSearch=true"/>
-    <AdvancedSearchBar v-model="advancedSearchParams" v-show="showAdvancedSearch" @hideAdvancedSearch="showAdvancedSearch=false" @searchListings="advancedSearch()"/>
+    <SimpleSearchBar
+      v-model="simpleSearchParams"
+      v-show="!showAdvancedSearch"
+      @showAdvancedSearch="showAdvancedSearch=true"
+    />
+    <AdvancedSearchBar
+      v-model="advancedSearchParams"
+      v-show="showAdvancedSearch"
+      @hideAdvancedSearch="showAdvancedSearch=false"
+      @searchListings="updatePageAndQuery"
+    />
     <v-alert
       v-if="error !== undefined"
       type="error"
@@ -14,7 +23,7 @@
     <v-list three-line v-if="resultsPage">
       <template v-for="(sale, index) in resultsPage.results">
         <v-divider v-if="sale === undefined" :key="'divider-'+index"/>
-        <SaleResult v-else :key="sale.id" :saleItem="sale" @goBack="updatePage" @refresh="updateResults"/>
+        <SaleResult v-else :key="sale.id" :saleItem="sale" @goBack="updatePage" @refresh="updatePage"/>
       </template>
     </v-list>
     <!--paginate results-->
@@ -97,12 +106,39 @@ export default {
   },
   methods: {
     /**
+     * Updates the currently viewed page.
+     * Does not update advanced query params.
+     */
+    async updatePage() {
+      if(this.showAdvancedSearch) {
+        this.advancedSearch();
+      }
+      else {
+        this.simpleSearch();
+      }
+    },
+    /**
+     * Updates the page and refreshes the advanced search query
+     */
+    async updatePageAndQuery() {
+      if (this.showAdvancedSearch) {
+        this.updateAdvancedSearchQuery();
+      }
+      this.updatePage();
+    },
+    /**
      * Call basic search endpoint with the simpleSearchParams
      */
     async simpleSearch() {
       if(this.simpleSearchParams.query === null) this.simpleSearchParams = "";
-      const result = await basicSearchSaleitem(this.simpleSearchParams.query, this.simpleSearchParams.orderBy,
-        this.currentPage, this.resultsPerPage, this.simpleSearchParams.reverse);
+
+      const result = await basicSearchSaleitem(
+        this.simpleSearchParams.query,
+        this.simpleSearchParams.orderBy,
+        this.currentPage,
+        this.resultsPerPage,
+        this.simpleSearchParams.reverse
+      );
       if (typeof result === 'string'){
         this.errorMessage = result;
       } else {
@@ -111,32 +147,27 @@ export default {
       }
     },
     /**
-     * Call advanceSearch endpoint with advanceSearchParams
+     * Update the current advanced serach params
      */
-    async advancedSearch() {
+    updateAdvancedSearchQuery() {
       if(this.advancedSearchParams.productQuery === null) this.advancedSearchParams.productQuery = "";
       if(this.advancedSearchParams.businessQuery === null) this.advancedSearchParams.businessQuery = "";
       if(this.advancedSearchParams.locationQuery === null) this.advancedSearchParams.locationQuery = "";
       if(this.advancedSearchParams.closesBefore === null) this.advancedSearchParams.closesBefore = "";
       if(this.advancedSearchParams.closesAfter === null) this.advancedSearchParams.closesAfter = "";
-      this.previousQuery = {...this.advancedSearchParams};
-      const result = await advanceSearchSaleitem(this.advancedSearchParams, this.currentPage, this.resultsPerPage);
+      this.currentQuery= {...this.advancedSearchParams};
+    },
+    /**
+     * Performs an advanced search with the current query
+     */
+    async advancedSearch() {
+      const result = await advanceSearchSaleitem(this.currentQuery, this.currentPage, this.resultsPerPage);
       if (typeof result === 'string'){
         this.errorMessage = result;
       } else {
         this.errorMessage = undefined;
         this.resultsPage = result;
       }
-    },
-    async updatePage() {
-      if(this.showAdvancedSearch) this.advancedSearch();
-      else this.simpleSearch();
-    },
-    /**
-     * Fetches a new set of results
-     */
-    async updateResults() {
-      this.resultsPage = (await basicSearchSaleitem("", "created", 1, this.resultsPerPage, false));
     },
   },
   watch: {
@@ -146,7 +177,7 @@ export default {
     simpleSearchParams: {
       deep: true,
       handler() {
-        this.simpleSearch();
+        this.updatePageAndQuery();
       }
     },
     /**
@@ -160,22 +191,14 @@ export default {
      * If on the simple search page, send request with the new query and page number.
      */
     async currentPage() {
-      if(this.showAdvancedSearch) {
-        const result = await advanceSearchSaleitem(this.previousQuery, this.currentPage, this.resultsPerPage);
-        if (typeof result === 'string'){
-          this.errorMessage = result;
-        } else {
-          this.errorMessage = undefined;
-          this.resultsPage = result;
-        }}
-      else this.updatePage();
+      this.updatePage();
     },
     resultsPerPage() {
       this.updatePage();
     },
   },
   async beforeMount() {
-    this.updateResults();
+    this.updatePage();
   }
 };
 </script>
