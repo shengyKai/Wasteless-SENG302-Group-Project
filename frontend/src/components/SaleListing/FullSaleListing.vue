@@ -109,10 +109,10 @@
                 <h4 class=" font-weight-regular">{{ sellByFormatted }}</h4>
               </v-col>
               <v-col cols="6" sm="3">
-                <h4 class=" font-weight-bold">Country of Sale:</h4>
+                <h4 class=" font-weight-bold">Location:</h4>
               </v-col>
               <v-col cols="6" sm="3">
-                <h4 class=" font-weight-regular">{{ product.countryOfSale }}</h4>
+                <h4 class=" font-weight-regular">{{ saleLocation }}</h4>
               </v-col>
               <v-row>
                 <v-col cols="6" sm="3">
@@ -137,6 +137,7 @@ import ImageCarousel from "@/components/image/ImageCarousel";
 import { currencyFromCountry } from "@/api/currency";
 import { setListingInterest, getListingInterest, purchaseListing} from '../../api/sale';
 import { formatDate, formatPrice } from '@/utils';
+import convertAddressToReadableText from '@/components/utils/Methods/convertAddressToReadableText';
 
 export default {
   name: "FullSaleListing",
@@ -165,6 +166,9 @@ export default {
     this.interestCount = this.saleItem.interestCount;
   },
   computed: {
+    saleLocation() {
+      return convertAddressToReadableText(this.business.address, "partial");
+    },
     /**
      * Easier access to business properties
      */
