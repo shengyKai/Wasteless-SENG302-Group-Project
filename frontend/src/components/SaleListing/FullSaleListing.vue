@@ -64,7 +64,7 @@
                 <h4 class="font-weight-bold">Price:</h4>
               </v-col>
               <v-col cols="6" sm="3">
-                <h4 class="font-weight-regular">${{ saleItem.price }}</h4>
+                <h4 class="font-weight-regular">{{currency.symbol}}{{ saleItem.price }} {{currency.code}}</h4>
               </v-col>
               <v-col cols="6" sm="3">
                 <h4 class=" font-weight-bold">Date Created:</h4>
@@ -327,8 +327,8 @@ export default {
     /**
      * Computes the currency
      */
-    computeCurrency() {
-      this.currency = currencyFromCountry(this.product.countryOfSale);
+    async computeCurrency() {
+      this.currency = await currencyFromCountry(this.product.countryOfSale);
     },
     /**
      * Minimize the full sale listing and back to the listing result page

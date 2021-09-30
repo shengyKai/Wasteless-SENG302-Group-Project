@@ -28,7 +28,7 @@
             Creation Date:
           </v-col>
           <v-col cols="auto">
-            ${{ saleItem.price }}
+            {{currency.symbol}}{{ saleItem.price }} {{currency.code}}
             <br>
             {{ createdFormatted }}
           </v-col>
@@ -114,8 +114,8 @@ export default {
     /**
      * Computes the currency
      */
-    computeCurrency() {
-      this.currency = currencyFromCountry(this.product.countryOfSale);
+    async computeCurrency() {
+      this.currency = await currencyFromCountry(this.product.countryOfSale);
     }
   },
   beforeMount() {
