@@ -1,11 +1,11 @@
 package org.seng302.leftovers.persistence;
 
+import org.seng302.leftovers.persistence.SearchCriteria.Pred;
 import org.springframework.data.jpa.domain.Specification;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
-import org.seng302.leftovers.persistence.SearchCriteria.Pred;
 
 /**
  * A specification builder

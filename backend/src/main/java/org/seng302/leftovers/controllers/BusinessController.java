@@ -11,7 +11,6 @@ import org.seng302.leftovers.dto.business.BusinessType;
 import org.seng302.leftovers.dto.business.CreateBusinessDTO;
 import org.seng302.leftovers.dto.business.ModifyBusinessDTO;
 import org.seng302.leftovers.entities.Business;
-import org.seng302.leftovers.entities.Image;
 import org.seng302.leftovers.entities.Product;
 import org.seng302.leftovers.entities.User;
 import org.seng302.leftovers.exceptions.DoesNotExistResponseException;
@@ -21,9 +20,9 @@ import org.seng302.leftovers.persistence.BusinessRepository;
 import org.seng302.leftovers.persistence.ImageRepository;
 import org.seng302.leftovers.persistence.UserRepository;
 import org.seng302.leftovers.service.ImageService;
-import org.seng302.leftovers.tools.AuthenticationTokenManager;
 import org.seng302.leftovers.service.search.SearchPageConstructor;
 import org.seng302.leftovers.service.search.SearchSpecConstructor;
+import org.seng302.leftovers.tools.AuthenticationTokenManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -49,17 +48,15 @@ public class BusinessController {
     private final BusinessRepository businessRepository;
     private final UserRepository userRepository;
     private final ImageService imageService;
-    private final ImageRepository imageRepository;
     private static final Logger logger = LogManager.getLogger(BusinessController.class.getName());
 
     private static final Set<String> VALID_BUSINESS_ORDERINGS = Set.of("created", "name", "location", "businessType", "points");
 
     @Autowired
-    public BusinessController(BusinessRepository businessRepository, UserRepository userRepository, ImageService imageService, ImageRepository imageRepository) {
+    public BusinessController(BusinessRepository businessRepository, UserRepository userRepository, ImageService imageService) {
         this.businessRepository = businessRepository;
         this.userRepository = userRepository;
         this.imageService = imageService;
-        this.imageRepository = imageRepository;
     }
 
     /**

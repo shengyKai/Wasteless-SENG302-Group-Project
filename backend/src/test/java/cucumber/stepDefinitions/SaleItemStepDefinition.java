@@ -1,5 +1,6 @@
 package cucumber.stepDefinitions;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import cucumber.context.BusinessContext;
@@ -13,6 +14,7 @@ import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
 import net.minidev.json.parser.JSONParser;
 import org.seng302.leftovers.dto.event.InterestEventDTO;
+import org.seng302.leftovers.dto.saleitem.BoughtSaleItemRecord;
 import org.seng302.leftovers.entities.InventoryItem;
 import org.seng302.leftovers.entities.Product;
 import org.seng302.leftovers.entities.SaleItem;
@@ -23,6 +25,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 
 import javax.transaction.Transactional;
+import java.math.BigDecimal;
 import java.util.*;
 import java.util.stream.StreamSupport;
 
@@ -260,5 +263,39 @@ public class SaleItemStepDefinition {
     @Then("The notification is for unliking the sale item")
     public void the_notification_is_for_unliking_the_sale_item() {
         notificationExistsWithInterest(false);
+    }
+
+    @When("I view the report from {string} to {string} with {string} granularity")
+    public void i_view_the_report_from_to_with_granularity(String start, String end, String granularity) {
+        requestContext.performRequest(
+                get(String.format("/businesses/%d/reports", businessContext.getLast().getId()))
+                        .param("startDate", start)
+                        .param("endDate", end)
+                        .param("granularity", granularity)
+        );
+    }
+
+    @Then("{int} report segments are returned")
+    public void report_segments_are_returned(int segments) throws JsonProcessingException {
+        List<BoughtSaleItemRecord> results = objectMapper.readValue(requestContext.getLastResultAsString(), new TypeReference<>() {});
+        assertEquals(segments, results.size());
+    }
+
+    @Then("The total number of purchases is {int}")
+    public void the_total_number_of_purchases_is(Integer purchases) throws JsonProcessingException {
+        List<BoughtSaleItemRecord> results = objectMapper.readValue(requestContext.getLastResultAsString(), new TypeReference<>() {});
+        assertEquals(1, results.size());
+
+        var result = results.get(0);
+        assertEquals(purchases, result.getUniqueListingsSold());
+    }
+
+    @Then("The total value of purchases is {bigdecimal}")
+    public void the_total_value_of_purchases_is(BigDecimal value) throws JsonProcessingException {
+        List<BoughtSaleItemRecord> results = objectMapper.readValue(requestContext.getLastResultAsString(), new TypeReference<>() {});
+        assertEquals(1, results.size());
+
+        var result = results.get(0);
+        assertEquals(0, value.compareTo(result.getTotalPriceSold()));
     }
 }

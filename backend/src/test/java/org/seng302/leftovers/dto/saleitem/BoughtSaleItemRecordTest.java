@@ -14,6 +14,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 
@@ -43,6 +44,9 @@ class BoughtSaleItemRecordTest {
     @Mock
     private BoughtSaleItem item3;
 
+    private final LocalDate startDate = LocalDate.parse("2021-01-10");
+    private final LocalDate endDate = LocalDate.parse("2021-10-01");
+
     private final Instant referenceInstant = Instant.parse("2021-09-08T08:47:59Z");
 
     @BeforeEach
@@ -62,7 +66,7 @@ class BoughtSaleItemRecordTest {
         when(item3.getQuantity()).thenReturn(7);
 
         when(item1.getInterestCount()).thenReturn(0);
-        when(item2.getInterestCount()).thenReturn(4);
+        when(item2.getInterestCount()).thenReturn(3);
         when(item3.getInterestCount()).thenReturn(9);
 
         when(item1.getProduct()).thenReturn(product1);
@@ -84,13 +88,15 @@ class BoughtSaleItemRecordTest {
 
     @Test
     void serialise_expectedFormat() {
-        var record = new BoughtSaleItemRecord(List.of(item1, item2));
+        var record = new BoughtSaleItemRecord(startDate, endDate, List.of(item1, item2));
         var json = objectMapper.convertValue(record, JSONObject.class);
 
+        assertEquals(record.getStartDate().toString(), json.get("startDate"));
+        assertEquals(record.getEndDate().toString(), json.get("endDate"));
         assertEquals(record.getUniqueListingsSold(), json.get("uniqueListingsSold"));
         assertEquals(record.getUniqueBuyers(), json.get("uniqueBuyers"));
         assertEquals(record.getUniqueProducts(), json.get("uniqueProducts"));
-        assertEquals(record.getTotalInterest(), json.get("totalInterest"));
+        assertEquals(record.getAverageLikeCount(), json.get("averageLikeCount"));
         assertEquals(record.getTotalPriceSold(), json.get("totalPriceSold"));
         assertEquals(record.getUniqueBuyers(), json.get("uniqueBuyers"));
         assertEquals(record.getAverageDaysToSell(), json.get("averageDaysToSell"));
@@ -98,61 +104,67 @@ class BoughtSaleItemRecordTest {
 
     @Test
     void construct_expectedUniqueListingsSold() {
-        var record = new BoughtSaleItemRecord(List.of(item1, item2, item3));
+        var record = new BoughtSaleItemRecord(startDate, endDate, List.of(item1, item2, item3));
         assertEquals(3, record.getUniqueListingsSold());
     }
 
     @Test
     void construct_duplicateUsers_uniqueUserCountCorrect() {
-        var record = new BoughtSaleItemRecord(List.of(item1, item3));
+        var record = new BoughtSaleItemRecord(startDate, endDate, List.of(item1, item3));
         assertEquals(1, record.getUniqueBuyers());
     }
 
     @Test
     void construct_noDuplicateUsers_uniqueUserCountCorrect() {
-        var record = new BoughtSaleItemRecord(List.of(item1, item2));
+        var record = new BoughtSaleItemRecord(startDate, endDate, List.of(item1, item2));
         assertEquals(2, record.getUniqueBuyers());
     }
 
     @Test
     void construct_duplicateProducts_uniqueProductCountCorrect() {
-        var record = new BoughtSaleItemRecord(List.of(item2, item3));
+        var record = new BoughtSaleItemRecord(startDate, endDate, List.of(item2, item3));
         assertEquals(1, record.getUniqueProducts());
     }
 
     @Test
     void construct_noDuplicateProducts_uniqueProductCountCorrect() {
-        var record = new BoughtSaleItemRecord(List.of(item1, item2));
+        var record = new BoughtSaleItemRecord(startDate, endDate, List.of(item1, item2));
         assertEquals(2, record.getUniqueProducts());
     }
 
     @Test
     void construct_expectedTotalQuantitySold() {
-        var record = new BoughtSaleItemRecord(List.of(item1, item2, item3));
+        var record = new BoughtSaleItemRecord(startDate, endDate, List.of(item1, item2, item3));
         assertEquals(item1.getQuantity() + item2.getQuantity() + item3.getQuantity(), record.getTotalQuantitySold());
     }
 
     @Test
     void construct_expectedTotalPriceSold() {
-        var record = new BoughtSaleItemRecord(List.of(item1, item2, item3));
+        var record = new BoughtSaleItemRecord(startDate, endDate, List.of(item1, item2, item3));
         assertEquals(item1.getPrice().add(item2.getPrice()).add(item3.getPrice()), record.getTotalPriceSold());
     }
 
     @Test
-    void construct_expectedTotalInterest() {
-        var record = new BoughtSaleItemRecord(List.of(item1, item2, item3));
-        assertEquals(item1.getInterestCount() + item2.getInterestCount() + item3.getInterestCount(), record.getTotalInterest());
+    void construct_notItemsProvided_averageLikeCountNull() {
+        var record = new BoughtSaleItemRecord(startDate, endDate, List.of());
+        assertNull(record.getAverageLikeCount());
     }
 
     @Test
-    void construct_noItemsProvided_averageDaystoSellNull() {
-        var record = new BoughtSaleItemRecord(List.of());
+    void construct_itemsProvided_expectedAverageLikeCount() {
+        var record = new BoughtSaleItemRecord(startDate, endDate, List.of(item1, item2, item3));
+        assertEquals(4.0, record.getAverageLikeCount());
+    }
+
+    @Test
+    void construct_noItemsProvided_averageDaysToSellNull() {
+        var record = new BoughtSaleItemRecord(startDate, endDate, List.of());
         assertNull(record.getAverageDaysToSell());
     }
 
     @Test
     void construct_itemsProvided_expectedAverageDaysToSell() {
-        var record = new BoughtSaleItemRecord(List.of(item1, item2));
+        var record = new BoughtSaleItemRecord(startDate, endDate, List.of(item1, item2));
         assertEquals(6.0, record.getAverageDaysToSell());
     }
 }

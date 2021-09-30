@@ -2,7 +2,6 @@ package org.seng302.leftovers.entities;
 
 import org.seng302.leftovers.dto.business.BusinessType;
 import org.seng302.leftovers.dto.business.Rank;
-import org.seng302.leftovers.exceptions.DoesNotExistResponseException;
 import org.seng302.leftovers.exceptions.InsufficientPermissionResponseException;
 import org.seng302.leftovers.exceptions.ValidationResponseException;
 import org.seng302.leftovers.tools.AuthenticationTokenManager;

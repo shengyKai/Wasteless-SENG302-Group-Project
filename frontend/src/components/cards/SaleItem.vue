@@ -3,7 +3,7 @@
     v-if="showFullView"
     class="my-2 mx-3"
     :saleItem="saleItem"
-    @goBack="showFullView=false"
+    @goBack="goBack"
     @refresh="$emit('refresh')"
   />
   <v-col cols="12" lg="6" v-else>
@@ -68,6 +68,15 @@ export default {
   },
   props: {
     saleItem: Object,
+  },
+  methods: {
+    /**
+     * emit the goBack to update parent components
+     */
+    goBack() {
+      this.showFullView = false;
+      this.$emit("goBack");
+    },
   },
   computed: {
     /**

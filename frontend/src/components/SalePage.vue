@@ -44,6 +44,7 @@
           :key="sale.id"
           :business-id="businessId"
           :sale-item="sale"
+          @goBack="populateSales"
           @refresh="populateSales"
         />
       </v-row>

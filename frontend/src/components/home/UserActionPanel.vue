@@ -10,7 +10,7 @@
           <v-list-item-group>
             <v-list-item @click="viewProfile">
               <v-list-item-icon>
-                <v-icon>mdi-account-circle</v-icon>
+                <v-icon color="blue">mdi-account-circle</v-icon>
               </v-list-item-icon>
               <v-list-item-content>
                 <v-list-item-title>Profile</v-list-item-title>
@@ -18,7 +18,7 @@
             </v-list-item>
             <v-list-item @click="viewCreateBusiness">
               <v-list-item-icon>
-                <v-icon>mdi-briefcase-plus</v-icon>
+                <v-icon color="blue-grey lighten-1">mdi-briefcase-plus</v-icon>
               </v-list-item-icon>
               <v-list-item-content>
                 <v-list-item-title>Add Business</v-list-item-title>
@@ -26,7 +26,7 @@
             </v-list-item>
             <v-list-item @click="viewUserSearch">
               <v-list-item-icon>
-                <v-icon>mdi-account-search</v-icon>
+                <v-icon color="cyan darken-2">mdi-account-search</v-icon>
               </v-list-item-icon>
               <v-list-item-content>
                 <v-list-item-title>Search Users</v-list-item-title>
@@ -34,7 +34,7 @@
             </v-list-item>
             <v-list-item @click="viewBusinessSearch">
               <v-list-item-icon>
-                <v-icon>mdi-briefcase-search</v-icon>
+                <v-icon color="black lighten-2">mdi-briefcase-search</v-icon>
               </v-list-item-icon>
               <v-list-item-content>
                 <v-list-item-title>Search Businesses</v-list-item-title>
@@ -42,7 +42,7 @@
             </v-list-item>
             <v-list-item @click="viewSaleItemSearch">
               <v-list-item-icon>
-                <v-icon>mdi-cart</v-icon>
+                <v-icon color="red lighten-2">mdi-cart</v-icon>
               </v-list-item-icon>
               <v-list-item-content>
                 <v-list-item-title>Search Sale Items</v-list-item-title>
@@ -50,7 +50,7 @@
             </v-list-item>
             <v-list-item @click="viewMarketplace">
               <v-list-item-icon>
-                <v-icon>mdi-store</v-icon>
+                <v-icon color="deep-orange lighten-2">mdi-store</v-icon>
               </v-list-item-icon>
               <v-list-item-content>
                 <v-list-item-title>Marketplace</v-list-item-title>
@@ -58,7 +58,7 @@
             </v-list-item>
             <v-list-item @click="viewMyCards">
               <v-list-item-icon>
-                <v-icon>mdi-card-text</v-icon>
+                <v-icon color="brown lighten-1">mdi-card-text</v-icon>
               </v-list-item-icon>
               <v-list-item-content>
                 <v-list-item-title>My Cards</v-list-item-title>

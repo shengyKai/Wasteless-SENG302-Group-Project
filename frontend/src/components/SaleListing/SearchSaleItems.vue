@@ -14,12 +14,7 @@
     <v-list three-line v-if="resultsPage">
       <template v-for="(sale, index) in resultsPage.results">
         <v-divider v-if="sale === undefined" :key="'divider-'+index"/>
-        <SaleResult
-          v-else
-          :key="sale.id"
-          :saleItem="sale"
-          @refresh="updateResults"
-        />
+        <SaleResult v-else :key="sale.id" :saleItem="sale" @goBack="updatePage" @refresh="updateResults"/>
       </template>
     </v-list>
     <!--paginate results-->
@@ -40,7 +35,8 @@
 import AdvancedSearchBar from './AdvancedSearchBar.vue';
 import SimpleSearchBar from './SimpleSearchBar.vue';
 import SaleResult from './SaleResult.vue';
-import {getBusinessSales} from "@/api/sale";
+import { debounce } from '@/utils';
+import {basicSearchSaleitem, advanceSearchSaleitem} from "@/api/sale";
 
 export default {
   name: "SearchSaleItems",
@@ -52,28 +48,29 @@ export default {
   data() {
     return {
       currentPage: 1,
-      totalPages: 1,
       error: undefined,
       resultsPerPage: 10,
       resultsPage: undefined,
       showAdvancedSearch: false,
       simpleSearchParams: {
-        query: undefined,
-        orderBy: undefined,
+        query: "",
+        orderBy: "created",
         reverse: false
       },
       advancedSearchParams: {
-        productQuery: undefined,
-        businessQuery: undefined,
-        locationQuery: undefined,
-        closesBefore: undefined,
-        closesAfter: undefined,
-        orderBy: undefined,
+        productQuery: "",
+        businessQuery: "",
+        locationQuery: "",
+        closesBefore: "",
+        closesAfter: "",
+        orderBy: "created",
         businessTypes: [],
-        lowestPrice: undefined,
-        highestPrice: undefined,
+        lowestPrice: "",
+        highestPrice: "",
         reverse: false
       },
+      previousQuery: undefined,
+      debouncedUpdateQuery: debounce(this.updateSearchQuery, 500),
     };
   },
   computed: {
@@ -85,22 +82,61 @@ export default {
       return this.resultsPage.count;
     },
     resultsMessage() {
-      // TODO implement computing results message based on number of results when linking to endpoint
-      return "There are no results to show";
+      if(this.totalResults === 0) return 'There are no results to show';
+      const pageStartIndex = (this.currentPage - 1) * this.resultsPerPage;
+      const pageEndIndex = Math.min(pageStartIndex + this.resultsPerPage, this.totalResults);
+      return`Displaying ${pageStartIndex + 1} - ${pageEndIndex} of ${this.totalResults} results`;
+    },
+    /**
+     * The total number of pages required to show all the users
+     * May be 0 if there are no results
+     */
+    totalPages () {
+      return Math.ceil(this.totalResults / this.resultsPerPage);
     },
   },
   methods: {
-    simpleSearch() {
-      //TODO implement when linked to endpoint
+    /**
+     * Call basic search endpoint with the simpleSearchParams
+     */
+    async simpleSearch() {
+      if(this.simpleSearchParams.query === null) this.simpleSearchParams = "";
+      const result = await basicSearchSaleitem(this.simpleSearchParams.query, this.simpleSearchParams.orderBy,
+        this.currentPage, this.resultsPerPage, this.simpleSearchParams.reverse);
+      if (typeof result === 'string'){
+        this.errorMessage = result;
+      } else {
+        this.errorMessage = undefined;
+        this.resultsPage = result;
+      }
     },
-    advancedSearch() {
-      //TODO implement when linked to endpoint
+    /**
+     * Call advanceSearch endpoint with advanceSearchParams
+     */
+    async advancedSearch() {
+      if(this.advancedSearchParams.productQuery === null) this.advancedSearchParams.productQuery = "";
+      if(this.advancedSearchParams.businessQuery === null) this.advancedSearchParams.businessQuery = "";
+      if(this.advancedSearchParams.locationQuery === null) this.advancedSearchParams.locationQuery = "";
+      if(this.advancedSearchParams.closesBefore === null) this.advancedSearchParams.closesBefore = "";
+      if(this.advancedSearchParams.closesAfter === null) this.advancedSearchParams.closesAfter = "";
+      this.previousQuery = {...this.advancedSearchParams};
+      const result = await advanceSearchSaleitem(this.advancedSearchParams, this.currentPage, this.resultsPerPage);
+      if (typeof result === 'string'){
+        this.errorMessage = result;
+      } else {
+        this.errorMessage = undefined;
+        this.resultsPage = result;
+      }
+    },
+    async updatePage() {
+      if(this.showAdvancedSearch) this.advancedSearch();
+      else this.simpleSearch();
     },
     /**
      * Fetches a new set of results
      */
     async updateResults() {
-      this.resultsPage = (await getBusinessSales(1, 1, 1, "created", false));
+      this.resultsPage = (await basicSearchSaleitem("", "created", 1, this.resultsPerPage, false));
     },
   },
   watch: {
@@ -112,7 +148,31 @@ export default {
       handler() {
         this.simpleSearch();
       }
-    }
+    },
+    /**
+     * Ensures that the current page is at least 1 and less than or equal to the total number of pages.
+     */
+    totalPages() {
+      this.currentPage = Math.max(Math.min(this.currentPage, this.totalPages), 1);
+    },
+    /**
+     * Whenever user changes page on advanced search, send a new request with the old query and updated page number.
+     * If on the simple search page, send request with the new query and page number.
+     */
+    async currentPage() {
+      if(this.showAdvancedSearch) {
+        const result = await advanceSearchSaleitem(this.previousQuery, this.currentPage, this.resultsPerPage);
+        if (typeof result === 'string'){
+          this.errorMessage = result;
+        } else {
+          this.errorMessage = undefined;
+          this.resultsPage = result;
+        }}
+      else this.updatePage();
+    },
+    resultsPerPage() {
+      this.updatePage();
+    },
   },
   async beforeMount() {
     this.updateResults();

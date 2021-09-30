@@ -5,7 +5,7 @@
         <v-btn @click="returnToSearch" color="primary">Return to search</v-btn>
       </v-col>
     </v-row>
-    <div v-if='!modifyBusiness' class="mt-16">
+    <div v-if='!modifyBusiness && this.business' class="mt-16">
       <v-card v-if="businessImages && businessImages.length > 0">
         <ImageCarousel
           :imagesList="businessImages"
@@ -33,7 +33,7 @@
             <v-col cols="11">
               <span>
                 <h1 class="d-inline-block">{{ business.name }}</h1>
-                <RankIcon v-if="rank !== 'bronze'" :rankName="rank"/>
+                <RankIcon v-if="business.rank.name !== 'bronze'" :rankName="business.rank.name"/>
               </span>
             </v-col>
             <v-col class="text-right" v-if='!modifyBusiness && permissionToActAsBusiness'>
@@ -62,7 +62,7 @@
         <v-btn class="mr-2" outlined color="primary" @click="goSalePage" :value="false" width="150">
           Sale listings
         </v-btn>
-        <v-btn v-if="!isadmin" class="" outlined color="primary" @click="goSaleReports" :value="false" width="150">
+        <v-btn v-if="!isAdmin" class="" outlined color="primary" @click="goSaleReports" :value="false" width="150">
           Sale reports
         </v-btn>
         <v-container fluid>
@@ -109,21 +109,17 @@
 import { USER_ROLES } from "@/utils";
 import ModifyBusiness from '@/components/BusinessProfile/ModifyBusiness';
 import convertAddressToReadableText from '@/components/utils/Methods/convertAddressToReadableText';
-import {
-  alphabetExtendedMultilineRules,
-  alphabetExtendedSingleLineRules, alphabetRules,
-  mandatoryRules,
-  maxCharRules, postCodeRules, streetNumRules
-} from "@/utils";
 import ImageCarousel from "@/components/image/ImageCarousel";
 import {getBusiness} from "@/api/business";
 import RankIcon from "@/components/ranks/RankIcon";
+import LevelUp from '@/components/BusinessProfile/LevelUp.vue';
 export default {
   name: 'BusinessProfile',
   components: {
     ImageCarousel,
     ModifyBusiness,
     RankIcon,
+    LevelUp,
   },
   data() {
     return {
@@ -131,34 +127,7 @@ export default {
       readableAddress: "",
       errorMessage: undefined,
       dialog: true,
-      business: '',
-      businessName: '',
-      description: '',
-      businessType: [],
-      streetAddress: '',
-      district: '',
-      city: '',
-      region: '',
-      country: '',
-      postcode: '',
-      rank: '',
-      businessTypes: [
-        'Accommodation and Food Services',
-        'Charitable organisation',
-        'Non-profit organisation',
-        'Retail Trade',
-      ],
-      showImageUploaderForm: false,
-      valid: false,
-      updateProductCountry: true,
-      maxCharRules: () => maxCharRules(100),
-      maxCharDescriptionRules: ()=> maxCharRules(200),
-      mandatoryRules: ()=> mandatoryRules,
-      alphabetExtendedSingleLineRules: ()=> alphabetExtendedSingleLineRules,
-      alphabetExtendedMultilineRules: ()=> alphabetExtendedMultilineRules,
-      alphabetRules: ()=> alphabetRules,
-      streetRules: ()=> streetNumRules,
-      postcodeRules: ()=> postCodeRules
+      business: undefined,
     };
   },
   watch: {
@@ -270,7 +239,6 @@ export default {
           this.business = value;
           this.readableAddress = convertAddressToReadableText(value.address, "full");
         }
-        this.rank = this.business.rank.name;
       });
 
     },

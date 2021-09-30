@@ -9,34 +9,41 @@
         <v-row>
           <v-col cols="12" sm="8">
             <v-card flat>
-              <v-card-text>
-                <h2 ref="productName" class="text--primary font-weight-bold d-inline-block">
-                  {{ product.name }}
-                </h2>
-                <h4 class="ml-2 d-inline-block text-decoration-underline">FROM {{this.product.manufacturer}}</h4>
-                <div class="text--primary mt-2">
-                  {{ productDescription }}
-                </div>
+              <v-card-text class="ml-2">
+                <v-row class="mt-1">
+                  <h2 ref="productName" class="text--primary font-weight-bold">
+                    {{ product.name }}
+                  </h2>
+                  <h4 class="link ml-4 mt-1 text-decoration-underline" @click="viewProfile(business.id)">FROM {{this.business.name}}</h4>
+                </v-row>
+                <v-row>
+                  <div class="text--primary mt-3">
+                    {{ productDescription }}
+                  </div>
+                </v-row>
               </v-card-text>
             </v-card>
           </v-col>
           <!-- Buy feature will not be implemented yet -->
-          <v-col class="align-self-center text-center">
-            <v-btn class="pl-2 pr-2" color="primary darken-1" @click="buy">
-              Buy
-              <v-icon>mdi-currency-usd</v-icon>
-            </v-btn>
-            <!-- Thumb up/down button to show and allow user the like & unlike feature -->
-            <v-btn ref="likeButton" class=" pl-2 pr-2 ml-2" color="grey lighten-2" @click="changeInterest">
-              {{thumbMessage}} {{interestCount}}
-              <v-icon class="ml-1">{{thumbIcon}}</v-icon>
-            </v-btn>
-            <!-- A return button for user to hide full sale listing-->
-            <v-btn class="ml-2 mr-1 pl-2 pr-1" color="secondary" @click="hideExpand">
-              Hide
-              <v-icon class="ml-1">mdi-arrow-left</v-icon>
-            </v-btn>
-          </v-col>
+          <v-row>
+            <v-col class="align-self-center text-center">
+              <v-btn class="pl-2 pr-2" color="primary darken-1" @click="buy">
+                Buy
+                <v-icon>mdi-currency-usd</v-icon>
+              </v-btn>
+              <!-- Thumb up/down button to show and allow user the like & unlike feature -->
+              <v-btn ref="likeButton" class=" pl-2 pr-2 ml-2" color="grey lighten-2" @click="changeInterest">
+                {{thumbMessage}} {{interestCount}}
+                <v-icon class="ml-1">{{thumbIcon}}</v-icon>
+              </v-btn>
+              <!-- A return button for user to hide full sale listing-->
+              <v-btn class="ml-2 mr-1 pl-2 pr-1" color="secondary" @click="goBack">
+                Hide
+                <v-icon class="ml-1">mdi-arrow-left</v-icon>
+              </v-btn>
+            </v-col>
+          </v-row>
+          <!-- </v-col> -->
         </v-row>
       </div>
       <v-alert
@@ -50,83 +57,74 @@
       </v-alert>
       <!-- Listing details -->
       <div>
-        <v-container>
+        <v-container fluid>
           <v-card color="grey lighten-2" class="pa-2 pl-4">
             <v-row no-gutters class="mt-3">
-              <v-col cols="6" sm="2">
-                <h4 class="font-weight-bold">Total Price:</h4>
+              <v-col cols="6" sm="3">
+                <h4 class="font-weight-bold">Price:</h4>
               </v-col>
-              <v-col cols="6" sm="4">
+              <v-col cols="6" sm="3">
                 <h4 class="font-weight-regular">${{ saleItem.price }}</h4>
               </v-col>
-              <v-col cols="6" sm="2">
+              <v-col cols="6" sm="3">
                 <h4 class=" font-weight-bold">Date Created:</h4>
               </v-col>
-              <v-col cols="6" sm="4">
+              <v-col cols="6" sm="3">
                 <h4 class=" font-weight-regular">{{ createdFormatted }}</h4>
               </v-col>
-              <v-col cols="6" sm="2">
+              <v-col cols="6" sm="3">
                 <h4 class=" font-weight-bold">Quantity:</h4>
               </v-col>
-              <v-col cols="6" sm="4">
+              <v-col cols="6" sm="3">
                 <h4 class=" font-weight-regular">{{ saleItem.quantity }}</h4>
               </v-col>
-              <v-col cols="6" sm="2">
+              <v-col cols="6" sm="3">
+                <h4 class=" font-weight-bold">Manufacturer:</h4>
+              </v-col>
+              <v-col cols="6" sm="3">
+                <h4 class=" font-weight-regular">{{ productManufacturer}}</h4>
+              </v-col>
+              <v-col cols="6" sm="3">
                 <h4 class=" font-weight-bold">Expiry Date:</h4>
               </v-col>
-              <v-col cols="6" sm="4">
+              <v-col cols="6" sm="3">
                 <h4 class=" font-weight-regular">{{ expiresFormatted }}</h4>
               </v-col>
-              <v-col cols="6" sm="2">
-                <h4 class=" font-weight-bold">More Info:</h4>
-              </v-col>
-              <v-col cols="6" sm="4">
-                <h4 class=" font-weight-regular">
-                  {{ saleItem.moreInfo }}
-                </h4>
-              </v-col>
-              <v-col cols="6" sm="2">
+              <v-col cols="6" sm="3">
                 <h4 class=" font-weight-bold">Closing Date:</h4>
               </v-col>
-              <v-col class="column" cols="6" sm="4">
+              <v-col cols="6" sm="3">
                 <h4 class="font-weight-regular">{{ closesFormatted }}</h4>
               </v-col>
-            </v-row>
-            <!-- Addtional listing details -->
-            <div>
-              <v-row no-gutters>
-                <v-col cols="6" sm="2">
-                  <h4 class=" font-weight-bold">Best Before Date:</h4>
+              <v-col cols="6" sm="3">
+                <h4 class=" font-weight-bold">Best Before:</h4>
+              </v-col>
+              <v-col cols="6" sm="3">
+                <h4 class=" font-weight-regular">{{ bestBeforeFormatted }}</h4>
+              </v-col>
+              <v-col cols="6" sm="3">
+                <h4 class=" font-weight-bold">Sell By:</h4>
+              </v-col>
+              <v-col cols="6" sm="3">
+                <h4 class=" font-weight-regular">{{ sellByFormatted }}</h4>
+              </v-col>
+              <v-col cols="6" sm="3">
+                <h4 class=" font-weight-bold">Country of Sale:</h4>
+              </v-col>
+              <v-col cols="6" sm="3">
+                <h4 class=" font-weight-regular">{{ product.countryOfSale }}</h4>
+              </v-col>
+              <v-row>
+                <v-col cols="6" sm="3">
+                  <h4 class=" font-weight-bold">More Info:</h4>
                 </v-col>
-                <v-col cols="6" sm="4">
-                  <h4 class=" font-weight-regular">{{ bestBeforeFormatted }}</h4>
-                </v-col>
-                <v-col cols="6" sm="2">
-                  <h4 class=" font-weight-bold">Sell By Date:</h4>
-                </v-col>
-                <v-col cols="6" sm="4">
-                  <h4 class=" font-weight-regular">{{ sellByFormatted }}</h4>
-                </v-col>
-                <v-col cols="6" sm="2">
-                  <h4 class=" font-weight-bold">Country:</h4>
-                </v-col>
-                <v-col cols="6" sm="4">
-                  <h4 class=" font-weight-regular">{{ product.countryOfSale }}</h4>
-                </v-col>
-                <v-col cols="6" sm="2">
-                  <h4 class=" font-weight-bold">Manufacturer:</h4>
-                </v-col>
-                <v-col cols="6" sm="4">
-                  <h4 class=" font-weight-regular">{{ product.manufacturer }}</h4>
-                </v-col>
-                <v-col cols="6" sm="2">
-                  <h4 class=" font-weight-bold">Original Name:</h4>
-                </v-col>
-                <v-col cols="6" sm="4">
-                  <h4 class=" font-weight-regular">{{ product.name }}</h4>
+                <v-col cols="6" sm="6">
+                  <h4 class=" font-weight-regular">
+                    {{ saleItem.moreInfo }}
+                  </h4>
                 </v-col>
               </v-row>
-            </div>
+            </v-row>
           </v-card>
         </v-container>
       </div>
@@ -160,10 +158,19 @@ export default {
   props: {
     saleItem: Object
   },
+  /**
+   * Get the interestCount of the saleListing when its chose to be rendered
+   */
   mounted() {
     this.interestCount = this.saleItem.interestCount;
   },
   computed: {
+    /**
+     * Easier access to business properties
+     */
+    business() {
+      return this.product.business;
+    },
     /**
      * Stay consistent with other folder by the name imageList and easier access to the product images list
      */
@@ -237,6 +244,7 @@ export default {
      * @returns {string} BestBeforeDate
      */
     bestBeforeFormatted() {
+      if(this.inventoryItem.bestBefore === undefined) return "Not Provided";
       let date = new Date(this.inventoryItem.bestBefore);
       return formatDate(date);
     },
@@ -245,6 +253,7 @@ export default {
      * @returns {string} SellByDate
      */
     sellByFormatted() {
+      if(this.inventoryItem.sellBy === undefined) return "Not Provided";
       let date = new Date(this.inventoryItem.sellBy);
       return formatDate(date);
     },
@@ -258,11 +267,26 @@ export default {
       }
       return this.currency.symbol + formatPrice(this.saleItem.price) + " " + this.currency.code;
     },
+    /**
+     * To handle the issue whe description is empty
+     */
     productDescription() {
-      return this.product.description || "Not set";
+      return this.product.description || "Description Not Provided";
+    },
+    /**
+     * To handle the issue whe description is empty
+     */
+    productManufacturer() {
+      return this.product.manufacturer || "Not Provided";
     },
   },
   methods: {
+    /**
+     * Shows the business profile page
+     */
+    viewProfile(businessId) {
+      this.$router.push("/business/" + businessId);
+    },
     /** Change the user interest status on the listing (toggle)
      */
     async changeInterest() {
@@ -274,6 +298,7 @@ export default {
         this.isInterested = !this.isInterested;
         if(this.isInterested) this.interestCount += 1;
         else this.interestCount -= 1;
+        this.$emit("interestUpdate", this.isInterested);
       }
     },
     /**
@@ -308,7 +333,7 @@ export default {
     /**
      * Minimize the full sale listing and back to the listing result page
      */
-    hideExpand() {
+    goBack() {
       this.$emit('goBack');
     },
   },
