@@ -69,6 +69,7 @@ export default {
         highestPrice: "",
         reverse: false
       },
+      previousQuery: undefined,
       debouncedUpdateQuery: debounce(this.updateSearchQuery, 500),
     };
   },
@@ -81,9 +82,9 @@ export default {
       return this.resultsPage.count;
     },
     resultsMessage() {
-      if(this.resultsPage === undefined) return 'There are no results to show';
+      if(this.totalResults === 0) return 'There are no results to show';
       const pageStartIndex = (this.currentPage - 1) * this.resultsPerPage;
-      const pageEndIndex = pageStartIndex + this.resultsPerPage;
+      const pageEndIndex = Math.min(pageStartIndex + this.resultsPerPage, this.totalResults);
       return`Displaying ${pageStartIndex + 1} - ${pageEndIndex} of ${this.totalResults} results`;
     },
     /**
@@ -116,6 +117,7 @@ export default {
       if(this.advancedSearchParams.productQuery === null) this.advancedSearchParams.productQuery = "";
       if(this.advancedSearchParams.businessQuery === null) this.advancedSearchParams.businessQuery = "";
       if(this.advancedSearchParams.locationQuery === null) this.advancedSearchParams.locationQuery = "";
+      this.previousQuery = {...this.advancedSearchParams};
       const result = await advanceSearchSaleitem(this.advancedSearchParams, this.currentPage, this.resultsPerPage);
       if (typeof result === 'string'){
         this.errorMessage = result;
@@ -145,14 +147,26 @@ export default {
         this.simpleSearch();
       }
     },
-    advanceSearchParams: {
-      deep: true,
-      handler() {
-        this.advancedSearch();
-      }
+    /**
+     * Ensures that the current page is at least 1 and less than or equal to the total number of pages.
+     */
+    totalPages() {
+      this.currentPage = Math.max(Math.min(this.currentPage, this.totalPages), 1);
     },
-    currentPage() {
-      this.updatePage();
+    /**
+     * Whenever user changes page on advanced search, send a new request with the old query and updated page number.
+     * If on the simple search page, send request with the new query and page number.
+     */
+    async currentPage() {
+      if(this.showAdvancedSearch) {
+        const result = await advanceSearchSaleitem(this.previousQuery, this.currentPage, this.resultsPerPage);
+        if (typeof result === 'string'){
+          this.errorMessage = result;
+        } else {
+          this.errorMessage = undefined;
+          this.resultsPage = result;
+        }}
+      else this.updatePage();
     },
     resultsPerPage() {
       this.updatePage();
