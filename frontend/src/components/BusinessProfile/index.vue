@@ -14,7 +14,7 @@
           ref="businessImageCarousel"
         />
       </v-card>
-      <v-card class="body">
+      <v-card class="pa-5 pt-0">
         <div class="d-flex flex-column" no-gutters>
           <v-row>
             <v-col cols="12">
@@ -59,10 +59,10 @@
             <strong class="rank">Rank:</strong> {{ business.rank.name.charAt(0).toUpperCase() + business.rank.name.slice(1) }}
           </p>
         </div>
-        <v-btn class="business-btn" outlined color="primary" @click="goSalePage" :value="false" width="150">
+        <v-btn class="mr-2" outlined color="primary" @click="goSalePage" :value="false" width="150">
           Sale listings
         </v-btn>
-        <v-btn v-if="!isadmin" class="business-btn" outlined color="primary" @click="goSaleReports" :value="false" width="150">
+        <v-btn v-if="!isadmin" class="" outlined color="primary" @click="goSaleReports" :value="false" width="150">
           Sale reports
         </v-btn>
         <v-container fluid>
@@ -87,7 +87,7 @@
               <h4>Administrators</h4>
               <span v-for="admin in administrators" :key="admin.id">
                 <router-link :to="'/profile/' + admin.id">
-                  <v-chip class="link-chip link" :color="getAdminColour(admin)" text-color="white"> {{ admin.firstName }} {{ admin.lastName }} </v-chip>
+                  <v-chip class="mr-1 link" :color="getAdminColour(admin)" text-color="white"> {{ admin.firstName }} {{ admin.lastName }} </v-chip>
                 </router-link>
               </span>
             </v-col>
@@ -277,23 +277,3 @@ export default {
   }
 };
 </script>
-
-<style scoped>
-.body {
-    padding: 16px;
-}
-
-.top-section {
-  display: flex;
-  flex-wrap: wrap;
-}
-
-.link-chip {
-  margin-right: 4px;
-}
-
-.business-btn {
-  display: inline;
-  margin-right: 10px;
-}
-</style>
