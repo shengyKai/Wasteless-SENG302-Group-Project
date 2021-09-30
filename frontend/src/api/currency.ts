@@ -85,7 +85,7 @@ export async function getCurrencyFromAPIResponse(response: Response): Promise<Ma
   const responseBody = await response.json();
 
   if (!is<[CurrenciesContainer]>(responseBody)) {
-    return 'API response was not in readable format';
+    return 'Could not determine currency of provided country';
   }
 
   return responseBody[0].currencies[0];
