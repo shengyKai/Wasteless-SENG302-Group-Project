@@ -5,7 +5,7 @@
         <v-btn @click="returnToSearch" color="primary">Return to search</v-btn>
       </v-col>
     </v-row>
-    <div v-if='!modifyBusiness' class="mt-16">
+    <div v-if='!modifyBusiness && this.business' class="mt-16">
       <v-card v-if="businessImages && businessImages.length > 0">
         <ImageCarousel
           :imagesList="businessImages"
@@ -33,9 +33,9 @@
             <v-col cols="11">
               <span>
                 <h1 class="business-name">{{ business.name }}</h1>
-                <SilverRank v-if="rank === 'silver'" class="rank"/>
-                <GoldRank v-if="rank === 'gold'" class="rank"/>
-                <PlatinumRank v-if="rank === 'platinum'" class="rank"/>
+                <SilverRank v-if="business.rank.name === 'silver'" class="rank"/>
+                <GoldRank v-if="business.rank.name === 'gold'" class="rank"/>
+                <PlatinumRank v-if="business.rank.name === 'platinum'" class="rank"/>
               </span>
             </v-col>
             <v-col class="text-right" v-if='!modifyBusiness && permissionToActAsBusiness'>
@@ -111,12 +111,6 @@
 import { USER_ROLES } from "@/utils";
 import ModifyBusiness from '@/components/BusinessProfile/ModifyBusiness';
 import convertAddressToReadableText from '@/components/utils/Methods/convertAddressToReadableText';
-import {
-  alphabetExtendedMultilineRules,
-  alphabetExtendedSingleLineRules, alphabetRules,
-  mandatoryRules,
-  maxCharRules, postCodeRules, streetNumRules
-} from "@/utils";
 import ImageCarousel from "@/components/image/ImageCarousel";
 import {getBusiness} from "@/api/business";
 import SilverRank from "@/components/ranks/SilverRank";
@@ -139,34 +133,7 @@ export default {
       readableAddress: "",
       errorMessage: undefined,
       dialog: true,
-      business: '',
-      businessName: '',
-      description: '',
-      businessType: [],
-      streetAddress: '',
-      district: '',
-      city: '',
-      region: '',
-      country: '',
-      postcode: '',
-      rank: '',
-      businessTypes: [
-        'Accommodation and Food Services',
-        'Charitable organisation',
-        'Non-profit organisation',
-        'Retail Trade',
-      ],
-      showImageUploaderForm: false,
-      valid: false,
-      updateProductCountry: true,
-      maxCharRules: () => maxCharRules(100),
-      maxCharDescriptionRules: ()=> maxCharRules(200),
-      mandatoryRules: ()=> mandatoryRules,
-      alphabetExtendedSingleLineRules: ()=> alphabetExtendedSingleLineRules,
-      alphabetExtendedMultilineRules: ()=> alphabetExtendedMultilineRules,
-      alphabetRules: ()=> alphabetRules,
-      streetRules: ()=> streetNumRules,
-      postcodeRules: ()=> postCodeRules
+      business: undefined,
     };
   },
   watch: {
@@ -278,7 +245,6 @@ export default {
           this.business = value;
           this.readableAddress = convertAddressToReadableText(value.address, "full");
         }
-        this.rank = this.business.rank.name;
       });
 
     },
