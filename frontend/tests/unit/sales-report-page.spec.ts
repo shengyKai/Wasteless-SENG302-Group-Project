@@ -18,7 +18,7 @@ const $route = {
   params: {
     id: 1
   }
-}
+};
 
 const user : User = {
   id: 1,
@@ -62,7 +62,7 @@ const business : Business = {
   },
   primaryAdministratorId: 0,
   points: 0
-}
+};
 
 describe('SaleResult.vue', () => {
   let wrapper: Wrapper<any>;
@@ -92,5 +92,5 @@ describe('SaleResult.vue', () => {
 
   it("Must contain the page title of the format: Sales Report - *businessName*", async() => {
     expect(wrapper.text()).toContain(`Sales Report - Some Business Name`);
-  })
-})
+  });
+});
