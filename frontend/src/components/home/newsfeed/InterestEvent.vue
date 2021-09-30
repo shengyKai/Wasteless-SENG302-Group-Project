@@ -131,7 +131,6 @@ export default {
         }
         await this.$store.dispatch('refreshEventFeed');
       }, 100);
-      console.log("WOOO");
     }
   }
 };
