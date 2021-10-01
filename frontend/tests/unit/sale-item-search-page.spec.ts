@@ -1,6 +1,7 @@
 import { createLocalVue, shallowMount, Wrapper } from "@vue/test-utils";
 import Vue from "vue";
 import Vuetify from "vuetify";
+import router from '@/plugins/router';
 
 import SearchSaleItems from "@/components/SaleListing/SearchSaleItems.vue";
 
@@ -17,6 +18,7 @@ describe("SearchSaleItems.vue", () => {
     wrapper = shallowMount(SearchSaleItems, {
       localVue,
       vuetify,
+      router,
     });
   });
 
