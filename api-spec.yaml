@@ -1139,11 +1139,12 @@ paths:
           schema:
             type: string
             example: 'daily'
-          
             enum:
               - daily
+              - weekly
               - monthly
               - yearly
+              - none
       responses:
         '200':
           description: 'Request successful, a list of Report Records is returned. <br/> The number of records returned will be equal to the range of the report divided by the granularity'
@@ -2954,10 +2955,14 @@ components:
       required:
         - name
       properties:
-        date:
-          description: The date period of this report. Accurate only to the level of granularity
+        startDate:
+          description: The start date of this report period (inclusive).
           type: string
           example: '2020-09-12'
+        endDate:
+          description: The end date of this report period (inclusive).
+          type: string
+          example: '2020-09-16'
         uniqueListingsSold:
           description: The number of unique listings sold for the given period
           type: number
@@ -2980,6 +2985,10 @@ components:
           example: 10
         totalPriceSold:
           description: The total price of listings sold for the given period
+          type: number
+          example: 10
+        totalQuantitySold:
+          description: The total quantity of listings sold for the given period
           type: number
           example: 10
     Address:

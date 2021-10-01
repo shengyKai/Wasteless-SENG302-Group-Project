@@ -310,6 +310,7 @@ import {
   passwordRules, phoneNumberRules,
   postCodeRules,
   streetNumRules,
+  getLocalDate,
 } from "@/utils";
 import {getUser, modifyUser} from "@/api/user";
 
@@ -365,7 +366,7 @@ export default {
   async mounted () {
     await this.setUser();
     this.validateAllField();
-    this.maxDate = this.minimumDateOfBirth().toISOString().slice(0, 10);
+    this.maxDate = getLocalDate(this.minimumDateOfBirth());
 
   },
   methods: {
