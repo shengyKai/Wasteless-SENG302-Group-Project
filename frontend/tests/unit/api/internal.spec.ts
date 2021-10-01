@@ -136,13 +136,15 @@ const testCreateInventoryItem: CreateInventoryItem = {
 };
 
 const testRecord: SaleRecord = {
-  date: '2022-09-09',
+  startDate: '2021-09-09',
+  endDate: '2022-09-09',
   uniqueListingsSold: 12,
   uniqueBuyers: 12,
   uniqueProducts: 3,
   averageLikeCount: 40,
   averageDaysToSell: 5,
-  totalPriceSold: 1032.10
+  totalPriceSold: 1032.10,
+  totalQuantitySold: 3
 };
 
 const testProduct: Product = {

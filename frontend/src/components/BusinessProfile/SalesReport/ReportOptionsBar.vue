@@ -2,7 +2,7 @@
   <v-card color="secondary" dark>
     <v-card-actions>
       <v-row align="center" justify="center">
-        <v-col cols="12" md="2" sm="12" class="mt-1">
+        <v-col cols="12" md="2">
           <v-menu
             ref="fromMenu"
             v-model="fromDateMenu"
@@ -46,7 +46,7 @@
             </v-date-picker>
           </v-menu>
         </v-col>
-        <v-col cols="12" md="2" sm="12">
+        <v-col cols="12" md="2">
           <v-menu
             class="mb-0 pb-0"
             ref="toMenu"
@@ -70,6 +70,7 @@
             </template>
             <v-date-picker
               v-model="toDate"
+              :min="minToDate"
               :max="maxToDate"
               scrollable
             >
@@ -91,42 +92,37 @@
             </v-date-picker>
           </v-menu>
         </v-col>
-        <v-col cols="12" md="1" sm="12">
-          <h4 class="font-weight-bold text-center">
-            OR
-          </h4>
-        </v-col>
-        <v-col cols="12" md="3" sm="12">
+        <v-col cols="12" md="3">
           <v-select
-            v-model="periodBefore"
+            v-model="presetPeriodUserString"
+            :items="presetPeriods.map(period => period.level)"
             flat
             solo-inverted
             hide-details
             label="Preset periods"
-            :items="periodBeforeOptions"
-            item-text="periodLevel"
-            item-value="periodValue"
             prepend-inner-icon="mdi-clock-time-four"
             color="secondary"
           />
         </v-col>
         <v-divider vertical dark/>
-        <v-col cols="12" md="2" sm="12">
+        <v-col cols="12" md="2">
           <v-select
             v-model="granularity"
             flat
             solo-inverted
             hide-details
             :items="granularityOptions"
-            item-text="granularityLevel"
-            item-value="granularityValue"
+            item-text="level"
+            item-value="value"
             color="secondary"
             label="Report Granularity"
           />
         </v-col>
-        <v-col cols="12" md="1" sm="12" class="text-center">
+        <v-col cols="12" md="2" class="text-center">
           <v-btn
-            color="primary">
+            color="primary"
+            @click="sendReportSpecifications"
+          >
             Generate
           </v-btn>
         </v-col>
@@ -136,94 +132,132 @@
 </template>
 
 <script>
+import { getLocalDate } from '@/utils';
 export default {
-  name: "ReportGenerationBar",
+  name: "ReportOptionsBar",
   data() {
     return {
-      fromDate: null,
-      toDate: null,
+      fromDate: undefined,
+      toDate: undefined,
       fromDateMenu: false,
       toDateMenu: false,
-      periodBefore: null,
-      granularity: null,
-      periodBeforeOptions: [
-        { periodLevel:'One day before', periodValue:'day' },
-        { periodLevel:'One week before', periodValue:'week' },
-        { periodLevel:'One month before', periodValue:'month' },
-        { periodLevel:'One year before', periodValue:'year' }
+      presetPeriodUserString: undefined,
+      granularity: "none",
+      presetPeriods: [
+        { level: 'Today',          value:'day' },
+        { level: 'Current Week',  value:'week' },
+        { level: 'Current Month', value:'month' },
+        { level: 'Current Year',  value:'year' }
       ],
       granularityOptions: [
-        { granularityLevel:'Day', granularityValue:'day' },
-        { granularityLevel:'Week', granularityValue:'week' },
-        { granularityLevel:'Month', granularityValue:'month' },
-        { granularityLevel:'Year', granularityValue:'year' }
+        { level: 'Day',   value: 'daily'   },
+        { level: 'Week',  value: 'weekly'  },
+        { level: 'Month', value: 'monthly' },
+        { level: 'Year',  value: 'yearly'  },
+        { level: 'Whole', value: 'none'    },
       ]
     };
   },
   computed: {
     /**
+     * Internal name of the period
+     */
+    presetPeriod() {
+      for (let period of this.presetPeriods) {
+        if (period.level === this.presetPeriodUserString) return period.value;
+      }
+      return undefined;
+    },
+    /**
+     * Dates for the given period if one is selected, otherwise undefined
+     */
+    presetDates() {
+      if (this.presetPeriod === undefined) return undefined;
+
+      let now = new Date();
+      let start = new Date(now);
+      if (this.presetPeriod === 'day') {
+        // End day is already correct
+      } else if (this.presetPeriod === 'week') {
+        while (start.getDay() !== 1) { // While not Monday
+          start.setDate(start.getDate() - 1);
+        }
+      } else if (this.presetPeriod === 'month') {
+        start.setDate(1); // Set start to first day of month
+      } else if (this.presetPeriod === 'year') {
+        start.setMonth(0, 1); // Set start to first day in year
+      }
+      return {
+        fromDate: getLocalDate(start),
+        toDate: getLocalDate(now),
+      };
+    },
+    /**
      * Max date of the fromDate has to be the same as the toDate or the present day
      */
     maxFromDate() {
-      if (this.toDate !== null) {
+      if (this.toDate !== undefined) {
         return this.toDate;
       } else {
-        return new Date().toISOString().slice(0, 10);
+        return getLocalDate(new Date());
       }
     },
     /**
      * Max date of the toDate is the present day
      */
     maxToDate() {
-      return new Date().toISOString().slice(0, 10);
-    }
+      return getLocalDate(new Date());
+    },
+    /**
+     * Min date of the toDate is the fromDate
+     */
+    minToDate() {
+      return this.fromDate;
+    },
+  },
+  methods: {
+    /**
+     * Method to send the report generation specifications to the parent, SalesReportPage
+     */
+    async sendReportSpecifications() {
+      this.$emit("sendRequestParams", {fromDate: this.fromDate, toDate: this.toDate, granularity: this.granularity});
+    },
+    /**
+     * Clear the current preset display
+     */
+    clearPresetPeriod() {
+      this.presetPeriodUserString = undefined;
+    },
   },
   watch: {
     /**
-     * If the fromDate value is null and a value is being set for the toDate, the fromDate value is also set to the toDate value.
-     * This is to ensure both fields are filled in at all times.
-     * If toDate is not null, periodBefore must be null as both options cannot be used at the same time.
-     * If the toDate date is before the fromDate date, change the fromDate to that value
+     * When the presetDates change, then update the from/to dates accordingly
      */
-    toDate(value) {
-      if (this.fromDate === null) {
-        this.fromDate = value;
-      }
-      if (value !== null) {
-        this.periodBefore = null;
-      }
-      if (new Date(value) < new Date(this.fromDate)) {
-        this.fromDate = value;
+    presetDates: {
+      handler() {
+        if (this.presetDates === undefined) return;
+
+        this.fromDate = this.presetDates.fromDate;
+        this.toDate = this.presetDates.toDate;
+      },
+      deep: true,
+    },
+    /**
+     * When the fromDate changes check if it is different from the presetDates
+     */
+    fromDate() {
+      if (this.fromDate !== this.presetDates?.fromDate) {
+        this.clearPresetPeriod();
       }
     },
     /**
-     * If the toDate value is null and a value is being set for the fromDate, the toDate value is also set to the fromDate value.
-     * This is to ensure both fields are filled in at all times.
-     * If fromDate is not null, periodBefore must be null as both options cannot be used at the same time.
-     * If the fromDate date is after the toDate date, change the toDate to that value
-     * Technically this situation should not have a chance to occur, but acts as a sanity check
+     * When the toDate changes check if it is different from the presetDates
      */
-    fromDate(value) {
-      if (this.toDate === null) {
-        this.toDate = value;
-      }
-      if (value !== null) {
-        this.periodBefore = null;
-      }
-      if (new Date(value) > new Date(this.toDate)) {
-        this.toDate = value;
+    toDate() {
+      if (this.toDate !== this.presetDates?.toDate) {
+        this.clearPresetPeriod();
       }
     },
-    /**
-     * This watches the periodBefore variable so that if the period is not null, the toDate and fromDate
-     * must be null, as both options cannot be used at the same time.
-     */
-    periodBefore(value) {
-      if (value !== null) {
-        this.toDate = null;
-        this.fromDate = null;
-      }
-    }
   }
 };
 </script>

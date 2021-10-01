@@ -5,148 +5,56 @@
     </strong>
     <v-data-table
       :headers="headers"
-      :items="reportValues"
+      :items="fullReport.reportData"
     />
   </div>
 </template>
 
 <script>
+
 export default {
   name: "SalesReportTable",
+  props: {
+    fullReport: Object
+  },
   data() {
     return {
-      reportType: "daily", // TODO Should be replaced with a value retrieved from the backend
       /**
        * These headers are shared throughout report types
        */
       baseHeaders: [
-        { text: 'Year', value: 'year' },
         { text: 'No. of Unique Buyers', value: 'uniqueBuyers' },
         { text: 'No. of Unique Products', value: 'uniqueProducts' },
-        { text: 'No. of Unique Listings', value: 'uniqueListingsSold' },
+        { text: 'No. of Listings Sold', value: 'uniqueListingsSold' },
         { text: 'Average Time to Sell (days)', value: 'averageDaysToSell' },
-        { text: 'Average Like Count', value: 'averageLikes' },
+        { text: 'Average Like Count', value: 'averageLikeCount' },
+        { text: 'Total Quantity Sold', value: 'totalQuantitySold' },
         { text: 'Total Value of all Purchases ($)', value: 'totalPriceSold' },
       ],
       /**
-       * These headers are the distinctive headers that differentiates between report types
+       * These headers are the unique headers that differentiates between report types
        */
-      distinctHeaders: {
-        "monthly": [
-          { text: 'Month', value: 'month' }
+      uniqueHeaders: {
+        none: [],
+        yearly: [
+          { text: 'Year', value: 'year' },
         ],
-        "weekly": [
-          { text: 'Week No.', value: 'week' },
-          { text: 'Month', value: 'month' }
+        monthly: [
+          { text: 'Year', value: 'year' },
+          { text: 'Month', value: 'month' },
         ],
-        "daily": [
-          { text: 'Day of the Month', value: 'day' },
+        weekly: [
+          { text: 'Year', value: 'year' },
+          { text: 'Month', value: 'month' },
           { text: 'Week No.', value: 'week' },
-          { text: 'Month', value: 'month' }
+        ],
+        daily: [
+          { text: 'Year', value: 'year' },
+          { text: 'Month', value: 'month' },
+          { text: 'Week No.', value: 'week' },
+          { text: 'Day in Month', value: 'day' },
         ]
       },
-      /**
-       * This list stores all the values depending on the report type and displays it on the table.
-       * TODO hard coded for now, should be replaced with a value from the backend
-       */
-      reportValues: [
-        {
-          year: 2021,
-          uniqueBuyers: 3,
-          uniqueProducts: 4,
-          uniqueListingsSold: 5,
-          averageDaysToSell: 1,
-          averageLikes: 20,
-          totalPriceSold: 300,
-          day: 20,
-          week: 23,
-          month: 5
-        },
-        {
-          year: 2021,
-          uniqueBuyers: 3,
-          uniqueProducts: 4,
-          uniqueListingsSold: 5,
-          averageDaysToSell: 1,
-          averageLikes: 20,
-          totalPriceSold: 300,
-          day: 21,
-          week: 23,
-          month: 5
-        },
-        {
-          year: 2021,
-          uniqueBuyers: 3,
-          uniqueProducts: 4,
-          uniqueListingsSold: 5,
-          averageDaysToSell: 1,
-          averageLikes: 20,
-          totalPriceSold: 300,
-          day: 22,
-          week: 23,
-          month: 5
-        },
-        {
-          year: 2021,
-          uniqueBuyers: 3,
-          uniqueProducts: 4,
-          uniqueListingsSold: 5,
-          averageDaysToSell: 1,
-          averageLikes: 20,
-          totalPriceSold: 300,
-          day: 24,
-          week: 23,
-          month: 5
-        },
-        {
-          year: 2021,
-          uniqueBuyers: 3,
-          uniqueProducts: 4,
-          uniqueListingsSold: 5,
-          averageDaysToSell: 1,
-          averageLikes: 20,
-          totalPriceSold: 300,
-          day: 25,
-          week: 23,
-          month: 5
-        },
-        {
-          year: 2021,
-          uniqueBuyers: 3,
-          uniqueProducts: 4,
-          uniqueListingsSold: 5,
-          averageDaysToSell: 1,
-          averageLikes: 20,
-          totalPriceSold: 300,
-          day: 26,
-          week: 23,
-          month: 5
-        },
-        {
-          year: 2021,
-          uniqueBuyers: 3,
-          uniqueProducts: 4,
-          uniqueListingsSold: 5,
-          averageDaysToSell: 1,
-          averageLikes: 20,
-          totalPriceSold: 300,
-          day: 27,
-          week: 23,
-          month: 5
-        },
-        {
-          year: 2021,
-          uniqueBuyers: 3,
-          uniqueProducts: 4,
-          uniqueListingsSold: 5,
-          averageDaysToSell: 1,
-          averageLikes: 20,
-          totalPriceSold: 300,
-          day: 28,
-          week: 23,
-          month: 5
-        },
-      ]
     };
   },
   computed: {
@@ -155,18 +63,22 @@ export default {
      * Otherwise, the headers are just the baseHeaders.
      */
     headers() {
-      if (this.reportType === "yearly" || this.reportType === "periodic") {
-        return this.baseHeaders;
-      } else {
-        return this.distinctHeaders[this.reportType].concat(this.baseHeaders);
-      }
+      return this.uniqueHeaders[this.fullReport.reportType].concat(this.baseHeaders);
     },
     /**
      * Generates the report title based on the reportType in the format '"reportType" Report'
      */
     reportTitle() {
-      return `${this.reportType.charAt(0).toUpperCase() + this.reportType.slice(1)} Report`;
-    }
-  }
+      const reportType = this.fullReport.reportType;
+      let reportTypeName;
+      if (reportType === 'none') {
+        reportTypeName = 'Whole Period';
+      } else {
+        reportTypeName = this.fullReport.reportType.charAt(0).toUpperCase() + this.fullReport.reportType.slice(1);
+      }
+
+      return `${reportTypeName} Report`;
+    },
+  },
 };
 </script>

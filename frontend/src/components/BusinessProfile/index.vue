@@ -111,13 +111,16 @@
 </template>
 
 <script>
-import { USER_ROLES } from "@/utils";
 import ModifyBusiness from '@/components/BusinessProfile/ModifyBusiness';
 import convertAddressToReadableText from '@/components/utils/Methods/convertAddressToReadableText';
+import {
+  USER_ROLES
+} from "@/utils";
 import ImageCarousel from "@/components/image/ImageCarousel";
 import {getBusiness} from "@/api/business";
 import RankIcon from "@/components/ranks/RankIcon";
 import LevelUp from '@/components/BusinessProfile/LevelUp.vue';
+
 export default {
   name: 'BusinessProfile',
   components: {
