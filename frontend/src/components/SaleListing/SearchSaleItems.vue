@@ -4,7 +4,7 @@
     <AdvancedSearchBar v-model="advancedSearchParams" v-show="showAdvancedSearch" @hideAdvancedSearch="showAdvancedSearch=false" @searchListings="advancedSearch()"/>
     <v-alert
       v-if="errorMessage !== undefined"
-      type="errorMessage"
+      type="error"
       dismissible
       @input="errorMessage = undefined"
     >
