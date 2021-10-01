@@ -14,7 +14,7 @@
     <v-list three-line v-if="resultsPage">
       <template v-for="(sale, index) in resultsPage.results">
         <v-divider v-if="sale === undefined" :key="'divider-'+index"/>
-        <SaleResult v-else :key="sale.id" :saleItem="sale" @goBack="updatePage" @refresh="updateResults"/>
+        <SaleResult v-else :key="sale.id" :saleItem="sale" @goBack="updatePage" @refresh="updatePage"/>
       </template>
     </v-list>
     <!--paginate results-->
@@ -128,15 +128,23 @@ export default {
         this.resultsPage = result;
       }
     },
-    async updatePage() {
-      if(this.showAdvancedSearch) this.advancedSearch();
-      else this.simpleSearch();
-    },
     /**
-     * Fetches a new set of results
+     * If on advanced search page, send a new request with the old query.
+     * If on the simple search page, send request with the new query.
      */
-    async updateResults() {
-      this.resultsPage = (await basicSearchSaleitem("", "created", 1, this.resultsPerPage, false));
+    async updatePage() {
+      if(this.showAdvancedSearch) {
+        const result = await advanceSearchSaleitem(this.previousQuery, this.currentPage, this.resultsPerPage);
+        if (typeof result === 'string'){
+          this.errorMessage = result;
+        } else {
+          this.errorMessage = undefined;
+          this.resultsPage = result;
+        }
+      }
+      else {
+        this.simpleSearch();
+      }
     },
   },
   watch: {
@@ -155,27 +163,15 @@ export default {
     totalPages() {
       this.currentPage = Math.max(Math.min(this.currentPage, this.totalPages), 1);
     },
-    /**
-     * Whenever user changes page on advanced search, send a new request with the old query and updated page number.
-     * If on the simple search page, send request with the new query and page number.
-     */
-    async currentPage() {
-      if(this.showAdvancedSearch) {
-        const result = await advanceSearchSaleitem(this.previousQuery, this.currentPage, this.resultsPerPage);
-        if (typeof result === 'string'){
-          this.errorMessage = result;
-        } else {
-          this.errorMessage = undefined;
-          this.resultsPage = result;
-        }}
-      else this.updatePage();
+    currentPage() {
+      this.updatePage();
     },
     resultsPerPage() {
       this.updatePage();
     },
   },
   async beforeMount() {
-    this.updateResults();
+    this.updatePage();
   }
 };
 </script>

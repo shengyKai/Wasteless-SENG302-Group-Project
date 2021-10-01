@@ -236,6 +236,7 @@ import {
   passwordRules, phoneNumberRules,
   postCodeRules,
   streetNumRules,
+  getLocalDate,
 } from "@/utils";
 import {createUser} from "@/api/user";
 
@@ -403,8 +404,8 @@ export default {
   //as any components are added to the dom, mounted() will be called
   mounted () {
     //sets maxDate and date of birth value
-    this.maxDate = this.minimumDateOfBirth().toISOString().slice(0, 10);
-    this.dob = this.minimumDateOfBirth().toISOString().slice(0, 10);
+    this.maxDate = getLocalDate(this.minimumDateOfBirth());
+    this.dob = getLocalDate(this.minimumDateOfBirth());
   }
 };
 
