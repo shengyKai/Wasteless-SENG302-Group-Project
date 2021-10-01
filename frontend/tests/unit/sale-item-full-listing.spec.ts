@@ -153,10 +153,6 @@ describe('FullSaleListing.vue', () => {
     expect(wrapper.text()).toContain("Baked Beans as they should be.");
   });
 
-  it("Must contain the manufactured origin country of the sale", () => {
-    expect(wrapper.text()).toContain("Country of Sale: New Z");
-  });
-
   it("Must contain the manufactured details", () => {
     expect(wrapper.text()).toContain("Manufacturer: Heinz Wattie's Limited");
   });
