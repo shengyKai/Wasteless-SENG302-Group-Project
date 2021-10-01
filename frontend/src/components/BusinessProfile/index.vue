@@ -1,8 +1,13 @@
 <template>
   <div>
-    <v-row v-if="fromSearch && !modifyBusiness" class="mt-6 mb-n10">
+    <v-row v-if="fromBusinessSearch && !modifyBusiness" class="mt-6 mb-n10">
       <v-col class="text-right">
-        <v-btn @click="returnToSearch" color="primary">Return to search</v-btn>
+        <v-btn @click="returnToBusinessSearch" color="primary">Return to search</v-btn>
+      </v-col>
+    </v-row>
+    <v-row v-if="fromSaleSearch && !modifyBusiness" class="mt-6 mb-n10">
+      <v-col class="text-right">
+        <v-btn @click="returnToSaleSearch" color="primary">Return to search</v-btn>
       </v-col>
     </v-row>
     <div v-if='!modifyBusiness && this.business' class="mt-16">
@@ -178,12 +183,17 @@ export default {
           user.role === 'globalApplicationAdmin';
     },
 
-    fromSearch() {
-      return this.$route.query.businessType !== undefined
-          || this.$route.query.orderBy !== undefined
-          || this.$route.query.page !== undefined
-          || this.$route.query.reverse !== undefined
-          || this.$route.query.searchQuery !== undefined;
+    /**
+     * Determines whether the user has been routed to the profile from the business search page
+     */
+    fromBusinessSearch() {
+      return this.$route.query.fromPage === "businessSearch";
+    },
+    /**
+     * Determines whether the user has been routed to the profile from the sale listing search page
+     */
+    fromSaleSearch() {
+      return this.$route.query.fromPage === "saleSearch";
     },
     businessImages() {
       return this.business.images;
@@ -200,8 +210,14 @@ export default {
     /**
      * Returns to the search page, keeping the search parameters
      */
-    async returnToSearch() {
+    async returnToBusinessSearch() {
       await this.$router.push({path: '/search/business', query:{...this.$route.query}});
+    },
+    /**
+     * Returns to the search page, keeping the search parameters
+     */
+    async returnToSaleSearch() {
+      await this.$router.push({path: '/search/sales', query:{...this.$route.query}});
     },
     /**
      * Returns the appropriate color of the admin for their chip

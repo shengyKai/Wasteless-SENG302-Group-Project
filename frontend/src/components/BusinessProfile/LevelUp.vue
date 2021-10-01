@@ -1,9 +1,9 @@
 <template>
   <div>
     <v-progress-linear class="maxXP" height="25" :value="progress">
-      <strong class="ml-2">
-        <div class="float-left">{{points}}</div>
-        <div v-if="threshold" class="float-left">/ {{threshold}}</div>
+      <strong>
+        <span>{{points}} </span>
+        <span v-if="threshold">/ {{threshold}}</span>
       </strong>
     </v-progress-linear>
   </div>
