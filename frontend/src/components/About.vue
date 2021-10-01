@@ -1,5 +1,5 @@
 <template>
-  <v-card>
+  <v-card class="mt-16">
     <v-card-title>
       About
     </v-card-title>
