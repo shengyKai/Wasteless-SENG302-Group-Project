@@ -293,10 +293,11 @@ export default {
   },
   methods: {
     /**
-     * Shows the business profile page
+     * Tells the parent to visit the business profile page
+     * @param businessId ID of the business to visit
      */
     viewProfile(businessId) {
-      this.$router.push("/business/" + businessId);
+      this.$emit("viewProfile", businessId);
     },
     /** Change the user interest status on the listing (toggle)
      */

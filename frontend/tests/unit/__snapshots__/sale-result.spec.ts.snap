@@ -11,9 +11,9 @@ exports[`SaleResult.vue Component matches snapshot 1`] = `
         <div class="col">
           <h4><a>Watties Baked Beans - 420g can</a>
             from
-            <router-link-stub to="/business/5" class="text--secondary">
+            <span class="text--secondary link text-decoration-underline">
               This Inc.
-            </router-link-stub>
+            </span>
           </h4>
         </div>
       </div>

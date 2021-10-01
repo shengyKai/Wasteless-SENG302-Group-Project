@@ -233,7 +233,8 @@ export default {
         orderBy : this.orderBy,
         page : this.currentPage.toString(),
         reverse : this.reverse.toString(),
-        searchQuery : this.searchQuery
+        searchQuery : this.searchQuery,
+        fromPage: "businessSearch"
       };
       await this.$router.push({name: 'businessProfile',params:{id:businessId} , query});
     }
