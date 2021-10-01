@@ -32,7 +32,7 @@
           <v-row>
             <v-col cols="11">
               <span>
-                <h1 class="d-inline-block">{{ business.name }}</h1>
+                <h1 class="d-inline-block mr-3">{{ business.name }}</h1>
                 <RankIcon v-if="business.rank.name !== 'bronze'" :rankName="business.rank.name"/>
               </span>
             </v-col>
@@ -62,7 +62,7 @@
         <v-btn class="mr-2" outlined color="primary" @click="goSalePage" :value="false" width="150">
           Sale listings
         </v-btn>
-        <v-btn v-if="!isAdmin" class="" outlined color="primary" @click="goSaleReports" :value="false" width="150">
+        <v-btn v-if="isAdmin" class="" outlined color="primary" @click="goSaleReports" :value="false" width="150">
           Sale reports
         </v-btn>
         <v-container fluid>
