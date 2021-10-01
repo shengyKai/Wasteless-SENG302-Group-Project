@@ -1,13 +1,8 @@
 <template>
   <div>
-    <v-row v-if="fromBusinessSearch && !modifyBusiness" class="mt-6 mb-n10">
+    <v-row v-if="referrer !== undefined && !modifyBusiness" class="mt-6 mb-n10">
       <v-col class="text-right">
-        <v-btn @click="returnToBusinessSearch" color="primary">Return to search</v-btn>
-      </v-col>
-    </v-row>
-    <v-row v-if="fromSaleSearch && !modifyBusiness" class="mt-6 mb-n10">
-      <v-col class="text-right">
-        <v-btn @click="returnToSaleSearch" color="primary">Return to search</v-btn>
+        <v-btn @click="returnToReferrer" color="primary">Return {{referrer === 'home' ? 'home' : 'to search'}}</v-btn>
       </v-col>
     </v-row>
     <div v-if='!modifyBusiness && this.business' class="mt-16">
@@ -155,6 +150,9 @@ export default {
       return this.business.administrators.map(admin => admin.id).includes(this.$store.state.user.id) ||
       [USER_ROLES.DGAA, USER_ROLES.GAA].includes(this.$store.getters.role);
     },
+    /**
+     * Gets the message for the business's creation date.
+     */
     createdMsg() {
       if (this.business.created === undefined) return '';
 
@@ -167,34 +165,39 @@ export default {
 
       return `${parts[2]} ${parts[1]} ${parts[3]} (${diffMonths} months ago)`;
     },
+    /**
+     * Gets the list of business admins
+     */
     administrators() {
       return this.business?.administrators || [];
     },
+    /**
+     * Checks whether the current user is acting as this business.
+     */
     isActingAsCurrentBusiness() {
       const isBusiness =  this.$store.state.activeRole?.type === 'business';
       if (!isBusiness) return false;
       const user = this.$store.state.user;
       return user.businessesAdministered.map(business => business.id).includes(this.business.id);
     },
+    /**
+     * Checks whether the current user has permission to act as this business.
+     */
     permissionToActAsBusiness() {
       const user = this.$store.state.user;
       return this.isActingAsCurrentBusiness ||
           user.role === 'defaultGlobalApplicationAdmin' ||
           user.role === 'globalApplicationAdmin';
     },
-
     /**
-     * Determines whether the user has been routed to the profile from the business search page
+     * Gets the page name that sent the user here
      */
-    fromBusinessSearch() {
-      return this.$route.query.fromPage === "businessSearch";
+    referrer() {
+      return this.$route.query.fromPage;
     },
     /**
-     * Determines whether the user has been routed to the profile from the sale listing search page
+     * Gets the list of business images
      */
-    fromSaleSearch() {
-      return this.$route.query.fromPage === "saleSearch";
-    },
     businessImages() {
       return this.business.images;
     },
@@ -210,8 +213,16 @@ export default {
     /**
      * Returns to the search page, keeping the search parameters
      */
-    async returnToBusinessSearch() {
-      await this.$router.push({path: '/search/business', query:{...this.$route.query}});
+    async returnToReferrer() {
+      if (this.referrer === 'businessSearch') {
+        await this.$router.push({path: '/search/business', query:{...this.$route.query}});
+      } else if (this.referrer === 'saleSearch') {
+        await this.$router.push({path: '/search/sales', query:{...this.$route.query}});
+      } else if (this.referrer === 'home') {
+        await this.$router.push({path: '/home'});
+      } else {
+        throw new Error('Unknown referrer: ' + this.referrer);
+      }
     },
     /**
      * Returns to the search page, keeping the search parameters
