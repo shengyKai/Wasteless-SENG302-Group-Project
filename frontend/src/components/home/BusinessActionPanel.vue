@@ -10,7 +10,7 @@
           <v-list-item-group>
             <v-list-item @click="viewProfile">
               <v-list-item-icon>
-                <v-icon color="blue">mdi-account-circle</v-icon>
+                <v-icon>mdi-account-circle</v-icon>
               </v-list-item-icon>
               <v-list-item-content>
                 <v-list-item-title>Profile</v-list-item-title>
@@ -18,7 +18,7 @@
             </v-list-item>
             <v-list-item @click="goToCataloguePage">
               <v-list-item-icon>
-                <v-icon color="brown lighten-1">mdi-clipboard-text</v-icon>
+                <v-icon>mdi-view-list</v-icon>
               </v-list-item-icon>
               <v-list-item-content>
                 <v-list-item-title>Catalogue</v-list-item-title>
@@ -26,7 +26,7 @@
             </v-list-item>
             <v-list-item @click="goInventoryPage">
               <v-list-item-icon>
-                <v-icon color="red lighten-2">mdi-cart</v-icon>
+                <v-icon>mdi-view-list</v-icon>
               </v-list-item-icon>
               <v-list-item-content>
                 <v-list-item-title>Inventory</v-list-item-title>
@@ -34,7 +34,7 @@
             </v-list-item>
             <v-list-item @click="goSalePage">
               <v-list-item-icon>
-                <v-icon color="blue-grey darken-1">mdi-view-list</v-icon>
+                <v-icon>mdi-view-list</v-icon>
               </v-list-item-icon>
               <v-list-item-content>
                 <v-list-item-title>Sale Listing</v-list-item-title>
@@ -42,7 +42,7 @@
             </v-list-item>
             <v-list-item @click="goSaleReports">
               <v-list-item-icon>
-                <v-icon color="primary">mdi-chart-box-outline</v-icon>
+                <v-icon>mdi-view-list</v-icon>
               </v-list-item-icon>
               <v-list-item-content>
                 <v-list-item-title>Sale Reports</v-list-item-title>
