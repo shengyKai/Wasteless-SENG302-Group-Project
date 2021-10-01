@@ -118,7 +118,7 @@ public class SaleItemGenerator {
 
         float price = generatePricePerItem();
 
-        int quantity = random.nextInt(inventoryItemInfo.getRemainingQuantity());
+        int quantity = random.nextInt(inventoryItemInfo.getRemainingQuantity()) + 1;
         try (PreparedStatement stmt = conn.prepareStatement(
             "INSERT INTO sale_item(closes, created, more_info, price, quantity, inventory_item_id)"
                 + "VALUES (?, ?, ?, ?, ?, ?)",
