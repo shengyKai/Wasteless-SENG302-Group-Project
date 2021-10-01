@@ -91,6 +91,9 @@ export default {
       if (this.resultsPage === undefined) return 0;
       return this.resultsPage.count;
     },
+    /**
+     * The message to be displayed in the pagination element
+     */
     resultsMessage() {
       if(this.totalResults === 0) return 'There are no results to show';
       const pageStartIndex = (this.currentPage - 1) * this.resultsPerPage;
@@ -172,6 +175,10 @@ export default {
         this.wasAdvancedSearch = true;
       }
     },
+    /**
+     * Routes user to the given business profile
+     * includes current search parameters as URL queries so that the current state can be restored.
+     */
     async viewProfile(businessId) {
       if (this.wasAdvancedSearch) {
         const advancedParams = JSON.stringify(this.advancedSearchParams);
@@ -182,6 +189,10 @@ export default {
 
       }
     },
+    /**
+     * Attempts to update the search parameters with the values from URL query
+     * Used for when returning from the business profile page.
+     */
     async updateSearchFromRoute() {
       if (this.$route.query.currentPage) {
         this.currentPage = parseInt(this.$route.query.currentPage);
