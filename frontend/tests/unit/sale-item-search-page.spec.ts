@@ -1,24 +1,33 @@
 import { createLocalVue, shallowMount, Wrapper } from "@vue/test-utils";
 import Vue from "vue";
+import Vuex from 'vuex';
 import Vuetify from "vuetify";
 import router from '@/plugins/router';
+import VueRouter from 'vue-router';
 
 import SearchSaleItems from "@/components/SaleListing/SearchSaleItems.vue";
+import { getStore, resetStoreForTesting } from "@/store";
+
+Vue.use(Vuex);
+resetStoreForTesting();
 
 describe("SearchSaleItems.vue", () => {
 
   Vue.use(Vuetify);
 
   const localVue = createLocalVue();
+  localVue.use(VueRouter);
   let wrapper : Wrapper<any>;
 
   beforeEach(() => {
     const vuetify = new Vuetify();
+    const store = getStore();
 
     wrapper = shallowMount(SearchSaleItems, {
       localVue,
       vuetify,
       router,
+      store,
     });
   });
 
