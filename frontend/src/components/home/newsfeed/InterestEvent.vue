@@ -34,7 +34,9 @@
         :saleItem="event.saleItem"
         @goBack="fullSaleOpen=false"
         @refresh="fullSaleOpen=false"
-        @interestUpdate="updateInterest"/>
+        @interestUpdate="updateInterest"
+        @viewProfile="viewBusinessProfile"
+      />
     </v-dialog>
   </Event>
 </template>
@@ -104,11 +106,17 @@ export default {
         name: "businessProfile",
         params: {
           id: this.business.id
-        }
+        },
+        query: {
+          fromPage: 'home',
+        },
       };
     },
   },
   methods: {
+    viewBusinessProfile() {
+      this.$router.push(this.businessRoute);
+    },
     /**
      * Updates the interest status.
      * Used for when the interest changes outside of the component

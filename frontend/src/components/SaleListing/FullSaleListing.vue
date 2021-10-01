@@ -15,6 +15,11 @@
                     {{ product.name }}
                   </h2>
                   <h4 class="link ml-4 mt-1 text-decoration-underline" @click="viewProfile(business.id)">FROM {{this.business.name}}</h4>
+                  <v-row>
+                    <p class="align-self-end ml-5 mt-5">
+                      {{ product.business.businessType }}
+                    </p>
+                  </v-row>
                 </v-row>
                 <v-row>
                   <div class="text--primary mt-3">
@@ -25,24 +30,26 @@
             </v-card>
           </v-col>
           <!-- Buy feature will not be implemented yet -->
-          <v-row>
-            <v-col class="align-self-center text-center">
-              <v-btn class="pl-2 pr-2" color="primary darken-1" @click="buy">
-                Buy
-                <v-icon>mdi-currency-usd</v-icon>
-              </v-btn>
-              <!-- Thumb up/down button to show and allow user the like & unlike feature -->
-              <v-btn ref="likeButton" class=" pl-2 pr-2 ml-2" color="grey lighten-2" @click="changeInterest">
-                {{thumbMessage}} {{interestCount}}
-                <v-icon class="ml-1">{{thumbIcon}}</v-icon>
-              </v-btn>
-              <!-- A return button for user to hide full sale listing-->
-              <v-btn class="ml-2 mr-1 pl-2 pr-1" color="secondary" @click="goBack">
-                Hide
-                <v-icon class="ml-1">mdi-arrow-left</v-icon>
-              </v-btn>
-            </v-col>
-          </v-row>
+          <v-col class="mt-5">
+            <v-row>
+              <v-col class="align-self-center text-center">
+                <v-btn class="pl-2 pr-2" color="primary darken-1" @click="buy">
+                  Buy
+                  <v-icon>mdi-currency-usd</v-icon>
+                </v-btn>
+                <!-- Thumb up/down button to show and allow user the like & unlike feature -->
+                <v-btn ref="likeButton" class=" pl-2 pr-2 ml-2" color="grey lighten-2" @click="changeInterest">
+                  {{thumbMessage}} {{interestCount}}
+                  <v-icon class="ml-1">{{thumbIcon}}</v-icon>
+                </v-btn>
+                <!-- A return button for user to hide full sale listing-->
+                <v-btn class="ml-2 mr-1 pl-2 pr-1" color="secondary" @click="goBack">
+                  Hide
+                  <v-icon class="ml-1">mdi-arrow-left</v-icon>
+                </v-btn>
+              </v-col>
+            </v-row>
+          </v-col>
           <!-- </v-col> -->
         </v-row>
       </div>
@@ -64,7 +71,7 @@
                 <h4 class="font-weight-bold">Price:</h4>
               </v-col>
               <v-col cols="6" sm="3">
-                <h4 class="font-weight-regular">${{ saleItem.price }}</h4>
+                <h4 class="font-weight-regular">{{currency.symbol}}{{ saleItem.price }} {{currency.code}}</h4>
               </v-col>
               <v-col cols="6" sm="3">
                 <h4 class=" font-weight-bold">Date Created:</h4>
@@ -109,10 +116,10 @@
                 <h4 class=" font-weight-regular">{{ sellByFormatted }}</h4>
               </v-col>
               <v-col cols="6" sm="3">
-                <h4 class=" font-weight-bold">Country of Sale:</h4>
+                <h4 class=" font-weight-bold">Location:</h4>
               </v-col>
               <v-col cols="6" sm="3">
-                <h4 class=" font-weight-regular">{{ product.countryOfSale }}</h4>
+                <h4 class=" font-weight-regular">{{ saleLocation }}</h4>
               </v-col>
               <v-row>
                 <v-col cols="6" sm="3">
@@ -137,6 +144,7 @@ import ImageCarousel from "@/components/image/ImageCarousel";
 import { currencyFromCountry } from "@/api/currency";
 import { setListingInterest, getListingInterest, purchaseListing} from '../../api/sale';
 import { formatDate, formatPrice } from '@/utils';
+import convertAddressToReadableText from '@/components/utils/Methods/convertAddressToReadableText';
 
 export default {
   name: "FullSaleListing",
@@ -165,6 +173,9 @@ export default {
     this.interestCount = this.saleItem.interestCount;
   },
   computed: {
+    saleLocation() {
+      return convertAddressToReadableText(this.business.address, "partial");
+    },
     /**
      * Easier access to business properties
      */
@@ -328,8 +339,8 @@ export default {
     /**
      * Computes the currency
      */
-    computeCurrency() {
-      this.currency = currencyFromCountry(this.product.countryOfSale);
+    async computeCurrency() {
+      this.currency = await currencyFromCountry(this.product.countryOfSale);
     },
     /**
      * Minimize the full sale listing and back to the listing result page

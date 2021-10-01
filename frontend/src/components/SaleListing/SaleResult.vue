@@ -5,8 +5,8 @@
         <Avatar :product="product" size="medium-large"/>
       </v-col>
       <v-col>
-        <v-row dense>
-          <v-col>
+        <v-row dense class="justify-space-between">
+          <v-col cols="8">
             <h4>
               <a ref="title">{{ product.name }}</a>
               from
@@ -14,6 +14,11 @@
                 {{ product.business.name }}
               </span>
             </h4>
+          </v-col>
+          <v-col cols="auto" class="align-self-center">
+            <body>
+              {{ product.business.businessType }}
+            </body>
           </v-col>
         </v-row>
         <v-row class="my-0 py-0">
@@ -28,7 +33,7 @@
             Creation Date:
           </v-col>
           <v-col cols="auto">
-            ${{ saleItem.price }}
+            {{currency.symbol}}{{ saleItem.price }} {{currency.code}}
             <br>
             {{ createdFormatted }}
           </v-col>

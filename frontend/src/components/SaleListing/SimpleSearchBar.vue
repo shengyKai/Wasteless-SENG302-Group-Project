@@ -4,6 +4,7 @@
       <v-col cols="12" lg="4">
         <v-text-field
           clearable
+          @click:clear="resetQuery"
           flat
           solo-inverted
           hide-details
@@ -66,6 +67,9 @@ export default {
     value: Object,
   },
   methods: {
+    resetQuery() {
+      this.searchParams.query = "";
+    },
     /**
      * Emit a message to the parent so that it will show the advanced search view.
      */

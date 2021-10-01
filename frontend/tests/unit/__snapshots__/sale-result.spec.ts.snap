@@ -7,14 +7,20 @@ exports[`SaleResult.vue Component matches snapshot 1`] = `
       <div class="v-avatar white--text headline secondary" style="height: 80px; min-width: 80px; width: 80px; font-size: 40px;">W</div>
     </div>
     <div class="col">
-      <div class="row row--dense">
-        <div class="col">
+      <div class="row justify-space-between row--dense">
+        <div class="col col-8">
           <h4><a>Watties Baked Beans - 420g can</a>
             from
             <span class="text--secondary link text-decoration-underline">
               This Inc.
             </span>
           </h4>
+        </div>
+        <div class="align-self-center col col-auto">
+
+          <body>
+
+          </body>
         </div>
       </div>
       <div class="row my-0 py-0">
@@ -28,7 +34,7 @@ exports[`SaleResult.vue Component matches snapshot 1`] = `
           Creation Date:
         </div>
         <div class="col col-auto">
-          $17.99
+          Currency symbol17.99 Currency code
           <br>
           14 Jul 2021
         </div>
