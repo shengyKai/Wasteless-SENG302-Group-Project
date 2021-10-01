@@ -101,7 +101,7 @@ describe('SearchResults.vue', () => {
   it('The search query passed in from the url is searched', () => {
     setResults(createTestUsers(5));
     createWrapper();
-    expect(search).toBeCalledWith('test_query', 1, RESULTS_PER_PAGE, 'relevance', false);
+    expect(search).toBeCalledWith('test_query', 1, RESULTS_PER_PAGE, 'firstName', false);
   });
 
   it('The search results should be displayed somewhere', async () => {
@@ -156,7 +156,7 @@ describe('SearchResults.vue', () => {
     // Update the search box
     const searchBox = wrapper.findComponent({ name: 'v-text-field' });
     await searchBox.findAll('input').at(0).setValue('new_test_query');
-    expect(search).lastCalledWith('new_test_query', 1, RESULTS_PER_PAGE, 'relevance', false);
+    expect(search).lastCalledWith('new_test_query', 1, RESULTS_PER_PAGE, 'firstName', false);
   });
 
   it('If there are many pages then there should be a pagination component with many pages', async () => {
