@@ -19,7 +19,6 @@
         solo-inverted
         hide-details
         :items="[
-          { text: 'Relevance',   value: 'relevance'  },
           { text: 'User ID',     value: 'userId'     },
           { text: 'First Name',  value: 'firstName'  },
           { text: 'Middle Name', value: 'middleName' },
@@ -103,7 +102,7 @@ export default {
       /**
        * The current search result order
        */
-      orderBy: 'relevance',
+      orderBy: 'firstName',
       /**
        * Currently selected page (1 is first page)
        */
