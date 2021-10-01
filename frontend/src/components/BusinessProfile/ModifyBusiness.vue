@@ -150,7 +150,7 @@
                   />
                 </v-col>
               </v-row>
-              <v-row justify="end" no-gutters>
+              <v-row v-if="country !== business.address.country" justify="end" no-gutters>
                 <!-- INPUT: Update Currency -->
                 <v-checkbox
                   v-model="updateProductCountry"
@@ -337,7 +337,7 @@ export default {
      */
     async openCurrencyDialog() {
       this.newCountryCode = await this.currencyCodeFromCountry(this.country);
-      if (this.updateProductCountry === true && this.newCountryCode !== this.previousCountryCode) {
+      if (this.updateProductCountry) {
         this.currencyConfirmDialog = true;
       } else {
         await this.proceedWithModifyBusiness();
