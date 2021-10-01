@@ -2,12 +2,26 @@ import Vue from 'vue';
 import Vuetify from 'vuetify';
 import { createLocalVue, mount, Wrapper } from '@vue/test-utils';
 import ReportOptionsBar from "@/components/BusinessProfile/SalesReport/ReportOptionsBar.vue";
+import {findButtonWithText} from "./utils";
 
 Vue.use(Vuetify);
 
+const currentDate = new Date("2012-12-21");
 describe('ReportOptionsBar.vue', () => {
   let wrapper: Wrapper<any>;
   let vuetify: Vuetify;
+
+
+  function findButton(component: string) {
+    return findButtonWithText(wrapper, component);
+  }
+
+  beforeAll(() => {
+    jest
+      .useFakeTimers('modern')
+      .setSystemTime(currentDate);
+  });
+
 
   beforeEach(async () => {
     const localVue = createLocalVue();
@@ -18,8 +32,9 @@ describe('ReportOptionsBar.vue', () => {
       vuetify,
       data() {
         return {
-          fromDate: new Date("01-01-2021").toISOString().slice(0, 10),
-          toDate: new Date("01-01-2021").toISOString().slice(0, 10),
+          fromDate: "2012-01-01",
+          toDate: "2012-02-01",
+          granularity: "yearly",
         };
       }
     });
@@ -29,76 +44,66 @@ describe('ReportOptionsBar.vue', () => {
     wrapper.destroy();
   });
 
-  it("The maximum possible date for the From and To datepickers are at most the present day or toDate", ()=> {
-    expect(new Date(wrapper.vm.maxFromDate) <= new Date()).toBeTruthy();
-    expect(new Date(wrapper.vm.maxFromDate) <= new Date(wrapper.vm.toDate)).toBeTruthy();
-    expect(new Date(wrapper.vm.maxToDate) <= new Date()).toBeTruthy();
+  it("The maximum/minimum possible date for the From and To datepickers are correct", ()=> {
+    expect(new Date(wrapper.vm.maxFromDate)).toStrictEqual(new Date("2012-02-01")); // Maximum fromDate is toDate
+    expect(new Date(wrapper.vm.maxToDate)).toStrictEqual(currentDate); // Maximum toDate is now
+    expect(new Date(wrapper.vm.minToDate)).toStrictEqual(new Date("2012-01-01")); // Minimum toDate is fromDate
   });
 
-  it("If toDate is not set, maxFromDate will be changed to the present day", async() => {
+  it("If toDate is not set, maxFromDate will be the present day", async() => {
     await wrapper.setData({
-      toDate: null
+      toDate: undefined,
     });
-    expect(wrapper.vm.maxFromDate).toEqual(new Date().toISOString().slice(0, 10));
+    expect(new Date(wrapper.vm.maxFromDate)).toStrictEqual(currentDate);
   });
 
-  it("If the toDate date is before the fromDate date, the fromDate value is changed to that value", async ()=> {
+  it('If preset period "Current Year" is selected, then the fromDate/toDate should be set accordingly', async () => {
     await wrapper.setData({
-      toDate: new Date("01-12-2020").toISOString().slice(0, 10)
+      presetPeriodUserString: 'Current Year',
     });
-    expect(wrapper.vm.fromDate).toEqual(wrapper.vm.toDate);
+
+    expect(new Date(wrapper.vm.fromDate)).toStrictEqual(new Date("2012-01-01"));
+    expect(new Date(wrapper.vm.toDate)).toStrictEqual(currentDate);
   });
 
-  it("If the fromDate date is after the toDate date, the toDate value is changed to that value", async ()=> {
+  it('If preset period "Current Month" is selected, then the fromDate/toDate should be set accordingly', async () => {
     await wrapper.setData({
-      fromDate: new Date().toISOString().slice(0, 10)
+      presetPeriodUserString: 'Current Month',
     });
-    expect(wrapper.vm.toDate).toEqual(wrapper.vm.fromDate);
+
+    expect(new Date(wrapper.vm.fromDate)).toStrictEqual(new Date("2012-12-01"));
+    expect(new Date(wrapper.vm.toDate)).toStrictEqual(currentDate);
   });
 
-  it("If toDate is set, periodBefore must be null", async() => {
+  it('If preset period "Current Week" is selected, then the fromDate/toDate should be set accordingly', async () => {
     await wrapper.setData({
-      toDate: new Date("01-12-2020").toISOString().slice(0, 10)
+      presetPeriodUserString: 'Current Week',
     });
-    expect(wrapper.vm.periodBefore).toEqual(null);
+
+    expect(new Date(wrapper.vm.fromDate)).toStrictEqual(new Date("2012-12-17"));
+    expect(new Date(wrapper.vm.toDate)).toStrictEqual(currentDate);
   });
 
-  it("If toDate is set, periodBefore must be null", async() => {
+  it('If preset period "Today" is selected, then the fromDate/toDate should be set accordingly', async () => {
     await wrapper.setData({
-      fromDate: new Date("01-12-2020").toISOString().slice(0, 10)
+      presetPeriodUserString: 'Today',
     });
-    expect(wrapper.vm.periodBefore).toEqual(null);
+
+    expect(new Date(wrapper.vm.fromDate)).toStrictEqual(currentDate);
+    expect(new Date(wrapper.vm.toDate)).toStrictEqual(currentDate);
   });
 
-  it("If periodBefore is set, toDate and fromDate must be null", async() => {
-    await wrapper.setData({
-      periodBefore: "something"
-    });
-    expect(wrapper.vm.toDate).toEqual(null);
-    expect(wrapper.vm.fromDate).toEqual(null);
+  it("Clicking on generate will emit an event to SalesReportPage along with the specified report options", async () => {
+    await findButton("Generate").trigger("click");
+    expect(wrapper.emitted().sendRequestParams).toBeTruthy();
+    expect(wrapper.emitted().sendRequestParams as any[1]).toEqual([[{
+      fromDate: "2012-01-01",
+      toDate: "2012-02-01",
+      granularity: "yearly"
+    }]]);
   });
 
-  it("If toDate is set and fromDate is null, fromDate will be set to toDate's value", async() => {
-    // Have to separate the setData for both of it because the watcher will not be triggered if both is set
-    // at the same time
-    await wrapper.setData({
-      fromDate: null
-    });
-    await wrapper.setData({
-      toDate: new Date().toISOString().slice(0, 10)
-    });
-    expect(wrapper.vm.fromDate).toEqual(new Date().toISOString().slice(0, 10));
-  });
-
-  it("If fromDate is set and toDate is null, toDate will be set to fromDate's value", async() => {
-    // Have to separate the setData for both of it because the watcher will not be triggered if both is set
-    // at the same time
-    await wrapper.setData({
-      toDate: null,
-    });
-    await wrapper.setData({
-      fromDate: new Date().toISOString().slice(0, 10)
-    });
-    expect(wrapper.vm.toDate).toEqual(new Date().toISOString().slice(0, 10));
+  it('Matches snapshot', () => {
+    expect(wrapper).toMatchSnapshot();
   });
 });

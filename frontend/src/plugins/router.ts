@@ -18,6 +18,8 @@ import Marketplace from "../components/marketplace/Marketplace.vue";
 import UserCards from "../components/marketplace/UserCards.vue";
 import ImageManager from "../components/image/ImageManager.vue";
 import SalesReportPage from "../components/BusinessProfile/SalesReport/SalesReportPage.vue";
+import About from "../components/About.vue";
+import Contact from "../components/Contact.vue";
 import { COOKIE, getCookie } from "@/utils";
 import { getStore } from "@/store";
 
@@ -118,6 +120,16 @@ const routes = [
     path: '/salesreport/:id',
     component: SalesReportPage,
     meta: { title: 'Business sales report' },
+  },
+  {
+    path: "/about",
+    component: About,
+    meta: { title: 'About' }
+  },
+  {
+    path: "/contact",
+    component: Contact,
+    meta: { title: 'Contact' }
   },
 ];
 

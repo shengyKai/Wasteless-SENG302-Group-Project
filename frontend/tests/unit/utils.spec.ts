@@ -1,7 +1,12 @@
-import { getCookie, trimToLength } from "@/utils";
+import { getCookie, getLocalDate, trimToLength } from "@/utils";
 
 
 describe('utils.ts', () => {
+  it('getLocalDate returns expected value', () => {
+    const local = '2012-12-21';
+    expect(getLocalDate(new Date(local))).toBe(local);
+  });
+
   it.each([
     ['Hello world', 4, 'Hell' ],
     ['Hello world', 8, 'Hello' ],

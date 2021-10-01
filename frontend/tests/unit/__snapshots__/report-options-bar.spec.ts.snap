@@ -1,0 +1,99 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`ReportOptionsBar.vue Matches snapshot 1`] = `
+<div class="v-card v-sheet theme--dark secondary">
+  <div class="v-card__actions">
+    <div class="row align-center justify-center">
+      <div class="col-md-2 col-12">
+        <div class="v-input v-input--is-label-active v-input--is-dirty v-input--is-readonly theme--dark v-text-field v-text-field--enclosed v-text-field--outlined">
+          <div class="v-input__control">
+            <div class="v-input__slot">
+              <div class="v-input__prepend-inner">
+                <div class="v-input__icon v-input__icon--prepend-inner"><i aria-hidden="true" class="v-icon notranslate mdi mdi-calendar theme--dark"></i></div>
+              </div>
+              <fieldset aria-hidden="true">
+                <legend style="width: 0px;"><span>​</span></legend>
+              </fieldset>
+              <div class="v-text-field__slot"><label for="input-158" class="v-label v-label--active theme--dark" style="left: 0px; position: absolute;">From</label><input role="button" aria-haspopup="true" aria-expanded="false" id="input-158" readonly="readonly" type="text"></div>
+            </div>
+            <div class="v-text-field__details">
+              <div class="v-messages theme--dark">
+                <transition-group-stub tag="div" name="message-transition" class="v-messages__wrapper"></transition-group-stub>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="v-menu" persistent="">
+          <!---->
+        </div>
+      </div>
+      <div class="col-md-2 col-12">
+        <div class="v-input v-input--is-label-active v-input--is-dirty v-input--is-readonly theme--dark v-text-field v-text-field--enclosed v-text-field--outlined">
+          <div class="v-input__control">
+            <div class="v-input__slot">
+              <div class="v-input__prepend-inner">
+                <div class="v-input__icon v-input__icon--prepend-inner"><i aria-hidden="true" class="v-icon notranslate mdi mdi-calendar theme--dark"></i></div>
+              </div>
+              <fieldset aria-hidden="true">
+                <legend style="width: 0px;"><span>​</span></legend>
+              </fieldset>
+              <div class="v-text-field__slot"><label for="input-163" class="v-label v-label--active theme--dark" style="left: 0px; position: absolute;">To</label><input role="button" aria-haspopup="true" aria-expanded="false" id="input-163" readonly="readonly" type="text"></div>
+            </div>
+            <div class="v-text-field__details">
+              <div class="v-messages theme--dark">
+                <transition-group-stub tag="div" name="message-transition" class="v-messages__wrapper"></transition-group-stub>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="v-menu mb-0 pb-0" persistent="">
+          <!---->
+        </div>
+      </div>
+      <div class="col-md-3 col-12">
+        <div class="v-input v-input--hide-details theme--dark v-text-field v-text-field--single-line v-text-field--solo v-text-field--solo-inverted v-text-field--solo-flat v-text-field--enclosed v-select">
+          <div class="v-input__control">
+            <div role="button" aria-haspopup="listbox" aria-expanded="false" aria-owns="list-167" class="v-input__slot">
+              <div class="v-input__prepend-inner">
+                <div class="v-input__icon v-input__icon--prepend-inner"><i aria-hidden="true" class="v-icon notranslate mdi mdi-clock-time-four theme--dark"></i></div>
+              </div>
+              <div class="v-select__slot"><label for="input-167" class="v-label theme--dark" style="left: 0px; position: absolute;">Preset periods</label>
+                <div class="v-select__selections"><input id="input-167" readonly="readonly" type="text" aria-readonly="false" autocomplete="off"></div>
+                <div class="v-input__append-inner">
+                  <div class="v-input__icon v-input__icon--append"><i aria-hidden="true" class="v-icon notranslate mdi mdi-menu-down theme--dark"></i></div>
+                </div><input type="hidden">
+              </div>
+              <div class="v-menu">
+                <!---->
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <hr role="separator" aria-orientation="vertical" class="v-divider v-divider--vertical theme--dark">
+      <div class="col-md-2 col-12">
+        <div class="v-input v-input--hide-details v-input--is-label-active v-input--is-dirty theme--dark v-text-field v-text-field--single-line v-text-field--solo v-text-field--solo-inverted v-text-field--solo-flat v-text-field--enclosed v-select">
+          <div class="v-input__control">
+            <div role="button" aria-haspopup="listbox" aria-expanded="false" aria-owns="list-172" class="v-input__slot">
+              <div class="v-select__slot">
+                <div class="v-select__selections">
+                  <div class="v-select__selection v-select__selection--comma">Year</div><input id="input-172" readonly="readonly" type="text" aria-readonly="false" autocomplete="off">
+                </div>
+                <div class="v-input__append-inner">
+                  <div class="v-input__icon v-input__icon--append"><i aria-hidden="true" class="v-icon notranslate mdi mdi-menu-down theme--dark"></i></div>
+                </div><input type="hidden" value="yearly">
+              </div>
+              <div class="v-menu">
+                <!---->
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="text-center col-md-2 col-12"><button type="button" class="v-btn v-btn--is-elevated v-btn--has-bg theme--dark v-size--default primary"><span class="v-btn__content">
+          Generate
+        </span></button></div>
+    </div>
+  </div>
+</div>
+`;
