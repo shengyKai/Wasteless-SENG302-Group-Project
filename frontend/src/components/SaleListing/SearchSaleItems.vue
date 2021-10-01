@@ -3,12 +3,12 @@
     <SimpleSearchBar v-model="simpleSearchParams" v-show="!showAdvancedSearch" @showAdvancedSearch="showAdvancedSearch=true"/>
     <AdvancedSearchBar v-model="advancedSearchParams" v-show="showAdvancedSearch" @hideAdvancedSearch="showAdvancedSearch=false" @searchListings="advancedSearch()"/>
     <v-alert
-      v-if="error !== undefined"
-      type="error"
+      v-if="errorMessage !== undefined"
+      type="errorMessage"
       dismissible
-      @input="error = undefined"
+      @input="errorMessage = undefined"
     >
-      {{ error }}
+      {{ errorMessage }}
     </v-alert>
     <!-- PUT RESULTS HERE -->
     <v-list three-line v-if="resultsPage">
@@ -48,7 +48,7 @@ export default {
   data() {
     return {
       currentPage: 1,
-      error: undefined,
+      errorMessage: undefined,
       resultsPerPage: 10,
       resultsPage: undefined,
       showAdvancedSearch: false,
@@ -67,7 +67,7 @@ export default {
         businessTypes: [],
         lowestPrice: "",
         highestPrice: "",
-        reverse: false
+        reverse: false,
       },
       previousQuery: undefined,
       debouncedUpdateQuery: debounce(this.updateSearchQuery, 500),
@@ -75,7 +75,7 @@ export default {
   },
   computed: {
     /**
-     * The total number of results matching the search, or 0 if there is no search or an error has occured with the search
+     * The total number of results matching the search, or 0 if there is no search or an errorMessage has occured with the search
      */
     totalResults() {
       if (this.resultsPage === undefined) return 0;
