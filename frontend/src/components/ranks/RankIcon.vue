@@ -1,9 +1,9 @@
 <template>
   <v-tooltip top>
     <template #activator="{ on, attrs }">
-      <v-img v-if="rankName === 'silver'" :max-height="sizeHeight" :max-width="sizeWidth" class="ml-2 mb-5 d-inline-block rank" src="../../assets/silver-rank-icon.png" alt="silver star" v-bind="attrs" v-on="on"/>
-      <v-img v-if="rankName === 'gold'" :max-height="sizeHeight" :max-width="sizeWidth" class="ml-2 mb-5 d-inline-block rank" src="../../assets/gold-rank-icon.png" alt="gold star" v-bind="attrs" v-on="on"/>
-      <v-img v-if="rankName === 'platinum'" :max-height="sizeHeight" :max-width="sizeWidth" class="ml-2 mb-5 d-inline-block rank" src="../../assets/platinum-rank-icon.png" alt="platinum star" v-bind="attrs" v-on="on"/>
+      <v-img v-if="rankName === 'silver'" :max-height="sizeHeight" :max-width="sizeWidth" class="d-inline-block rank" src="../../assets/silver-rank-icon.png" alt="silver star" v-bind="attrs" v-on="on"/>
+      <v-img v-if="rankName === 'gold'" :max-height="sizeHeight" :max-width="sizeWidth" class="d-inline-block rank" src="../../assets/gold-rank-icon.png" alt="gold star" v-bind="attrs" v-on="on"/>
+      <v-img v-if="rankName === 'platinum'" :max-height="sizeHeight" :max-width="sizeWidth" class="d-inline-block rank" src="../../assets/platinum-rank-icon.png" alt="platinum star" v-bind="attrs" v-on="on"/>
     </template>
     <span>Business Rank</span>
   </v-tooltip>
@@ -43,9 +43,3 @@ export default {
   }
 };
 </script>
-
-<style scoped>
-.rank {
-  position: fixed;
-}
-</style>

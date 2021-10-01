@@ -18,7 +18,7 @@
           </v-list-item-title>
           <v-list-item-subtitle>{{ insertAddress(business.address) }}</v-list-item-subtitle>
           <v-list-item-subtitle>{{ business.businessType }}</v-list-item-subtitle>
-          <v-list-item-subtitle><strong>Rank: </strong> {{business.rank.name}} ({{business.points}} points) </v-list-item-subtitle>
+          <v-list-item-subtitle><strong>Rank: </strong> {{ business.rank.name.charAt(0).toUpperCase() + business.rank.name.slice(1) }} ({{business.points}} points) </v-list-item-subtitle>
         </v-list-item-content>
       </v-col>
     </v-row>

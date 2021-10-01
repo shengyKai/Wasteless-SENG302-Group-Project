@@ -32,7 +32,7 @@
           <v-row>
             <v-col cols="11">
               <span>
-                <h1 class="d-inline-block">{{ business.name }}</h1>
+                <h1 class="d-inline-block mr-3">{{ business.name }}</h1>
                 <RankIcon v-if="business.rank.name !== 'bronze'" :rankName="business.rank.name"/>
               </span>
             </v-col>
