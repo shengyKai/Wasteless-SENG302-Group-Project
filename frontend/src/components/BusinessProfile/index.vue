@@ -250,7 +250,7 @@ export default {
      * Shows the Sale Reports page
      */
     goSaleReports() {
-      this.$router.push(`/salesreport/${this.$store.state.activeRole.id}`);
+      this.$router.push(`/salesreport/${this.$route.params.id}`);
     },
     /**
      * Updates the business profile page to show the updated details of the business.
