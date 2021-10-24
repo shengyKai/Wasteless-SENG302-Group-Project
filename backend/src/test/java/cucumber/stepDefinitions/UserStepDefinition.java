@@ -8,13 +8,19 @@ import io.cucumber.java.en.And;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
+import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
 import net.minidev.json.parser.JSONParser;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.junit.Assert;
+import org.opentest4j.AssertionFailedError;
+import org.seng302.leftovers.dto.user.UserRole;
+import org.seng302.leftovers.entities.Image;
 import org.seng302.leftovers.entities.Location;
 import org.seng302.leftovers.entities.User;
+import org.seng302.leftovers.exceptions.ValidationResponseException;
+import org.seng302.leftovers.persistence.ImageRepository;
 import org.seng302.leftovers.persistence.UserRepository;
 import org.seng302.leftovers.tools.PasswordAuthenticator;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,7 +29,6 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
-import org.springframework.web.server.ResponseStatusException;
 
 import javax.transaction.Transactional;
 import java.security.NoSuchAlgorithmException;
@@ -32,11 +37,11 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -54,6 +59,8 @@ public class UserStepDefinition {
     private UserRepository userRepository;
     @Autowired
     private SessionFactory sessionFactory;
+    @Autowired
+    private ImageRepository imageRepository;
 
     private JSONObject modifyParameters;
 
@@ -140,7 +147,7 @@ public class UserStepDefinition {
                 .withAddress(Location.covertAddressStringToLocation("4,Rountree Street,Ashburton,Christchurch,New Zealand," +
                         "Canterbury,8041"))
                 .build();
-        user.setRole("globalApplicationAdmin");
+        user.setRole(UserRole.GAA);
         userContext.save(user);
     }
 
@@ -196,7 +203,7 @@ public class UserStepDefinition {
                     .withAddress(userAddress)
                     .build();
             userRepository.save(theUser);
-        } catch (ResponseStatusException | DataIntegrityViolationException ignored) {}
+        } catch (ValidationResponseException | DataIntegrityViolationException ignored) {}
     }
 
     @Then("a user with the email {string} exists")
@@ -376,6 +383,20 @@ public class UserStepDefinition {
             CucumberUtils.setValueAtPath(modifyParameters, path, entry.getValue());
         }
 
+        var imageNamesString = Optional.ofNullable(modifyParameters.get("imageIds"));
+        if (imageNamesString.isPresent()) {
+            List<String> names = Arrays.asList(imageNamesString.get().toString().split(","));
+            var value = names.stream()
+                    .map(imageName -> imageRepository.findByFilename(imageName)
+                            .get().getID())
+                    .collect(Collectors.toList());
+            modifyParameters.put("imageIds", value);
+        } else {
+            modifyParameters.put("imageIds", new JSONArray());
+        }
+
+
+
         User user = userContext.getByName(name);
         requestContext.performRequest(put("/users/" + user.getUserID())
                 .contentType(MediaType.APPLICATION_JSON)
@@ -424,5 +445,11 @@ public class UserStepDefinition {
         assertEquals(oldUser.getDob(), newUser.getDob());
         assertEquals(oldUser.getAuthenticationCode(), newUser.getAuthenticationCode());
     }
+
+    @Given("I am not logged in")
+    public void i_am_not_logged_in() {
+        requestContext.setLoggedInAccount(null);
+    }
+
 
 }

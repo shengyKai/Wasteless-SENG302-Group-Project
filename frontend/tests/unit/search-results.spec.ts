@@ -1,15 +1,14 @@
 import Vue from 'vue';
 import Vuetify from 'vuetify';
-import Vuex, { Store } from 'vuex';
-import { createLocalVue, Wrapper, mount } from '@vue/test-utils';
+import Vuex from 'vuex';
+import {createLocalVue, mount, Wrapper} from '@vue/test-utils';
 import SearchResults from '@/components/SearchResults.vue';
 import SearchResultItem from '@/components/cards/SearchResultItem.vue';
-import { User } from '@/api/internal';
-import * as api from '@/api/internal';
-import { castMock, flushQueue } from './utils';
+import {castMock, flushQueue} from './utils';
+import {userSearch as search1, User} from "@/api/user";
 
-jest.mock('@/api/internal', () => ({
-  search: jest.fn(),
+jest.mock('@/api/user', () => ({
+  userSearch: jest.fn(),
   getSearchCount: jest.fn(),
 }));
 
@@ -18,7 +17,7 @@ jest.mock('@/utils', () => ({
   debounce: (func: (() => void)) => func,
 }));
 
-const search = castMock(api.search);
+const search = castMock(search1);
 
 Vue.use(Vuetify);
 
@@ -44,6 +43,7 @@ function createTestUsers(count: number) {
       email: 'test_email' + i,
       dateOfBirth: '1/1/1900',
       homeAddress: { country: 'test_country' + i },
+      images: [],
     });
   }
   return result;
@@ -72,11 +72,15 @@ describe('SearchResults.vue', () => {
     });
   }
 
+  afterEach(() => {
+    wrapper.destroy();
+  });
+
   /**
    * Sets the mock api results.
    *
    * @param users Users on the current page to use for the mock results
-   * @param testCount The mock number of total users for this search
+   * @param totalCount The mock number of total users for this search
    */
   function setResults(users: User[], totalCount?: number) {
     search.mockResolvedValue({
@@ -97,7 +101,7 @@ describe('SearchResults.vue', () => {
   it('The search query passed in from the url is searched', () => {
     setResults(createTestUsers(5));
     createWrapper();
-    expect(search).toBeCalledWith('test_query', 1, RESULTS_PER_PAGE, 'relevance', false);
+    expect(search).toBeCalledWith('test_query', 1, RESULTS_PER_PAGE, 'firstName', false);
   });
 
   it('The search results should be displayed somewhere', async () => {
@@ -152,7 +156,7 @@ describe('SearchResults.vue', () => {
     // Update the search box
     const searchBox = wrapper.findComponent({ name: 'v-text-field' });
     await searchBox.findAll('input').at(0).setValue('new_test_query');
-    expect(search).lastCalledWith('new_test_query', 1, RESULTS_PER_PAGE, 'relevance', false);
+    expect(search).lastCalledWith('new_test_query', 1, RESULTS_PER_PAGE, 'firstName', false);
   });
 
   it('If there are many pages then there should be a pagination component with many pages', async () => {

@@ -1,34 +1,48 @@
 import Vue from 'vue';
 import Vuetify from 'vuetify';
-import Vuex, { Store } from 'vuex';
-import {createLocalVue, Wrapper, mount, createWrapper} from '@vue/test-utils';
+import Vuex, {Store} from 'vuex';
+import {createLocalVue, mount, Wrapper} from '@vue/test-utils';
 
-import { getStore, resetStoreForTesting, StoreData } from '@/store';
+import {getStore, resetStoreForTesting, StoreData} from '@/store';
 import UserProfile from '@/components/UserProfile/index.vue';
 
-import * as api from '@/api/internal';
-import { castMock, flushQueue } from './utils';
-import { User, Business } from '@/api/internal';
+import {castMock, flushQueue} from './utils';
+import {
+  getUser as getUser1,
+  makeAdmin as makeAdmin1,
+  revokeAdmin as revokeAdmin1,
+  UserRole,
+  User
+} from "@/api/user";
+import {
+  getBusiness as getBusiness1,
+  makeBusinessAdmin as makeBusinessAdmin1,
+  removeBusinessAdmin as removeBusinessAdmin1,
+  Business
+} from "@/api/business";
 
 Vue.use(Vuetify);
 
-jest.mock('@/api/internal', () => ({
-  makeBusinessAdmin: jest.fn(),
-  removeBusinessAdmin: jest.fn(),
-  getBusiness: jest.fn(),
+jest.mock('@/api/user', () => ({
   getUser: jest.fn(),
   makeAdmin: jest.fn(),
   revokeAdmin: jest.fn(),
 }));
+jest.mock('@/api/business', () => ({
+  makeBusinessAdmin: jest.fn(),
+  removeBusinessAdmin: jest.fn(),
+  getBusiness: jest.fn(),
+}));
 
-const makeBusinessAdmin = castMock(api.makeBusinessAdmin);
-const removeBusinessAdmin = castMock(api.removeBusinessAdmin);
 
-const getBusiness = castMock(api.getBusiness);
-const getUser = castMock(api.getUser);
+const makeBusinessAdmin = castMock(makeBusinessAdmin1);
+const removeBusinessAdmin = castMock(removeBusinessAdmin1);
 
-const makeAdmin = castMock(api.makeAdmin);
-const revokeAdmin = castMock(api.revokeAdmin);
+const getBusiness = castMock(getBusiness1);
+const getUser = castMock(getUser1);
+
+const makeAdmin = castMock(makeAdmin1);
+const revokeAdmin = castMock(revokeAdmin1);
 
 const localVue = createLocalVue();
 
@@ -47,6 +61,10 @@ function makeTestBusiness(businessId: number, administrators?: number[]) {
     address: { country: 'test_business_country' + businessId },
     description: 'test_business_description' + businessId,
     created: '1/5/2005',
+    points: 10,
+    rank: {
+      name: 'bronze',
+    },
     businessType: 'Accommodation and Food Services',
   };
 
@@ -61,10 +79,10 @@ function makeTestBusiness(businessId: number, administrators?: number[]) {
  *
  * @param userId The user id to use
  * @param businesses The businesses for this user to administer
- * @param applicationAdmin True if you want the user to be an system administrator
+ * @param role Role of the user
  * @returns The generated user
  */
-function makeTestUser(userId: number, businesses?: number[], role?: api.UserRole) {
+function makeTestUser(userId: number, businesses?: number[], role?: UserRole) {
   let user: User = {
     id:  userId,
     firstName: 'test_firstname' + userId,
@@ -84,7 +102,8 @@ function makeTestUser(userId: number, businesses?: number[], role?: api.UserRole
       district: 'test_district',
       country: 'test_country' + userId
     },
-    role: role ?? 'user'
+    role: role ?? 'user',
+    images: [],
   };
 
   if (businesses !== undefined) {
@@ -178,7 +197,7 @@ describe('UserProfile.vue', () => {
     document.body.appendChild(elem);
     const vuetify = new Vuetify();
     appWrapper = mount(App, {
-      stubs: ['router-link', 'router-view'],
+      stubs: ['router-link', 'router-view', 'Avatar'],
       mocks: {
         $route: {
           params: {

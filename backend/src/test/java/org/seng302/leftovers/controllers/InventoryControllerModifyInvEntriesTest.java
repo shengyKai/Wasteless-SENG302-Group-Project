@@ -9,6 +9,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.seng302.leftovers.dto.business.BusinessType;
 import org.seng302.leftovers.entities.*;
 import org.seng302.leftovers.persistence.BusinessRepository;
 import org.seng302.leftovers.persistence.InventoryItemRepository;
@@ -17,16 +18,20 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import org.springframework.web.server.ResponseStatusException;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import java.time.LocalDate;
 import java.util.HashMap;
+import java.util.Optional;
 
+import static org.mockito.AdditionalMatchers.not;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -94,14 +99,14 @@ class InventoryControllerModifyInvEntriesTest {
                 .withAddress(Location.covertAddressStringToLocation("108,Albert Road,Ashburton,Christchurch,New Zealand,Canterbury,8041"))
                 .build();
         testBusiness = new Business.Builder()
-                .withBusinessType("Accommodation and Food Services")
+                .withBusinessType(BusinessType.ACCOMMODATION_AND_FOOD_SERVICES)
                 .withDescription("DESCRIPTION")
                 .withName("BUSINESS_NAME")
                 .withAddress(Location.covertAddressStringToLocation("108,Albert Road,Ashburton,Christchurch,New Zealand,Canterbury,8041"))
                 .withPrimaryOwner(testUser)
                 .build();
         testBusiness2 = new Business.Builder()
-                .withBusinessType("Accommodation and Food Services")
+                .withBusinessType(BusinessType.ACCOMMODATION_AND_FOOD_SERVICES)
                 .withDescription("DESCRIPTIONN")
                 .withName("BUSINESS_NAMEE")
                 .withAddress(Location.covertAddressStringToLocation("108,Albert Road,Ashburton,Christchurch,New Zealand,Canterbury,8041"))
@@ -163,13 +168,18 @@ class InventoryControllerModifyInvEntriesTest {
         Product productSpy2 = spy(testProduct2);
         InventoryItem invItemSpy = spy(testInvItem);
         when(businessRepository.getBusinessById(1L)).thenReturn(businessSpy);
+        when(businessRepository.getBusinessById(not(eq(1L)))).thenThrow(new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE));
+
         when(productRepository.getProduct(businessSpy, "NATHANAPPLE52")).thenReturn(productSpy);
         when(productRepository.getProduct(businessSpy, "NATHANAPPLE95")).thenReturn(productSpy2);
         when(productRepository.findByBusinessAndProductCode(businessSpy, "NATHANAPPLE52"))
                 .thenReturn(java.util.Optional.ofNullable(productSpy));
         when(productRepository.findByBusinessAndProductCode(businessSpy, "NATHANAPPLE95"))
                 .thenReturn(java.util.Optional.ofNullable(productSpy2));
-        when(invItemRepository.getInventoryItemByBusinessAndId(businessSpy, 1L)).thenReturn(invItemSpy);
+
+        when(invItemRepository.findInventoryItemByBusinessAndId(businessSpy, 1L)).thenReturn(Optional.of(invItemSpy));
+        when(invItemRepository.findInventoryItemByBusinessAndId(eq(businessSpy), not(eq(1L)))).thenReturn(Optional.empty());
+
         doNothing().when(businessSpy).checkSessionPermissions(any());
     }
 
@@ -213,8 +223,8 @@ class InventoryControllerModifyInvEntriesTest {
     }
 
     @Test
-    void modifyInvEntries_modifyIdInvalid_cannotModify400() throws Exception {
-        int[] productIds = {-1, -2, 0};
+    void modifyInvEntries_productNotFound_cannotModify406() throws Exception {
+        int[] productIds = {-1, 999999, 0};
         JSONObject invBody = generateInvJSONBody();
 
         for (int productId : productIds) {
@@ -224,7 +234,7 @@ class InventoryControllerModifyInvEntriesTest {
                     .put("/businesses/1/inventory/1")
                     .contentType(MediaType.APPLICATION_JSON)
                     .content(invBody.toString()))
-                    .andExpect(status().isBadRequest());
+                    .andExpect(status().isNotAcceptable());
         }
     }
 
@@ -244,20 +254,17 @@ class InventoryControllerModifyInvEntriesTest {
         }
     }
 
-    @Test
-    void modifyInvEntries_modifyQuantityInvalid_cannotModify400() throws Exception {
-        String[] quantities = {"-1", "-2", "-10", "#", "$", "a", "b", "Z" };
+    @ParameterizedTest
+    @ValueSource(strings = {"-1", "-2", "-10", "#", "$", "a", "b", "Z" })
+    void modifyInvEntries_modifyQuantityInvalid_cannotModify400(String quantity) throws Exception {
         JSONObject invBody = generateInvJSONBody();
 
-        for (int i=0; i < quantities.length; i++) {
-            invBody.put("quantity", quantities[i]);
-
-            mockMvc.perform(MockMvcRequestBuilders
-                    .put("/businesses/1/inventory/1")
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .content(invBody.toString()))
-                    .andExpect(status().isBadRequest());
-        }
+        invBody.put("quantity", quantity);
+        mockMvc.perform(MockMvcRequestBuilders
+                .put("/businesses/1/inventory/1")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(invBody.toString()))
+                .andExpect(status().isBadRequest());
     }
 
     @Test
@@ -695,7 +702,7 @@ class InventoryControllerModifyInvEntriesTest {
                 .put("/businesses/2/inventory/1")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(invBody.toString()))
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isNotAcceptable());
     }
 
     @Test
@@ -705,7 +712,7 @@ class InventoryControllerModifyInvEntriesTest {
                 .put("/businesses/10000/inventory/1")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(invBody.toString()))
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isNotAcceptable());
     }
 
     @Test

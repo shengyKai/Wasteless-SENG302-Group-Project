@@ -19,7 +19,6 @@
         solo-inverted
         hide-details
         :items="[
-          { text: 'Relevance',   value: 'relevance'  },
           { text: 'User ID',     value: 'userId'     },
           { text: 'First Name',  value: 'firstName'  },
           { text: 'Middle Name', value: 'middleName' },
@@ -72,8 +71,8 @@
 
 <script>
 import SearchResultItem from './cards/SearchResultItem';
-import { search } from '../api/internal';
-import { debounce } from '../utils';
+import { debounce } from '@/utils';
+import {userSearch} from "@/api/user";
 
 export default {
   name: 'SearchResults',
@@ -103,7 +102,7 @@ export default {
       /**
        * The current search result order
        */
-      orderBy: 'relevance',
+      orderBy: 'firstName',
       /**
        * Currently selected page (1 is first page)
        */
@@ -170,7 +169,7 @@ export default {
 
       this.searchedQuery = this.searchQuery;
 
-      const value = await search (
+      const value = await userSearch (
         this.searchedQuery,
         this.currentPage,
         this.resultsPerPage,

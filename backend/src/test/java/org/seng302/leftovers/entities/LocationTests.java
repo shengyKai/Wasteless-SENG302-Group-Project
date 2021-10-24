@@ -1,12 +1,15 @@
 package org.seng302.leftovers.entities;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import net.minidev.json.JSONObject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
+import org.seng302.leftovers.dto.LocationDTO;
+import org.seng302.leftovers.exceptions.ValidationResponseException;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.web.server.ResponseStatusException;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -19,6 +22,9 @@ class LocationTests {
 
   private Location testLocation = new Location();
   private Location.Builder locationBuilder;
+
+  @Autowired
+  private ObjectMapper objectMapper;
 
   @BeforeEach
   public void setUp() {
@@ -417,7 +423,7 @@ class LocationTests {
             .inCountry("New Zealand")
             .withPostCode("8041")
             .atDistrict("Ashburton");
-    assertThrows(ResponseStatusException.class, builder::build);
+    assertThrows(ValidationResponseException.class, builder::build);
   }
 
   /**
@@ -435,7 +441,7 @@ class LocationTests {
             .withPostCode("8041")
             .atDistrict("Ashburton")
             .atDistrict("Ashburton");
-    assertThrows(ResponseStatusException.class, builder::build);
+    assertThrows(ValidationResponseException.class, builder::build);
   }
 
   /**
@@ -452,7 +458,7 @@ class LocationTests {
             .inCountry("New Zealand")
             .withPostCode("8041")
             .atDistrict("Ashburton");
-    assertThrows(ResponseStatusException.class, builder::build);
+    assertThrows(ValidationResponseException.class, builder::build);
   }
 
   /**
@@ -469,7 +475,7 @@ class LocationTests {
             .inCountry("New Zealand")
             .withPostCode("8041")
             .atDistrict("Ashburton");
-    assertThrows(ResponseStatusException.class, builder::build);
+    assertThrows(ValidationResponseException.class, builder::build);
   }
 
   /**
@@ -486,7 +492,7 @@ class LocationTests {
             .inCountry("N3w Z3@l@nd")
             .withPostCode("8041")
             .atDistrict("Ashburton");
-    assertThrows(ResponseStatusException.class, builder::build);
+    assertThrows(ValidationResponseException.class, builder::build);
   }
 
   /**
@@ -503,7 +509,7 @@ class LocationTests {
             .inCountry("New Zealand")
             .withPostCode("80999999999999941")
             .atDistrict("Ashburton");
-    assertThrows(ResponseStatusException.class, builder::build);
+    assertThrows(ValidationResponseException.class, builder::build);
   }
 
   /**
@@ -520,7 +526,7 @@ class LocationTests {
             .inCountry("New Zealand")
             .withPostCode("8041")
             .atDistrict("this district string contains above one hundred characters from start to end inclusive of spacessssss");
-    assertThrows(ResponseStatusException.class, builder::build);
+    assertThrows(ValidationResponseException.class, builder::build);
   }
 
   /**
@@ -536,7 +542,7 @@ class LocationTests {
             .inCountry("New Zealand")
             .withPostCode("8041")
             .atDistrict("Ashburton");
-    assertThrows(ResponseStatusException.class, locationBuilder::build);
+    assertThrows(ValidationResponseException.class, locationBuilder::build);
   }
 
   /**
@@ -552,7 +558,7 @@ class LocationTests {
             .inCountry("New Zealand")
             .withPostCode("8041")
             .atDistrict("Ashburton");
-    assertThrows(ResponseStatusException.class, locationBuilder::build);
+    assertThrows(ValidationResponseException.class, locationBuilder::build);
   }
 
   /**
@@ -567,7 +573,7 @@ class LocationTests {
             .inCountry("New Zealand")
             .withPostCode("8041")
             .atDistrict("Ashburton");
-    assertThrows(ResponseStatusException.class, locationBuilder::build);
+    assertThrows(ValidationResponseException.class, locationBuilder::build);
   }
 
   /**
@@ -583,7 +589,7 @@ class LocationTests {
             .inCountry("New Zealand")
             .withPostCode("8041")
             .atDistrict("Ashburton");
-    assertThrows(ResponseStatusException.class, locationBuilder::build);
+    assertThrows(ValidationResponseException.class, locationBuilder::build);
   }
 
   /**
@@ -599,7 +605,7 @@ class LocationTests {
             .inRegion("Canterbury")
             .withPostCode("8041")
             .atDistrict("Ashburton");
-    assertThrows(ResponseStatusException.class, locationBuilder::build);
+    assertThrows(ValidationResponseException.class, locationBuilder::build);
   }
 
   /**
@@ -615,7 +621,7 @@ class LocationTests {
             .inRegion("Canterbury")
             .inCountry("New Zealand")
             .atDistrict("Ashburton");
-    assertThrows(ResponseStatusException.class, locationBuilder::build);
+    assertThrows(ValidationResponseException.class, locationBuilder::build);
   }
 
   /**
@@ -702,7 +708,7 @@ class LocationTests {
   @Test
   void constructFullJsonIncludesAllExpectedFieldsTest() {
     Location location = locationBuilder.build();
-    JSONObject json = location.constructFullJson();
+    var json = objectMapper.convertValue(new LocationDTO(location, true), JSONObject.class);
     assertTrue(json.containsKey("streetNumber"));
     assertTrue(json.containsKey("streetName"));
     assertTrue(json.containsKey("city"));
@@ -719,7 +725,7 @@ class LocationTests {
   @Test
   void constructFullJsonOnlyIncludesExpectedFieldsTest() {
     Location location = locationBuilder.build();
-    JSONObject json = location.constructFullJson();
+    var json = objectMapper.convertValue(new LocationDTO(location, true), JSONObject.class);
     json.remove("streetNumber");
     json.remove("streetName");
     json.remove("city");
@@ -736,7 +742,7 @@ class LocationTests {
   @Test
   void constructFullJsonFieldsHaveExpectedValueTest() {
     Location location = locationBuilder.build();
-    JSONObject json = location.constructFullJson();
+    var json = objectMapper.convertValue(new LocationDTO(location, true), JSONObject.class);
     assertEquals(location.getStreetNumber(), json.getAsString("streetNumber"));
     assertEquals(location.getStreetName(), json.getAsString("streetName"));
     assertEquals(location.getCity(), json.getAsString("city"));
@@ -753,7 +759,7 @@ class LocationTests {
   @Test
   void constructPartialJsonIncludesAllExpectedFieldsTest() {
     Location location = locationBuilder.build();
-    JSONObject json = location.constructPartialJson();
+    var json = objectMapper.convertValue(new LocationDTO(location, false), JSONObject.class);
     assertTrue(json.containsKey("city"));
     assertTrue(json.containsKey("region"));
     assertTrue(json.containsKey("country"));
@@ -766,7 +772,7 @@ class LocationTests {
   @Test
   void constructPartialJsonOnlyIncludesExpectedFieldsTest() {
     Location location = locationBuilder.build();
-    JSONObject json = location.constructPartialJson();
+    var json = objectMapper.convertValue(new LocationDTO(location, false), JSONObject.class);
     json.remove("city");
     json.remove("region");
     json.remove("country");
@@ -779,7 +785,7 @@ class LocationTests {
   @Test
   void constructPartialJsonFieldsHaveExpectedValueTest() {
     Location location = locationBuilder.build();
-    JSONObject json = location.constructPartialJson();
+    var json = objectMapper.convertValue(new LocationDTO(location, false), JSONObject.class);
     assertEquals(location.getCity(), json.getAsString("city"));
     assertEquals(location.getRegion(), json.getAsString("region"));
     assertEquals(location.getCountry(), json.getAsString("country"));

@@ -1,5 +1,12 @@
-import { createMarketplaceCard, CreateMarketplaceCard, deleteMarketplaceCard, extendMarketplaceCardExpiry, getMarketplaceCardsBySectionAndKeywords, getMarketplaceCardsByUser, MarketplaceCard, modifyMarketplaceCard, ModifyMarketplaceCard, User } from '@/api/internal';
 import axios, { AxiosInstance } from 'axios';
+import {User} from "@/api/user";
+import {
+  CreateMarketplaceCard,
+  createMarketplaceCard,
+  deleteMarketplaceCard,
+  extendMarketplaceCardExpiry, getMarketplaceCardsBySectionAndKeywords,
+  getMarketplaceCardsByUser, MarketplaceCard, ModifyMarketplaceCard, modifyMarketplaceCard
+} from "@/api/marketplace";
 
 jest.mock('axios', () => ({
   create: jest.fn(function () {
@@ -290,7 +297,8 @@ describe("Test GET /users/{userId}/cards endpoint", () => {
     email: "some email",
     homeAddress: {
       country: "some country"
-    }
+    },
+    images: [],
   };
 
   const marketplaceCard : MarketplaceCard = {
@@ -464,7 +472,8 @@ describe("Test GET /users/{userId}/cards endpoint", () => {
       email: "some email",
       homeAddress: {
         country: "some country"
-      }
+      },
+      images: [],
     };
     const marketplaceCard : MarketplaceCard = {
       id: 2,

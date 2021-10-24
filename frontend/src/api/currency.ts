@@ -58,7 +58,7 @@ export async function currencyFromCountry(country: string): Promise<CurrencyOrEr
  */
 export async function queryCurrencyAPI(country: string): Promise<MaybeError<Response>> {
 
-  const queryUrl = `https://restcountries.eu/rest/v2/name/${country}?fullText=true&fields=currencies`;
+  const queryUrl = `https://restcountries.com/v2/name/${country}?fullText=true&fields=currencies`;
 
   const response = await fetch(queryUrl)
     .catch(error => {
@@ -85,7 +85,7 @@ export async function getCurrencyFromAPIResponse(response: Response): Promise<Ma
   const responseBody = await response.json();
 
   if (!is<[CurrenciesContainer]>(responseBody)) {
-    return 'API response was not in readable format';
+    return 'Could not determine currency of provided country';
   }
 
   return responseBody[0].currencies[0];

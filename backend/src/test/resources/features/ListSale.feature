@@ -16,8 +16,9 @@ Feature: U22 - List Sale
     Given the business is listing the following items
       | product_id | price | quantity |
       | FISH       | 10    | 5        |
+    And I am not logged in
     When I look a the business sale listings
-    Then I expect to be unauthorised
+    Then The request fails due to not authorised
 
   Scenario: AC1 - When logged in I can view sale items
     Given the business is listing the following items

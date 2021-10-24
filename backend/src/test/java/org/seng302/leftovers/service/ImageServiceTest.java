@@ -13,13 +13,12 @@ import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.seng302.leftovers.entities.Image;
+import org.seng302.leftovers.exceptions.ValidationResponseException;
 import org.seng302.leftovers.persistence.ImageRepository;
 import org.seng302.leftovers.tools.ImageTools;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.http.HttpStatus;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.server.ResponseStatusException;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
@@ -70,7 +69,7 @@ class ImageServiceTest {
         // Return input value
         when(imageRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
 
-        imageService = new ImageServiceImpl(imageRepository, storageService);
+        imageService = new ImageService(imageRepository, storageService);
     }
 
     @AfterEach
@@ -130,9 +129,8 @@ class ImageServiceTest {
         when(file.getInputStream()).thenReturn(mockInputStream);
         when(file.getContentType()).thenReturn(contentType);
 
-        var exception = assertThrows(ResponseStatusException.class, () -> imageService.create(file));
-        assertEquals(HttpStatus.BAD_REQUEST, exception.getStatus());
-        assertEquals("Invalid image format. Must be jpeg or png", exception.getReason());
+        var exception = assertThrows(ValidationResponseException.class, () -> imageService.create(file));
+        assertEquals("Invalid image format. Must be jpeg or png", exception.getMessage());
 
         verify(imageRepository, times(0)).save(any());
         verify(storageService, times(0)).store(any(), any());
@@ -146,9 +144,8 @@ class ImageServiceTest {
 
         imageIO.when(() -> ImageIO.read(mockInputStream)).thenReturn(null);
 
-        var exception = assertThrows(ResponseStatusException.class, () -> imageService.create(file));
-        assertEquals(HttpStatus.BAD_REQUEST, exception.getStatus());
-        assertEquals("Invalid image provided", exception.getReason());
+        var exception = assertThrows(ValidationResponseException.class, () -> imageService.create(file));
+        assertEquals("Invalid image provided", exception.getMessage());
 
         verify(imageRepository, times(0)).save(any());
         verify(storageService, times(0)).store(any(), any());

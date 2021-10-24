@@ -1,12 +1,11 @@
 package org.seng302.leftovers.persistence;
 
 import org.seng302.leftovers.entities.Business;
+import org.seng302.leftovers.exceptions.DoesNotExistResponseException;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Repository;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Optional;
 
@@ -25,8 +24,7 @@ public interface BusinessRepository extends CrudRepository<Business, Long>, JpaS
         // check business exists
         Optional<Business> business = this.findById(businessId);
         if (business.isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE,
-                    "The given business does not exist");
+            throw new DoesNotExistResponseException(Business.class);
         }
         return business.get();
     }

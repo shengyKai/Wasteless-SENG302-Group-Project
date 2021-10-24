@@ -2,12 +2,13 @@ package org.seng302.leftovers.persistence;
 
 import org.seng302.leftovers.entities.Image;
 import org.seng302.leftovers.entities.Product;
+import org.seng302.leftovers.exceptions.DoesNotExistResponseException;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Repository;
-import org.springframework.web.server.ResponseStatusException;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -36,8 +37,7 @@ public interface ImageRepository extends CrudRepository<Image, Long> {
     default Image getImageById(Long imageId) {
         Optional<Image> image = findById(imageId);
         if (image.isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE,
-                    "the given image does not exist");
+            throw new DoesNotExistResponseException(Image.class);
         }
         return image.get();
     }
@@ -51,11 +51,24 @@ public interface ImageRepository extends CrudRepository<Image, Long> {
      */
     default Image getImageByProductAndId(Product product, Long imageId) {
         Optional<Image> image = this.findById(imageId);
-        if (image.isEmpty() || !product.getProductImages().contains(image.get())) {
-            throw new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE,
-                    "The given image does not exist");
+        if (image.isEmpty() || !product.getImages().contains(image.get())) {
+            throw new DoesNotExistResponseException(Image.class);
         }
         return image.get();
 
+    }
+
+    /**
+     * Fetches a list of Images given a list of Image IDS
+     * If one or more ImageIds are invalid, a NOT_ACCEPTABLE exception is raised
+     * @param ids List of Image IDs
+     * @return List of Images
+     */
+    default List<Image> getImagesByIds(List<Long> ids) {
+        List<Image> images = new ArrayList<>();
+        for (var id: ids) {
+            images.add(getImageById(id));
+        }
+        return images;
     }
 }

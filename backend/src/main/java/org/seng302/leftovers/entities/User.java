@@ -1,21 +1,22 @@
 /* Subtype of Account for individual users */
 package org.seng302.leftovers.entities;
 
-import net.minidev.json.JSONArray;
-import net.minidev.json.JSONObject;
-import org.seng302.leftovers.tools.JsonTools;
+import org.seng302.leftovers.dto.user.UserRole;
+import org.seng302.leftovers.entities.event.Event;
+import org.seng302.leftovers.exceptions.ValidationResponseException;
 import org.springframework.data.annotation.ReadOnlyProperty;
-import org.springframework.http.HttpStatus;
-import org.springframework.web.server.ResponseStatusException;
 
 import javax.persistence.*;
 import java.time.Instant;
 import java.time.LocalDate;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 import java.util.regex.Pattern;
 
 @Entity
-public class User extends Account {
+public class User extends Account implements ImageAttachment {
 
     private static final String NAME_REGEX = "[ \\p{L}\\-'.]+";
 
@@ -51,6 +52,14 @@ public class User extends Account {
     @OneToMany(mappedBy = "notifiedUser", fetch = FetchType.LAZY)
     private Set<Event> events = new HashSet<>();
 
+    @ManyToMany(mappedBy = "interestedUsers", fetch = FetchType.LAZY)
+    private Set<SaleItem> likedSaleItems = new HashSet<>();
+
+    @OrderColumn(name="image_order")
+    @OneToMany(fetch = FetchType.EAGER)
+    @JoinColumn(name="user_id")
+    private List<Image> images = new ArrayList<>();
+
     /* Matches:
     123-456-7890
     (123) 456-7890
@@ -81,7 +90,7 @@ public class User extends Account {
         if (firstName != null && firstName.length() > 0 && firstName.length() <= 32 && firstName.matches(NAME_REGEX)) {
             this.firstName = firstName;
         } else {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The first name must not be empty, be less then 16 characters, and only contain letters.");
+            throw new ValidationResponseException("The first name must not be empty, be less then 16 characters, and only contain letters.");
         }
     }
 
@@ -102,7 +111,7 @@ public class User extends Account {
         } else if (middleName.equals("")) {
             this.middleName = null;
         } else {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The middle name must not be empty, be less then 16 characters, and only contain letters.");
+            throw new ValidationResponseException("The middle name must not be empty, be less then 16 characters, and only contain letters.");
         }
     }
 
@@ -124,7 +133,7 @@ public class User extends Account {
         if (lastName != null && lastName.length() > 0 && lastName.length() <= 32 && lastName.matches(NAME_REGEX)) {
             this.lastName = lastName;
         } else {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The last name must not be empty, be less then 16 characters, and only contain letters.");
+            throw new ValidationResponseException("The last name must not be empty, be less then 16 characters, and only contain letters.");
         }
     }
 
@@ -146,7 +155,7 @@ public class User extends Account {
         } else if (nickname.equals("")) {
             this.nickname = null;
         } else {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The nickname must not be empty, be less then 16 characters, and only contain letters.");
+            throw new ValidationResponseException("The nickname must not be empty, be less then 16 characters, and only contain letters.");
         }
     }
 
@@ -168,7 +177,7 @@ public class User extends Account {
         } else if (bio.equals("")) {
             this.bio = null;
         } else {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The bio must be less than 200 characters long," + 
+            throw new ValidationResponseException("The bio must be less than 200 characters long," + 
             "and only contain letters, numbers, and valid special characters");
         }
     }
@@ -197,10 +206,10 @@ public class User extends Account {
             if (dob.compareTo(minDate) < 0) {
                 this.dob = dob;
             } else {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "You must be at least 13 years old to create an account");
+                throw new ValidationResponseException("You must be at least 13 years old to create an account");
             }
         } else {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Your date of birth has been entered incorrectly");
+            throw new ValidationResponseException("Your date of birth has been entered incorrectly");
         }
     }
 
@@ -226,7 +235,7 @@ public class User extends Account {
         } else if (phNum.equals("")) {
             this.phNum = null;
         } else {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Your phone number has been entered incorrectly");
+            throw new ValidationResponseException("Your phone number has been entered incorrectly");
         }
     }
 
@@ -247,7 +256,7 @@ public class User extends Account {
         if (address != null) {
             this.address = address;
         } else {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Your address has been entered incorrectly");
+            throw new ValidationResponseException("Your address has been entered incorrectly");
         }
     }
 
@@ -289,6 +298,13 @@ public class User extends Account {
     public Set<Event> getEvents() { return this.events;}
 
     /**
+     * Gets the list of images for this user
+     * @return List of images
+     */
+    @Override
+    public List<Image> getImages() { return this.images; }
+
+    /**
      * Gets the set of businesses that the user is an admin of OR is the owner of
      * @return Businesses administered or owned
      */
@@ -315,98 +331,26 @@ public class User extends Account {
     }
 
     /**
-     * This method constructs a JSON representation of the user's public details. These are their id number,
-     * first name, middle name, last name, nickname, email, bio, the city/region/country part of their address,
-     * the businesses they administer, and date the account was created. If fullBusienssDetails is true then
-     * a JSON representation of each business they administer will be included, otherwise the businessesAdministered
-     * field will not be present to avoid issues when nesting this json inside the administrators field of the business
-     * json.
-     * @param fullBusinessDetails A JSON representation of each business will be included in the businessesAdministered
-     * field if this is set to true, otherwise the field will not be present.
-     * @return JSONObject with attribute name as key and attribute value as value.
-     */
-    public JSONObject constructPublicJson(boolean fullBusinessDetails) {
-        var object = new JSONObject();
-        object.put("id",          getUserID());
-        object.put("firstName",   getFirstName());
-        object.put("lastName",    getLastName());
-        object.put("email",       getEmail());
-        object.put("created",     getCreated().toString());
-        object.put("middleName",  getMiddleName());
-        object.put("nickname",    getNickname());
-        object.put("bio", getBio());
-        object.put("homeAddress", getAddress().constructPartialJson());
-        if (fullBusinessDetails) {
-            object.put("businessesAdministered", constructBusinessJsonArray());
-        }
-        JsonTools.removeNullsFromJson(object);
-        return object;
-    }
-
-    /**
-     * Override the constructPublicJson method so that it defaults to omitting the businessesAdministered field.
-     * @return A public JSON representation of the user without information on the businesses they administer
-     */
-    public JSONObject constructPublicJson() {
-        return constructPublicJson(false);
-    }
-
-    /**
-     * This method constructs a JSON representation of the user's private details. This includes all the values from
-     * the public JSON, plus their full address, date of birth, phone number and role.
-     * @param fullBusinessDetails A JSON representation of each business will be included in the businessesAdministered
-     * field if this is set to true, otherwise the field will not be present.
-     * @return JSONObject with attribute name as key and attribute value as value.
-     */
-    public JSONObject constructPrivateJson(boolean fullBusinessDetails) {
-        JSONObject json = constructPublicJson(fullBusinessDetails);
-        json.replace("homeAddress", getAddress().constructFullJson());
-        json.appendField("dateOfBirth", dob.toString());
-        json.appendField("phoneNumber", phNum);
-        json.appendField("role", role);
-        JsonTools.removeNullsFromJson(json);
-        return json;
-    }
-
-     /**
-     * Override the constructPrivateJson method so that it defaults omitting the businessesAdministered field
-     * @return A private JSON representation of the user without information on the businesses they administer
-     */
-    public JSONObject constructPrivateJson() {
-        return constructPrivateJson(false);
-    }
-
-    /**
-     * Construct an array of JSON objects representing the businesses the user administers. The JSONs in the array
-     * are sorted by the id number of the business to ensure consistency between subsequent requests.
-     * @return An array of JSON representations of the businesses the user administers.
-     */
-    public JSONArray constructBusinessJsonArray() {
-        List<Business> businesses = new ArrayList<>();
-        businesses.addAll(getBusinessesAdministeredAndOwned());
-        Collections.sort(businesses, (Business business1, Business business2) ->
-            business1.getId().compareTo(business2.getId()));
-        JSONArray businessArray = new JSONArray();
-        for (Business business : businesses) {
-            businessArray.add(business.constructJson());
-        }
-        return businessArray;
-    }
-
-    /**
      * Called before a user is removed from the database
      * Ensures that the User is not an owner of any Businesses.
      * If the User is an administrator for any businesses, they are removed from the administrator set for each business
-     * @throws ResponseStatusException If User owns any businesses
      */
     @PreRemove
     public void preRemove() {
         if (!this.getBusinessesOwned().isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Cannot delete a user who is an owner of one or more businesses");
+            throw new ValidationResponseException("Cannot delete a user who is an owner of one or more businesses");
         }
         for (Business business : this.getBusinessesAdministered()) {
             business.removeAdmin(this);
         }
+    }
+
+    /**
+     * Sets the list of images for the user
+     * @param images Images to set
+     */
+    public void setImages(List<Image> images) {
+        this.images = images;
     }
 
 
@@ -552,7 +496,7 @@ public class User extends Account {
             user.setPhNum(this.phNum);
             user.setAddress(this.address);
             user.setCreated(Instant.now());
-            user.setRole("user");
+            user.setRole(UserRole.USER);
             return user;
         }
 

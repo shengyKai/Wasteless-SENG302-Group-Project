@@ -1,5 +1,6 @@
 package org.seng302.leftovers.controllers;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.SneakyThrows;
 import net.minidev.json.JSONObject;
 import org.junit.jupiter.api.AfterEach;
@@ -9,13 +10,17 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.junit.runner.RunWith;
 import org.mockito.*;
+import org.seng302.leftovers.dto.LocationDTO;
+import org.seng302.leftovers.dto.business.BusinessType;
 import org.seng302.leftovers.entities.*;
-import org.seng302.leftovers.exceptions.AccessTokenException;
+import org.seng302.leftovers.exceptions.AccessTokenResponseException;
+import org.seng302.leftovers.exceptions.DoesNotExistResponseException;
 import org.seng302.leftovers.persistence.BusinessRepository;
 import org.seng302.leftovers.persistence.ImageRepository;
 import org.seng302.leftovers.persistence.UserRepository;
 import org.seng302.leftovers.service.ImageService;
 import org.seng302.leftovers.tools.AuthenticationTokenManager;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -25,9 +30,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.AdditionalMatchers.not;
@@ -45,11 +48,15 @@ class BusinessControllerMockedTest {
 
     private MockMvc mockMvc;
 
-    private long mockBusinessId = 6L;
-    private long mockOwnerId    = 7L;
-    private long mockNonOwnerId = 8L;
-    private long mockImageId = 9L;
-    private long mockPrimaryImageId = 10L;
+    private final long mockBusinessId = 6L;
+    private final long mockOwnerId    = 7L;
+    private final long mockNonOwnerId = 8L;
+    private final long mockImageId = 9L;
+    private final long mockImageId2 = 23L;
+    private final long mockImageId3 = 19L;
+
+    @Autowired
+    private ObjectMapper objectMapper;
 
     @Mock
     private BusinessRepository businessRepository;
@@ -57,8 +64,6 @@ class BusinessControllerMockedTest {
     private UserRepository userRepository;
     @Mock
     private ImageService imageService;
-    @Mock
-    private ImageRepository imageRepository;
     @Mock
     private Business mockBusiness;
     @Mock
@@ -73,6 +78,10 @@ class BusinessControllerMockedTest {
     private Product mockProduct3;
     @Mock
     private Image mockImage;
+    @Mock
+    private Image mockImage2;
+    @Mock
+    private Image mockImage3;
     @Mock
     private Image mockPrimaryImage;
 
@@ -90,6 +99,8 @@ class BusinessControllerMockedTest {
         when(mockOwner.getUserID()).thenReturn(mockOwnerId);
         when(mockNonOwner.getUserID()).thenReturn(mockNonOwnerId);
         when(mockImage.getID()).thenReturn(mockImageId);
+        when(mockImage2.getID()).thenReturn(mockImageId2);
+        when(mockImage3.getID()).thenReturn(mockImageId3);
 
         when(userRepository.findById(mockOwnerId)).thenReturn(Optional.of(mockOwner));
         when(userRepository.findById(mockNonOwnerId)).thenReturn(Optional.of(mockNonOwner));
@@ -103,11 +114,7 @@ class BusinessControllerMockedTest {
         when(businessRepository.findById(not(eq(mockBusinessId)))).thenReturn(Optional.empty());
         when(businessRepository.getBusinessById(any())).thenAnswer(CALLS_REAL_METHODS);
 
-        when(imageService.create(any())).thenReturn(mockImage);
-        when(imageRepository.getImageById(mockImageId)).thenReturn(mockImage);
-
-
-        BusinessController businessController = new BusinessController(businessRepository, userRepository, imageService, imageRepository);
+        BusinessController businessController = new BusinessController(businessRepository, userRepository, imageService);
         mockMvc = MockMvcBuilders.standaloneSetup(businessController).build();
     }
 
@@ -128,8 +135,8 @@ class BusinessControllerMockedTest {
         json.put("primaryAdministratorId", mockOwnerId);
         json.put("name", "New business name");
         json.put("description", "New business description");
-        json.put("address", Location.covertAddressStringToLocation("4,Rountree Street,Ashburton,Christchurch,New Zealand,Canterbury,8041").constructFullJson());
-        json.put("businessType", Business.getBusinessTypes().get(0));
+        json.put("address", new LocationDTO(Location.covertAddressStringToLocation("4,Rountree Street,Ashburton,Christchurch,New Zealand,Canterbury,8041"), true));
+        json.put("businessType", objectMapper.convertValue(BusinessType.ACCOMMODATION_AND_FOOD_SERVICES, String.class));
         json.put("updateProductCountry", true);
         return json;
     }
@@ -138,7 +145,7 @@ class BusinessControllerMockedTest {
     void modifyBusiness_notLoggedIn_401Response() throws Exception {
         // Mock the AuthenticationTokenManager to respond as it would when the authentication token is missing or invalid
         authenticationTokenManager.when(() -> AuthenticationTokenManager.checkAuthenticationToken(any()))
-                .thenThrow(new AccessTokenException());
+                .thenThrow(new AccessTokenResponseException());
 
         var json = createValidRequest();
         mockMvc.perform(
@@ -292,7 +299,9 @@ class BusinessControllerMockedTest {
         verify(mockBusiness, times(1)).setPrimaryOwner(mockNonOwner);
         verify(mockBusiness, times(1)).setName((String)json.get("name"));
         verify(mockBusiness, times(1)).setDescription((String)json.get("description"));
-        verify(mockBusiness, times(1)).setBusinessType((String)json.get("businessType"));
+
+        var businessType = objectMapper.convertValue(json.getAsString("businessType"), BusinessType.class);
+        verify(mockBusiness, times(1)).setBusinessType(businessType);
 
         var addressCaptor = ArgumentCaptor.forClass(Location.class);
         verify(mockBusiness, times(1)).setAddress(addressCaptor.capture());
@@ -339,8 +348,6 @@ class BusinessControllerMockedTest {
         
         var addressCaptor = ArgumentCaptor.forClass(Location.class);
         verify(mockBusiness, times(1)).setAddress(addressCaptor.capture());
-        String country = addressCaptor.getValue().getCountry();
-
         verify(mockBusiness, times(1)).getCatalogue();
         verify(mockProduct1, times(1)).setCountryOfSale("New Zealand");
     }
@@ -367,23 +374,18 @@ class BusinessControllerMockedTest {
         verify(mockProduct3, times(1)).setCountryOfSale(country);
     }
 
-    /**
-     * Creates a mock multipart file
-     * @return Mock file
-     */
-    private MockMultipartFile createMockUpload() {
-        return new MockMultipartFile("file", "filename.txt", "image/jpeg", new byte[100]);
-    }
-
-
     @Test
-    void uploadImage_notLoggedIn_401Response() throws Exception {
+    void modifyBusinessSetImage_notLoggedIn_401Response() throws Exception {
         // Mock the AuthenticationTokenManager to respond as it would when the authentication token is missing or invalid
         authenticationTokenManager.when(() -> AuthenticationTokenManager.checkAuthenticationToken(any()))
-                .thenThrow(new AccessTokenException());
+                .thenThrow(new AccessTokenResponseException());
 
-        mockMvc.perform(multipart("/businesses/" + mockBusinessId + "/images")
-                .file(createMockUpload()))
+        var json = createValidRequest();
+        json.put("imageIds", Collections.singletonList(mockImageId));
+
+        mockMvc.perform(put("/businesses/" + mockBusinessId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(json.toString()))
                 .andExpect(status().isUnauthorized())
                 .andReturn();
 
@@ -393,115 +395,85 @@ class BusinessControllerMockedTest {
     }
 
     @Test
-    void uploadImage_businessDoesNotExist_406Response() throws Exception {
-        mockMvc.perform(multipart("/businesses/9999/images")
-                .file(createMockUpload()))
+    void modifyBusinessSetImage_businessDoesNotExist_406Response() throws Exception {
+        var json = createValidRequest();
+        json.put("imageIds", Collections.singletonList(mockImageId));
+
+        mockMvc.perform(put("/businesses/9999")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(json.toString()))
                 .andExpect(status().isNotAcceptable())
                 .andReturn();
 
         verify(businessRepository, times(1)).findById(9999L);
+        verify(mockBusiness, times(0)).setImages(any());
         verify(businessRepository, times(0)).save(any());
     }
 
     @Test
-    void uploadImage_notAuthorisedForBusiness_403Response() throws Exception {
-        doThrow(new ResponseStatusException(HttpStatus.FORBIDDEN)).when(mockBusiness).checkSessionPermissions(any());
+    void modifyBusinessSetImage_ImageDoesNotExist_406Response() throws Exception {
+        when(imageService.getListOfImagesFromIds(any())).thenThrow(new DoesNotExistResponseException(Image.class));
 
-        mockMvc.perform(multipart("/businesses/" + mockBusinessId + "/images")
-                .file(createMockUpload()))
-                .andExpect(status().isForbidden())
-                .andReturn();
+        var json = createValidRequest();
+        json.put("imageIds", Collections.singletonList(9999L));
 
-        verify(mockBusiness, times(1)).checkSessionPermissions(any());
-        verify(businessRepository, times(0)).save(any());
-    }
-
-    @Test
-    void uploadImage_invalidImage_400Response() throws Exception {
-        when(imageService.create(any())).thenThrow(new ResponseStatusException(HttpStatus.BAD_REQUEST));
-
-        mockMvc.perform(multipart("/businesses/" + mockBusinessId + "/images")
-                .file(createMockUpload()))
-                .andExpect(status().isBadRequest())
-                .andReturn();
-
-        verify(imageService, times(1)).create(any());
-        verify(businessRepository, times(0)).save(any());
-    }
-
-    @Test
-    void uploadImage_validRequest_201ResponseAndCreated() throws Exception {
-        mockMvc.perform(multipart("/businesses/" + mockBusinessId + "/images")
-                .file(createMockUpload()))
-                .andExpect(status().isCreated())
-                .andReturn();
-
-        verify(imageService, times(1)).create(any());
-        verify(mockBusiness, times(1)).addImage(mockImage);
-        verify(businessRepository, times(1)).save(mockBusiness);
-    }
-
-    @Test
-    void makeImagePrimary_notLoggedIn_401Response() throws Exception {
-        // Mock the AuthenticationTokenManager to respond as it would when the authentication token is missing or invalid
-        authenticationTokenManager.when(() -> AuthenticationTokenManager.checkAuthenticationToken(any()))
-                .thenThrow(new AccessTokenException());
-
-        mockMvc.perform(put("/businesses/" + mockBusinessId + "/images/" + mockImageId + "/makeprimary"))
-                .andExpect(status().isUnauthorized())
-                .andReturn();
-
-        // Check that the authentication token manager was called
-        authenticationTokenManager.verify(() -> AuthenticationTokenManager.checkAuthenticationToken(any()));
-        verify(businessRepository, times(0)).save(any());
-    }
-
-    @Test
-    void makeImagePrimary_businessDoesNotExist_406Response() throws Exception {
-        mockMvc.perform(put("/businesses/9999/images/" + mockImageId + "/makeprimary"))
-                .andExpect(status().isNotAcceptable())
-                .andReturn();
-
-        verify(businessRepository, times(1)).findById(9999L);
-        verify(mockBusiness, times(0)).removeImage(any());
-        verify(businessRepository, times(0)).save(any());
-    }
-
-    @Test
-    void makeImagePrimary_ImageDoesNotExist_406Response() throws Exception {
-        doThrow(new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE)).when(imageRepository).getImageById(any());
-        mockMvc.perform(put("/businesses/" + mockBusinessId + "/images/9999/makeprimary"))
+        mockMvc.perform(put("/businesses/" + mockBusinessId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(json.toString()))
                 .andExpect(status().isNotAcceptable())
                 .andReturn();
 
         verify(businessRepository, times(1)).findById(mockBusinessId);
-        verify(mockBusiness, times(0)).removeImage(any());
+        verify(mockBusiness, times(0)).setImages(any());
         verify(businessRepository, times(0)).save(any());
     }
 
     @Test
-    void makeImagePrimary_notAuthorisedForBusiness_403Response() throws Exception {
+    void modifyBusinessSetImage_notAuthorisedForBusiness_403Response() throws Exception {
         doThrow(new ResponseStatusException(HttpStatus.FORBIDDEN)).when(mockBusiness).checkSessionPermissions(any());
 
-        mockMvc.perform(put("/businesses/" + mockBusinessId + "/images/" + mockImageId + "/makeprimary"))
+        var json = createValidRequest();
+        json.put("imageIds", Collections.singletonList(mockImageId));
+
+        mockMvc.perform(put("/businesses/" + mockBusinessId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(json.toString()))
                 .andExpect(status().isForbidden())
                 .andReturn();
 
         verify(mockBusiness, times(1)).checkSessionPermissions(any());
-        verify(mockBusiness, times(0)).removeImage(any());
+        verify(mockBusiness, times(0)).setImages(any());
         verify(businessRepository, times(0)).save(any());
     }
 
     @Test
-    void makeImagePrimary_validRequest_200ResponseAndPrimary() throws Exception {
-        mockMvc.perform(put("/businesses/" + mockBusinessId + "/images/" + mockImageId + "/makeprimary"))
+    void modifyBusinessSetImage_validRequest_200ResponseAndPrimary() throws Exception {
+        var json = createValidRequest();
+        json.put("imageIds", Collections.singletonList(mockImageId));
+
+        mockMvc.perform(put("/businesses/" + mockBusinessId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(json.toString()))
                 .andExpect(status().isOk())
                 .andReturn();
 
-        verify(imageRepository, times(1)).getImageById(mockImageId);
-        verify(mockBusiness, times(1)).removeImage(mockImage);
-        verify(mockBusiness, times(1)).addImage(0, mockImage);
+        verify(mockBusiness, times(1)).setImages(any());
         verify(businessRepository, times(1)).save(mockBusiness);
     }
 
+    @Test
+    void modifyBusinessSetManyImage_validRequest_200Response() throws Exception {
+        var json = createValidRequest();
+        List<Long> expected = List.of(mockImageId, mockImageId2, mockImageId3);
+        json.put("imageIds", expected);
+
+        mockMvc.perform(put("/businesses/" + mockBusinessId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(json.toString()))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        verify(mockBusiness, times(1)).setImages(any());
+        verify(businessRepository, times(1)).save(mockBusiness);
+    }
 }

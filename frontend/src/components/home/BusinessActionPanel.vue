@@ -16,17 +16,9 @@
                 <v-list-item-title>Profile</v-list-item-title>
               </v-list-item-content>
             </v-list-item>
-            <v-list-item @click="viewCreateProduct">
-              <v-list-item-icon>
-                <v-icon>mdi-tooltip-plus</v-icon>
-              </v-list-item-icon>
-              <v-list-item-content>
-                <v-list-item-title>Add Product</v-list-item-title>
-              </v-list-item-content>
-            </v-list-item>
             <v-list-item @click="goToCataloguePage">
               <v-list-item-icon>
-                <v-icon>mdi-view-list</v-icon>
+                <v-icon>mdi-clipboard-text</v-icon>
               </v-list-item-icon>
               <v-list-item-content>
                 <v-list-item-title>Catalogue</v-list-item-title>
@@ -37,15 +29,23 @@
                 <v-icon>mdi-view-list</v-icon>
               </v-list-item-icon>
               <v-list-item-content>
-                <v-list-item-title >Inventory</v-list-item-title>
+                <v-list-item-title>Inventory</v-list-item-title>
               </v-list-item-content>
             </v-list-item>
             <v-list-item @click="goSalePage">
               <v-list-item-icon>
-                <v-icon>mdi-view-list</v-icon>
+                <v-icon>mdi-cart</v-icon>
               </v-list-item-icon>
               <v-list-item-content>
-                <v-list-item-title >Sale Listing</v-list-item-title>
+                <v-list-item-title>Sale Listing</v-list-item-title>
+              </v-list-item-content>
+            </v-list-item>
+            <v-list-item @click="goSaleReports">
+              <v-list-item-icon>
+                <v-icon>mdi-chart-box</v-icon>
+              </v-list-item-icon>
+              <v-list-item-content>
+                <v-list-item-title>Sale Reports</v-list-item-title>
               </v-list-item-content>
             </v-list-item>
           </v-list-item-group>
@@ -57,34 +57,25 @@
       <v-btn icon @click="viewProfile" class="action-button">
         <v-icon large>mdi-account-circle</v-icon>
       </v-btn>
-      <v-btn icon @click="viewCreateProduct" class="action-button">
-        <v-icon large>mdi-tooltip-plus</v-icon>
-      </v-btn>
       <v-btn icon @click="goToCataloguePage" class="action-button">
-        <v-icon large>mdi-view-list</v-icon>
+        <v-icon large>mdi-clipboard-list</v-icon>
       </v-btn>
       <v-btn icon @click="goInventoryPage" class="action-button">
         <v-icon large>mdi-view-list</v-icon>
       </v-btn>
       <v-btn icon @click="goSalePage" class="action-button">
-        <v-icon large>mdi-view-list</v-icon>
+        <v-icon large>mdi-cart</v-icon>
+      </v-btn>
+      <v-btn icon @click="goSaleReports" class="action-button">
+        <v-icon large>mdi-chart-box</v-icon>
       </v-btn>
     </v-card>
-
-    <template v-if="showingCreateProduct">
-      <ProductForm :businessId="this.$store.state.activeRole.id" @closeDialog="showingCreateProduct=false"/>
-    </template>
   </div>
 </template>
 
 <script>
-import ProductForm from '@/components/BusinessProfile/ProductForm.vue';
-
 export default {
   name: "BusinessActionPanel",
-  components: {
-    ProductForm,
-  },
   data() {
     return {
       showingCreateProduct: false,
@@ -96,12 +87,6 @@ export default {
      */
     viewProfile() {
       this.$router.push("/business/" + this.$store.state.activeRole.id);
-    },
-    /**
-     * Shows the create product dialog
-     */
-    viewCreateProduct() {
-      this.showingCreateProduct = true;
     },
 
     /**
@@ -116,9 +101,18 @@ export default {
     goInventoryPage() {
       this.$router.push(`/business/${this.$store.state.activeRole.id}/inventory`);
     },
+    /**
+     * Shows the Sale Listing page
+     */
     goSalePage() {
       this.$router.push(`/business/${this.$store.state.activeRole.id}/listings`);
     },
+    /**
+     * Shows the Sale Reports page
+     */
+    goSaleReports() {
+      this.$router.push(`/salesreport/${this.$store.state.activeRole.id}`);
+    }
   },
 };
 </script>

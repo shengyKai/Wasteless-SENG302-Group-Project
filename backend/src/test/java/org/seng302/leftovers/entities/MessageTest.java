@@ -1,6 +1,7 @@
 package org.seng302.leftovers.entities;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import net.minidev.json.JSONObject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -10,9 +11,10 @@ import org.junit.jupiter.params.provider.NullSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.seng302.leftovers.dto.conversation.MessageDTO;
+import org.seng302.leftovers.exceptions.ValidationResponseException;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.http.HttpStatus;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.time.Instant;
 
@@ -23,6 +25,8 @@ import static org.mockito.Mockito.when;
 @SpringBootTest
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class MessageTest {
+    @Autowired
+    private ObjectMapper mapper;
 
     @Mock
     private User user;
@@ -37,16 +41,14 @@ class MessageTest {
 
     @Test
     void createMessage_nullConversation_400Thrown() {
-        var exception = assertThrows(ResponseStatusException.class, () -> new Message(null, user, "Hello!"));
-        assertEquals(HttpStatus.BAD_REQUEST, exception.getStatus());
-        assertEquals("Message conversation cannot be null", exception.getReason());
+        var exception = assertThrows(ValidationResponseException.class, () -> new Message(null, user, "Hello!"));
+        assertEquals("Message conversation cannot be null", exception.getMessage());
     }
 
     @Test
     void createMessage_nullUser_400Thrown() {
-        var exception = assertThrows(ResponseStatusException.class, () -> new Message(conversation, null, "Hello!"));
-        assertEquals(HttpStatus.BAD_REQUEST, exception.getStatus());
-        assertEquals("Message sender cannot be null", exception.getReason());
+        var exception = assertThrows(ValidationResponseException.class, () -> new Message(conversation, null, "Hello!"));
+        assertEquals("Message sender cannot be null", exception.getMessage());
     }
 
 
@@ -54,18 +56,16 @@ class MessageTest {
     @NullSource
     @ValueSource(strings = {"", "   ", "\n", "\t"})
     void createMessage_noContent_400Thrown(String content) {
-        var exception = assertThrows(ResponseStatusException.class, () -> new Message(conversation, user, content));
-        assertEquals(HttpStatus.BAD_REQUEST, exception.getStatus());
-        assertEquals("Message cannot be empty", exception.getReason());
+        var exception = assertThrows(ValidationResponseException.class, () -> new Message(conversation, user, content));
+        assertEquals("Message cannot be empty", exception.getMessage());
     }
 
     @Test
     void createMessage_messageTooLong_400Thrown() {
         String content = "a".repeat(201);
 
-        var exception = assertThrows(ResponseStatusException.class, () -> new Message(conversation, user, content));
-        assertEquals(HttpStatus.BAD_REQUEST, exception.getStatus());
-        assertEquals("Message must be 200 characters or less", exception.getReason());
+        var exception = assertThrows(ValidationResponseException.class, () -> new Message(conversation, user, content));
+        assertEquals("Message must be 200 characters or less", exception.getMessage());
     }
 
     @Test
@@ -86,13 +86,14 @@ class MessageTest {
     }
 
     @Test
-    void constructJSONObject_jsonHasExpectedFormat() throws JsonProcessingException {
+    void asDTO_jsonHasExpectedFormat() throws JsonProcessingException {
         JSONObject userJson = new JSONObject();
         userJson.appendField("id", 967);
         when(conversation.getId()).thenReturn(44L);
-        when(user.constructPublicJson()).thenReturn(userJson);
         Message message = new Message(conversation, user, "Hello world!");
-        JSONObject json = message.constructJSONObject();
+
+
+        var json = mapper.convertValue(new MessageDTO(message), JSONObject.class);
         assertEquals(message.getId(), json.getAsNumber("id"));
         assertEquals(message.getSender().getUserID(), (Long) json.getAsNumber("senderId"));
         assertEquals(message.getCreated().toString(), json.getAsString("created"));

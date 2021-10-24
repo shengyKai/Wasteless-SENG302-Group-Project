@@ -79,8 +79,8 @@
 
 <script>
 import SearchBusinessResult from './cards/SearchBusinessResult';
-import { searchBusinesses, BUSINESS_TYPES } from '../api/internal';
-import { debounce } from '../utils';
+import { debounce } from '@/utils';
+import {BUSINESS_TYPES, searchBusinesses} from "@/api/business";
 
 export default {
   name: 'SearchBusinessPage',
@@ -134,7 +134,8 @@ export default {
       orderByOptions: [
         {text: "Name", value: "name"},
         {text: "Location", value: "location"},
-        {text: "Business Type", value: "businessType"}
+        {text: "Business Type", value: "businessType"},
+        {text: "Rank", value: "points"}
       ],
     };
   },
@@ -232,7 +233,8 @@ export default {
         orderBy : this.orderBy,
         page : this.currentPage.toString(),
         reverse : this.reverse.toString(),
-        searchQuery : this.searchQuery
+        searchQuery : this.searchQuery,
+        fromPage: "businessSearch"
       };
       await this.$router.push({name: 'businessProfile',params:{id:businessId} , query});
     }

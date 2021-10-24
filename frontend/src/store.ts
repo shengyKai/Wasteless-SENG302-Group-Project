@@ -1,8 +1,10 @@
-import { User, Business, getUser, login, InventoryItem, deleteNotification } from './api/internal';
-import { AnyEvent, initialiseEventSourceForUser, addEventMessageHandler } from './api/events';
+import {AnyEvent, deleteNotification, getEvents} from './api/events';
 import Vuex, { Store, StoreOptions } from 'vuex';
 import { COOKIE, deleteCookie, getCookie, isTesting, setCookie } from './utils';
 import Vue from 'vue';
+import {getUser, login, User} from "@/api/user";
+import {Business} from "@/api/business";
+import {InventoryItem} from "@/api/inventory";
 
 type UserRole = { type: "user" | "business", id: number };
 type SaleItemInfo = { businessId: number, inventoryItem: InventoryItem };
@@ -49,7 +51,6 @@ export type StoreData = {
   createSaleItemDialog: SaleItemInfo | undefined,
   /**
    * Map from event ids to events.
-   * This is a sparse array
    */
   eventMap: Record<number, AnyEvent>,
   /**
@@ -68,8 +69,8 @@ function createOptions(): StoreOptions<StoreData> {
       createBusinessDialogShown: false,
       createInventoryDialog: undefined,
       createSaleItemDialog: undefined,
-      eventMap: {},
       eventForDeletionIds: [],
+      eventMap: {},
     },
     mutations: {
       setUser(state, payload: User) {
@@ -89,8 +90,14 @@ function createOptions(): StoreOptions<StoreData> {
         state.business = payload;
       },
       /**
+       * Remove all of the events from the eventMap
+       * @param state Current state
+       */
+      clearEvents(state) {
+        state.eventMap = {};
+      },
+      /**
        * Adds or replaces a event in the event list
-       * This method is only expected to be called from the event message handler
        * @param state Current state
        * @param payload New event
        */
@@ -122,6 +129,7 @@ function createOptions(): StoreOptions<StoreData> {
       logoutUser(state) {
         state.user = null;
         deleteCookie(COOKIE.USER);
+        state.eventMap = {};
       },
 
       /**
@@ -145,7 +153,7 @@ function createOptions(): StoreOptions<StoreData> {
        * Creates a modal create inventory dialog for adding a sale item to the provided business
        *
        * @param state Current store state
-       * @param businessId Business to create the sale item for
+       * @param saleItemInfo sale item details
        */
       showCreateSaleItem(state, saleItemInfo: SaleItemInfo) {
         state.createSaleItemDialog = saleItemInfo;
@@ -220,16 +228,6 @@ function createOptions(): StoreOptions<StoreData> {
     },
     actions: {
       /**
-       * Starts listening to notification events which are placed in state.eventMap
-       * This is expected to be called just after logging in
-       * @param context The store context
-       */
-      startUserFeed(context) {
-        context.state.eventMap = {}; // Clear events
-        initialiseEventSourceForUser(context.state.user!.id); // Make event handler
-        addEventMessageHandler(event => context.commit('addEvent', event));
-      },
-      /**
        * Attempts to automatically log in the provided user id with the current authentication cookies.
        * Will also set the current role to the previously selected role.
        *
@@ -239,11 +237,9 @@ function createOptions(): StoreOptions<StoreData> {
       async autoLogin(context, userId: number) {
         const response = await getUser(userId);
         if (typeof response === 'string') {
-          //context.commit('setError', response);
           return;
         }
         context.commit('setUser', response);
-        context.dispatch('startUserFeed');
 
         let rawRole = getCookie('role');
         if (rawRole !== null) {
@@ -293,7 +289,6 @@ function createOptions(): StoreOptions<StoreData> {
           return user;
         }
         context.commit('setUser', user);
-        context.dispatch('startUserFeed');
 
         return undefined;
       },
@@ -314,11 +309,31 @@ function createOptions(): StoreOptions<StoreData> {
           if (typeof response === 'string') {
             return response;
           } else {
+            context.commit('removeEvent', eventId);
             return undefined;
           }
         }
         return 'Notification not staged for deletion';
       },
+      /**
+       * Sends a request to get all the events which should be present in the user's newsfeed and adds
+       * them to the eventMap. If the are already events in the eventMap, only requests events which
+       * have been modified after the most recently modified event.
+       * @param context The store context.
+       */
+      async refreshEventFeed(context) {
+        const userId = context.state.user?.id;
+        if (!userId) return;
+        let response = await getEvents(userId, undefined);
+        if (typeof response === 'string') {
+          console.error(response);
+        } else {
+          context.commit('clearEvents');
+          for (let event of response) {
+            context.commit('addEvent', event);
+          }
+        }
+      }
     }
   };
 }

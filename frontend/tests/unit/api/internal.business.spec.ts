@@ -1,5 +1,10 @@
-import { Business, searchBusinesses, ModifyBusiness, modifyBusiness, uploadBusinessImage, makeBusinessImagePrimary } from '@/api/internal';
 import axios, { AxiosInstance } from 'axios';
+import {
+  Business,
+  ModifyBusiness,
+  modifyBusiness,
+  searchBusinesses,
+} from "@/api/business";
 
 jest.mock('axios', () => ({
   create: jest.fn(function () {
@@ -33,7 +38,11 @@ describe('Test GET businesses/search endpoint', () => {
       country: "New Zealand",
       postcode: "7777"
     },
-    businessType: "Accommodation and Food Services"
+    businessType: "Accommodation and Food Services",
+    points: 24,
+    rank: {
+      name: 'bronze',
+    },
   };
 
   const invalidBusiness: any  = {
@@ -85,7 +94,7 @@ describe('Test GET businesses/search endpoint', () => {
       }
     });
     const response = await searchBusinesses('Query', 'Accommodation and Food Services', 2, 10, "created", false);
-    expect(response).toEqual({results:[],count:0});
+    expect(response).toEqual(responseData);
   });
 
   it('When API request is unsuccessfully resolved with a 400 status code, returns an error with the message received from the backend', async () => {
@@ -154,7 +163,8 @@ describe('Test PUT /businesses/${businessId} endpoint', () => {
       postcode: "7777"
     },
     businessType: "Accommodation and Food Services",
-    updateProductCountry: true
+    updateProductCountry: true,
+    imageIds: [1]
   };
 
   it('When API request is successfully resolved, returns undefined', async () => {
@@ -232,158 +242,5 @@ describe('Test PUT /businesses/${businessId} endpoint', () => {
     });
     const response = await modifyBusiness(88, business);
     expect(response).toEqual("Request failed: some error");
-  });
-});
-
-describe("POST /businesses/{businessId}/images", ()=>{
-  const demoFIle = new File([], 'test_file');
-
-  it('When the API request is successfully resolved, nothing is returned', async ()=>{
-    instance.post.mockResolvedValueOnce({
-      response: {
-        status: 201
-      }
-    });
-    const response = await uploadBusinessImage(1, demoFIle);
-    expect(response).toEqual(undefined);
-  });
-
-  it('When the response is 400, a message says image is invalid', async ()=>{
-    instance.post.mockRejectedValueOnce({
-      response: {
-        status: 400
-      }
-    });
-    const response = await uploadBusinessImage(1, demoFIle);
-    expect(response).toEqual("Invalid image");
-  });
-
-  it('When the session is invalid, message teeling user to log back in', async ()=>{
-    instance.post.mockRejectedValueOnce({
-      response: {
-        status: 401
-      }
-    });
-    const response = await uploadBusinessImage(1, demoFIle);
-    expect(response).toEqual("You have been logged out. Please login again and retry");
-  });
-
-  it('When the user has invalid permission, permission error', async ()=>{
-    instance.post.mockRejectedValueOnce({
-      response: {
-        status: 403
-      }
-    });
-    const response = await uploadBusinessImage(1, demoFIle);
-    expect(response).toEqual("Operation not permitted");
-  });
-
-  it('When business does not exists, business not found error', async ()=>{
-    instance.post.mockRejectedValueOnce({
-      response: {
-        status: 406
-      }
-    });
-    const response = await uploadBusinessImage(1, demoFIle);
-    expect(response).toEqual("Business not found");
-  });
-
-  it('When image too large, image too large error', async ()=>{
-    instance.post.mockRejectedValueOnce({
-      response: {
-        status: 413
-      }
-    });
-    const response = await uploadBusinessImage(1, demoFIle);
-    expect(response).toEqual("Image too large");
-  });
-
-  it('When response is undefined, failed to reach backend', async ()=>{
-    instance.post.mockRejectedValueOnce({
-      response: {
-        status: undefined
-      }
-    });
-    const response = await uploadBusinessImage(1, demoFIle);
-    expect(response).toEqual("Failed to reach backend");
-  });
-  it('Any other response, message should be displayed', async ()=>{
-    instance.post.mockRejectedValueOnce({
-      response: {
-        status: 123,
-        data: {
-          message: "message from server"
-        }
-      }
-    });
-    const response = await uploadBusinessImage(1, demoFIle);
-    expect(response).toEqual("Request failed: message from server");
-  });
-
-});
-
-describe("PUT /businesses/{businessId}/images/{imageId}/makeprimary", ()=> {
-
-  it('When the API request is successfully resolved, nothing is returned', async () => {
-    instance.put.mockResolvedValueOnce({
-      response: {
-        status: 201
-      }
-    });
-    const response = await makeBusinessImagePrimary(1, 1);
-    expect(response).toEqual(undefined);
-  });
-
-  it('When the session is invalid, message telling user to log back in', async () => {
-    instance.put.mockRejectedValueOnce({
-      response: {
-        status: 401
-      }
-    });
-    const response = await makeBusinessImagePrimary(1, 1);
-    expect(response).toEqual("You have been logged out. Please login again and retry");
-  });
-
-  it('When the user has invalid permission, permission error', async () => {
-    instance.put.mockRejectedValueOnce({
-      response: {
-        status: 403
-      }
-    });
-    const response = await makeBusinessImagePrimary(1, 1);
-    expect(response).toEqual("Operation not permitted");
-  });
-
-  it('When business does not exists, business or image not found error', async () => {
-    instance.put.mockRejectedValueOnce({
-      response: {
-        status: 406
-      }
-    });
-    const response = await makeBusinessImagePrimary(1, 1);
-    expect(response).toEqual("Business or Image not found");
-  });
-
-  it('When response is undefined, failed to reach backend', async () => {
-    instance.put.mockRejectedValueOnce({
-      response: {
-        status: undefined
-      }
-    });
-    const response = await makeBusinessImagePrimary(1, 1);
-    expect(response).toEqual("Failed to reach backend");
-  });
-
-  it('Any other response, message should be displayed', async () => {
-    instance.put.mockRejectedValueOnce({
-      response: {
-        status: 123,
-        data: {
-          message: "message from server"
-        }
-      }
-    });
-    const response = await makeBusinessImagePrimary(1, 1);
-    expect(response).toEqual("Request failed: message from server");
   });
 });

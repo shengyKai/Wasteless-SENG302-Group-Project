@@ -1,21 +1,28 @@
 package org.seng302.leftovers.controllers;
 
-import net.minidev.json.JSONObject;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.Getter;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.seng302.leftovers.dto.CreateBusinessDTO;
-import org.seng302.leftovers.dto.ModifyBusinessDTO;
+import org.seng302.leftovers.dto.ResultPageDTO;
+import org.seng302.leftovers.dto.business.BusinessResponseDTO;
+import org.seng302.leftovers.dto.business.BusinessType;
+import org.seng302.leftovers.dto.business.CreateBusinessDTO;
+import org.seng302.leftovers.dto.business.ModifyBusinessDTO;
 import org.seng302.leftovers.entities.Business;
-import org.seng302.leftovers.entities.Image;
 import org.seng302.leftovers.entities.Product;
 import org.seng302.leftovers.entities.User;
+import org.seng302.leftovers.exceptions.DoesNotExistResponseException;
+import org.seng302.leftovers.exceptions.InsufficientPermissionResponseException;
+import org.seng302.leftovers.exceptions.ValidationResponseException;
 import org.seng302.leftovers.persistence.BusinessRepository;
 import org.seng302.leftovers.persistence.ImageRepository;
 import org.seng302.leftovers.persistence.UserRepository;
 import org.seng302.leftovers.service.ImageService;
+import org.seng302.leftovers.service.search.SearchPageConstructor;
+import org.seng302.leftovers.service.search.SearchSpecConstructor;
 import org.seng302.leftovers.tools.AuthenticationTokenManager;
-import org.seng302.leftovers.tools.JsonTools;
-import org.seng302.leftovers.tools.SearchHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -24,12 +31,10 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.server.ResponseStatusException;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
-
+import javax.validation.constraints.NotNull;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
@@ -37,20 +42,21 @@ import java.util.Set;
 
 @RestController
 public class BusinessController {
+    @Autowired
+    private ObjectMapper objectMapper;
+
     private final BusinessRepository businessRepository;
     private final UserRepository userRepository;
     private final ImageService imageService;
-    private final ImageRepository imageRepository;
     private static final Logger logger = LogManager.getLogger(BusinessController.class.getName());
 
-    private static final Set<String> VALID_BUSINESS_ORDERINGS = Set.of("created", "name", "location", "businessType");
+    private static final Set<String> VALID_BUSINESS_ORDERINGS = Set.of("created", "name", "location", "businessType", "points");
 
     @Autowired
-    public BusinessController(BusinessRepository businessRepository, UserRepository userRepository, ImageService imageService, ImageRepository imageRepository) {
+    public BusinessController(BusinessRepository businessRepository, UserRepository userRepository, ImageService imageService) {
         this.businessRepository = businessRepository;
         this.userRepository = userRepository;
         this.imageService = imageService;
-        this.imageRepository = imageRepository;
     }
 
     /**
@@ -67,11 +73,9 @@ public class BusinessController {
             Optional<User> primaryOwner = userRepository.findById(body.getPrimaryAdministratorId());
 
             if (primaryOwner.isEmpty()) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                        "The given PrimaryBusinessOwner does not exist");
+                throw new ValidationResponseException("The given PrimaryBusinessOwner does not exist");
             } else if (!AuthenticationTokenManager.sessionCanSeePrivate(req, primaryOwner.get().getUserID())) {
-                throw new ResponseStatusException(HttpStatus.FORBIDDEN,
-                        "You don't have permission to set the provided Primary Owner");
+                throw new InsufficientPermissionResponseException("You don't have permission to set the provided Primary Owner");
             }
 
             // Build the business
@@ -105,33 +109,22 @@ public class BusinessController {
         AuthenticationTokenManager.checkAuthenticationToken(request);
         try {
             Business business = businessRepository.findById(id)
-                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE, "Business not found"));
+                    .orElseThrow(() -> new DoesNotExistResponseException(Business.class));
             business.checkSessionPermissions(request);
+
             Long newAdminID = body.getPrimaryAdministratorId();
             if(!business.getPrimaryOwner().getUserID().equals(newAdminID)) {
-                business.checkSessionPermissionsOwner(request);
-
-                User newOwner = userRepository.findById(newAdminID)  
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Updated primary administrator does not exist"));
-                User previousOwner = userRepository.findById(business.getPrimaryOwner().getUserID())
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Previous business owner account does not exist"));
-
-                business.removeAdmin(newOwner);
-                business.setPrimaryOwner(newOwner);    
-                business.addAdmin(previousOwner);      
+                changeAdmin(request, business, newAdminID);
             }
+
             business.setName(body.getName());
             business.setDescription(body.getDescription());
             business.setAddress(body.getAddress().createLocation());
             business.setBusinessType(body.getBusinessType());
+            business.setImages(imageService.getListOfImagesFromIds(body.getImageIds()));
 
             if (Boolean.TRUE.equals(body.getUpdateProductCountry())) {
-                List<Product> catalogue = business.getCatalogue();
-                String countryToChange = body.getAddress().getCountry();
-                // Iterate through each product in the catalogue and change their country to the specified country
-                for (Product product : catalogue) {
-                    product.setCountryOfSale(countryToChange);
-                }
+                updateCountry(body, business.getCatalogue());
             }
 
             businessRepository.save(business);
@@ -142,21 +135,62 @@ public class BusinessController {
     }
 
     /**
+     * Updates the country of products associated with the business
+     * @param body Request body with all the business info
+     * @param catalogue List of products associated with the business
+     */
+    private void updateCountry(ModifyBusinessDTO body, List<Product> catalogue) {
+        String countryToChange = body.getAddress().getCountry();
+        // Iterate through each product in the catalogue and change their country to the specified country
+        for (Product product : catalogue) {
+            product.setCountryOfSale(countryToChange);
+        }
+    }
+
+    /**
+     * Update the primary administrator of the business
+     * @param request Request body with auth details of business
+     * @param business The business object being modified
+     * @param newAdminID The ID of the new admin
+     */
+    private void changeAdmin(HttpServletRequest request, Business business, Long newAdminID) {
+        business.checkSessionPermissionsOwner(request);
+
+        User newOwner = userRepository.findById(newAdminID)
+                .orElseThrow(() -> new ValidationResponseException("Updated primary administrator does not exist"));
+        User previousOwner = userRepository.findById(business.getPrimaryOwner().getUserID())
+                .orElseThrow(() -> new ValidationResponseException("Previous business owner account does not exist"));
+
+        business.removeAdmin(newOwner);
+        business.setPrimaryOwner(newOwner);
+        business.addAdmin(previousOwner);
+    }
+
+    /**
      * This method searchs for the business with the given ID in the database. If the business exists, return a JSON representation of the
      * business. If the business does not exists, send a response with status code 406/Not Acceptable.
      * @return JSON representation of the business.
      */
     @GetMapping("/businesses/{id}")
-    public JSONObject getBusinessById(@PathVariable Long id, HttpServletRequest request) {
+    public BusinessResponseDTO getBusinessById(@PathVariable Long id, HttpServletRequest request) {
         AuthenticationTokenManager.checkAuthenticationToken(request);
-        logger.info(() -> String.format("Retrieving business with ID %d.", id));
+        logger.info("Retrieving business with ID {}.", id);
         Optional<Business> business = businessRepository.findById(id);
         if (business.isEmpty()) {
-            ResponseStatusException notFoundException = new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE, String.format("No business with ID %d.", id));
+            var notFoundException = new DoesNotExistResponseException(Business.class);
             logger.error(notFoundException.getMessage());
             throw notFoundException;
         }
-        return business.get().constructJson(true);
+        return BusinessResponseDTO.withAdmins(business.get());
+    }
+
+    /**
+     * DTO for getting the ID number of the user that is being promoted/demoted to a GAA.
+     */
+    @Getter
+    private static class PromoteDemoteDTO {
+        @NotNull
+        private Long userId;
     }
 
 
@@ -167,12 +201,14 @@ public class BusinessController {
      * @param businessId The Id of the business
      */
     @PutMapping("/businesses/{id}/makeAdministrator")
-    public void makeAdmin(@RequestBody JSONObject userInfo, HttpServletRequest req, @PathVariable("id") Long businessId) {
+    public void makeAdmin(@RequestBody @Valid PromoteDemoteDTO userInfo, HttpServletRequest req, @PathVariable("id") Long businessId) {
         try {
             AuthenticationTokenManager.checkAuthenticationToken(req); // Ensure a user is logged in
             Business business = getBusiness(businessId); // Get the business
             business.checkSessionPermissionsOwner(req);
-            User user = getUser(userInfo); // Get the user to promote
+
+            User user = userRepository.findById(userInfo.getUserId())
+                    .orElseThrow(() -> new ValidationResponseException("The given user does not exist"));
             LocalDate now = LocalDate.now();
             LocalDate minDate = now.minusYears(16);
             
@@ -181,7 +217,7 @@ public class BusinessController {
                 businessRepository.save(business);
                 logger.info(() -> String.format("Added user %d as admin of business %d", user.getUserID(), businessId));
             } else {
-                throw new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE, "The new business admin should be at least 16 years old");
+                throw new ValidationResponseException("The new business admin should be at least 16 years old");
             }
         } catch (Exception err) {
             logger.error(err.getMessage());
@@ -196,12 +232,13 @@ public class BusinessController {
      * @param businessId The Id of the business
      */
     @PutMapping("/businesses/{id}/removeAdministrator")
-    public void removeAdmin(@RequestBody JSONObject userInfo, HttpServletRequest req, @PathVariable("id") Long businessId) {
+    public void removeAdmin(@RequestBody @Valid PromoteDemoteDTO userInfo, HttpServletRequest req, @PathVariable("id") Long businessId) {
         try {
             AuthenticationTokenManager.checkAuthenticationToken(req); // Ensure a user is logged in
             Business business = getBusiness(businessId); // Get the business
             business.checkSessionPermissionsOwner(req);
-            User user = getUser(userInfo); // Get the user to demote
+            User user = userRepository.findById(userInfo.getUserId())
+                    .orElseThrow(() -> new ValidationResponseException("The given user does not exist"));
 
             business.removeAdmin(user);
             businessRepository.save(business);
@@ -214,33 +251,6 @@ public class BusinessController {
     }
 
     /**
-     * Gets a user from the database and performs sanity checks to ensure User is not null
-     * Throws a ResponseStatusException if the user does not exist
-     * @param userInfo Data containing the Id of the user to find
-     * @return A user of given UserId
-     */
-    private User getUser(@RequestBody JSONObject userInfo) {
-        // Check a valid Long id is given in the request
-        if (!userInfo.containsKey("userId")) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                    "Could not find a user id in the request");
-        }
-
-        Long userId = userInfo.getAsNumber("userId").longValue();
-        if (userId == null) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                    "Could not find a user id in the request");
-        }
-        // check the requested user exists
-        Optional<User> user = userRepository.findById(userId);
-        if (!user.isPresent()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                    "The given user does not exist");
-        }
-        return user.get();
-    }
-
-    /**
      * Gets a business from the database matching a given Business Id
      * Performs sanity checks to ensure the business is not null
      * Throws ResponseStatusException if business does not exist
@@ -250,9 +260,8 @@ public class BusinessController {
     private Business getBusiness(Long businessId) {
         // check business exists
         Optional<Business> business = businessRepository.findById(businessId);
-        if (!business.isPresent()) {
-            throw new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE,
-                    "The given business does not exist");
+        if (business.isEmpty()) {
+            throw new DoesNotExistResponseException(Business.class);
         }
         return business.get();
     }
@@ -267,29 +276,34 @@ public class BusinessController {
      * @param resultsPerPage Number of results per page
      * @param orderBy Order by term. Can be one of "created", "name", "location", "businessType"
      * @param reverse Boolean. Reverse ordering of results
-     * @param businessType Type of business. Can by one of "Accommodation and Food Services", "Retail Trade",
-     *                     "Charitable organisation", "Non-profit organisation".
+     * @param businessTypeString Type of business. Can by one of "Accommodation and Food Services", "Retail Trade","Charitable organisation", "Non-profit organisation".
      * @return A JSON object containing the total count and paginated results.
      */
     @GetMapping("/businesses/search")
-    public JSONObject search(HttpServletRequest request, @RequestParam(required = false) String searchQuery,
-                             @RequestParam(required = false) Integer page,
-                             @RequestParam(required = false) Integer resultsPerPage,
-                             @RequestParam(required = false) String orderBy,
-                             @RequestParam(required = false) Boolean reverse,
-                             @RequestParam(required = false) String businessType) {
+    public ResultPageDTO<BusinessResponseDTO> search(HttpServletRequest request, @RequestParam(required = false) String searchQuery,
+                                @RequestParam(required = false) Integer page,
+                                @RequestParam(required = false) Integer resultsPerPage,
+                                @RequestParam(required = false) String orderBy,
+                                @RequestParam(required = false) Boolean reverse,
+                                @RequestParam(required = false, name = "businessType") String businessTypeString) {
 
         AuthenticationTokenManager.checkAuthenticationToken(request);
+        logger.info("Performing Business search for query \"{}\" and type \"{}\"", searchQuery, businessTypeString);
 
-        logger.info(() -> String.format("Performing Business search for query \"%s\" and type \"%s\"", searchQuery, businessType));
+        BusinessType businessType;
+        try {
+            businessType = objectMapper.convertValue(businessTypeString, new TypeReference<>() {});
+        } catch (IllegalArgumentException e) {
+            throw new ValidationResponseException("Invalid business type provided");
+        }
 
-        Sort.Direction direction = SearchHelper.getSortDirection(reverse);
+        Sort.Direction direction = SearchPageConstructor.getSortDirection(reverse);
         if (orderBy == null) {
             orderBy = "created";
         }
         if (!VALID_BUSINESS_ORDERINGS.contains(orderBy)) {
             logger.error("Invalid 'orderBy' parameter {} used", orderBy);
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid business ordering");
+            throw new ValidationResponseException("Invalid business ordering");
         }
 
         List<Sort.Order> sortOrder;
@@ -299,69 +313,10 @@ public class BusinessController {
             sortOrder = List.of(new Sort.Order(direction, orderBy).ignoreCase());
         }
 
-        PageRequest pageRequest = SearchHelper.getPageRequest(page, resultsPerPage, Sort.by(sortOrder));
-        Specification<Business> specification = SearchHelper.constructSpecificationFromBusinessSearch(searchQuery, businessType);
+        PageRequest pageRequest = SearchPageConstructor.getPageRequest(page, resultsPerPage, Sort.by(sortOrder));
+        Specification<Business> specification = SearchSpecConstructor.constructSpecificationFromBusinessSearch(searchQuery, businessType);
 
         Page<Business> results = businessRepository.findAll(specification, pageRequest);
-        return JsonTools.constructPageJSON(results.map(Business::constructJson));
-    }
-
-    /**
-     * Adds a new image to the business' image list
-     * @param businessId Identifier of business to add image to
-     * @param file Uploaded image
-     * @return Empty response with 201 if successful
-     */
-    @PostMapping("/businesses/{businessId}/images")
-    public ResponseEntity<Void> uploadImage(@PathVariable Long businessId, @RequestParam("file") MultipartFile file, HttpServletRequest request) {
-        logger.info("Adding business image (businessId={})", businessId);
-        AuthenticationTokenManager.checkAuthenticationToken(request);
-        try {
-            Business business = businessRepository.getBusinessById(businessId);
-            business.checkSessionPermissions(request);
-
-            Image image = imageService.create(file);
-            business.addImage(image);
-            businessRepository.save(business);
-
-            return new ResponseEntity<>(HttpStatus.CREATED);
-        } catch (Exception e) {
-            logger.error(e.getMessage());
-            throw e;
-        }
-    }
-
-    /**
-     * Sets the new primary image to be displayed for a business
-     * @param businessId The ID of the business to modify
-     * @param imageId The ID of the image to set as primary image
-     * @return Empty response with 200 if successful
-     */
-    @PutMapping("/businesses/{businessId}/images/{imageId}/makeprimary")
-    public ResponseEntity<Void> makeImagePrimary(@PathVariable Long businessId, @PathVariable Long imageId, HttpServletRequest request) {
-        logger.info("Making business image primary (businessId={}, imageId={})", businessId, imageId);
-        AuthenticationTokenManager.checkAuthenticationToken(request);
-        try {
-            Business business = businessRepository.getBusinessById(businessId);
-            business.checkSessionPermissions(request);
-
-            Image image = imageRepository.getImageById(imageId);
-            var images = business.getImages();
-            // Ensure that the provided image belongs to this business. Otherwise, action is forbidden
-            if (!images.contains(image)) {
-                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You cannot modify this image");
-            }
-            if (images.get(0).equals(image)) {
-                return new ResponseEntity<>(HttpStatus.OK);
-            }
-            business.removeImage(image);
-            business.addImage(0, image);
-            businessRepository.save(business);
-
-            return new ResponseEntity<>(HttpStatus.OK);
-        } catch (Exception e) {
-            logger.error(e.getMessage());
-            throw e;
-        }
+        return new ResultPageDTO<>(results.map(BusinessResponseDTO::withoutAdmins));
     }
 }

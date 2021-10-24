@@ -66,8 +66,8 @@
 <script>
 import Event from './Event';
 import {mandatoryRules, maxCharRules} from '@/utils';
-import {getMessagesInConversation, messageConversation} from "@/api/internal";
 import { formatDate, formatTime } from '@/utils';
+import {getMessagesInConversation, messageConversation} from "@/api/marketplace";
 
 export default {
   name: "MessageEvent",
@@ -121,6 +121,7 @@ export default {
         this.errorMessage = response;
       } else {
         this.directMessageContent = '';
+        this.$store.dispatch('refreshEventFeed');
       }
     },
     formatDate,

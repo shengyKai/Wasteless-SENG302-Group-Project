@@ -1,21 +1,21 @@
 package org.seng302.leftovers.controllers;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.ToString;
-import net.minidev.json.JSONObject;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.hibernate.Session;
 import org.seng302.datagenerator.*;
+import org.seng302.leftovers.dto.business.BusinessType;
 import org.seng302.leftovers.entities.*;
+import org.seng302.leftovers.exceptions.InsufficientPermissionResponseException;
 import org.seng302.leftovers.persistence.*;
 import org.seng302.leftovers.tools.AuthenticationTokenManager;
-import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.server.ResponseStatusException;
 
 import javax.persistence.EntityManager;
 import javax.servlet.http.HttpServletRequest;
@@ -63,7 +63,7 @@ public class DemoController {
         try {
             AuthenticationTokenManager.checkAuthenticationToken(request);
             if (!AuthenticationTokenManager.sessionIsAdmin(request)) {
-                ResponseStatusException error = new ResponseStatusException(HttpStatus.FORBIDDEN, "Only admin accounts can perform demo actions.");
+                var error = new InsufficientPermissionResponseException("Only admin accounts can perform demo actions.");
                 logger.error(error.getMessage());
                 throw error;
             }
@@ -91,7 +91,7 @@ public class DemoController {
             // Construct demo business and save it to the repository
             if (business == null) {
                 business = new Business.Builder()
-                        .withBusinessType("Accommodation and Food Services")
+                        .withBusinessType(BusinessType.ACCOMMODATION_AND_FOOD_SERVICES)
                         .withDescription("DESCRIPTION")
                         .withName("BUSINESS_NAME")
                         .withAddress(Location.covertAddressStringToLocation("108,Albert Road,Ashburton,Christchurch,New Zealand,Canterbury,8041"))
@@ -118,11 +118,11 @@ public class DemoController {
                     .withProduct(product)
                     .withQuantity(1000)
                     .withPricePerItem("10")
-                    .withTotalPrice(null)
-                    .withManufactured(today.minusDays(1).toString())
-                    .withSellBy(today.plusDays(1).toString())
-                    .withBestBefore(today.plusDays(2).toString())
-                    .withExpires(today.plusDays(3).toString())
+                    .withTotalPrice((String) null)
+                    .withManufactured(today.minusDays(1))
+                    .withSellBy(today.plusDays(1))
+                    .withBestBefore(today.plusDays(2))
+                    .withExpires(today.plusDays(3))
                     .build();
             inventoryItem = inventoryItemRepository.save(inventoryItem);
 
@@ -167,24 +167,47 @@ public class DemoController {
     @Getter
     @ToString
     public static class GeneratorRequestDTO {
-      private int userCount = 0;
-      private int businessCount = 0;
-      private int productCount = 0;
-      private int inventoryItemCount = 0;
-      private int cardCount = 0;
-      private int saleItemCount = 0;
+        private int userCount = 0;
+        private int businessCount = 0;
+        private int productCount = 0;
+        private int inventoryItemCount = 0;
+        private int cardCount = 0;
+        private int saleItemCount = 0;
+        private int boughtSaleItemCount = 0;
 
-      private List<Long> userInitial = new ArrayList<>();
-      private List<Long> businessInitial = new ArrayList<>();
-      private List<Long> productInitial = new ArrayList<>();
-      private List<Long> inventoryItemInitial = new ArrayList<>();
-      private List<Long> saleItemInitial = new ArrayList<>();
-      private Boolean generateProductImages = false;
-      private Boolean generateBusinessImages = false;
-      private int businessImageMin = 0;
-      private int businessImageMax = 3;
+        private List<Long> userInitial = new ArrayList<>();
+        private List<Long> businessInitial = new ArrayList<>();
+        private List<Long> productInitial = new ArrayList<>();
+        private List<Long> inventoryItemInitial = new ArrayList<>();
+        private List<Long> saleItemInitial = new ArrayList<>();
+        private List<Long> boughtSaleItemInitial = new ArrayList<>();
+
+        private Boolean generateProductImages = false;
+
+        private Boolean generateBusinessImages = false;
+        private int businessImageMin = 0;
+        private int businessImageMax = 3;
+
+        private Boolean generateUserImages = false;
+        private int userImageMin = 0;
+        private int userImageMax = 2;
     }
 
+    /**
+     * DTO representing the response of a generate request
+     */
+    @Getter
+    @ToString
+    @AllArgsConstructor
+    public static class GenerateResponseDTO {
+        private List<Long> generatedUsers;
+        private List<Long> generatedBusinesses;
+        private List<Long> generatedProducts;
+        private List<Long> generatedInventoryItems;
+        private List<Long> generatedSaleItems;
+        private List<Long> generatedCards;
+        private List<Long> generatedBoughtSaleItems;
+    }
 
     /**
      * Generates a set of demo data (Using the more advanced generators)
@@ -192,7 +215,7 @@ public class DemoController {
      * @return JSON including generated Users, Businesses and Products IDs
      */
     @PostMapping("/demo/generate")
-    public JSONObject generate(HttpServletRequest request, @RequestBody GeneratorRequestDTO options) {
+    public GenerateResponseDTO generate(HttpServletRequest request, @RequestBody GeneratorRequestDTO options) {
         AuthenticationTokenManager.checkAuthenticationTokenDGAA(request);
 
         List<Long> allUsers = options.getUserInitial();
@@ -200,16 +223,16 @@ public class DemoController {
         List<Long> allProducts = options.getProductInitial();
         List<Long> allInventoryItems = options.getInventoryItemInitial();
 
-        JSONObject json = new JSONObject();
         Session session = entityManager.unwrap(Session.class);
-        session.doWork(connection -> {
+        return session.doReturningWork(connection -> {
             var userGenerator = new UserGenerator(connection);
             var businessGenerator = new BusinessGenerator(connection);
             var productGenerator = new ProductGenerator(connection);
             var inventoryItemGenerator = new InventoryItemGenerator(connection);
             var saleItemGenerator = new SaleItemGenerator(connection);
             var cardGenerator = new MarketplaceCardGenerator(connection);
-            var businessImageGenerator = new BusinessImageGenerator(connection);
+            var imageGenerator = new ImageGenerator(connection);
+            var boughtSaleItemGenerator = new BoughtSaleItemGenerator(connection);
 
             List<Long> userIds = userGenerator.generateUsers(options.userCount);
             allUsers.addAll(userIds);
@@ -227,20 +250,19 @@ public class DemoController {
 
             List<Long> cardIds = cardGenerator.generateCards(allUsers, options.getCardCount());
 
+            List<Long> boughtSaleItemIds = boughtSaleItemGenerator.generateBoughtSaleItems(allProducts, allUsers, options.getBoughtSaleItemCount());
+
+            businessGenerator.setBusinessPointsFromSaleItems(allBusinesses);
+
             if (options.getGenerateBusinessImages()) {
-                businessImageGenerator.generateBusinessImages(allBusinesses, options.getBusinessImageMin(), options.getBusinessImageMax());
+                imageGenerator.generateEntityImages(allBusinesses, options.getBusinessImageMin(), options.getBusinessImageMax(), ImageGenerator.ImageEntityType.BUSINESS);
             }
 
-            json.appendField("generatedUsers", userIds);
-            json.appendField("generatedBusinesses", businessIds);
-            json.appendField("generatedProducts", productIds);
-            json.appendField("generatedInventoryItems", inventoryIds);
-            json.appendField("generatedSaleItems", saleItemIds);
-            json.appendField("generatedCards", cardIds);
+            if (options.getGenerateUserImages()) {
+                imageGenerator.generateEntityImages(allUsers, options.getUserImageMin(), options.getUserImageMax(), ImageGenerator.ImageEntityType.USER);
+            }
 
+            return new GenerateResponseDTO(userIds, businessIds, productIds, inventoryIds, saleItemIds, cardIds, boughtSaleItemIds);
         });
-        return json;
     }
-
-
 }

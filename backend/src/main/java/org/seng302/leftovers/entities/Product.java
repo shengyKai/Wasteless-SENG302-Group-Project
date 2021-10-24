@@ -1,10 +1,6 @@
 package org.seng302.leftovers.entities;
 
-import net.minidev.json.JSONArray;
-import net.minidev.json.JSONObject;
-import org.seng302.leftovers.tools.JsonTools;
-import org.springframework.http.HttpStatus;
-import org.springframework.web.server.ResponseStatusException;
+import org.seng302.leftovers.exceptions.ValidationResponseException;
 
 import javax.persistence.*;
 import java.math.BigDecimal;
@@ -16,7 +12,7 @@ import java.util.List;
         @UniqueConstraint(columnNames = {"product_code", "business_id"})
 })
 @Entity
-public class Product {
+public class Product implements ImageAttachment {
     // Product code must only contain uppercase letters, numbers and dashes
     // Product code have a length between 1-15
     private static final String PRODUCT_CODE_REGEX = "^[-A-Z0-9]{1,15}$";
@@ -51,7 +47,7 @@ public class Product {
     @OrderColumn(name="image_order")
     @OneToMany(fetch = FetchType.EAGER)
     @JoinColumn(name="product_id")
-    private List<Image> productImages = new ArrayList<>();
+    private List<Image> images = new ArrayList<>();
 
 
 
@@ -80,8 +76,8 @@ public class Product {
      * Adds a single image to the Product's list of images
      * @param image An image entity to be linked to this product.
      */
-    public void addProductImage(Image image) {
-        this.productImages.add(image);
+    public void addImage(Image image) {
+        this.images.add(image);
     }
     /**
      * Get the description of the product
@@ -117,7 +113,8 @@ public class Product {
      * Get the image object associated with this product
      * @return the image
      */
-    public List<Image> getProductImages() { return productImages; }
+    @Override
+    public List<Image> getImages() { return images; }
 
     /**
      * Get the name of the country which the product is being sold in.
@@ -131,10 +128,10 @@ public class Product {
      */
     public void setProductCode(String productCode) {
         if (productCode == null) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Product code must be provided");
+            throw new ValidationResponseException("Product code must be provided");
         }
         if (!productCode.matches(PRODUCT_CODE_REGEX)) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Product code must have a valid format");
+            throw new ValidationResponseException("Product code must have a valid format");
         }
         this.productCode = productCode;
     }
@@ -145,13 +142,13 @@ public class Product {
      */
     public void setName(String name) {
         if (name == null) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Product name must be provided");
+            throw new ValidationResponseException("Product name must be provided");
         }
         if (name.isEmpty() || name.length() > 50) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Product name must be between 1-50 characters long");
+            throw new ValidationResponseException("Product name must be between 1-50 characters long");
         }
         if (!name.matches("^[ \\d\\p{Punct}\\p{L}]*$")) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Product name must only contain letters, numbers, spaces and punctuation");
+            throw new ValidationResponseException("Product name must only contain letters, numbers, spaces and punctuation");
         }
         this.name = name;
     }
@@ -166,10 +163,10 @@ public class Product {
             return;
         }
         if (description.length() > 200) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Product description must not be longer than 200 characters");
+            throw new ValidationResponseException("Product description must not be longer than 200 characters");
         }
         if (!description.matches("^[\\p{Space}\\d\\p{Punct}\\p{L}]*$")) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Product description must only contain letters, numbers, whitespace and punctuation");
+            throw new ValidationResponseException("Product description must only contain letters, numbers, whitespace and punctuation");
         }
         this.description = description;
     }
@@ -184,10 +181,10 @@ public class Product {
             return;
         }
         if (manufacturer.length() > 100) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Product manufacturer must not be longer than 100 characters");
+            throw new ValidationResponseException("Product manufacturer must not be longer than 100 characters");
         }
         if (!manufacturer.matches("^[ \\d\\p{Punct}\\p{L}]*$")) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Product manufacturer must only contain letters, numbers, spaces and punctuation");
+            throw new ValidationResponseException("Product manufacturer must only contain letters, numbers, spaces and punctuation");
         }
         this.manufacturer = manufacturer;
     }
@@ -199,48 +196,32 @@ public class Product {
     public void setRecommendedRetailPrice(BigDecimal recommendedRetailPrice) {
         if (recommendedRetailPrice != null) {
             if (recommendedRetailPrice.compareTo(BigDecimal.ZERO) < 0) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Product recommended retail price must not be less than 0");
+                throw new ValidationResponseException("Product recommended retail price must not be less than 0");
             }
             if (recommendedRetailPrice.compareTo(new BigDecimal(10000)) >= 0) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Product recommended retail price must be less that 100,000");
+                throw new ValidationResponseException("Product recommended retail price must be less that 10,000");
             }
         }
         this.recommendedRetailPrice = recommendedRetailPrice;
     }
 
     /**
-     * Convenience method for setting the recommended retail price from a string
-     * @param recommendedRetailPrice The new RRP of the product as a string
-     */
-    public void setRecommendedRetailPrice(String recommendedRetailPrice) {
-        if (recommendedRetailPrice == null || recommendedRetailPrice.equals("")) {
-            this.recommendedRetailPrice = null;
-            return;
-        }
-        try {
-            this.setRecommendedRetailPrice(new BigDecimal(recommendedRetailPrice));
-        } catch (NumberFormatException ignored) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The recommended retail price is not a number");
-        }
-    }
-
-    /**
      * Sets the images associated with the product
-     * @param productImages the product images
+     * @param images the product images
      */
-    public void setProductImages(List<Image> productImages) {
-        this.productImages = productImages;
+    public void setImages(List<Image> images) {
+        this.images = images;
     }
 
     /**
      * Removes a given image from the list of products
-     * @param productImage The image to remove
+     * @param image The image to remove
      */
-    public void removeProductImage(Image productImage) {
-        if (!this.productImages.contains(productImage)) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Product cannot be removed");
+    public void removeImage(Image image) {
+        if (!this.images.contains(image)) {
+            throw new ValidationResponseException("Product cannot be removed");
         }
-        this.productImages.remove(productImage);
+        this.images.remove(image);
     }
 
     /**
@@ -250,35 +231,14 @@ public class Product {
      */
     public void setCountryOfSale(String countryOfSale) {
         if (countryOfSale == null || countryOfSale.isEmpty() || countryOfSale.isBlank()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Country of sale cannot be empty");
+            throw new ValidationResponseException("Country of sale cannot be empty");
         } else if (countryOfSale.length() > 100) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Country of sale must be less than 100 characters long");
+            throw new ValidationResponseException("Country of sale must be less than 100 characters long");
         } else if (!countryOfSale.matches("[ \\p{L}]+")) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Country of sale contains illegal characters");
+            throw new ValidationResponseException("Country of sale contains illegal characters");
         } else {
             this.countryOfSale = countryOfSale;
         }
-    }
-
-    /**
-     * Convert product to a JSON object
-     */
-    public JSONObject constructJSONObject() {
-        JSONObject object = new JSONObject();
-        object.put("id", productCode);
-        object.put("name", name);
-        object.put("description", description);
-        object.put("manufacturer", manufacturer);
-        object.put("recommendedRetailPrice", recommendedRetailPrice);
-        object.put("created", created.toString());
-        JSONArray images = new JSONArray();
-        for (Image image : productImages) {
-            images.add(image.constructJSONObject());
-        }
-        object.put("images", images);
-        object.put("countryOfSale", countryOfSale);
-        JsonTools.removeNullsFromJson(object);
-        return object;
     }
 
     /**
@@ -289,7 +249,7 @@ public class Product {
         private String name;
         private String description;
         private String manufacturer;
-        private String recommendedRetailPrice;
+        private BigDecimal recommendedRetailPrice;
         private Business business;
 
         /**
@@ -339,8 +299,24 @@ public class Product {
          * @param recommendedRetailPrice the recommended retail price of the product
          * @return Builder with the recommended retail price set
          */
-        public Builder withRecommendedRetailPrice(String recommendedRetailPrice) {
+        public Builder withRecommendedRetailPrice(BigDecimal recommendedRetailPrice) {
             this.recommendedRetailPrice = recommendedRetailPrice;
+            return this;
+        }
+
+        /**
+         * Sets the builder's recommended retail price.
+         * If the provided string is not a valid number then this method will throw an exception
+         *
+         * @param recommendedRetailPrice the recommended retail price of the product
+         * @return Builder with the recommended retail price set
+         */
+        public Builder withRecommendedRetailPrice(String recommendedRetailPrice) {
+            try {
+                this.recommendedRetailPrice = new BigDecimal(recommendedRetailPrice);
+            } catch (NumberFormatException ignored) {
+                throw new ValidationResponseException("The recommended retail price is not a number");
+            }
             return this;
         }
 

@@ -1,15 +1,16 @@
 import Vue from 'vue';
 import Vuetify from 'vuetify';
-import { createLocalVue, Wrapper, mount } from '@vue/test-utils';
+import {createLocalVue, mount, Wrapper} from '@vue/test-utils';
 
 import ProductForm from '@/components/BusinessProfile/ProductForm.vue';
-import { castMock, flushQueue } from './utils';
-import * as api from '@/api/internal';
-import { currencyFromCountry } from '@/api/currency';
+import {castMock, flushQueue, findButtonWithText} from './utils';
+import {createProduct as createProduct1, modifyProduct as modifyProduct1, Product} from "@/api/product";
 
-jest.mock('@/api/internal', () => ({
+jest.mock('@/api/product', () => ({
   createProduct: jest.fn(),
   modifyProduct: jest.fn(),
+}));
+jest.mock('@/api/business', () => ({
   getBusiness: jest.fn(() => {
     return {
       address: {
@@ -31,8 +32,8 @@ jest.mock('@/api/currency', () => ({
 }));
 
 
-const createProduct = castMock(api.createProduct);
-const modifyProduct = castMock(api.modifyProduct);
+const createProduct = castMock(createProduct1);
+const modifyProduct = castMock(modifyProduct1);
 
 Vue.use(Vuetify);
 
@@ -133,24 +134,14 @@ describe('ProductForm.vue - Create', () => {
    *
    * @returns A Wrapper around the close button
    */
-  function findCloseButton() {
-    const buttons = wrapper.findAllComponents({ name: 'v-btn' });
-    const filtered = buttons.filter(button => button.text().includes('Close'));
-    expect(filtered.length).toBe(1);
-    return filtered.at(0);
-  }
+  const findCloseButton = () => findButtonWithText(wrapper, 'Close');
 
   /**
    * Finds the create button in the ProductForm form
    *
    * @returns A Wrapper around the create button
    */
-  function findCreateButton() {
-    const buttons = wrapper.findAllComponents({ name: 'v-btn' });
-    const filtered = buttons.filter(button => button.text().includes('Create'));
-    expect(filtered.length).toBe(1);
-    return filtered.at(0);
-  }
+  const findCreateButton = () => findButtonWithText(wrapper, 'Create');
 
   it('Valid if all required fields are provided', async () => {
     await populateRequiredFields();
@@ -400,7 +391,7 @@ describe('ProductForm.vue - Modify', () => {
   // Container for the ProductForm under test
   let wrapper: Wrapper<any>;
 
-  const previousProduct: api.Product = {
+  const previousProduct: Product = {
     id: 'TEST-ID',
     name: 'Test product name',
     description: 'Test product description',
@@ -457,12 +448,7 @@ describe('ProductForm.vue - Modify', () => {
    *
    * @returns A Wrapper around the save button
    */
-  function findSaveButton() {
-    const buttons = wrapper.findAllComponents({ name: 'v-btn' });
-    const filtered = buttons.filter(button => button.text().includes('Save'));
-    expect(filtered.length).toBe(1);
-    return filtered.at(0);
-  }
+  const findSaveButton = () => findButtonWithText(wrapper, 'Save');
 
   it('Form has the correct title', () => {
     expect(appWrapper.text()).toContain(`Update ${previousProduct.id}`);

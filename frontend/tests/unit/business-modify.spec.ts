@@ -1,21 +1,30 @@
 import Vue from 'vue';
 import Vuex from 'vuex';
 import Vuetify from 'vuetify';
-import { createLocalVue, Wrapper, mount } from '@vue/test-utils';
+import {createLocalVue, mount, Wrapper} from '@vue/test-utils';
 
 import ModifyBusiness from '@/components/BusinessProfile/ModifyBusiness.vue';
-import {castMock} from "./utils";
-import * as api from '@/api/internal';
-import {User, Location, Business} from "@/api/internal";
-import { getStore, resetStoreForTesting } from '@/store';
+import {castMock, findButtonWithText} from "./utils";
+import {Location} from '@/api/internal';
+import {getStore, resetStoreForTesting} from '@/store';
+import {getUser as getUser1, User} from "@/api/user";
+import {currencyFromCountry} from "@/api/currency";
+import {modifyBusiness as modifyBusiness1, Business} from "@/api/business";
+import ImageManager from "@/components/image/ImageManager.vue";
 
-jest.mock('@/api/internal', () => ({
+jest.mock('@/api/user', () => ({
+  getUser: jest.fn(),
+}));
+jest.mock('@/api/business', () => ({
   modifyBusiness: jest.fn(),
-  uploadBusinessImage: jest.fn(),
+}));
+jest.mock('@/api/currency', () => ({
+  currencyFromCountry: jest.fn(),
 }));
 
-const modifyBusiness = castMock(api.modifyBusiness);
-const uploadBusinessImage = castMock(api.uploadBusinessImage);
+const currencyAPI = castMock(currencyFromCountry);
+const getUser = castMock(getUser1);
+const modifyBusiness = castMock(modifyBusiness1);
 Vue.use(Vuetify);
 const localVue = createLocalVue();
 
@@ -54,7 +63,8 @@ function createTestUser(userId: number) {
     phoneNumber: 'test_phone_number' + userId,
     dateOfBirth: '1/1/1900',
     created: '1/5/2005',
-    homeAddress: createTestLocation()
+    homeAddress: createTestLocation(),
+    images: [],
   };
   return user;
 }
@@ -75,7 +85,12 @@ function createTestBusiness(businessId: number, primaryAdminId: number, admins: 
     description: 'test_description' + businessId,
     address: createTestLocation(),
     businessType: 'Charitable organisation',
-    created: '2/6/2006'
+    created: '2/6/2006',
+    images: [],
+    points: 0,
+    rank: {
+      name: 'bronze',
+    },
   };
   return business;
 }
@@ -105,8 +120,6 @@ describe('modifyBusiness.vue', () => {
     };
   });
 
-  const diacritics = ['À','È','Ì','Ò','Ù','à','è','ì','ò','ù','Á','É','Í','Ó','Ú','Ý','á','é','í','ó','ú','ý','Â','Ê','Î','Ô','Û','â','ê','î','ô','û','Ã','Ñ','Õ','ã','ñ','õ','Ä','Ë','Ï','Ö','Ü','Ÿ','ä','ë','ï','ö','ü','ÿ'];
-
   let testUser: User;
   let testAdmins: User[] = [];
 
@@ -123,9 +136,11 @@ describe('modifyBusiness.vue', () => {
     resetStoreForTesting();
     let store = getStore();
     store.state.user = testUser;
+    getUser.mockResolvedValueOnce(testUser);
+    currencyAPI.mockResolvedValue({symbol: "$", name: "NZD", code: "NZD"});
     const vuetify = new Vuetify();
     const App = localVue.component('App', {
-      components: { ModifyBusiness },
+      components: {ModifyBusiness},
       template: '<div data-app><ModifyBusiness :business="thingy"/></div>',
     });
 
@@ -136,13 +151,18 @@ describe('modifyBusiness.vue', () => {
       stubs: ['router-link', 'router-view'],
       mocks: {
         $router: {
-          go: () => {return;},
+          go: () => {
+            return;
+          },
         }
       },
       localVue,
       vuetify,
       attachTo: elem,
       store: store,
+      components: {
+        ImageManager
+      },
       data() {
         return {
           thingy: business
@@ -163,11 +183,8 @@ describe('modifyBusiness.vue', () => {
    *
    * @returns A wrapper around the update button
    */
-  function findButton(component:string) {
-    const buttons = wrapper.findAllComponents({ name: 'v-btn' });
-    const button = buttons.filter(button => button.text().includes(component));
-    expect(button.length).toBe(1);
-    return button.at(0);
+  function findButton(component: string) {
+    return findButtonWithText(wrapper, component);
   }
 
 
@@ -390,7 +407,7 @@ describe('modifyBusiness.vue', () => {
     expect(wrapper.vm.valid).toBeFalsy();
   });
 
-  it('Invalid if the street address only contains a number', async() => {
+  it('Invalid if the street address only contains a number', async () => {
     await populateRequiredFields();
     await wrapper.setData({
       streetAddress: '69'
@@ -399,7 +416,7 @@ describe('modifyBusiness.vue', () => {
     expect(wrapper.vm.valid).toBeFalsy();
   });
 
-  it('Invalid if the street address only contains a word', async() => {
+  it('Invalid if the street address only contains a word', async () => {
     await populateRequiredFields();
     await wrapper.setData({
       streetAddress: 'Elizabeth Street'
@@ -493,11 +510,12 @@ describe('modifyBusiness.vue', () => {
     await populateRequiredFields();
     const submitButton = findButton("Submit");
     await submitButton.trigger('click');
+    await Vue.nextTick();
     expect(modifyBusiness).toHaveBeenCalled();
   });
 
   describe('changing primary administrator', () => {
-    it('Primary admin is changed and alert message is shown when non-primary admin is selected', async() => {
+    it('Primary admin is changed and alert message is shown when non-primary admin is selected', async () => {
       const currentPrimaryAdmin = testAdmins[0];
       const newPrimaryAdmin = testAdmins[1];
       expect(wrapper.vm.adminIsPrimary(newPrimaryAdmin)).toBeFalsy();
@@ -506,7 +524,7 @@ describe('modifyBusiness.vue', () => {
       expect(wrapper.vm.primaryAdminAlertMsg).toEqual(`Primary admin will be changed to ${newPrimaryAdmin.firstName} ${newPrimaryAdmin.lastName}`);
     });
 
-    it('Primary admin stays the same and alert message is not shown when primary admin is selected', async() => {
+    it('Primary admin stays the same and alert message is not shown when primary admin is selected', async () => {
       const primaryAdmin = testAdmins[0];
       expect(wrapper.vm.adminIsPrimary(primaryAdmin)).toBeTruthy();
       wrapper.vm.changePrimaryOwner(primaryAdmin);
@@ -515,60 +533,43 @@ describe('modifyBusiness.vue', () => {
     });
   });
 
-  describe('Uploading images', () => {
-    beforeEach(() => {
-      uploadBusinessImage.mock.calls = [];
-      uploadBusinessImage.mockResolvedValue(undefined);
-    });
+  it("With one uploaded image, imageIds will be updated after an emit call from ImageManager", () => {
+    const images = [
+      {
+        id: 1,
+        filename: "some test file",
+        thumbnailFilename: "some thumbnail"
+      }
+    ];
+    const imageManagerWrapper = wrapper.findComponent(ImageManager);
+    expect(imageManagerWrapper.exists()).toBeTruthy();
+    expect(wrapper.vm.imageIds.length).toEqual(0);
+    imageManagerWrapper.vm.$emit("input", images);
+    expect(wrapper.vm.imageIds.length).toEqual(1);
+  });
 
-    it('When image file added, it is appended to the list of image files', () => {
-      expect(wrapper.vm.allImageFiles.length).toBe(0);
-      const testFile = new File([], 'test_file');
-      wrapper.vm.imageFile = testFile;
-
-      wrapper.vm.addImage();
-
-      expect(wrapper.vm.allImageFiles.length).toBe(1);
-      expect(wrapper.vm.allImageFiles[0]).toBe(testFile);
-    });
-
-    it('When form is submitted and no images are added, no API call to upload images is made', async () => {
-      expect(wrapper.vm.allImageFiles.length).toBe(0);
-      await wrapper.vm.proceedWithModifyBusiness();
-      expect(uploadBusinessImage.mock.calls.length).toBe(0);
-    });
-
-    it('When form is submitted and one image is added, one API call to upload images is made', async () => {
-      const testFile1 = new File([], 'test_file_1');
-      wrapper.vm.allImageFiles = [testFile1];
-      expect(wrapper.vm.allImageFiles.length).toBe(1);
-      await wrapper.vm.proceedWithModifyBusiness();
-      expect(uploadBusinessImage.mock.calls.length).toBe(1);
-      expect(uploadBusinessImage.mock.calls[0][0]).toBe(44);
-      expect(uploadBusinessImage.mock.calls[0][1]).toBe(testFile1);
-    });
-
-    it('When form is submitted and multiple images are added, one API call to upload images is made for each image', async () => {
-      wrapper.vm.allImageFiles = [new File([], 'test_file_1'), new File([], 'test_file_2'), new File([], 'test_file_3')];
-      expect(wrapper.vm.allImageFiles.length).toBe(3);
-      await wrapper.vm.proceedWithModifyBusiness();
-      expect(uploadBusinessImage.mock.calls.length).toBe(3);
-    });
-
-    it('When upload image request is successful, no error message is displayed', async () => {
-      expect(wrapper.vm.errorMessage).toBe(undefined);
-      wrapper.vm.allImageFiles = [new File([], 'test_file_1')];
-      await wrapper.vm.proceedWithModifyBusiness();
-      expect(wrapper.vm.errorMessage).toBe(undefined);
-    });
-
-    it('When upload image request is unsuccessful, received error message is displayed', async () => {
-      expect(wrapper.vm.errorMessage).toBe(undefined);
-      uploadBusinessImage.mockResolvedValueOnce("This is an error");
-      wrapper.vm.allImageFiles = [new File([], 'test_file_1')];
-      await wrapper.vm.proceedWithModifyBusiness();
-      expect(wrapper.vm.errorMessage).toBe("This is an error");
-    });
-
+  it("With multiple uploaded images, imageIds will be updated", () => {
+    const images = [
+      {
+        id: 1,
+        filename: "some test file1",
+        thumbnailFilename: "some thumbnail"
+      },
+      {
+        id: 2,
+        filename: "some test file2",
+        thumbnailFilename: "some thumbnail"
+      },
+      {
+        id: 3,
+        filename: "some test file3",
+        thumbnailFilename: "some thumbnail"
+      }
+    ];
+    const imageManagerWrapper = wrapper.findComponent(ImageManager);
+    expect(imageManagerWrapper.exists()).toBeTruthy();
+    expect(wrapper.vm.imageIds.length).toEqual(0);
+    imageManagerWrapper.vm.$emit("input", images);
+    expect(wrapper.vm.imageIds.length).toEqual(3);
   });
 });

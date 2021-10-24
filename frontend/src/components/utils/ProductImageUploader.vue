@@ -34,8 +34,8 @@
 </template>
 
 <script>
-import { uploadProductImage } from '@/api/internal';
-import ImageSelector from "@/components/utils/ImageSelector";
+import ImageSelector from "@/components/image/ImageSelector";
+import {uploadProductImage} from "@/api/product";
 export default {
   name: "ProductImageUploader",
   components: {ImageSelector},

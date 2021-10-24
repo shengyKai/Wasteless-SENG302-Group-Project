@@ -1,237 +1,245 @@
 <template>
-  <v-card class="body" v-if="user">
-    <div class="top-section">
-      <div class="profile-img">
-        <Avatar :user="user" size="large" />
-      </div>
+  <div>
+    <v-card class="mt-16 mb-0">
+      <ImageCarousel
+        v-if="userImages && userImages.length > 0"
+        :imagesList="userImages"
+        :showMakePrimary="false"
+        :showDelete="false"
+        ref="userImageCarousel"
+      />
+    </v-card>
+    <v-card class="body mt-0" v-if="user">
+      <div class="top-section">
+        <div>
+          <h1>
+            {{ user.firstName }} {{ user.lastName }}
+          </h1>
+          <h2>
+            <em>{{ user.nickname }}</em>
+          </h2>
+          <p><strong>Member Since:</strong> {{ createdMsg }}</p>
+        </div>
 
+        <!-- List of available actions -->
+        <div class="action-menu">
+
+          <v-tooltip bottom>
+            <template #activator="{ on, attrs }">
+              <v-btn
+                v-if="showEditButton"
+                ref="settingsButton"
+                icon
+                color="primary"
+                v-bind="attrs"
+                v-on="on"
+                @click="$router.push(`/profile/${user.id}/modify`)"
+              >
+                <v-icon>mdi-cog</v-icon>
+              </v-btn>
+            </template>
+            <span>Modify Profile</span>
+          </v-tooltip>
+          <v-dialog
+            v-if="isActingAsBusiness && isViewingOwnProfile===false"
+            v-model="removeAdminDialog"
+            persistent
+            max-width="300"
+          >
+            <template #activator="{ on: dialog, attrs}">
+              <v-tooltip bottom>
+                <template #activator="{ on: tooltip}">
+                  <v-btn
+                    icon
+                    color="primary"
+                    v-bind="attrs"
+                    v-on="{...tooltip, ...dialog}"
+                    :disabled="isUserAdminOfActiveBusiness === false"
+                    ref="removeAdminButton"
+                  >
+                    <v-icon>mdi-account-minus</v-icon>
+                  </v-btn>
+                </template>
+                <span> Remove administrator </span>
+              </v-tooltip>
+            </template>
+            <v-card>
+              <v-card-title class="headline">
+                Are you sure?
+              </v-card-title>
+              <v-card-text>This user will no longer be able to operate this business as an administrator for {{this.$store.state.user.businessesAdministered.find(x => x.id === this.activeRole.id).name}}.</v-card-text>
+              <v-card-actions>
+                <v-spacer/>
+                <v-btn
+                  ref="cancelButton"
+                  color="green darken-1"
+                  text
+                  @click="removeAdminDialog = false"
+                >
+                  No
+                </v-btn>
+                <v-btn
+                  ref="confirmButton"
+                  color="green darken-1"
+                  text
+                  @click="removeAdminDialog = false; removeUserAdmin()"
+                >
+                  Yes, Demote
+                </v-btn>
+              </v-card-actions>
+            </v-card>
+          </v-dialog>
+          <v-dialog
+            v-if="isActingAsBusiness && isViewingOwnProfile===false"
+            v-model="addAdminDialog"
+            persistent
+            max-width="300"
+          >
+            <template #activator="{ on: dialog, attrs}">
+              <v-tooltip bottom>
+                <template #activator="{ on: tooltip }">
+                  <v-btn
+                    icon
+                    color="primary"
+                    v-bind="attrs"
+                    v-on="{...dialog, ...tooltip}"
+                    :disabled="isUserAdminOfActiveBusiness === true"
+                    ref="addAdminButton"
+                  >
+                    <v-icon>mdi-account-plus</v-icon>
+                  </v-btn>
+                </template>
+                <span> Add administrator </span>
+              </v-tooltip>
+            </template>
+            <v-card>
+              <v-card-title class="headline">
+                Are you sure?
+              </v-card-title>
+              <v-card-text>This user will be able to act as an administrator for {{this.$store.state.user.businessesAdministered.find(x => x.id === this.activeRole.id).name}}</v-card-text>
+              <v-card-actions>
+                <v-spacer/>
+                <v-btn
+                  ref="cancelButton"
+                  color="green darken-1"
+                  text
+                  @click="addAdminDialog = false"
+                >
+                  No
+                </v-btn>
+                <v-btn
+                  ref="confirmButton"
+                  color="green darken-1"
+                  text
+                  @click="addAdminDialog = false; addUserAsAdmin()"
+                >
+                  Yes, promote
+                </v-btn>
+              </v-card-actions>
+            </v-card>
+          </v-dialog>
+          <!-- Normal users cannot see the GAA/DGAA statuses of system admins -->
+          <v-tooltip
+            v-if="currentUserRole!=='user' && (user.role==='globalApplicationAdmin' || user.role==='defaultGlobalApplicationAdmin')"
+            bottom>
+            <template #activator="{ on: tooltip }">
+              <v-menu
+                bottom
+                left
+              >
+                <template #activator="{on: menu, attrs}">
+                  <v-chip
+                    ref="administratorStatus"
+                    outlined
+                    color="primary"
+                    v-on="{...menu, ...tooltip}"
+                    v-bind="attrs"
+                  >
+                    <v-icon>mdi-account-tie</v-icon>
+                  </v-chip>
+                </template>
+                <!-- put as a v-list item because if in the future we want to be able to add more actions between DGAA/GAA, its easy to add-->
+                <!-- Only DGAA should be able to see the revoke button. They should not be able to revoke their own admin status -->
+                <v-list
+                  v-if="currentUserRole==='defaultGlobalApplicationAdmin' && user.role!=='defaultGlobalApplicationAdmin'">
+                  <v-list-item
+                    ref="revokeAdminButton"
+                    @click="revokeGAAFromUser(); loader='loadingRevoke'"
+                    :loading="loadingRevoke"
+                    :disabled="loadingRevoke"
+                  >
+                    Revoke Admin
+                  </v-list-item>
+                </v-list>
+              </v-menu>
+            </template>
+            <span v-if="user.role==='defaultGlobalApplicationAdmin'">Default System Administrator</span>
+            <span v-else-if="user.role==='globalApplicationAdmin'">System Administrator</span>
+          </v-tooltip>
+          <!-- DGAA can only make users into a GAA, not current GAAs/DGAA. Only the DGAA can make users into GAAs -->
+          <v-btn
+            ref="makeAdminButton"
+            v-else-if="user.role==='user' && currentUserRole==='defaultGlobalApplicationAdmin'"
+            @click="makeUserAsGAA(); loader='loadingMake'"
+            :loading="loadingMake"
+            :disabled="loadingMake"
+            small
+            outlined
+          >
+            Make Admin
+          </v-btn>
+        </div>
+      </div>
       <div>
-        <h1>
-          {{ user.firstName }} {{ user.lastName }}
-        </h1>
-        <h2>
-          <em>{{ user.nickname }}</em>
-        </h2>
-        <p><strong>Member Since:</strong> {{ createdMsg }}</p>
-      </div>
-
-      <!-- List of available actions -->
-      <div class="action-menu">
-
-        <v-tooltip bottom>
-          <template #activator="{ on, attrs }">
-            <v-btn
-              v-if="showEditButton"
-              ref="settingsButton"
-              icon
-              color="primary"
-              v-bind="attrs"
-              v-on="on"
-              @click="$router.push(`/profile/${user.id}/modify`)"
-            >
-              <v-icon>mdi-cog</v-icon>
-            </v-btn>
-          </template>
-          <span>Modify Profile</span>
-        </v-tooltip>
-        <v-dialog
-          v-if="isActingAsBusiness && isViewingOwnProfile===false"
-          v-model="removeAdminDialog"
-          persistent
-          max-width="300"
-        >
-          <template #activator="{ on: dialog, attrs}">
-            <v-tooltip bottom>
-              <template #activator="{ on: tooltip}">
-                <v-btn
-                  icon
-                  color="primary"
-                  v-bind="attrs"
-                  v-on="{...tooltip, ...dialog}"
-                  :disabled="isUserAdminOfActiveBusiness === false"
-                  ref="removeAdminButton"
-                >
-                  <v-icon>mdi-account-minus</v-icon>
-                </v-btn>
-              </template>
-              <span> Remove administrator </span>
-            </v-tooltip>
-          </template>
-          <v-card>
-            <v-card-title class="headline">
-              Are you sure?
-            </v-card-title>
-            <v-card-text>This user will no longer be able to operate this business as an administrator for {{this.$store.state.user.businessesAdministered.find(x => x.id === this.activeRole.id).name}}.</v-card-text>
-            <v-card-actions>
-              <v-spacer/>
-              <v-btn
-                ref="cancelButton"
-                color="green darken-1"
-                text
-                @click="removeAdminDialog = false"
-              >
-                No
-              </v-btn>
-              <v-btn
-                ref="confirmButton"
-                color="green darken-1"
-                text
-                @click="removeAdminDialog = false; removeUserAdmin()"
-              >
-                Yes, Demote
-              </v-btn>
-            </v-card-actions>
-          </v-card>
-        </v-dialog>
-        <v-dialog
-          v-if="isActingAsBusiness && isViewingOwnProfile===false"
-          v-model="addAdminDialog"
-          persistent
-          max-width="300"
-        >
-          <template #activator="{ on: dialog, attrs}">
-            <v-tooltip bottom>
-              <template #activator="{ on: tooltip }">
-                <v-btn
-                  icon
-                  color="primary"
-                  v-bind="attrs"
-                  v-on="{...dialog, ...tooltip}"
-                  :disabled="isUserAdminOfActiveBusiness === true"
-                  ref="addAdminButton"
-                >
-                  <v-icon>mdi-account-plus</v-icon>
-                </v-btn>
-              </template>
-              <span> Add administrator </span>
-            </v-tooltip>
-          </template>
-          <v-card>
-            <v-card-title class="headline">
-              Are you sure?
-            </v-card-title>
-            <v-card-text>This user will be able to act as an administrator for {{this.$store.state.user.businessesAdministered.find(x => x.id === this.activeRole.id).name}}</v-card-text>
-            <v-card-actions>
-              <v-spacer/>
-              <v-btn
-                ref="cancelButton"
-                color="green darken-1"
-                text
-                @click="addAdminDialog = false"
-              >
-                No
-              </v-btn>
-              <v-btn
-                ref="confirmButton"
-                color="green darken-1"
-                text
-                @click="addAdminDialog = false; addUserAsAdmin()"
-              >
-                Yes, promote
-              </v-btn>
-            </v-card-actions>
-          </v-card>
-        </v-dialog>
-        <!-- Normal users cannot see the GAA/DGAA statuses of system admins -->
-        <v-tooltip
-          v-if="currentUserRole!=='user' && (user.role==='globalApplicationAdmin' || user.role==='defaultGlobalApplicationAdmin')"
-          bottom>
-          <template #activator="{ on: tooltip }">
-            <v-menu
-              bottom
-              left
-            >
-              <template #activator="{on: menu, attrs}">
-                <v-chip
-                  ref="administratorStatus"
-                  outlined
-                  color="primary"
-                  v-on="{...menu, ...tooltip}"
-                  v-bind="attrs"
-                >
-                  <v-icon>mdi-account-tie</v-icon>
-                </v-chip>
-              </template>
-              <!-- put as a v-list item because if in the future we want to be able to add more actions between DGAA/GAA, its easy to add-->
-              <!-- Only DGAA should be able to see the revoke button. They should not be able to revoke their own admin status -->
-              <v-list
-                v-if="currentUserRole==='defaultGlobalApplicationAdmin' && user.role!=='defaultGlobalApplicationAdmin'">
-                <v-list-item
-                  ref="revokeAdminButton"
-                  @click="revokeGAAFromUser(); loader='loadingRevoke'"
-                  :loading="loadingRevoke"
-                  :disabled="loadingRevoke"
-                >
-                  Revoke Admin
-                </v-list-item>
-              </v-list>
-            </v-menu>
-          </template>
-          <span v-if="user.role==='defaultGlobalApplicationAdmin'">Default System Administrator</span>
-          <span v-else-if="user.role==='globalApplicationAdmin'">System Administrator</span>
-        </v-tooltip>
-        <!-- DGAA can only make users into a GAA, not current GAAs/DGAA. Only the DGAA can make users into GAAs -->
-        <v-btn
-          ref="makeAdminButton"
-          v-else-if="user.role==='user' && currentUserRole==='defaultGlobalApplicationAdmin'"
-          @click="makeUserAsGAA(); loader='loadingMake'"
-          :loading="loadingMake"
-          :disabled="loadingMake"
-          small
-          outlined
-        >
-          Make Admin
+        <v-btn outlined color="primary" @click="viewMarketplaceCards">
+          Marketplace cards
         </v-btn>
       </div>
-    </div>
-    <div>
-      <v-btn outlined color="primary" @click="viewMarketplaceCards">
-        Marketplace cards
-      </v-btn>
-    </div>
 
-    <v-container fluid>
-      <v-row>
-        <v-col cols="12" sm="6">
-          <h4>Email</h4>
-          {{ user.email }}
-        </v-col>
-        <v-col cols="12" sm="6">
-          <h4>Date of Birth</h4>
-          {{ dateOfBirth }}
-        </v-col>
+      <v-container fluid>
+        <v-row>
+          <v-col cols="12" sm="6">
+            <h4>Email</h4>
+            {{ user.email }}
+          </v-col>
+          <v-col cols="12" sm="6">
+            <h4>Date of Birth</h4>
+            {{ dateOfBirth }}
+          </v-col>
 
-        <v-col cols="12" sm="6">
-          <h4>Phone Number</h4>
-          {{ user.phoneNumber }}
-        </v-col>
-        <v-col class="address" cols="12" sm="6">
-          <h4>Home Address</h4>
-          {{ insertAddress(user.homeAddress) }}
-        </v-col>
+          <v-col cols="12" sm="6">
+            <h4>Phone Number</h4>
+            {{ user.phoneNumber }}
+          </v-col>
+          <v-col class="address" cols="12" sm="6">
+            <h4>Home Address</h4>
+            {{ insertAddress(user.homeAddress) }}
+          </v-col>
 
-        <v-col cols="12">
-          <h4>Bio</h4>
-          {{ user.bio }}
-        </v-col>
-        <v-col cols="12">
-          <h4>Businesses</h4>
-          <span v-for="business in businesses" :key="business.id">
-            <router-link :to="'/business/' + business.id">
-              <v-chip color="primary" class="link-chip link"> {{ business.name }} </v-chip>
-            </router-link>
-          </span>
-        </v-col>
-      </v-row>
+          <v-col cols="12">
+            <h4>Bio</h4>
+            {{ user.bio }}
+          </v-col>
+          <v-col cols="12">
+            <h4>Businesses</h4>
+            <span v-for="business in businesses" :key="business.id">
+              <router-link :to="'/business/' + business.id">
+                <v-chip color="primary" class="link-chip link"> {{ business.name }} </v-chip>
+              </router-link>
+            </span>
+          </v-col>
+        </v-row>
 
-    </v-container>
-  </v-card>
+      </v-container>
+    </v-card>
+  </div>
 </template>
 
 <script>
-import { getUser, makeBusinessAdmin, removeBusinessAdmin, makeAdmin, revokeAdmin } from '../../api/internal';
-import Avatar from '@/components/utils/Avatar';
+import ImageCarousel from '@/components/image/ImageCarousel';
 import convertAddressToReadableText from '@/components/utils/Methods/convertAddressToReadableText';
+import {getUser, makeAdmin, revokeAdmin} from "@/api/user";
+import {makeBusinessAdmin, removeBusinessAdmin} from "@/api/business";
 
 export default {
   name: 'UserProfile',
@@ -451,10 +459,13 @@ export default {
      */
     showEditButton() {
       return (this.isViewingOwnProfile===true || this.currentUserRole!=='user') && this.user.role !== 'defaultGlobalApplicationAdmin';
+    },
+    userImages() {
+      return this.user?.images;
     }
   },
   components: {
-    Avatar,
+    ImageCarousel,
   }
 };
 </script>

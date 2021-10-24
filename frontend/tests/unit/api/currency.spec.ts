@@ -30,7 +30,7 @@ describe('currency.ts', () => {
     );
     const response = await currencyFromCountry("Australia");
     expect('errorMessage' in response).toBeTruthy();
-    expect(response).toStrictEqual({"errorMessage": "API response was not in readable format", "symbol": "$", "code": ""});
+    expect(response).toStrictEqual({"errorMessage": "Could not determine currency of provided country", "symbol": "$", "code": ""});
   });
 
   it('Returns with no error message to the frontend when API responds with a country with correct format', async () => {
@@ -58,9 +58,9 @@ describe('currency.ts', () => {
     );
     const currency = await currencyFromCountry("Australia");
     expect(consoleOutput).toEqual([
-      "Failed to reach https://restcountries.eu/rest/v2/name/Australia?fullText=true&fields=currencies"
+      "Failed to reach https://restcountries.com/v2/name/Australia?fullText=true&fields=currencies"
     ]);
-    expect(currency).toStrictEqual({"errorMessage": "Failed to reach https://restcountries.eu/rest/v2/name/Australia?fullText=true&fields=currencies", "symbol": "$", "code": ""});
+    expect(currency).toStrictEqual({"errorMessage": "Failed to reach https://restcountries.com/v2/name/Australia?fullText=true&fields=currencies", "symbol": "$", "code": ""});
   });
 
   it('Returns no currency to the frontend and outputs to the console when 404 response received', async () => {
@@ -95,9 +95,9 @@ describe('currency.ts', () => {
     );
     const currency = await currencyFromCountry("Australia");
     expect(consoleOutput).toEqual([
-      "API response was not in readable format"
+      "Could not determine currency of provided country"
     ]);
-    expect(currency).toStrictEqual({"errorMessage": "API response was not in readable format", "symbol": "$", "code": ""});
+    expect(currency).toStrictEqual({"errorMessage": "Could not determine currency of provided country", "symbol": "$", "code": ""});
   });
 
   it('Return currency received from API when response list contains one currency', async () => {

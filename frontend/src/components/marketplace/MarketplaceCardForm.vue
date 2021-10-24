@@ -45,13 +45,13 @@
             </v-col>
           </v-row>
           <v-row>
-            <div class="keyword">
+            <v-col cols="9">
               <v-select
                 class="keyword-child"
                 no-data-text="No keywords found"
                 value = "keywords"
                 v-model="selectedKeywords"
-                :items="allKeywords"
+                :items="filteredKeywords"
                 :hint="selectedKeywordsNames"
                 label="Select keywords"
                 item-text="name"
@@ -73,22 +73,29 @@
                   </v-list-item>
                 </template>
               </v-select>
+            </v-col>
+            <v-col cols="3">
               <!-- Add new keyword -->
               <v-btn class="keyword-child" color="primary" @click="addNewKeyword" title="Can't find what you're looking for? Hit '+' to create a new keyword out of what you have currently typed">
                 <v-icon>mdi-plus-box</v-icon>
               </v-btn>
-            </div>
+            </v-col>
             <p class="error-text text-center" v-if ="errorMessage !== undefined"> {{errorMessage}} </p>
-            <v-card-actions>
-              <v-spacer/>
-              <div class="error--text" v-if="feedback !== undefined">{{ feedback }}</div>
-              <v-btn text color="primary" :disabled="!valid" @click="submit">
-                {{ submitText }}
-              </v-btn>
-              <v-btn text color="primary" @click="closeDialog">
-                Cancel
-              </v-btn>
-            </v-card-actions>
+            <v-row>
+              <v-col>
+                <div class="error--text text-center" v-if="feedback !== undefined">{{ feedback }}</div>
+              </v-col>
+            </v-row>
+            <v-row no-gutters >
+              <v-col class="text-right">
+                <v-btn text color="primary" class="mr-n4" :disabled="!valid" @click="submit">
+                  {{ submitText }}
+                </v-btn>
+                <v-btn text color="primary" @click="closeDialog">
+                  Cancel
+                </v-btn>
+              </v-col>
+            </v-row>
           </v-row>
         </v-container>
       </v-card>
@@ -97,7 +104,8 @@
 </template>
 
 <script>
-import {createMarketplaceCard, createNewKeyword, searchKeywords, modifyMarketplaceCard} from '@/api/internal';
+import {createMarketplaceCard, modifyMarketplaceCard} from "@/api/marketplace";
+import {createNewKeyword, searchKeywords} from "@/api/keyword";
 
 export default {
   name: "MarketplaceCard",
@@ -109,6 +117,7 @@ export default {
     return {
       title: this.previousCard?.title ?? "",
       description: this.previousCard?.description ?? "",
+      filteredKeywords: [],
       allKeywords: [],
       selectedKeywords: this.previousCard?.keywords ?? [],
       keywordFilter: "",
@@ -119,7 +128,7 @@ export default {
       allowedCharsRegex: /^[\s\d\p{L}\p{P}]*$/u,
     };
   },
-  mounted() {
+  async mounted() {
     function OnInput() {
       this.style.height = "auto";
       this.style.height = (this.scrollHeight) + "px";
@@ -131,7 +140,8 @@ export default {
     this.titleField.setAttribute("style", "height:" + (this.titleField.scrollHeight) + "px;overflow-y:hidden;");
     this.titleField.addEventListener("input", OnInput);
 
-    this.searchKeywords();
+    await this.searchKeywords();
+    this.allKeywords = this.filteredKeywords;
 
     if (this.previousCard) {
       const prevKeywordIds = [];
@@ -144,10 +154,10 @@ export default {
   computed: {
     selectedKeywordsNames() {
       let names = "";
-      for (let i = 0; i < this.selectedKeywords.length; i++) {
-        for (let j = 0; j < this.allKeywords.length; j++) {
-          if (this.selectedKeywords[i] === this.allKeywords[j].id) {
-            names += this.allKeywords[j].name + ', ';
+      for (let selectedKeywordsId of this.selectedKeywords) {
+        for (let keyword of this.allKeywords) {
+          if (selectedKeywordsId === keyword.id) {
+            names += keyword.name + ', ';
           }
         }
       }
@@ -242,12 +252,14 @@ export default {
         } else {
           await this.searchKeywords();
           this.selectedKeywords.push(result);
+          this.resetSearch();
         }
       }
     },
-    resetSearch() {
+    async resetSearch() {
       this.keywordFilter = "";
-      this.searchKeywords();
+      await this.searchKeywords();
+      this.allKeywords = this.filteredKeywords;
     },
     closeDialog() {
       this.$emit('closeDialog');
@@ -281,7 +293,7 @@ export default {
       if (typeof response === 'string') {
         this.errorMessage = response;
       } else {
-        this.allKeywords = response;
+        this.filteredKeywords = response;
       }
     }
   }
@@ -290,12 +302,6 @@ export default {
 
 
 <style scoped>
-.keyword {
-  display: flex;
-}
-.keyword-child {
-  margin: 0.5em;
-}
 .title {
   line-height: 1.25;
   word-break: break-word;

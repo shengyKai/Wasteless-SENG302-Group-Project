@@ -1,5 +1,6 @@
-import { CreateInventoryItem, getInventory, InventoryItem, modifyInventoryItem, SearchResults } from '@/api/internal';
+import {SearchResults} from '@/api/internal';
 import axios, {AxiosInstance } from 'axios';
+import {CreateInventoryItem, getInventory, InventoryItem, modifyInventoryItem} from "@/api/inventory";
 
 jest.mock('axios', () => ({
   create: jest.fn(function () {
@@ -189,7 +190,7 @@ describe("Test PUT /businesses/:businessId/inventory/:inventoryItemId endpoint",
       }
     });
     const message = await modifyInventoryItem(7, 1, invItem);
-    expect(message).toEqual("Missing/Invalid access token");
+    expect(message).toEqual('You have been logged out. Please login again and retry');
   });
 
   it('When response is 403 status, the result will be an error message stating the operation is not permitted', async () => {

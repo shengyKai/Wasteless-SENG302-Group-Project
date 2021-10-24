@@ -178,13 +178,6 @@ Feature: U11 - Modifying Businesses
     Then The request fails due to not authorised
     And The business has no images
 
-  Scenario: AC1 - A user that is not a business admin cannot upload images
-    Given A user exists with name "Tim"
-    And I am logged into "Tim" account
-    When I try to upload the image "point.png" to the business
-    Then The request fails due to forbidden
-    And The business has no images
-
   Scenario: AC4 - I can upload a .png image to the business
     Given I am logged into "Dave" account
     When I try to upload the image "point.png" to the business

@@ -1,15 +1,15 @@
 /* Parent class for all kinds of accounts */
 package org.seng302.leftovers.entities;
 
-import org.seng302.leftovers.exceptions.EmailInUseException;
+import org.seng302.leftovers.dto.user.UserRole;
+import org.seng302.leftovers.exceptions.ConflictResponseException;
+import org.seng302.leftovers.exceptions.InternalErrorResponseException;
+import org.seng302.leftovers.exceptions.ValidationResponseException;
 import org.seng302.leftovers.persistence.UserRepository;
 import org.seng302.leftovers.tools.PasswordAuthenticator;
-import org.springframework.http.HttpStatus;
-import org.springframework.web.server.ResponseStatusException;
 
 import javax.persistence.*;
 import java.security.NoSuchAlgorithmException;
-import java.util.Set;
 import java.util.regex.Pattern;
 
 @Entity
@@ -26,7 +26,8 @@ public abstract class Account {
     private String authenticationCode;
 
     @Column(nullable = false)
-    protected String role;
+    @Enumerated(EnumType.ORDINAL)
+    protected UserRole role;
     // Allows letters, numbers and selected symbols then 1 @ then some amount of other characters
     private static final String EMAIL_REGEX = "^[A-Za-z0-9+_.-]+@(.+)$";
 
@@ -49,19 +50,20 @@ public abstract class Account {
         if (validEmail && !email.trim().isEmpty() && email.length() <= 100) {
             this.email = email;
         } else {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Email must not be empty and must consist of an email prefix, a @ symbol and a domain, and less than 100 char");
+            throw new ValidationResponseException(
+            "Email must not be empty and must consist of an email prefix, a @ symbol and a domain, and less than 100 char");
         }
     }
 
     /**
-     * This method checks whether there is a user in the repository with the given email and throws a EmailInUseException
+     * This method checks whether there is a user in the repository with the given email and throws a ConflictResponseException
      * if there is.
      * @param email The email to search the repository for.
      * @param repository Repository containing all registered users.
      */
     public static void checkEmailUniqueness(String email, UserRepository repository) {
         if (repository.findByEmail(email) != null) {
-            throw new EmailInUseException();
+            throw new ConflictResponseException("Email already in use");
         }
     }
 
@@ -84,24 +86,24 @@ public abstract class Account {
                 this.authenticationCode = PasswordAuthenticator.generateAuthenticationCode(password);
 
             } catch (NoSuchAlgorithmException e) {
-                throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Could not generate authentication code. Try again later");
+                throw new InternalErrorResponseException("Could not generate authentication code. Try again later", e);
             }
         } else {
             // Password cannot be null or empty
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "The password must be at least 7 characters long and no longer than 32.");
+            throw new ValidationResponseException("The password must be at least 7 characters long and no longer than 32.");
         }
     }
 
     /**
      * Sets the authentication code of the account as equal to the given authentication code. This method is used by the
-     * JPA repository. For intializing accoutn use setAuthenticationCodeFromPassword instead.
+     * JPA repository. For initialising account use setAuthenticationCodeFromPassword instead.
      * @param authenticationCode
      */
     public void setAuthenticationCode(String authenticationCode) {
         if (authenticationCode.matches("[a-f0-9]*") && authenticationCode.length() == 64) {
             this.authenticationCode = authenticationCode;
         } else {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Not a vaild authentication code.");
+            throw new ValidationResponseException("Not a valid authentication code.");
         }
     }
 
@@ -125,7 +127,7 @@ public abstract class Account {
      * Authority within the system, eg: admin status and what businesses they are associated with
      * @return role
      */
-    public String getRole(){
+    public UserRole getRole(){
         return this.role;
     }
 
@@ -133,12 +135,8 @@ public abstract class Account {
      * Change the description of their status within the system
      * @param role admin status and what businesses they are associated with
      */
-    public void setRole(String role){
-        if (!Set.of("user", "globalApplicationAdmin", "defaultGlobalApplicationAdmin").contains(role)) {
-            throw new IllegalArgumentException("Invalid role: \"" + role + "\"");
-        }
-
-        this.role=role;
+    public void setRole(UserRole role){
+        this.role = role;
     }
 
 }

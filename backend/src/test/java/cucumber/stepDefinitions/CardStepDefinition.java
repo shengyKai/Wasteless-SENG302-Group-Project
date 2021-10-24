@@ -1,6 +1,7 @@
 package cucumber.stepDefinitions;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import cucumber.context.CardContext;
 import cucumber.context.EventContext;
@@ -18,13 +19,13 @@ import net.minidev.json.parser.ParseException;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.junit.jupiter.api.Assertions;
+import org.seng302.leftovers.dto.card.MarketplaceCardResponseDTO;
 import org.seng302.leftovers.entities.Keyword;
 import org.seng302.leftovers.entities.MarketplaceCard;
 import org.seng302.leftovers.entities.User;
 import org.seng302.leftovers.persistence.KeywordRepository;
 import org.seng302.leftovers.persistence.MarketplaceCardRepository;
 import org.seng302.leftovers.service.CardService;
-import org.seng302.leftovers.tools.JsonTools;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
@@ -70,6 +71,9 @@ public class CardStepDefinition {
 
     @Autowired
     private SessionFactory sessionFactory;
+
+    @Autowired
+    private ObjectMapper mapper;
 
     private JSONObject modifyParameters;
 
@@ -196,7 +200,7 @@ public class CardStepDefinition {
     public void i_have_received_a_message_telling_me_the_card_is_about_to_expire()
             throws JsonProcessingException, UnsupportedEncodingException, ParseException {
 
-        List<JSONObject> events = eventContext.lastReceivedEvents("newsfeed");
+        List<JSONObject> events = eventContext.mvcResultToJsonObjectList(requestContext.getLastResult());
 
         Assertions.assertEquals(1, events.size());
         JSONObject event = events.get(0);
@@ -208,14 +212,15 @@ public class CardStepDefinition {
 
         try (Session session = sessionFactory.openSession()) {
             MarketplaceCard card = session.find(MarketplaceCard.class, cardContext.getLast().getID());
-            ObjectMapper mapper = new ObjectMapper();
-            assertEquals(mapper.readTree(card.constructJSONObject().toJSONString()), mapper.readTree(cardJson.toJSONString()));
+
+            var expectedJson = mapper.convertValue(new MarketplaceCardResponseDTO(card), JSONObject.class);
+            assertEquals(mapper.readTree(mapper.writeValueAsString(expectedJson)), mapper.readTree(cardJson.toJSONString()));
         }
     }
 
     @Then("I have received a message telling me the card has expired")
     public void i_have_received_a_message_telling_me_the_card_has_expired() throws UnsupportedEncodingException, ParseException {
-        List<JSONObject> events = eventContext.lastReceivedEvents("newsfeed");
+        List<JSONObject> events = eventContext.mvcResultToJsonObjectList(requestContext.getLastResult());
 
         Assertions.assertEquals(1, events.size());
         JSONObject event = events.get(0);
@@ -411,9 +416,7 @@ public class CardStepDefinition {
         assertEquals(modifyParameters.getAsString("title"), updatedCard.getTitle());
         assertEquals(modifyParameters.getAsString("description"), updatedCard.getDescription());
 
-        Set<Long> expectedKeywordIds = Arrays.stream(JsonTools.parseLongArrayFromJsonField(modifyParameters, "keywordIds"))
-                .boxed()
-                .collect(Collectors.toSet());
+        Set<Long> expectedKeywordIds = mapper.convertValue(modifyParameters.get("keywordIds"), new TypeReference<>() {});
         Set<Long> actualKeywordIds = updatedCard.getKeywords().stream()
                 .map(Keyword::getID)
                 .collect(Collectors.toSet());

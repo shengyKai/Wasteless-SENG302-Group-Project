@@ -35,6 +35,10 @@ describe('index.vue', () => {
     } as any);
   });
 
+  afterEach(() => {
+    wrapper.destroy();
+  });
+
   it("Testing out the register page link, should redirect to Login Page from Register Page", async () => {
     //if login is false, the Register component should exist and the Login component should not exist
     expect(wrapper.findComponent(Login).exists()).toBeFalsy();
@@ -103,8 +107,6 @@ describe('Register.vue', () => {
       } as any;
     };
   });
-
-  const diacritics = ['À','È','Ì','Ò','Ù','à','è','ì','ò','ù','Á','É','Í','Ó','Ú','Ý','á','é','í','ó','ú','ý','Â','Ê','Î','Ô','Û','â','ê','î','ô','û','Ã','Ñ','Õ','ã','ñ','õ','Ä','Ë','Ï','Ö','Ü','Ÿ','ä','ë','ï','ö','ü','ÿ'];
 
   it("Testing out all inputs, such that the user can only press the register button " +
     "after inputting valid formats for all fields", () => {
@@ -250,10 +252,10 @@ describe('Register.vue', () => {
     expect(registerButton.props().disabled).toBeTruthy();
   });
 
-  it.each(diacritics)("Testing first name supports diacritics and accents", async (char) => {
+  it("Testing first name supports diacritics and accents", async () => {
     const registerButton = wrapper.find(".v-btn");
     await wrapper.setData({
-      firstName: char
+      firstName: "ÙÀàìÓÍóéÎúâÔôÕõñŸäöÿ"
     });
     await Vue.nextTick();
     expect(registerButton.props().disabled).toBeFalsy();
@@ -286,10 +288,10 @@ describe('Register.vue', () => {
     expect(registerButton.props().disabled).toBeFalsy();
   });
 
-  it.each(diacritics)("Testing middle name supports diacritics and accents", async (char) => {
+  it("Testing middle name supports diacritics and accents", async () => {
     const registerButton = wrapper.find(".v-btn");
     await wrapper.setData({
-      middleName: char
+      middleName: "ÙÀàìÓÍóéÎúâÔôÕõñŸäöÿ"
     });
     await Vue.nextTick();
     expect(registerButton.props().disabled).toBeFalsy();
@@ -322,10 +324,10 @@ describe('Register.vue', () => {
     expect(registerButton.props().disabled).toBeTruthy();
   });
 
-  it.each(diacritics)("Testing last name supports diacritics and accents", async (char) => {
+  it("Testing last name supports diacritics and accents", async () => {
     const registerButton = wrapper.find(".v-btn");
     await wrapper.setData({
-      lastName: char
+      lastName: "ÙÀàìÓÍóéÎúâÔôÕõñŸäöÿ"
     });
     await Vue.nextTick();
     expect(registerButton.props().disabled).toBeFalsy();
@@ -358,10 +360,10 @@ describe('Register.vue', () => {
     expect(registerButton.props().disabled).toBeTruthy();
   });
 
-  it.each(diacritics)("Testing nickname supports diacritics and accents", async (char) => {
+  it("Testing nickname supports diacritics and accents", async () => {
     const registerButton = wrapper.find(".v-btn");
     await wrapper.setData({
-      nickname: char
+      nickname: "ÙÀàìÓÍóéÎúâÔôÕõñŸäöÿ"
     });
     await Vue.nextTick();
     expect(registerButton.props().disabled).toBeFalsy();

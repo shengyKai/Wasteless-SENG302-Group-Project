@@ -29,40 +29,27 @@
         </template>
       </v-select>
       <!-- Newsfeed -->
-      <!-- Example message - move inside for loop once message is an event type -->
-      <v-card
-        v-for="event in eventsPage"
-        :key="event.id"
-        outlined
-        rounded="lg"
-        class="newsfeed-item"
-      >
-        <GlobalMessage v-if="event.type === 'GlobalMessageEvent'" :event="event"/>
-        <ExpiryEvent v-else-if="event.type === 'ExpiryEvent'" :event="event"/>
-        <DeleteEvent v-else-if="event.type === 'DeleteEvent'" :event="event"/>
-        <KeywordCreated v-else-if="event.type === 'KeywordCreatedEvent'" :event="event"/>
-        <MessageEvent v-else-if="event.type === 'MessageEvent'" :event="event"/>
-        <template v-else>
-          <v-card-title>
-            {{ event.type }}
-          </v-card-title>
-          <v-card-text>
-            <pre>{{ event }}</pre>
-          </v-card-text>
-        </template>
-      </v-card>
-      <!--paginate results-->
-      <v-pagination
-        v-if="storeEvents.length !== 0 || !isBusiness"
-        v-model="currentPage"
-        :total-visible="10"
-        :length="totalPages"
-        circle
-      />
-      <!--Text to display range of results out of total number of results-->
-      <v-row justify="center" no-gutters>
-        {{ resultsMessage }}
-      </v-row>
+      <v-tabs
+        v-model="tab">
+        <v-tabs-slider/>
+        <v-tab href="#all-events-tab">
+          <v-icon>mdi-home</v-icon>
+          All
+        </v-tab>
+        <v-tab href="#archived-events-tab">
+          <v-icon>mdi-archive</v-icon>
+          Archived
+        </v-tab>
+      </v-tabs>
+      <!-- Tab content -->
+      <v-tabs-items v-model="tab">
+        <v-tab-item value="all-events-tab" :eager="true">
+          <EventList :events="mainEvents" :is-filtered="isFiltered" ref="mainEvents"/>
+        </v-tab-item>
+        <v-tab-item value="archived-events-tab" :eager="true">
+          <EventList :events="archivedEvents" :is-filtered="isFiltered" ref="archivedEvents"/>
+        </v-tab-item>
+      </v-tabs-items>
     </div>
   </div>
 </template>
@@ -70,21 +57,13 @@
 <script>
 import BusinessActionPanel from "./BusinessActionPanel";
 import UserActionPanel from "./UserActionPanel";
-import GlobalMessage from "./newsfeed/GlobalMessage.vue";
-import ExpiryEvent from './newsfeed/ExpiryEvent.vue';
-import DeleteEvent from './newsfeed/DeleteEvent.vue';
-import KeywordCreated from './newsfeed/KeywordCreated.vue';
-import MessageEvent from './newsfeed/MessageEvent.vue';
+import EventList from "@/components/home/newsfeed/EventList";
 
 export default {
   components: {
     BusinessActionPanel,
     UserActionPanel,
-    GlobalMessage,
-    ExpiryEvent,
-    DeleteEvent,
-    KeywordCreated,
-    MessageEvent
+    EventList,
   },
   data() {
     return {
@@ -93,19 +72,17 @@ export default {
        */
       filterBy: [],
       /**
-       * Currently selected page (1 is first page)
-       */
-      currentPage: 1,
-      /**
-       * Number of results per a result page
-       */
-      resultsPerPage: 10,
-      /**
        * A list for the v-select component so that the text and the value can be displayed appropriately
        */
       colours: [{text: "None", value: 'none'}, {text: "Red", value: 'red'}, {text: "Orange", value: 'orange'},
         {text: "Yellow", value: 'yellow'}, {text: "Green", value: 'green'}, {text: "Blue", value: 'blue'},
-        {text: "Purple", value: 'purple'}]
+        {text: "Purple", value: 'purple'}],
+      tab: "all-events-tab",
+      /**
+       * This attribute is used to set the polling interval when the component is created and stop it when the
+       * page is destroyed.
+       */
+      polling: undefined,
     };
   },
   computed: {
@@ -114,6 +91,44 @@ export default {
      */
     storeEvents() {
       return this.$store.getters.events;
+    },
+    /**
+     * The events list which is filtered after retrieving from the store
+     */
+    filteredEvents() {
+      if (!this.isFiltered) return this.storeEvents;
+      return this.storeEvents.filter(event => {
+        return this.filterBy.includes(event.tag);
+      });
+    },
+    /**
+     * Events categorised by type (normal, starred, archived) and ordered by creation date
+     */
+    categorisedEvents() {
+      let events = {normal: [], starred: [], archived: []};
+      for (let event of this.filteredEvents) {
+        events[event.status].push(event);
+      }
+      return events;
+    },
+    /**
+     * Events that should be shown in the main flow of events
+     * All events that are not archived with the starred events first
+     */
+    mainEvents() {
+      return [...this.categorisedEvents.starred, ...this.categorisedEvents.normal];
+    },
+    /**
+     * Returns events that have been archived
+     */
+    archivedEvents() {
+      return this.categorisedEvents.archived;
+    },
+    /**
+     * An attribute to check if the events list is a filtered events list or not
+     */
+    isFiltered() {
+      return this.filterBy.length !== 0;
     },
     /**
      * Current active user role
@@ -127,65 +142,17 @@ export default {
     isBusiness() {
       return this.role?.type === "business";
     },
+  },
+  methods: {
     /**
-     * List of inventory items to be shown
+     * Refresh the events for the user's newsfeed every 3 seconds.
      */
-    inventoryItems() {
-      if (!this.isBusiness) return undefined;
-      return [...Array(10).keys()].map(i => `Item ${i}`);
+    startPolling() {
+      this.$store.dispatch('refreshEventFeed');
+      this.polling = setInterval(() => {
+        this.$store.dispatch('refreshEventFeed');
+      }, 7500);
     },
-    /**
-     * Total number of results from the store
-     */
-    totalResults() {
-      if (this.events.length === undefined) return 0;
-      return this.events.length;
-    },
-    /**
-     * The total number of pages required to show all the events
-     * May be 0 if there are no results
-     */
-    totalPages () {
-      return Math.ceil(this.totalResults / this.resultsPerPage);
-    },
-    /**
-     * The message displayed at the bottom of the page to show how many events there are
-     */
-    resultsMessage() {
-      if (this.totalResults === 0 && !this.isFiltered) {
-        return 'No items in your feed';
-      } else if (this.totalResults === 0 && this.isFiltered) {
-        return 'No items matches the filter';
-      }
-      const pageStartIndex = (this.currentPage - 1) * this.resultsPerPage;
-      let pageEndIndex = pageStartIndex + this.resultsPerPage;
-      if (pageEndIndex > this.totalResults) {
-        pageEndIndex = pageStartIndex + (this.totalResults % this.resultsPerPage);
-      }
-      return `Displaying ${pageStartIndex + 1} - ${pageEndIndex} of ${this.totalResults} results`;
-    },
-    /**
-     * The events list which is filtered after retrieving from the store
-     */
-    events() {
-      if (this.filterBy.length === 0) return this.storeEvents;
-      return this.storeEvents.filter(event => {
-        return this.filterBy.includes(event.tag);
-      });
-    },
-    /**
-     * The events list after pagination for each page
-     */
-    eventsPage() {
-      const pageStartIndex = (this.currentPage - 1) * this.resultsPerPage;
-      return this.events.slice(pageStartIndex, (pageStartIndex + this.resultsPerPage));
-    },
-    /**
-     * An attribute to check if the events list is a filtered events list or not
-     */
-    isFiltered() {
-      return this.filterBy.length !== 0;
-    }
   },
   watch: {
     /**
@@ -201,6 +168,18 @@ export default {
     totalPages: function() {
       this.currentPage = Math.max(Math.min(this.currentPage, this.totalPages), 1);
     }
+  },
+  /**
+   * Initiate polling for the newsfeed events.
+   */
+  created() {
+    this.startPolling();
+  },
+  /**
+   * Stop polling for the newsfeed events.
+   */
+  beforeDestroy () {
+    clearInterval(this.polling);
   }
 };
 </script>
@@ -242,19 +221,12 @@ pre {
   flex-flow: row wrap;
 }
 
-.inventory-item {
-  max-width: 100px;
-  margin: 5px;
-}
+
 
 .newsfeed-item {
   margin-bottom: 10px;
 }
 
-.action-pane {
-  margin-right: 10px;
-  max-height: 400px;
-}
 
 
 @media not all and (min-width: 992px) {
@@ -267,5 +239,7 @@ pre {
   display: block;
   margin: 10px;
 }
+
+
 
 </style>

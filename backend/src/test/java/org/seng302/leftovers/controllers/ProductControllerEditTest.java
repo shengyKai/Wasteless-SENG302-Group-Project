@@ -12,7 +12,7 @@ import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.seng302.leftovers.entities.Business;
 import org.seng302.leftovers.entities.Product;
-import org.seng302.leftovers.exceptions.AccessTokenException;
+import org.seng302.leftovers.exceptions.AccessTokenResponseException;
 import org.seng302.leftovers.persistence.BusinessRepository;
 import org.seng302.leftovers.persistence.ProductRepository;
 import org.seng302.leftovers.tools.AuthenticationTokenManager;
@@ -24,6 +24,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.math.BigDecimal;
 import java.text.ParseException;
 import java.util.Optional;
 
@@ -87,7 +88,7 @@ class ProductControllerEditTest {
         productInfo.put("name", "Watties Baked Beans - 420g can");
         productInfo.put("description", "Baked Beans as they should be.");
         productInfo.put("manufacturer", "Heinz Wattie's Limited");
-        productInfo.put("recommendedRetailPrice", 2.2);
+        productInfo.put("recommendedRetailPrice", "2.2");
         return productInfo;
     }
 
@@ -100,7 +101,7 @@ class ProductControllerEditTest {
     void editProduct_noAuthToken_401Response() throws Exception {
         // Mock the AuthenticationTokenManager to respond as it would when the authentication token is missing or invalid
         authenticationTokenManager.when(() -> AuthenticationTokenManager.checkAuthenticationToken(any()))
-                    .thenThrow(new AccessTokenException());
+                    .thenThrow(new AccessTokenResponseException());
 
         // Verify that a 401 response is received in response to the POST request
         mockMvc.perform(put("/businesses/1/products/APPLE-1")
@@ -169,7 +170,7 @@ class ProductControllerEditTest {
         verify(product).setName(object.getAsString("name"));
         verify(product).setDescription(object.getAsString("description"));
         verify(product).setManufacturer(object.getAsString("manufacturer"));
-        verify(product).setRecommendedRetailPrice(object.getAsString("recommendedRetailPrice"));
+        verify(product).setRecommendedRetailPrice(new BigDecimal(object.getAsString("recommendedRetailPrice")));
 
         // Product should be saved
         verify(productRepository).save(product);
@@ -231,7 +232,7 @@ class ProductControllerEditTest {
 
     @Test
     void editProduct_invalidRecommendedRetailPrice_400Response() throws Exception {
-        doThrow(new ResponseStatusException(HttpStatus.BAD_REQUEST)).when(product).setRecommendedRetailPrice(any(String.class));
+        doThrow(new ResponseStatusException(HttpStatus.BAD_REQUEST)).when(product).setRecommendedRetailPrice(any(BigDecimal.class));
         mockMvc.perform(put("/businesses/1/products/APPLE-1")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(generateProductCreationInfo().toString()))

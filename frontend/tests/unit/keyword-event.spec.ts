@@ -1,4 +1,3 @@
-
 import Vue from 'vue';
 import Vuetify from 'vuetify';
 import { createLocalVue, mount, Wrapper } from '@vue/test-utils';
@@ -32,6 +31,10 @@ describe('KeywordCreated.vue', () => {
         },
       }
     });
+  });
+
+  afterEach(() => {
+    wrapper.destroy();
   });
 
   it("Title is correct", () => {

@@ -5,12 +5,12 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.runner.RunWith;
-import org.seng302.leftovers.entities.ExpiryEvent;
 import org.seng302.leftovers.entities.Location;
 import org.seng302.leftovers.entities.MarketplaceCard;
 import org.seng302.leftovers.entities.User;
-import org.seng302.leftovers.service.EventService;
-import org.seng302.leftovers.tools.SearchHelper;
+import org.seng302.leftovers.entities.event.ExpiryEvent;
+import org.seng302.leftovers.persistence.event.ExpiryEventRepository;
+import org.seng302.leftovers.service.search.SearchPageConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.Page;
@@ -36,8 +36,6 @@ class MarketplaceCardRepositoryTest {
     private UserRepository userRepository;
     @Autowired
     private ExpiryEventRepository expiryEventRepository;
-    @Autowired
-    private EventService eventService;
     private MarketplaceCard card;
     private User user;
 
@@ -154,7 +152,7 @@ class MarketplaceCardRepositoryTest {
         card = marketplaceCardRepository.save(card);
 
         ExpiryEvent event = new ExpiryEvent(card);
-        eventService.saveEvent(event);
+        expiryEventRepository.save(event);
         Assertions.assertTrue(expiryEventRepository.getByExpiringCard(card).isPresent());
 
         List<MarketplaceCard> results = marketplaceCardRepository.getAllExpiringBeforeWithoutEvent(cutoff);
@@ -199,7 +197,7 @@ class MarketplaceCardRepositoryTest {
         card3 = marketplaceCardRepository.save(card3);
 
         // Same page request as in GET /users/:id/cards
-        var pageRequest = SearchHelper.getPageRequest(null, null, Sort.by(new Sort.Order(Sort.Direction.DESC, "created")));
+        var pageRequest = SearchPageConstructor.getPageRequest(null, null, Sort.by(new Sort.Order(Sort.Direction.DESC, "created")));
         Page<MarketplaceCard> result = marketplaceCardRepository.getAllByCreator(user, pageRequest);
 
         List<MarketplaceCard> expectedOrder = List.of(card1, card3, card2);

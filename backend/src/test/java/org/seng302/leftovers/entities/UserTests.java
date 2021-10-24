@@ -1,19 +1,27 @@
 package org.seng302.leftovers.entities;
 
-import net.minidev.json.JSONArray;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import net.minidev.json.JSONObject;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.junit.jupiter.api.*;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.MockitoAnnotations;
 import org.mockito.internal.matchers.apachecommons.ReflectionEquals;
-import org.seng302.leftovers.exceptions.EmailInUseException;
+import org.seng302.leftovers.dto.LocationDTO;
+import org.seng302.leftovers.dto.business.BusinessResponseDTO;
+import org.seng302.leftovers.dto.business.BusinessType;
+import org.seng302.leftovers.dto.user.UserResponseDTO;
+import org.seng302.leftovers.dto.user.UserRole;
+import org.seng302.leftovers.exceptions.ConflictResponseException;
+import org.seng302.leftovers.exceptions.ValidationResponseException;
 import org.seng302.leftovers.persistence.BusinessRepository;
 import org.seng302.leftovers.persistence.UserRepository;
 import org.seng302.leftovers.tools.PasswordAuthenticator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.security.NoSuchAlgorithmException;
 import java.text.ParseException;
@@ -22,7 +30,7 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 
@@ -38,7 +46,9 @@ class UserTests {
     @Autowired
     private BusinessRepository businessRepository;
     @Autowired
-    SessionFactory sessionFactory;
+    private SessionFactory sessionFactory;
+    @Autowired
+    private ObjectMapper objectMapper;
 
     @BeforeAll
     void init() {
@@ -98,7 +108,7 @@ class UserTests {
 
             Business testBusiness1 = new Business.Builder()
                 .withName("Corellis")
-                .withBusinessType("Accommodation and Food Services")
+                .withBusinessType(BusinessType.ACCOMMODATION_AND_FOOD_SERVICES)
                 .withAddress(Location.covertAddressStringToLocation("46,Victoria Road,Ashburton,Auckland,Auckland,New Zealand,0624"))
                 .withPrimaryOwner(testUser)
                 .withDescription("Great coffee")
@@ -108,7 +118,7 @@ class UserTests {
 
             Business testBusiness2 = new Business.Builder()
                 .withName("Cakes n Ladders")
-                .withBusinessType("Accommodation and Food Services")
+                .withBusinessType(BusinessType.ACCOMMODATION_AND_FOOD_SERVICES)
                 .withAddress(Location.covertAddressStringToLocation("173,Symonds Street,Ashburton,Auckland,Auckland,New Zealand,1010"))
                 .withPrimaryOwner(testUser2)
                 .withDescription("Chill spot")
@@ -139,11 +149,7 @@ class UserTests {
         badEmails.add(badEmail3);
         badEmails.add(badEmail4);
         for (String email : badEmails) {
-            try {
-                testUser.setEmail(email);
-            } catch (ResponseStatusException | NullPointerException e) {
-
-            }
+            assertThrows(ValidationResponseException.class, () -> testUser.setEmail(email));
             assertEquals("Hi_123@testing.com", testUser.getEmail());
             //None of these should work, so email will be unchanged from last success case
         }
@@ -164,9 +170,7 @@ class UserTests {
         badPhones.add(badPhone3);
 
         for (String phone : badPhones) {
-            try {
-                testUser.setPhNum(phone);
-            } catch (ResponseStatusException ignored) {}
+            assertThrows(ValidationResponseException.class, () -> testUser.setPhNum(phone));
             assertEquals(goodPhone, testUser.getPhNum()); // Bad wont change, so last good phone is current
         }
     }
@@ -202,10 +206,7 @@ class UserTests {
      */
     @Test
     void checkInvalidFirstNameEmpty() {
-        try {
-            testUser.setFirstName("");
-            fail("A Forbidden exception was expected, but not thrown");
-        } catch (ResponseStatusException ignored) { }
+        assertThrows(ValidationResponseException.class, () -> testUser.setFirstName(""));
     }
 
     /**
@@ -215,10 +216,7 @@ class UserTests {
     void checkInvalidFirstNameTooLong() {
         String[] invalidFirstNames = { "HippoTooLongPotamusHippoTooLongPotamus", "ConnnnnnnnnnnnnnnnnnnnnorConnnnnnnnnnnnnnnnnnnnnor", "MrsMagicalMagicalMrsMagicalMagical" };
         for (String firstName : invalidFirstNames) {
-            try {
-                testUser.setFirstName(firstName);
-                fail("A Forbidden exception was expected, but not thrown");
-            } catch (ResponseStatusException ignored) { }
+            assertThrows(ValidationResponseException.class, () -> testUser.setFirstName(firstName));
         }
     }
 
@@ -229,10 +227,7 @@ class UserTests {
     void checkInvalidFirstNameNumbers() {
         String[] invalidFirstNames = { "C0nn0r", "E11a", "123456789", "1", "0", "Mohammad1" };
         for (String firstName : invalidFirstNames) {
-            try {
-                testUser.setFirstName(firstName);
-                fail("A Forbidden exception was expected, but not thrown");
-            } catch (ResponseStatusException ignored) { }
+            assertThrows(ValidationResponseException.class, () -> testUser.setFirstName(firstName));
         }
     }
 
@@ -243,11 +238,9 @@ class UserTests {
     void checkInvalidFirstNameCharacters() {
         String[] invalidFirstNames = { "C#nn#r", "E!!@", "!@#$%^&*()", "!", "@", "Mohammad*" };
         for (String firstName : invalidFirstNames) {
-            try {
-                testUser.setFirstName(firstName);
-                fail("A Forbidden exception was expected, but not thrown");
-            } catch (ResponseStatusException ignored) { }
+            assertThrows(ValidationResponseException.class, () -> testUser.setFirstName(firstName));
         }
+
     }
 
     /**
@@ -283,10 +276,7 @@ class UserTests {
     void checkInvalidMiddleNameTooLong() {
         String[] invalidMiddleNames = { "HippoTooLongPotamusqwertyuiopasdfg", "Connnnnnnnnnnnnnnnnnnnnorqwertyui", "MrsMagicalMagicalqwertyuiopqwerty" };
         for (String middleName : invalidMiddleNames) {
-            try {
-                testUser.setMiddleName(middleName);
-                fail("A Forbidden exception was expected, but not thrown");
-            } catch (ResponseStatusException ignored) { }
+            assertThrows(ValidationResponseException.class, () -> testUser.setMiddleName(middleName));
         }
     }
 
@@ -297,10 +287,7 @@ class UserTests {
     void checkInvalidMiddleNameNumbers() {
         String[] invalidMiddleNames = { "C0nn0r", "E11a", "123456789", "1", "0", "Mohammad1" };
         for (String middleName : invalidMiddleNames) {
-            try {
-                testUser.setMiddleName(middleName);
-                fail("A Forbidden exception was expected, but not thrown");
-            } catch (ResponseStatusException expectedException) { }
+            assertThrows(ValidationResponseException.class, () -> testUser.setMiddleName(middleName));
         }
     }
 
@@ -311,10 +298,7 @@ class UserTests {
     void checkInvalidMiddleNameCharacters() {
         String[] invalidMiddleNames = { "C#nn#r", "E!!@", "!@#$%^&*()", "!", "@", "Mohammad*" };
         for (String middleName : invalidMiddleNames) {
-            try {
-                testUser.setMiddleName(middleName);
-                fail("A Forbidden exception was expected, but not thrown");
-            } catch (ResponseStatusException expectedException) { }
+            assertThrows(ValidationResponseException.class, () -> testUser.setMiddleName(middleName));
         }
     }
 
@@ -335,10 +319,7 @@ class UserTests {
      */
     @Test
     void checkInvalidLastNameEmpty() {
-        try {
-            testUser.setLastName("");
-            fail("A Forbidden exception was expected, but not thrown");
-        } catch (ResponseStatusException expectedException) { }
+        assertThrows(ValidationResponseException.class, () -> testUser.setLastName(""));
     }
 
     /**
@@ -348,10 +329,7 @@ class UserTests {
     void checkInvalidLastNameTooLong() {
         String[] invalidLastNames = { "HippoTooLongPotamusHippoTooLongPotamus", "HippoTooLongPotamusConnnnnnnnnnnnnnnnnnnnnor", "HippoTooLongPotamusMrsMagicalMagical" };
         for (String lastName : invalidLastNames) {
-            try {
-                testUser.setLastName(lastName);
-                fail("A Forbidden exception was expected, but not thrown");
-            } catch (ResponseStatusException expectedException) { }
+            assertThrows(ValidationResponseException.class, () -> testUser.setLastName(lastName));
         }
     }
 
@@ -362,10 +340,7 @@ class UserTests {
     void checkInvalidLastNameNumbers() {
         String[] invalidLastNames = { "Sm1th", "J0hns0n", "123456789", "1", "0", "Mohammad1" };
         for (String lastName : invalidLastNames) {
-            try {
-                testUser.setLastName(lastName);
-                fail("A Forbidden exception was expected, but not thrown");
-            } catch (ResponseStatusException expectedException) { }
+            assertThrows(ValidationResponseException.class, () -> testUser.setLastName(lastName));
         }
     }
 
@@ -376,10 +351,7 @@ class UserTests {
     void checkInvalidLastNameCharacters() {
         String[] invalidLastNames = { "Sm!th", "J#hn$#n", "!@#$%^&*()", "!", "@", "Mohammad*" };
         for (String lastName : invalidLastNames) {
-            try {
-                testUser.setLastName(lastName);
-                fail("A Forbidden exception was expected, but not thrown");
-            } catch (ResponseStatusException expectedException) { }
+            assertThrows(ValidationResponseException.class, () -> testUser.setLastName(lastName));
         }
     }
 
@@ -416,10 +388,7 @@ class UserTests {
     void checkInvalidNicknameTooLong() {
         String[] invalidNicknames = { "HippoTooLongPotamusHippoTooLongPotamus", "HippoTooLongPotamusConnnnnnnnnnnnnnnnnnnnnor", "HippoTooLongPotamusMrsMagicalMagical" };
         for (String nickname : invalidNicknames) {
-            try {
-                testUser.setNickname(nickname);
-                fail("A Forbidden exception was expected, but not thrown");
-            } catch (ResponseStatusException expectedException) { }
+            assertThrows(ValidationResponseException.class, () -> testUser.setNickname(nickname));
         }
     }
 
@@ -430,10 +399,7 @@ class UserTests {
     void checkInvalidNicknameNumbers() {
         String[] invalidNicknames = { "Sm1th", "J0hns0n", "123456789", "1", "0", "Mohammad1" };
         for (String nickname : invalidNicknames) {
-            try {
-                testUser.setNickname(nickname);
-                fail("A Forbidden exception was expected, but not thrown");
-            } catch (ResponseStatusException expectedException) { }
+            assertThrows(ValidationResponseException.class, () -> testUser.setNickname(nickname));
         }
     }
 
@@ -444,10 +410,7 @@ class UserTests {
     void checkInvalidNicknameCharacters() {
         String[] invalidNicknames = { "Sm!th", "J#hn$#n", "!@#$%^&*()", "!", "@", "Mohammad*" };
         for (String nickname : invalidNicknames) {
-            try {
-                testUser.setNickname(nickname);
-                fail("A Forbidden exception was expected, but not thrown");
-            } catch (ResponseStatusException expectedException) { }
+            assertThrows(ValidationResponseException.class, () -> testUser.setNickname(nickname));
         }
     }
 
@@ -487,10 +450,7 @@ class UserTests {
         String[] invalidBios = { "This is the story of a student hoping one day to become a developer he sat here writing this long sentence hoping to reach exactly two hundred and fifty six characters however this was a challenge if he wanted to make a sentence that would read well nicely",
         "This is the story of a student hoping one day to become a developer he sat here writing this long sentence hoping to reach exactly two hundred and fifty six characters however this was a challenge if he wanted to make a sentence that would read well nicely This is the story of a student hoping one day to become a developer he sat here writing this long sentence hoping to reach exactly two hundred and fifty six characters however this was a challenge if he wanted to make a sentence that would read well nicely"};
         for (String bio : invalidBios) {
-            try {
-                testUser.setBio(bio);
-                fail("A Forbidden exception was expected, but not thrown");
-            } catch (ResponseStatusException expectedException) { }
+            assertThrows(ValidationResponseException.class, () -> testUser.setBio(bio));
         }
     }
 
@@ -528,10 +488,7 @@ class UserTests {
     void checkInvalidBioCharacters() {
         String[] invalidBios = {"\n", "\t", "\uD83D\uDE02", "\uFFFF"};
         for (String bio : invalidBios) {
-            try {
-                testUser.setBio(bio);
-                fail("A Forbidden exception was expected, but not thrown");
-            } catch (ResponseStatusException expectedException) { }
+            assertThrows(ValidationResponseException.class, () -> testUser.setBio(bio));
         }
     }
     /**
@@ -562,11 +519,8 @@ class UserTests {
         LocalDate minDate = date.minusYears(13);
         
         assertTrue(dateOfBirth.compareTo(minDate) > 0);
-        try {
-            testUser.setDob(dateOfBirth);
-            fail("A Forbidden exception was expected, but not thrown");
-        } catch (ResponseStatusException expectedException) { }
-        
+        assertThrows(ValidationResponseException.class, () -> testUser.setDob(dateOfBirth));
+
     }
 
     /**
@@ -603,10 +557,7 @@ class UserTests {
      */
     @Test
     void checkInvalidPasswordEmpty() {
-        try {
-            testUser.setAuthenticationCodeFromPassword("");
-            fail("A Forbidden exception was expected, but not thrown");
-        } catch (ResponseStatusException expectedException) { }
+        assertThrows(ValidationResponseException.class, () -> testUser.setAuthenticationCodeFromPassword(""));
     }
 
     /**
@@ -616,10 +567,7 @@ class UserTests {
     void checkInvalidPasswordTooShort() {
         String[] invalidPasswords = { "1", "12", "123", "1234", "12345", "123456", "1234567", "YaBoi#d", "@", "HEy" };
         for (String password : invalidPasswords) {
-            try {
-                testUser.setAuthenticationCodeFromPassword(password);
-                fail("A Forbidden exception was expected, but not thrown");
-            } catch (ResponseStatusException expectedException) { }
+            assertThrows(ValidationResponseException.class, () -> testUser.setAuthenticationCodeFromPassword(password));
         }
     }
 
@@ -632,10 +580,7 @@ class UserTests {
                 "asjdklasjkldjaslkdjlasjdklasjlkd^*&$#(*&#*(W$&(*#&#*(&(*3798427329847293874982378932480923490",
                 "asdjkl;asdasjkdsjakljaslkdjsa k        37498823094*()(#*()*($)#)*()#$*(#)$*()$#*DKLDJSL"};
         for (String password : invalidPasswords) {
-            try {
-                testUser.setAuthenticationCodeFromPassword(password);
-                fail("A Forbidden exception was expected, but not thrown");
-            } catch (ResponseStatusException expectedException) { }
+            assertThrows(ValidationResponseException.class, () -> testUser.setAuthenticationCodeFromPassword(password));
         }
     }
 
@@ -662,7 +607,7 @@ class UserTests {
     @Test
     void constructPublicJsonPublicAttributesPresentTest() {
         testUser.setUserID(1L);
-        JSONObject json = testUser.constructPublicJson(true);
+        var json = objectMapper.convertValue(new UserResponseDTO(testUser, true, false), JSONObject.class);
         assertTrue(json.containsKey("id"));
         assertTrue(json.containsKey("firstName"));
         assertTrue(json.containsKey("middleName"));
@@ -680,7 +625,7 @@ class UserTests {
     @Test
     void constructPublicJsonHiddenAttributesNotPresentTest() {
         testUser.setUserID(1L);
-        JSONObject json = testUser.constructPublicJson(true);
+        var json = objectMapper.convertValue(new UserResponseDTO(testUser, true, false), JSONObject.class);
         json.remove("id");
         json.remove("firstName");
         json.remove("middleName");
@@ -692,6 +637,7 @@ class UserTests {
         json.remove("dateOfBirth");
         json.remove("homeAddress");
         json.remove("businessesAdministered");
+        json.remove("images");
         assertTrue(json.isEmpty());
     }
 
@@ -700,9 +646,9 @@ class UserTests {
      * and the list of businesses it administers is empty, all of the attributes in the JSON have the expected value.
      */
     @Test
-    void constructPublicJsonNoAttributesNullTest() {
+    void constructPublicJsonNoAttributesNullTest() throws JsonProcessingException {
         testUser.setUserID(1L);
-        JSONObject json = testUser.constructPublicJson(true);
+        var json = objectMapper.convertValue(new UserResponseDTO(testUser, true, false), JSONObject.class);
         assertEquals(testUser.getUserID().toString(), json.getAsString("id"));
         assertEquals(testUser.getFirstName(), json.getAsString("firstName"));
         assertEquals(testUser.getMiddleName(), json.getAsString("middleName"));
@@ -711,8 +657,8 @@ class UserTests {
         assertEquals(testUser.getBio(), json.getAsString("bio"));
         assertEquals(testUser.getEmail(), json.getAsString("email"));
         assertEquals(testUser.getCreated().toString(), json.getAsString("created"));
-        String expectedAddressString = testUser.getAddress().constructPartialJson().toJSONString();
-        assertEquals(expectedAddressString, json.getAsString("homeAddress"));
+        String expectedAddressString = objectMapper.writeValueAsString(new LocationDTO(testUser.getAddress(), false));
+        assertEquals(expectedAddressString, objectMapper.writeValueAsString(json.get("homeAddress")));
         assertEquals("[]", json.getAsString("businessesAdministered"));
     }
 
@@ -721,12 +667,12 @@ class UserTests {
      * and the list of businesses it administers is empty, all of the attributes in the JSON have the expected value.
      */
     @Test
-    void constructPublicJsonOptionalAttributesNullTest() {
+    void constructPublicJsonOptionalAttributesNullTest() throws JsonProcessingException {
         testUser.setUserID(1L);
         testUser.setMiddleName(null);
         testUser.setNickname(null);
         testUser.setBio(null);
-        JSONObject json = testUser.constructPublicJson(true);
+        var json = objectMapper.convertValue(new UserResponseDTO(testUser, true, false), JSONObject.class);
         assertEquals(testUser.getUserID().toString(), json.getAsString("id"));
         assertEquals(testUser.getFirstName(), json.getAsString("firstName"));
         assertEquals(testUser.getMiddleName(), json.getAsString("middleName"));
@@ -735,8 +681,8 @@ class UserTests {
         assertEquals(testUser.getBio(), json.getAsString("bio"));
         assertEquals(testUser.getEmail(), json.getAsString("email"));
         assertEquals(testUser.getCreated().toString(), json.getAsString("created"));
-        String expectedAddressString = testUser.getAddress().constructPartialJson().toJSONString();
-        assertEquals(expectedAddressString, json.getAsString("homeAddress"));
+        String expectedAddressString = objectMapper.writeValueAsString(new LocationDTO(testUser.getAddress(), false));
+        assertEquals(expectedAddressString, objectMapper.writeValueAsString(json.get("homeAddress")));
         assertEquals("[]", json.getAsString("businessesAdministered"));
     }
 
@@ -746,7 +692,7 @@ class UserTests {
     @Test
     void constructPrivateJsonAllExpectedAttributesPresentTest() {
         testUser.setUserID(1L);
-        JSONObject json = testUser.constructPrivateJson(true);
+        var json = objectMapper.convertValue(new UserResponseDTO(testUser, true, true), JSONObject.class);
         assertTrue(json.containsKey("id"));
         assertTrue(json.containsKey("firstName"));
         assertTrue(json.containsKey("middleName"));
@@ -767,7 +713,7 @@ class UserTests {
     @Test
     void constructPrivateJsonNoUnexpectedAttributesPresentTest() {
         testUser.setUserID(1L);
-        JSONObject json = testUser.constructPrivateJson(true);
+        var json = objectMapper.convertValue(new UserResponseDTO(testUser, true, true), JSONObject.class);
         json.remove("id");
         json.remove("firstName");
         json.remove("middleName");
@@ -781,6 +727,7 @@ class UserTests {
         json.remove("phoneNumber");
         json.remove("dateOfBirth");
         json.remove("role");
+        json.remove("images");
         assertTrue(json.isEmpty());
     }
 
@@ -789,9 +736,9 @@ class UserTests {
      * and the list of businesses it administers is empty, all of the attributes in the JSON have the expected value.
      */
     @Test
-    void constructPrivateJsonNoAttributesNullTest() {
+    void constructPrivateJsonNoAttributesNullTest() throws JsonProcessingException {
         testUser.setUserID(1L);
-        JSONObject json = testUser.constructPrivateJson(true);
+        var json = objectMapper.convertValue(new UserResponseDTO(testUser, true, true), JSONObject.class);
         assertEquals(testUser.getUserID().toString(), json.getAsString("id"));
         assertEquals(testUser.getFirstName(), json.getAsString("firstName"));
         assertEquals(testUser.getMiddleName(), json.getAsString("middleName"));
@@ -800,10 +747,10 @@ class UserTests {
         assertEquals(testUser.getBio(), json.getAsString("bio"));
         assertEquals(testUser.getEmail(), json.getAsString("email"));
         assertEquals(testUser.getCreated().toString(), json.getAsString("created"));
-        String expectedAddressString = testUser.getAddress().constructFullJson().toJSONString();
-        assertEquals(expectedAddressString, json.getAsString("homeAddress"));
+        String expectedAddressString = objectMapper.writeValueAsString(new LocationDTO(testUser.getAddress(), true));
+        assertEquals(expectedAddressString, objectMapper.writeValueAsString(json.get("homeAddress")));
         assertEquals("[]", json.getAsString("businessesAdministered"));
-        assertEquals(testUser.getRole(), json.getAsString("role"));
+        assertEquals(testUser.getRole(), objectMapper.convertValue(json.get("role"), UserRole.class));
         assertEquals(testUser.getPhNum(), json.getAsString("phoneNumber"));
         assertEquals(testUser.getDob().toString(), json.getAsString("dateOfBirth"));
     }
@@ -813,13 +760,13 @@ class UserTests {
      * and the list of businesses it administers is empty, all of the attributes in the JSON have the expected value.
      */
     @Test
-    void constructPrivateJsonOptionalAttributesNullTest() {
+    void constructPrivateJsonOptionalAttributesNullTest() throws JsonProcessingException {
         testUser.setUserID(1L);
         testUser.setMiddleName(null);
         testUser.setNickname(null);
         testUser.setBio(null);
         testUser.setPhNum(null);
-        JSONObject json = testUser.constructPrivateJson(true);
+        var json = objectMapper.convertValue(new UserResponseDTO(testUser, true, true), JSONObject.class);
         assertEquals(testUser.getUserID().toString(), json.getAsString("id"));
         assertEquals(testUser.getFirstName(), json.getAsString("firstName"));
         assertEquals(testUser.getMiddleName(), json.getAsString("middleName"));
@@ -828,10 +775,10 @@ class UserTests {
         assertEquals(testUser.getBio(), json.getAsString("bio"));
         assertEquals(testUser.getEmail(), json.getAsString("email"));
         assertEquals(testUser.getCreated().toString(), json.getAsString("created"));
-        String expectedAddressString = testUser.getAddress().constructFullJson().toJSONString();
-        assertEquals(expectedAddressString, json.getAsString("homeAddress"));
+        String expectedAddressString = objectMapper.writeValueAsString(new LocationDTO(testUser.getAddress(), true));
+        assertEquals(expectedAddressString, objectMapper.writeValueAsString(json.get("homeAddress")));
         assertEquals("[]", json.getAsString("businessesAdministered"));
-        assertEquals(testUser.getRole(), json.getAsString("role"));
+        assertEquals(testUser.getRole(), objectMapper.convertValue(json.get("role"), UserRole.class));
         assertEquals(testUser.getPhNum(), json.getAsString("phoneNumber"));
         assertEquals(testUser.getDob().toString(), json.getAsString("dateOfBirth"));
     }
@@ -842,24 +789,21 @@ class UserTests {
      * resulting json will have the correct details for every business administered by the user
      */
     @Test
-    void constructPublicJsonBusinessesAdministeredTrueTest() {
+    void constructPublicJsonBusinessesAdministeredTrueTest() throws JsonProcessingException {
         try (Session session = sessionFactory.openSession()) {
             addBusinessesAdministeredToTestUser();
 
             testUser = session.find(User.class, testUser.getUserID());
 
-            List<Business> testBusinesses = new ArrayList<>();
-            testBusinesses.addAll(testUser.getBusinessesAdministeredAndOwned());
-            Collections.sort(testBusinesses, (Business b1, Business b2) ->
-                    b1.getId().compareTo(b2.getId()));
+            List<Business> testBusinesses = new ArrayList<>(testUser.getBusinessesAdministeredAndOwned());
+            testBusinesses.sort(Comparator.comparing(Business::getId));
             assertEquals(2, testBusinesses.size());
-            JSONObject json = testUser.constructPublicJson(true);
-            JSONArray expectedBusinessArray = new JSONArray();
+            var json = objectMapper.convertValue(new UserResponseDTO(testUser, true, false), JSONObject.class);
+            List<BusinessResponseDTO> expectedBusinessArray = new ArrayList<>();
             for (Business business : testBusinesses) {
-                expectedBusinessArray.add(business.constructJson(false));
+                expectedBusinessArray.add(BusinessResponseDTO.withoutAdmins(business));
             }
-            String expectedBusinessString = expectedBusinessArray.toJSONString();
-            assertEquals(expectedBusinessString, json.getAsString("businessesAdministered"));
+            assertEquals(objectMapper.writeValueAsString(expectedBusinessArray), objectMapper.writeValueAsString(json.get("businessesAdministered")));
         }
     }
 
@@ -871,7 +815,7 @@ class UserTests {
     @Test
     void constructPublicJsonBusinessesAdministeredFalseTest() {
         addBusinessesAdministeredToTestUser();
-        JSONObject json = testUser.constructPublicJson(false);
+        var json = objectMapper.convertValue(new UserResponseDTO(testUser, false, false), JSONObject.class);
         assertNull(json.get("businessesAdministered"));
     }
 
@@ -883,7 +827,7 @@ class UserTests {
     @Test
     void constructPublicJsonBusinessesAdministeredNullTest() {
         addBusinessesAdministeredToTestUser();
-        JSONObject json = testUser.constructPublicJson();
+        var json = objectMapper.convertValue(new UserResponseDTO(testUser), JSONObject.class);
         assertNull(json.get("businessesAdministered"));
     }
 
@@ -893,23 +837,21 @@ class UserTests {
      * resulting json will have the correct details for every business administered by the user
      */
     @Test
-    void constructPrivateJsonBusinessesAdministeredTrueTest() {
+    void constructPrivateJsonBusinessesAdministeredTrueTest() throws JsonProcessingException {
         addBusinessesAdministeredToTestUser();
-        List<Business> testBusinesses = new ArrayList<>();
 
         try (Session session = sessionFactory.openSession()) {
             testUser = session.load(User.class, testUser.getUserID());
-            testBusinesses.addAll(testUser.getBusinessesAdministeredAndOwned());
+            List<Business> testBusinesses = new ArrayList<>(testUser.getBusinessesAdministeredAndOwned());
 
-            Collections.sort(testBusinesses, (Business b1, Business b2) -> b1.getId().compareTo(b2.getId()));
+            testBusinesses.sort(Comparator.comparing(Business::getId));
             assertEquals(2, testBusinesses.size());
-            JSONObject json = testUser.constructPrivateJson(true);
-            JSONArray expectedBusinessArray = new JSONArray();
+            var json = objectMapper.convertValue(new UserResponseDTO(testUser, true, true), JSONObject.class);
+            List<BusinessResponseDTO> expectedBusinessArray = new ArrayList<>();
             for (Business business : testBusinesses) {
-                expectedBusinessArray.add(business.constructJson(false));
+                expectedBusinessArray.add(BusinessResponseDTO.withoutAdmins(business));
             }
-            String expectedBusinessString = expectedBusinessArray.toJSONString();
-            assertEquals(expectedBusinessString, json.getAsString("businessesAdministered"));
+            assertEquals(objectMapper.writeValueAsString(expectedBusinessArray), objectMapper.writeValueAsString(json.get("businessesAdministered")));
         }
     }
 
@@ -921,24 +863,12 @@ class UserTests {
     @Test
     void constructPrivateJsonBusinessesAdministeredFalseTest() {
         addBusinessesAdministeredToTestUser();
-        JSONObject json = testUser.constructPrivateJson(false);
+        var json = objectMapper.convertValue(new UserResponseDTO(testUser, false, true), JSONObject.class);
         assertNull(json.get("businessesAdministered"));
     }
 
     /**
-     * Test that when constructPrivateJson is called with no arguement, and the list of
-     * businesses administered by the user is not empty, the resulting json will not contain the businessesAdministered
-     * field.
-     */
-    @Test
-    void constructPrivateJsonBusinessesAdministeredNullTest() {
-        addBusinessesAdministeredToTestUser();
-        JSONObject json = testUser.constructPrivateJson();
-        assertNull(json.get("businessesAdministered"));
-    }
-
-    /**
-     * Verify that checkEmailUniqueness throws an EmailInUseException when called with an email that has been added to
+     * Verify that checkEmailUniqueness throws an ConflictResponseException when called with an email that has been added to
      * the user repository.
      */
     @Test
@@ -960,7 +890,7 @@ class UserTests {
         businessRepository.deleteAll();
         userRepository.deleteAll();
         userRepository.save(testUser);
-        assertThrows(EmailInUseException.class, () -> User.checkEmailUniqueness(testEmail, userRepository));
+        assertThrows(ConflictResponseException.class, () -> User.checkEmailUniqueness(testEmail, userRepository));
     }
 
     /**
@@ -989,7 +919,7 @@ class UserTests {
                 .withPhoneNumber("+64 3 555 0129")
                 .withAddress(Location.covertAddressStringToLocation("4,Rountree Street,Ashburton,Christchurch,New Zealand," +
                         "Canterbury,8041"));
-        assertThrows(ResponseStatusException.class, testBuilder::build);
+        assertThrows(ValidationResponseException.class, testBuilder::build);
     }
 
     /**
@@ -1008,7 +938,7 @@ class UserTests {
                 .withPhoneNumber("+64 3 555 0129")
                 .withAddress(Location.covertAddressStringToLocation("4,Rountree Street,Ashburton,Christchurch,New Zealand," +
                         "Canterbury,8041"));
-        assertThrows(ResponseStatusException.class, testBuilder::build);
+        assertThrows(ValidationResponseException.class, testBuilder::build);
     }
 
     /**
@@ -1027,7 +957,7 @@ class UserTests {
                 .withPhoneNumber("+64 3 555 0129")
                 .withAddress(Location.covertAddressStringToLocation("4,Rountree Street,Ashburton,Christchurch,New Zealand," +
                         "Canterbury,8041"));
-        assertThrows(ResponseStatusException.class, testBuilder::build);
+        assertThrows(ValidationResponseException.class, testBuilder::build);
     }
 
     /**
@@ -1046,7 +976,7 @@ class UserTests {
                 .withPhoneNumber("+64 3 555 0129")
                 .withAddress(Location.covertAddressStringToLocation("4,Rountree Street,Ashburton,Christchurch,New Zealand," +
                         "Canterbury,8041"));
-        assertThrows(ResponseStatusException.class, testBuilder::build);
+        assertThrows(ValidationResponseException.class, testBuilder::build);
     }
 
     /**
@@ -1064,7 +994,7 @@ class UserTests {
                 .withBio("Likes long walks on the beach")
                 .withDob("2001-03-11")
                 .withPhoneNumber("+64 3 555 0129");
-        assertThrows(ResponseStatusException.class, testBuilder::build);
+        assertThrows(ValidationResponseException.class, testBuilder::build);
     }
 
     /**
@@ -1083,7 +1013,7 @@ class UserTests {
                 .withPhoneNumber("+64 3 555 0129")
                 .withAddress(Location.covertAddressStringToLocation("4,Rountree Street,Ashburton,Christchurch,New Zealand," +
                         "Canterbury,8041"));
-        assertThrows(ResponseStatusException.class, testBuilder::build);
+        assertThrows(ValidationResponseException.class, testBuilder::build);
     }
 
     /**
@@ -1270,6 +1200,17 @@ class UserTests {
         LocalDate dob = LocalDate.parse("2001-03-11", dateTimeFormatter);
         User user = testBuilder.build();
         assertEquals(dob, user.getDob());
+    }
+
+    @ParameterizedTest
+    @CsvSource({
+            "USER,user",
+            "GAA,globalApplicationAdmin",
+            "DGAA,defaultGlobalApplicationAdmin"
+    })
+    void userRole_toString_isExpectedString(String roleString, String mappedRoleString) {
+        UserRole role = UserRole.valueOf(roleString);
+        assertEquals(mappedRoleString, objectMapper.convertValue(role, String.class));
     }
 
 }

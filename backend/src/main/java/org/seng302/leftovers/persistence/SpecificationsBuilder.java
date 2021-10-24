@@ -1,5 +1,6 @@
 package org.seng302.leftovers.persistence;
 
+import org.seng302.leftovers.persistence.SearchCriteria.Pred;
 import org.springframework.data.jpa.domain.Specification;
 
 import java.util.ArrayList;
@@ -26,7 +27,7 @@ public class SpecificationsBuilder<T> {
      * @param isOrPredicate Determines if predicate will be AND / OR
      * @return The builder
      */
-    public SpecificationsBuilder<T> with(String key, String operation, Object value, boolean isOrPredicate) {
+    public SpecificationsBuilder<T> with(String key, Pred operation, Object value, boolean isOrPredicate) {
         params.add(new SearchCriteria(key, operation, value, isOrPredicate));
         return this;
     }

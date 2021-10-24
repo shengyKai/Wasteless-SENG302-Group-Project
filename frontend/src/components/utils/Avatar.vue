@@ -27,6 +27,10 @@ export default {
      */
     business: Object,
 
+    /**
+     * Product to make avatar for.
+     */
+    product: Object,
 
     /**
      * The size of the avatar
@@ -34,7 +38,7 @@ export default {
      * @values small, medium, large
      */
     size: {
-      validator: (s) => ['small', 'medium', 'large'].includes(s),
+      validator: (s) => ['small', 'medium', 'medium-large', 'large'].includes(s),
       default: 'medium',
     },
   },
@@ -46,6 +50,8 @@ export default {
         return 30;
       case "medium":
         return 40;
+      case 'medium-large':
+        return 80;
       case "large":
         return 200;
       default:
@@ -58,26 +64,27 @@ export default {
     initials() {
       if (this.user !== undefined) {
         return this.user.firstName[0].toUpperCase() + this.user.lastName[0].toUpperCase();
-      } else if (this.business !== undefined) {
-        let pieces = this.business.name.split(/\s/);
-        console.log(this.business.name);
-        console.log(pieces);
-        if (pieces.length === 2) {
-          return pieces[0][0].toUpperCase() + pieces[1][0].toUpperCase();
-        }
-        return this.business.name[0].toUpperCase();
-      } else {
-        throw new Error('Either "user" or "business" must be provided.');
       }
+      let target = this.business;
+      if (target === undefined) target = this.product;
+      if (target === undefined) throw new Error('Either "user", "business" or "product" must be provided.');
+
+      let pieces = target.name.split(/\s/);
+      if (pieces.length === 2) {
+        return pieces[0][0].toUpperCase() + pieces[1][0].toUpperCase();
+      }
+      return target.name[0].toUpperCase();
     },
     image() {
       let image;
       if (this.user !== undefined) {
-        image = undefined; // User images not implemented
+        image = this.user.images[0];
       } else if (this.business !== undefined) {
         image = this.business.images[0];
+      } else if (this.product !== undefined) {
+        image = this.product.images[0];
       } else {
-        throw new Error('Either "user" or "business" must be provided.');
+        throw new Error('Either "user", "business" or "product" must be provided.');
       }
 
       if (image === undefined) return undefined;

@@ -1,6 +1,8 @@
 package org.seng302.leftovers.entities;
 
-import net.minidev.json.JSONArray;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import net.minidev.json.JSONObject;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
@@ -8,11 +10,20 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.NullSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.seng302.leftovers.exceptions.AccessTokenException;
+import org.seng302.leftovers.dto.LocationDTO;
+import org.seng302.leftovers.dto.business.BusinessResponseDTO;
+import org.seng302.leftovers.dto.business.BusinessType;
+import org.seng302.leftovers.dto.business.Rank;
+import org.seng302.leftovers.dto.user.UserResponseDTO;
+import org.seng302.leftovers.dto.user.UserRole;
+import org.seng302.leftovers.exceptions.AccessTokenResponseException;
+import org.seng302.leftovers.exceptions.InsufficientPermissionResponseException;
+import org.seng302.leftovers.exceptions.ValidationResponseException;
 import org.seng302.leftovers.persistence.BusinessRepository;
 import org.seng302.leftovers.persistence.ImageRepository;
 import org.seng302.leftovers.persistence.ProductRepository;
@@ -20,7 +31,6 @@ import org.seng302.leftovers.persistence.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 
 import javax.servlet.http.Cookie;
@@ -32,9 +42,10 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
+import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.when;
@@ -43,24 +54,26 @@ import static org.mockito.Mockito.when;
 class BusinessTests {
 
     @Autowired
-    BusinessRepository businessRepository;
+    private BusinessRepository businessRepository;
     @Autowired
-    UserRepository userRepository;
+    private UserRepository userRepository;
     @Autowired
-    ProductRepository productRepository;
+    private ProductRepository productRepository;
     @Autowired
-    ImageRepository imageRepository;
+    private ImageRepository imageRepository;
     @Mock
-    HttpServletRequest request;
+    private HttpServletRequest request;
     @Mock
-    HttpSession session;
+    private HttpSession session;
     @Autowired
-    SessionFactory sessionFactory;
+    private SessionFactory sessionFactory;
+    @Autowired
+    private ObjectMapper objectMapper;
 
-    User testUser1;
-    User testUser2;
-    User testUser3;
-    Business testBusiness1;
+    private User testUser1;
+    private User testUser2;
+    private User testUser3;
+    private Business testBusiness1;
 
     /**
      * Sets up 3 Users and 1 Business
@@ -117,7 +130,7 @@ class BusinessTests {
         testUser2 = userRepository.save(testUser2);
         testUser3 = userRepository.save(testUser3);
         testBusiness1 = new Business.Builder()
-                .withBusinessType("Accommodation and Food Services")
+                .withBusinessType(BusinessType.ACCOMMODATION_AND_FOOD_SERVICES)
                 .withAddress(Location.covertAddressStringToLocation("4,Rountree Street,Ashburton,Christchurch,New Zealand," +
                         "Canterbury,8041"))
                 .withDescription("Some description")
@@ -164,22 +177,8 @@ class BusinessTests {
      */
     @Test
     void setBusinessTypeWhenValid() throws ResponseStatusException {
-        testBusiness1.setBusinessType("Retail Trade");
-        assertEquals("Retail Trade", testBusiness1.getBusinessType());
-    }
-
-    /**
-     * Test that an error is thrown when the business type is invalid
-     * @throws ResponseStatusException
-     */
-    @Test
-    void setBusinessTypeThrowsWhenInvalid() throws ResponseStatusException {
-        try {
-            testBusiness1.setBusinessType("invalid type");
-            fail(); // shouldnt get here
-        } catch (ResponseStatusException err) {
-
-        }
+        testBusiness1.setBusinessType(BusinessType.RETAIL_TRADE);
+        assertEquals(BusinessType.RETAIL_TRADE, testBusiness1.getBusinessType());
     }
 
     /**
@@ -216,14 +215,14 @@ class BusinessTests {
     @Test
     void setBelowMinimumAge() {
         Business.Builder builder = new Business.Builder()
-                .withBusinessType("Accommodation and Food Services")
+                .withBusinessType(BusinessType.ACCOMMODATION_AND_FOOD_SERVICES)
                 .withAddress(
                         Location.covertAddressStringToLocation("4,Rountree Street,Ashburton,Christchurch,New Zealand," +
                         "Canterbury,8041"))
                 .withDescription("Some description")
                 .withName("BusinessName")
                 .withPrimaryOwner(testUser3);
-        Exception thrown = assertThrows(ResponseStatusException.class, builder::build, "Expected Business.builder() to throw, but it didn't");
+        Exception thrown = assertThrows(InsufficientPermissionResponseException.class, builder::build, "Expected Business.builder() to throw, but it didn't");
         assertTrue(thrown.getMessage().contains("User is not of minimum age required to create a business"));
     }
 
@@ -277,10 +276,9 @@ class BusinessTests {
         String originalName = testBusiness1.getName();
         String[] invalidCharacterNames = {"\n", "»»»»»", "business¢", "½This is not allowed", "¡or this¡"};
         for (String name : invalidCharacterNames) {
-            ResponseStatusException e = assertThrows(ResponseStatusException.class, () -> {
+            var e = assertThrows(ValidationResponseException.class, () -> {
                 testBusiness1.setName(name);
             });
-            assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
             assertEquals(originalName, testBusiness1.getName());
         }
     }
@@ -304,10 +302,9 @@ class BusinessTests {
         String[] longNames = {justOver.toString(), wayTooLong.toString()};
 
         for (String name : longNames) {
-            ResponseStatusException e = assertThrows(ResponseStatusException.class, () -> {
+            var e = assertThrows(ValidationResponseException.class, () -> {
                 testBusiness1.setName(name);
             });
-            assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
             assertEquals(originalName, testBusiness1.getName());
         }
     }
@@ -321,8 +318,7 @@ class BusinessTests {
     @ValueSource(strings = {"", "   "})
     void setNameToInvalidValue(String value) {
         String originalName = testBusiness1.getName();
-        ResponseStatusException e = assertThrows(ResponseStatusException.class, () -> testBusiness1.setName(value));
-        assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
+        var e = assertThrows(ValidationResponseException.class, () -> testBusiness1.setName(value));
         assertEquals(originalName, testBusiness1.getName());
     }
 
@@ -383,10 +379,9 @@ class BusinessTests {
         String originalDescription = testBusiness1.getDescription();
         String[] invalidCharacterDescriptions = {"»»»»»", "business¢", "½This is not allowed", "¡or this¡"};
         for (String description : invalidCharacterDescriptions) {
-            ResponseStatusException e = assertThrows(ResponseStatusException.class, () -> {
+            var e = assertThrows(ValidationResponseException.class, () -> {
                 testBusiness1.setDescription(description);
             });
-            assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
             assertEquals(originalDescription, testBusiness1.getDescription());
         }
     }
@@ -410,10 +405,9 @@ class BusinessTests {
         String[] longDescriptions = {justOver.toString(), wayTooLong.toString()};
 
         for (String description : longDescriptions) {
-            ResponseStatusException e = assertThrows(ResponseStatusException.class, () -> {
+            var e = assertThrows(ValidationResponseException.class, () -> {
                 testBusiness1.setDescription(description);
             });
-            assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
             assertEquals(originalDescription, testBusiness1.getDescription());
         }
     }
@@ -435,7 +429,7 @@ class BusinessTests {
     void primaryOwnerCantBeDeletedTest() {
         User primaryOwner = testBusiness1.getPrimaryOwner();
         long userId = primaryOwner.getUserID();
-        assertThrows(ResponseStatusException.class, () -> {
+        assertThrows(ValidationResponseException.class, () -> {
             userRepository.deleteById(userId);
         });
         assertTrue(userRepository.findById(primaryOwner.getUserID()).isPresent());
@@ -448,10 +442,9 @@ class BusinessTests {
     @Test
     void addAdminCurrentAdminTest() {
         testBusiness1.addAdmin(testUser2);
-        ResponseStatusException e = assertThrows(ResponseStatusException.class, () -> {
+        var e = assertThrows(ValidationResponseException.class, () -> {
             testBusiness1.addAdmin(testUser2);
         });
-        assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
         assertEquals(1, testBusiness1.getAdministrators().size());
         assertTrue(testBusiness1.getAdministrators().contains(testUser2));
     }
@@ -462,10 +455,9 @@ class BusinessTests {
      */
     @Test
     void addAdminPrimaryOwnerTest() {
-        ResponseStatusException e = assertThrows(ResponseStatusException.class, () -> {
+        var e = assertThrows(ValidationResponseException.class, () -> {
             testBusiness1.addAdmin(testUser1);
         });
-        assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
         assertEquals(0, testBusiness1.getAdministrators().size());
     }
 
@@ -541,9 +533,13 @@ class BusinessTests {
      */
     @Test
     void setCreatedInitialValueTest() {
-        Business testBusiness2 = new Business.Builder().withBusinessType("Non-profit organisation").withName("Zesty Business")
+        Business testBusiness2 = new Business.Builder()
+                .withBusinessType(BusinessType.NON_PROFIT)
+                .withName("Zesty Business")
                 .withAddress(Location.covertAddressStringToLocation("101,My Street,Ashburton,Christchurch,Canterbury,New Zealand,1010"))
-                .withDescription("A nice place").withPrimaryOwner(testUser2).build();
+                .withDescription("A nice place")
+                .withPrimaryOwner(testUser2)
+                .build();
         assertTrue(ChronoUnit.SECONDS.between(Instant.now(), testBusiness2.getCreated()) < 20);
     }
 
@@ -554,10 +550,9 @@ class BusinessTests {
     @Test
     void setAddressNullTest() {
         Location originalAddress = testBusiness1.getAddress();
-        ResponseStatusException e = assertThrows(ResponseStatusException.class, () -> {
+        var e = assertThrows(ValidationResponseException.class, () -> {
             testBusiness1.setAddress(null);
         });
-        assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
         assertEquals(originalAddress, testBusiness1.getAddress());
     }
 
@@ -579,11 +574,8 @@ class BusinessTests {
      * @return A lsit of JSONObjects produced by calling constructJson with true, false and no arg
      */
     private List<JSONObject> getTestJsons(Business business) {
-        List<JSONObject> testJsons = new ArrayList<>();
-        testJsons.add(business.constructJson(true));
-        testJsons.add(business.constructJson(false));
-        testJsons.add(business.constructJson());
-        return testJsons;
+        List<BusinessResponseDTO> testDTOs = List.of(BusinessResponseDTO.withAdmins(business), BusinessResponseDTO.withoutAdmins(business));
+        return objectMapper.convertValue(testDTOs, new TypeReference<>() {});
     }
 
     /**
@@ -593,7 +585,7 @@ class BusinessTests {
      */
     @Test
     void constructJsonHasExpectedFieldsFullDetailsTrueTest() {
-       JSONObject json = testBusiness1.constructJson(true);
+        var json = objectMapper.convertValue(BusinessResponseDTO.withAdmins(testBusiness1), JSONObject.class);
        assertTrue(json.containsKey("name"));
        assertTrue(json.containsKey("description"));
        assertTrue(json.containsKey("businessType"));
@@ -602,6 +594,8 @@ class BusinessTests {
        assertTrue(json.containsKey("primaryAdministratorId"));
        assertTrue(json.containsKey("administrators"));
        assertTrue(json.containsKey("created"));
+       assertTrue(json.containsKey("points"));
+       assertTrue(json.containsKey("rank"));
     }
 
     /**
@@ -611,18 +605,16 @@ class BusinessTests {
      */
     @Test
     void constructJsonHasExpectedFieldsFullDetailsFalseTest() {
-        List<JSONObject> testJsons = new ArrayList<>();
-        testJsons.add(testBusiness1.constructJson(false));
-        testJsons.add(testBusiness1.constructJson());
-        for (JSONObject json : testJsons) {
-            assertTrue(json.containsKey("name"));
-            assertTrue(json.containsKey("description"));
-            assertTrue(json.containsKey("businessType"));
-            assertTrue(json.containsKey("address"));
-            assertTrue(json.containsKey("id"));
-            assertTrue(json.containsKey("primaryAdministratorId"));
-            assertTrue(json.containsKey("created"));
-        }
+        var json = objectMapper.convertValue(BusinessResponseDTO.withoutAdmins(testBusiness1), JSONObject.class);
+        assertTrue(json.containsKey("name"));
+        assertTrue(json.containsKey("description"));
+        assertTrue(json.containsKey("businessType"));
+        assertTrue(json.containsKey("address"));
+        assertTrue(json.containsKey("id"));
+        assertTrue(json.containsKey("primaryAdministratorId"));
+        assertTrue(json.containsKey("created"));
+        assertTrue(json.containsKey("points"));
+        assertTrue(json.containsKey("rank"));
     }
 
     /**
@@ -632,7 +624,7 @@ class BusinessTests {
      */
     @Test
     void constructJsonDoesntHaveUnexpectedFieldsFullDetailsTrueTest() {
-        JSONObject json = testBusiness1.constructJson(true);
+        JSONObject json = objectMapper.convertValue(BusinessResponseDTO.withAdmins(testBusiness1), JSONObject.class);
         json.remove("name");
         json.remove("description");
         json.remove("businessType");
@@ -642,6 +634,9 @@ class BusinessTests {
         json.remove("administrators");
         json.remove("created");
         json.remove("images");
+        json.remove("points");
+        json.remove("rank");
+        json.remove("nextRank");
         assertTrue(json.isEmpty());
     }
 
@@ -652,20 +647,19 @@ class BusinessTests {
      */
     @Test
     void constructJsonDoesntHaveUnexpectedFieldsFullDetailsFalseTest() {
-        List<JSONObject> testJsons = new ArrayList<>();
-        testJsons.add(testBusiness1.constructJson(false));
-        testJsons.add(testBusiness1.constructJson());
-        for (JSONObject json : testJsons) {
-            json.remove("name");
-            json.remove("description");
-            json.remove("businessType");
-            json.remove("address");
-            json.remove("id");
-            json.remove("primaryAdministratorId");
-            json.remove("created");
-            json.remove("images");
-            assertTrue(json.isEmpty());
-        }
+        var json = objectMapper.convertValue(BusinessResponseDTO.withoutAdmins(testBusiness1), JSONObject.class);
+        json.remove("name");
+        json.remove("description");
+        json.remove("businessType");
+        json.remove("address");
+        json.remove("id");
+        json.remove("primaryAdministratorId");
+        json.remove("created");
+        json.remove("images");
+        json.remove("points");
+        json.remove("rank");
+        json.remove("nextRank");
+        assertTrue(json.isEmpty());
     }
 
     /**
@@ -676,15 +670,17 @@ class BusinessTests {
     @Test
     void constructJsonSimpleFieldsHaveExpectedValueTest() {
         List<JSONObject> testJsons = getTestJsons(testBusiness1);
-        for (JSONObject json : testJsons) {
+        for (var json : testJsons) {
             assertEquals(testBusiness1.getName(), json.getAsString("name"));
             assertEquals(testBusiness1.getDescription(), json.getAsString("description"));
-            assertEquals(testBusiness1.getBusinessType(), json.getAsString("businessType"));
-            assertEquals(testBusiness1.getAddress().constructFullJson().toString(), json.getAsString("address"));
+            assertEquals(testBusiness1.getBusinessType(), objectMapper.convertValue(json.get("businessType"), BusinessType.class));
+            assertEquals(new LocationDTO(testBusiness1.getAddress(), true), objectMapper.convertValue(json.get("address"), LocationDTO.class));
             assertEquals(testBusiness1.getId().toString(), json.getAsString("id"));
             assertEquals(testBusiness1.getPrimaryOwner().getUserID().toString(), json.getAsString("primaryAdministratorId"));
             assertEquals(testBusiness1.getCreated().toString(), json.getAsString("created"));
             assertEquals(List.of(), json.get("images"));
+            assertEquals(testBusiness1.getPoints(), json.get("points"));
+            assertEquals(testBusiness1.getRank(), objectMapper.convertValue(json.get("rank"), Rank.class));
         }
     }
 
@@ -693,20 +689,18 @@ class BusinessTests {
      * contains a list of User JSONs with the details of the business's administrators.
      */
     @Test
-    void constructJsonAdministratorsFullDetailsTest() {
+    void constructJsonAdministratorsFullDetailsTest() throws JsonProcessingException {
         testBusiness1.addAdmin(testUser2);
         assertEquals(2, testBusiness1.getOwnerAndAdministrators().size());
-        List<User> admins = new ArrayList<>();
-        admins.addAll(testBusiness1.getOwnerAndAdministrators());
-        Collections.sort(admins, (User user1, User user2) ->
-           user1.getUserID().compareTo(user2.getUserID()));
-        JSONArray expectedAdminArray = new JSONArray();
-        for (User user : admins) {
-            expectedAdminArray.add(user.constructPublicJson());
-        }
-        String expectedAdminString = expectedAdminArray.toJSONString();
-        JSONObject testJson = testBusiness1.constructJson(true);
-        assertEquals(expectedAdminString, testJson.getAsString("administrators"));
+        List<User> admins = new ArrayList<>(testBusiness1.getOwnerAndAdministrators());
+        admins.sort(Comparator.comparing(Account::getUserID));
+
+        List<UserResponseDTO> expectedAdminArray = admins.stream().map(UserResponseDTO::new).collect(Collectors.toList());
+
+        var json = objectMapper.convertValue(BusinessResponseDTO.withAdmins(testBusiness1), JSONObject.class);
+        List<UserResponseDTO> actualAdminArray = objectMapper.convertValue(json.get("administrators"), new TypeReference<>() {});
+
+        assertEquals(expectedAdminArray, actualAdminArray);
     }
 
     /**
@@ -736,7 +730,7 @@ class BusinessTests {
 
 
     /**
-     * Test that the checkSessionPermissions method will throw an AccessTokenException when called
+     * Test that the checkSessionPermissions method will throw an AccessTokenResponseException when called
      * with a HTTP request that does not contain an authentication token (i.e. the user has not logged in).
      */
     @Test
@@ -745,7 +739,7 @@ class BusinessTests {
                 invocation -> session);
         when(session.getAttribute("AUTHTOKEN")).thenAnswer(
                 invocation -> null);
-        assertThrows(AccessTokenException.class, () -> {
+        assertThrows(AccessTokenResponseException.class, () -> {
             testBusiness1.checkSessionPermissions(request);
         });
     }
@@ -774,10 +768,9 @@ class BusinessTests {
             invocation -> "user");
         when(session.getAttribute("accountId")).thenAnswer(
             invocation -> user2Id);
-        ResponseStatusException exception = assertThrows(ResponseStatusException.class, () -> {
+        var exception = assertThrows(InsufficientPermissionResponseException.class, () -> {
             testBusiness1.checkSessionPermissions(request);
         });
-        assertEquals(HttpStatus.FORBIDDEN, exception.getStatus());
     }
 
     /**
@@ -830,7 +823,7 @@ class BusinessTests {
                     return cookieArray;
                 });
         when(session.getAttribute("role")).thenAnswer(
-            invocation -> "globalApplicationAdmin");
+            invocation -> UserRole.GAA);
         when(session.getAttribute("accountId")).thenAnswer(
             invocation -> user2Id);
         try {
@@ -859,7 +852,7 @@ class BusinessTests {
                     return cookieArray;
                 });
         when(session.getAttribute("role")).thenAnswer(
-                invocation -> "defaultGlobalApplicationAdmin");
+                invocation -> UserRole.DGAA);
         when(session.getAttribute("accountId")).thenAnswer(
                 invocation -> null);
         try {
@@ -882,8 +875,8 @@ class BusinessTests {
             .withBusiness(testBusiness1)
             .build();
         testProduct1 = productRepository.save(testProduct1);      
-        testProduct1.addProductImage(testImage1);
-        testProduct1.addProductImage(testImage2);
+        testProduct1.addImage(testImage1);
+        testProduct1.addImage(testImage2);
         testProduct1 = productRepository.save(testProduct1);
           
         Product testProduct2 = new Product.Builder()
@@ -892,12 +885,36 @@ class BusinessTests {
             .withBusiness(testBusiness1)
             .build();
         testProduct2 = productRepository.save(testProduct2);
-        testProduct2.addProductImage(testImage3);
-        testProduct2.addProductImage(testImage4);
+        testProduct2.addImage(testImage3);
+        testProduct2.addImage(testImage4);
         testProduct2 = productRepository.save(testProduct2);
         
 
         testBusiness1 = businessRepository.save(testBusiness1);
         assertEquals(2, productRepository.findAllByBusiness(testBusiness1).size());
+    }
+
+    @ParameterizedTest
+    @CsvSource({
+            "ACCOMMODATION_AND_FOOD_SERVICES,Accommodation and Food Services",
+            "RETAIL_TRADE,Retail Trade",
+            "CHARITABLE,Charitable organisation",
+            "NON_PROFIT,Non-profit organisation"
+    })
+    void businessType_toString_isExpectedString(String typeString, String mappedTypeString) {
+        BusinessType role = BusinessType.valueOf(typeString);
+        assertEquals(mappedTypeString, objectMapper.convertValue(role, String.class));
+    }
+
+    @Test
+    void incrementPoints_incrementsPoints() {
+        var pointsInitial = testBusiness1.getPoints();
+        testBusiness1.incrementPoints();
+        assertEquals(pointsInitial + 1,testBusiness1.getPoints());
+    }
+
+    @Test
+    void businessCreated_rankIsBronze() {
+        assertEquals(Rank.BRONZE, testBusiness1.getRank());
     }
 }

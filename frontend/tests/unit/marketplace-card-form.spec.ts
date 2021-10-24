@@ -1,22 +1,22 @@
 import Vue from 'vue';
 import Vuex from 'vuex';
 import Vuetify from 'vuetify';
-import { createLocalVue, Wrapper, mount } from '@vue/test-utils';
+import {createLocalVue, mount, Wrapper} from '@vue/test-utils';
 
 import MarketplaceCardForm from '@/components/marketplace/MarketplaceCardForm.vue';
-import {castMock, makeTestUser} from "./utils";
-import * as api from '@/api/internal';
-import { getStore, resetStoreForTesting } from '@/store';
-import {User} from "@/api/internal";
-import { ThisTypedComponentOptionsWithArrayProps } from 'vue/types/options';
+import {castMock, makeTestUser, findButtonWithText} from "./utils";
+import {createMarketplaceCard as createMarketplaceCard1, MarketplaceCard} from "@/api/marketplace";
+import {searchKeywords as searchKeywords1} from "@/api/keyword";
 
-jest.mock('@/api/internal', () => ({
+jest.mock('@/api/keyword', () => ({
   searchKeywords: jest.fn(),
+}));
+jest.mock('@/api/marketplace', () => ({
   createMarketplaceCard: jest.fn(),
 }));
 
-const searchKeywords = castMock(api.searchKeywords);
-const createMarketplaceCard = castMock(api.createMarketplaceCard);
+const searchKeywords = castMock(searchKeywords1);
+const createMarketplaceCard = castMock(createMarketplaceCard1);
 Vue.use(Vuetify);
 const localVue = createLocalVue();
 
@@ -106,12 +106,7 @@ describe('MarketplaceCardFrom.vue', () => {
    *
    * @returns A Wrapper around the create button
    */
-    function findButton(text: string) {
-      const buttons = wrapper.findAllComponents({ name: 'v-btn' });
-      const filtered = buttons.filter(button => button.text().includes(text));
-      expect(filtered.length).toBe(1);
-      return filtered.at(0);
-    }
+    const findButton = (text: string) => findButtonWithText(wrapper, text);
 
     it('Valid if all required fields are provided', async () => {
       await wrapper.setData({
@@ -256,7 +251,7 @@ describe('MarketplaceCardFrom.vue', () => {
 
   describe('Form is being used to modify a marketplace card', () => {
 
-    const previousCard: api.MarketplaceCard = {
+    const previousCard: MarketplaceCard = {
       id: 1,
       creator: makeTestUser(1),
       section: "ForSale",

@@ -1,9 +1,7 @@
 package org.seng302.leftovers.entities;
 
 
-import net.minidev.json.JSONObject;
-import org.springframework.http.HttpStatus;
-import org.springframework.web.server.ResponseStatusException;
+import org.seng302.leftovers.exceptions.ValidationResponseException;
 
 import javax.persistence.*;
 import java.time.Instant;
@@ -40,10 +38,10 @@ public class Message {
      * @param content Initial message content
      */
     public Message(Conversation conversation, User sender, String content) {
-        if (conversation == null) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Message conversation cannot be null");
+        if (conversation == null) throw new ValidationResponseException("Message conversation cannot be null");
         this.conversation = conversation;
 
-        if (sender == null) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Message sender cannot be null");
+        if (sender == null) throw new ValidationResponseException("Message sender cannot be null");
         this.sender = sender;
 
         setContent(content);
@@ -95,26 +93,12 @@ public class Message {
      */
     public void setContent(String content) {
         if (content == null || content.isBlank()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Message cannot be empty");
+            throw new ValidationResponseException("Message cannot be empty");
         }
         if (content.length() > 200) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Message must be 200 characters or less");
+            throw new ValidationResponseException("Message must be 200 characters or less");
         }
         this.content = content;
-    }
-
-    /**
-     * Construct and return a JSON representation of this message. The JSON includes the id number of the message and of
-     * the conversation, the json representation of the sender, the date the message was created and the message content.
-     * @return JSON representation of this message.
-     */
-    public JSONObject constructJSONObject() {
-        JSONObject jsonObject = new JSONObject();
-        jsonObject.appendField("id", id);
-        jsonObject.appendField("senderId", sender.getUserID());
-        jsonObject.appendField("created", created.toString());
-        jsonObject.appendField("content", content);
-        return jsonObject;
     }
 
     @Override

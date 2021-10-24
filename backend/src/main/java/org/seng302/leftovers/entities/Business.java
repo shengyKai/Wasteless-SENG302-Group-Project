@@ -1,11 +1,10 @@
 package org.seng302.leftovers.entities;
 
-import net.minidev.json.JSONArray;
-import net.minidev.json.JSONObject;
+import org.seng302.leftovers.dto.business.BusinessType;
+import org.seng302.leftovers.dto.business.Rank;
+import org.seng302.leftovers.exceptions.InsufficientPermissionResponseException;
+import org.seng302.leftovers.exceptions.ValidationResponseException;
 import org.seng302.leftovers.tools.AuthenticationTokenManager;
-import org.seng302.leftovers.tools.JsonTools;
-import org.springframework.http.HttpStatus;
-import org.springframework.web.server.ResponseStatusException;
 
 import javax.persistence.*;
 import javax.servlet.http.HttpServletRequest;
@@ -13,14 +12,17 @@ import javax.servlet.http.HttpSession;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 @Entity
-public class Business {
+public class Business implements ImageAttachment {
 
     //Minimum age to create a business
     private static final int MINIMUM_AGE = 16;
-    private static final List<String> BUSINESS_TYPES = Arrays.asList("Accommodation and Food Services", "Retail Trade", "Charitable organisation", "Non-profit organisation");
+    private static int POINTS_PER_SALE_LISTING = 1;
     private static final String TEXT_REGEX = "[ \\p{L}0-9\\p{Punct}]*";
 
     @Id
@@ -33,9 +35,12 @@ public class Business {
     @OneToOne(cascade = CascadeType.ALL, optional = false)
     private Location address;
     @Column(nullable = false)
-    private String businessType;
+    @Enumerated(EnumType.ORDINAL)
+    private BusinessType businessType;
     @Column
     private Instant created;
+    @Column(nullable = false)
+    private int points;
 
     @OneToMany (fetch = FetchType.LAZY, mappedBy = "business", cascade = CascadeType.REMOVE)
     private List<Product> catalogue = new ArrayList<>();
@@ -71,13 +76,13 @@ public class Business {
      */
     public void setName(String name) {
         if (name == null || name.isEmpty() || name.isBlank()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The business name must not be empty");
+            throw new ValidationResponseException("The business name must not be empty");
         }
         if (name.length() > 100) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The business name must be 100 characters or fewer");
+            throw new ValidationResponseException("The business name must be 100 characters or fewer");
         }
         if (!name.matches(TEXT_REGEX)) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The business name can contain only letters, " +
+            throw new ValidationResponseException("The business name can contain only letters, " +
                     "numbers, and the special characters !\"#$%&'()*+,-./:;<=>?@[\\]^_`{|}~");
         }
         this.name = name;
@@ -100,11 +105,11 @@ public class Business {
             description = "";
         }
         if (description.length() > 200) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The business description must be 200 characters" +
+            throw new ValidationResponseException("The business description must be 200 characters" +
                     " or fewer");
         }
         if (!description.matches(TEXT_REGEX)) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The business description can contain only letters, " +
+            throw new ValidationResponseException("The business description can contain only letters, " +
                     "numbers, and the special characters @ $ % & - _ , . : ;");
         }
         this.description = description;
@@ -124,7 +129,7 @@ public class Business {
      */
     public void setAddress(Location address) {
         if (address == null) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The business's address cannot be null");
+            throw new ValidationResponseException("The business's address cannot be null");
         }
         this.address = address;
     }
@@ -141,9 +146,9 @@ public class Business {
      * Sets business type
      * @param businessType business type
      */
-    public void setBusinessType(String businessType) {
-        if (businessType == null || businessType.isEmpty() || !BUSINESS_TYPES.contains(businessType)) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The business type must not be empty and must be one of: " + BUSINESS_TYPES.toString());
+    public void setBusinessType(BusinessType businessType) {
+        if (businessType == null) {
+            throw new ValidationResponseException("The business type must not be empty");
         }
         this.businessType = businessType;
     }
@@ -152,7 +157,7 @@ public class Business {
      * Gets business type
      * @return business type
      */
-    public String getBusinessType() {
+    public BusinessType getBusinessType() {
         return this.businessType;
     }
 
@@ -162,10 +167,10 @@ public class Business {
      */
     private void setCreated(Instant createdAt) {
         if (createdAt == null) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The date the business was created cannot be null");
+            throw new ValidationResponseException("The date the business was created cannot be null");
         }
         if (this.created != null) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The date the business was created cannot be reset");
+            throw new ValidationResponseException("The date the business was created cannot be reset");
         }
         this.created = createdAt;
     }
@@ -179,20 +184,55 @@ public class Business {
     }
 
     /**
+     * Increments the business' points in response to selling a listing
+     */
+    public void incrementPoints() {
+        this.points += POINTS_PER_SALE_LISTING;
+    }
+
+    /**
+     * Gets business' points total
+     * @return Business points
+     */
+    public int getPoints(){return this.points;}
+
+    /**
+     * Sets the business' points total
+     * @param points Value to set points
+     */
+    public void setPoints(int points){this.points = points;}
+
+    /**
+     * Gets the business' current rank
+     * @return The rank of the business based on its current points.
+     */
+    public Rank getRank() {
+        return Rank.getRankFromPoints(points);
+    }
+
+    /**
+     * Get the next rank which the business will be awarded if it reaches the points threshold for its current rank.
+     * @return The next rank which the business can be awarded.
+     */
+    public Rank getNextRank() {
+        return Rank.getNextRank(this.getRank());
+    }
+
+    /**
      * Sets primary owner of the business
      * If the requested user is less than 16 years of age, a 403 forbidden status is thrown.
      * @param owner Owner of business
      */
     public void setPrimaryOwner(User owner) {
         if (owner == null) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The business must have a primary owner");
+            throw new ValidationResponseException("The business must have a primary owner");
         }
 
         //Get the current date as of now and find the difference in years between the current date and the age of the user.
         long age = java.time.temporal.ChronoUnit.YEARS.between(
             owner.getDob(), LocalDate.now());
         if (age < MINIMUM_AGE) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "User is not of minimum age required to create a business");
+            throw new InsufficientPermissionResponseException("User is not of minimum age required to create a business");
         }
         this.primaryOwner = owner;
     }
@@ -220,7 +260,7 @@ public class Business {
      */
     public void addAdmin(User newAdmin) {
         if (this.administrators.contains(newAdmin) || this.primaryOwner == newAdmin) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "This user is already a registered admin of this business");
+            throw new ValidationResponseException("This user is already a registered admin of this business");
         } else {
             this.administrators.add(newAdmin);
         }
@@ -233,7 +273,7 @@ public class Business {
      */
     public void removeAdmin(User oldAdmin) {
         if (!this.administrators.contains(oldAdmin)) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The given user is not an admin of this business");
+            throw new ValidationResponseException("The given user is not an admin of this business");
         } else {
             this.administrators.remove(oldAdmin);
         }
@@ -253,7 +293,7 @@ public class Business {
             adminIds.add(user.getUserID());
         }
         if (!AuthenticationTokenManager.sessionIsAdmin(request) && !adminIds.contains(userId)) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "User does not have sufficient permissions to perform this action");
+            throw new InsufficientPermissionResponseException("User does not have sufficient permissions to perform this action");
         }
     }
     /**
@@ -268,7 +308,7 @@ public class Business {
         Long userId = (Long) session.getAttribute("accountId");
 
         if (!AuthenticationTokenManager.sessionIsAdmin(request) && !this.getPrimaryOwner().getUserID().equals(userId)) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Only Primary Owner and System administrator can perform this action");
+            throw new InsufficientPermissionResponseException("Only Primary Owner and System administrator can perform this action");
         }
     }
 
@@ -299,15 +339,6 @@ public class Business {
     }
 
     /**
-     * Removes the given product from the business's catalogue
-     */
-    public void removeFromCatalogue(Product product) {
-        if(!catalogue.remove(product)) {
-            throw new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE,"The product did not match any within the business's catalogue");
-        }
-    }
-
-    /**
      * Returns the business's product catalogue.
      * @return product catalogue of the business.
      */
@@ -319,98 +350,27 @@ public class Business {
      * Returns the images associated with this business.
      * @return List of business images
      */
+    @Override
     public List<Image> getImages() { return this.images; }
 
     /**
-     * Adds a single image to the Business`s list of images
-     * @param image An image entity to be linked to this business
+     * Replaces the existing list of images with a new list of images
+     * @param images A list of images
      */
-    public void addImage(Image image) {
-        images.add(image);
+    public void setImages(List<Image> images) {
+        this.images = images;
     }
 
     /**
-     * Adds a single image to the Business's list of images at given index
-     * @param index Index to insert the new image
-     * @param image An image entity to be linked to this business
+     * Returns the ids of all the images associated with the business
+     * @return the ids of all the images associated with the business
      */
-    public void addImage(int index, Image image) {
-        images.add(index, image);
-    }
-
-    /**
-     * Removes a given image from the list of business images
-     * @param image The image to remove
-     */
-    public void removeImage(Image image) {
-        if (!this.images.remove(image)) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Cannot remove image");
+    public List<Long> getIdsOfImages() {
+        List<Long> imageIds = new ArrayList<Long>();
+        for (Image image: this.images) {
+            imageIds.add(image.getID());
         }
-    }
-
-    /**
-     * Construct a JSON object representing the business. The JSON object includes an array of JSON
-     * representations of the users who are administrators of the business, and a JSON representation
-     * of the business's address, as well as simple attributes for all the other properties of the
-     * business. If fullAdminDetails is true, the JSON will include a full JSON representation for each
-     * admin of the business. If fullAdminDetails is false, the administrators field will be excluded, to
-     * avoid issues when nesting this json within the businessesAdministered field of the user json.
-     * @param fullAdminDetails True if administrators should be included in JSON
-     * @return A JSON representation of this business.
-     */
-    public JSONObject constructJson(boolean fullAdminDetails) {
-        var object = new JSONObject();
-        object.put("id", getId());
-        object.put("name", name);
-        object.put("description", description);
-        if (fullAdminDetails) {
-            object.put("administrators", constructAdminJsonArray());
-        }
-        JSONArray jsonImages = new JSONArray();
-        for (Image image : images) {
-            jsonImages.add(image.constructJSONObject());
-        }
-        object.put("images", jsonImages);
-        object.put("primaryAdministratorId", primaryOwner.getUserID());
-        object.put("address", getAddress().constructFullJson());
-        object.put("businessType", businessType);
-        object.put("created", created.toString());
-        JsonTools.removeNullsFromJson(object);
-        return object;
-    }
-
-    /**
-     * Override the constructJson method so that by default it does not includethe administrators.
-     * @return A JSON representation of the business without details of its administrators.
-     */
-    public JSONObject constructJson() {
-        return constructJson(false);
-    }
-
-    /**
-     * This method gets the public JSON representation of each User who is an admin of this Business
-     *  and adds it to a JSONArray. The JSONs in the array are ordered by the id number of the user
-     *  to ensure consistency between subsequent requests.
-     * @return A JSONArray containing JSON respresentations of all admins of this business.
-     */
-    private JSONArray constructAdminJsonArray() {
-        JSONArray adminJsons = new JSONArray();
-        List<User> admins = new ArrayList<>();
-        admins.addAll(getOwnerAndAdministrators());
-        Collections.sort(admins, (User user1, User user2) ->
-            user1.getUserID().compareTo(user2.getUserID()));
-        for (User admin : admins) {
-            adminJsons.add(admin.constructPublicJson());
-        }
-        return adminJsons;
-    }
-
-    /**
-     * Returns a list of all possible business types.
-     * @return All the types allowed for a business.
-     */
-    public static List<String> getBusinessTypes() {
-        return BUSINESS_TYPES;
+        return imageIds;
     }
 
     @Override
@@ -426,7 +386,7 @@ public class Business {
         private String description;
         private User primaryOwner;
         private Location address;
-        private String businessType;
+        private BusinessType businessType;
 
         /**
          * Sets the builders name. Required
@@ -469,7 +429,7 @@ public class Business {
          * @param businessType Name of the business
          * @return Builder with businessType set
          */
-        public Builder withBusinessType(String businessType) {
+        public Builder withBusinessType(BusinessType businessType) {
             this.businessType = businessType;
             return this;
         }

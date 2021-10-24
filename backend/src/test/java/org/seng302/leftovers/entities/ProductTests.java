@@ -1,5 +1,6 @@
 package org.seng302.leftovers.entities;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
 import org.hibernate.Session;
@@ -7,13 +8,16 @@ import org.hibernate.SessionFactory;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.seng302.leftovers.dto.ImageDTO;
+import org.seng302.leftovers.dto.business.BusinessType;
+import org.seng302.leftovers.dto.product.ProductResponseDTO;
+import org.seng302.leftovers.exceptions.DoesNotExistResponseException;
+import org.seng302.leftovers.exceptions.ValidationResponseException;
 import org.seng302.leftovers.persistence.BusinessRepository;
 import org.seng302.leftovers.persistence.ProductRepository;
 import org.seng302.leftovers.persistence.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.http.HttpStatus;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.math.BigDecimal;
 import java.time.Instant;
@@ -29,11 +33,13 @@ import static org.junit.jupiter.api.Assertions.*;
 class ProductTests {
 
     @Autowired
-    ProductRepository productRepository;
+    private ObjectMapper objectMapper;
     @Autowired
-    BusinessRepository businessRepository;
+    private ProductRepository productRepository;
     @Autowired
-    UserRepository userRepository;
+    private BusinessRepository businessRepository;
+    @Autowired
+    private UserRepository userRepository;
     @Autowired
     private SessionFactory sessionFactory;
 
@@ -48,7 +54,7 @@ class ProductTests {
      */
     void createTestBusinesses() {
         testBusiness1 = new Business.Builder()
-                .withBusinessType("Accommodation and Food Services")
+                .withBusinessType(BusinessType.ACCOMMODATION_AND_FOOD_SERVICES)
                 .withAddress(Location.covertAddressStringToLocation("4,Rountree Street,Ashburton,Christchurch,New Zealand," +
                         "Canterbury,8041"))
                 .withDescription("Some description")
@@ -59,7 +65,7 @@ class ProductTests {
         testBusiness1 = session.find(Business.class, testBusiness1.getId());
 
         testBusiness2 = new Business.Builder()
-                .withBusinessType("Accommodation and Food Services")
+                .withBusinessType(BusinessType.ACCOMMODATION_AND_FOOD_SERVICES)
                 .withAddress(Location.covertAddressStringToLocation("4,Rountree Street,Ashburton,Christchurch,New Zealand," +
                         "Canterbury,8041"))
                 .withDescription("Some description 2")
@@ -321,7 +327,7 @@ class ProductTests {
    @Test
    void testDeletingBusinessWithProducts() {
        Business tempBusinessInitial = new Business.Builder()
-               .withBusinessType("Accommodation and Food Services")
+               .withBusinessType(BusinessType.ACCOMMODATION_AND_FOOD_SERVICES)
                .withAddress(Location.covertAddressStringToLocation("4,Rountree Street,Ashburton,Christchurch,New Zealand," +
                        "Canterbury,8041"))
                .withDescription("This business will be deleted")
@@ -451,9 +457,8 @@ class ProductTests {
                        .build()
        );
 
-       var exception = assertThrows(ResponseStatusException.class, () -> productRepository.getProduct(testBusiness1, "NATHAN-APPLE-70"));
-       assertEquals(HttpStatus.NOT_ACCEPTABLE, exception.getStatus());
-       assertEquals("the product does not exist", exception.getReason());
+       var exception = assertThrows(DoesNotExistResponseException.class, () -> productRepository.getProduct(testBusiness1, "NATHAN-APPLE-70"));
+       assertEquals("Product does not exist", exception.getMessage());
    }
 
    @Test
@@ -469,9 +474,8 @@ class ProductTests {
                        .build()
        );
 
-       var exception = assertThrows(ResponseStatusException.class, () -> productRepository.getProduct(testBusiness1, "NATHAN-APPLE-70"));
-       assertEquals(HttpStatus.NOT_ACCEPTABLE, exception.getStatus());
-       assertEquals("the product does not exist", exception.getReason());
+       var exception = assertThrows(DoesNotExistResponseException.class, () -> productRepository.getProduct(testBusiness1, "NATHAN-APPLE-70"));
+       assertEquals("Product does not exist", exception.getMessage());
    }
 
    @Test
@@ -489,9 +493,8 @@ class ProductTests {
 
        productRepository.delete(product);
 
-       var exception = assertThrows(ResponseStatusException.class, () -> productRepository.getProduct(testBusiness1, "NATHAN-APPLE-70"));
-       assertEquals(HttpStatus.NOT_ACCEPTABLE, exception.getStatus());
-       assertEquals("the product does not exist", exception.getReason());
+       var exception = assertThrows(DoesNotExistResponseException.class, () -> productRepository.getProduct(testBusiness1, "NATHAN-APPLE-70"));
+       assertEquals("Product does not exist", exception.getMessage());
    }
 
    /**
@@ -527,7 +530,7 @@ class ProductTests {
                .withManufacturer("Apple")
                .withRecommendedRetailPrice("9000.03")
                .withBusiness(testBusiness1);
-       assertThrows(ResponseStatusException.class, builder::build);
+       assertThrows(ValidationResponseException.class, builder::build);
    }
 
    /**
@@ -542,7 +545,7 @@ class ProductTests {
                .withManufacturer("Apple")
                .withRecommendedRetailPrice("9000.03")
                .withBusiness(testBusiness1);
-       assertThrows(ResponseStatusException.class, builder::build);
+       assertThrows(ValidationResponseException.class, builder::build);
    }
 
    /**
@@ -557,7 +560,7 @@ class ProductTests {
                .withManufacturer("Apple")
                .withRecommendedRetailPrice("9000.03")
                .withBusiness(testBusiness1);
-       assertThrows(ResponseStatusException.class, builder::build);
+       assertThrows(ValidationResponseException.class, builder::build);
    }
 
    /**
@@ -574,7 +577,7 @@ class ProductTests {
                .withManufacturer("Apple")
                .withRecommendedRetailPrice("9000.03")
                .withBusiness(testBusiness1);
-       assertThrows(ResponseStatusException.class, builder::build);
+       assertThrows(ValidationResponseException.class, builder::build);
    }
 
    /**
@@ -588,7 +591,7 @@ class ProductTests {
                .withManufacturer("Apple")
                .withRecommendedRetailPrice("9000.03")
                .withBusiness(testBusiness1);
-       assertThrows(ResponseStatusException.class, builder::build);
+       assertThrows(ValidationResponseException.class, builder::build);
    }
 
    /**
@@ -603,7 +606,7 @@ class ProductTests {
                .withManufacturer("Apple")
                .withRecommendedRetailPrice("9000.03")
                .withBusiness(testBusiness1);
-       assertThrows(ResponseStatusException.class, builder::build);
+       assertThrows(ValidationResponseException.class, builder::build);
    }
 
    /**
@@ -620,7 +623,7 @@ class ProductTests {
                .withManufacturer("Apple")
                .withRecommendedRetailPrice("9000.03")
                .withBusiness(testBusiness1);
-       assertThrows(ResponseStatusException.class, builder::build);
+       assertThrows(ValidationResponseException.class, builder::build);
    }
 
    /**
@@ -652,7 +655,7 @@ class ProductTests {
                .withManufacturer("Apple")
                .withRecommendedRetailPrice("9000.03")
                .withBusiness(testBusiness1);
-       assertThrows(ResponseStatusException.class, builder::build);
+       assertThrows(ValidationResponseException.class, builder::build);
    }
 
    /**
@@ -669,7 +672,7 @@ class ProductTests {
                .withManufacturer("Apple")
                .withRecommendedRetailPrice("9000.03")
                .withBusiness(testBusiness1);
-       assertThrows(ResponseStatusException.class, builder::build);
+       assertThrows(ValidationResponseException.class, builder::build);
    }
 
    /**
@@ -701,7 +704,7 @@ class ProductTests {
                .withManufacturer("Apple")
                .withRecommendedRetailPrice("9000.03")
                .withBusiness(testBusiness1);
-       assertThrows(ResponseStatusException.class, builder::build);
+       assertThrows(ValidationResponseException.class, builder::build);
    }
 
    /**
@@ -718,7 +721,7 @@ class ProductTests {
                .withManufacturer(manufacturer)
                .withRecommendedRetailPrice("9000.03")
                .withBusiness(testBusiness1);
-       assertThrows(ResponseStatusException.class, builder::build);
+       assertThrows(ValidationResponseException.class, builder::build);
    }
 
    /**
@@ -750,7 +753,7 @@ class ProductTests {
                .withManufacturer("a".repeat(101))
                .withRecommendedRetailPrice("9000.03")
                .withBusiness(testBusiness1);
-       assertThrows(ResponseStatusException.class, builder::build);
+       assertThrows(ValidationResponseException.class, builder::build);
    }
 
    /**
@@ -764,11 +767,8 @@ class ProductTests {
                .withName("The Nathan Apple")
                .withDescription("Ever wonder why Nathan has an apple")
                .withManufacturer("Apple")
-               .withBusiness(testBusiness1)
-               .withRecommendedRetailPrice("pricen't");
-
-       // Maybe it is worth delaying this exception until build
-       assertThrows(ResponseStatusException.class, builder::build);
+               .withBusiness(testBusiness1);
+       assertThrows(ValidationResponseException.class, () -> builder.withRecommendedRetailPrice("pricen't"));
    }
 
    /**
@@ -783,7 +783,7 @@ class ProductTests {
                .withManufacturer("Apple")
                .withRecommendedRetailPrice("-1")
                .withBusiness(testBusiness1);
-       assertThrows(ResponseStatusException.class, builder::build);
+       assertThrows(ValidationResponseException.class, builder::build);
    }
 
    /**
@@ -798,7 +798,7 @@ class ProductTests {
                .withManufacturer("Apple")
                .withRecommendedRetailPrice("100000")
                .withBusiness(testBusiness1);
-       assertThrows(ResponseStatusException.class, builder::build);
+       assertThrows(ValidationResponseException.class, builder::build);
    }
 
    /**
@@ -838,7 +838,7 @@ class ProductTests {
                .withBusiness(testBusiness1)
                .build();
        for (String country : invalidCountries) {
-           assertThrows(ResponseStatusException.class, ()  -> testProduct.setCountryOfSale(country));
+           assertThrows(ValidationResponseException.class, ()  -> testProduct.setCountryOfSale(country));
            assertEquals(testBusiness1.getAddress().getCountry(), testProduct.getCountryOfSale());
        }
    }
@@ -861,7 +861,7 @@ class ProductTests {
                .withBusiness(testBusiness1)
                .build();
        for (String country : invalidCountries) {
-           assertThrows(ResponseStatusException.class, ()  -> testProduct.setCountryOfSale(country));
+           assertThrows(ValidationResponseException.class, ()  -> testProduct.setCountryOfSale(country));
            assertEquals(testBusiness1.getAddress().getCountry(), testProduct.getCountryOfSale());
        }
    }
@@ -883,7 +883,7 @@ class ProductTests {
                .withBusiness(testBusiness1)
                .build();
        for (String country : invalidCountries) {
-           assertThrows(ResponseStatusException.class, ()  -> testProduct.setCountryOfSale(country));
+           assertThrows(ValidationResponseException.class, ()  -> testProduct.setCountryOfSale(country));
            assertEquals(testBusiness1.getAddress().getCountry(), testProduct.getCountryOfSale());
        }
    }
@@ -898,7 +898,7 @@ class ProductTests {
                .withRecommendedRetailPrice("9000.03")
                .withBusiness(testBusiness1)
                .build();
-       JSONObject testJson = testProduct.constructJSONObject();
+       var testJson = objectMapper.convertValue(new ProductResponseDTO(testProduct), JSONObject.class);
        assertTrue(testJson.containsKey("id"));
        assertTrue(testJson.containsKey("name"));
        assertTrue(testJson.containsKey("description"));
@@ -919,7 +919,7 @@ class ProductTests {
                .withRecommendedRetailPrice("9000.03")
                .withBusiness(testBusiness1)
                .build();
-       JSONObject testJson = testProduct.constructJSONObject();
+       var testJson = objectMapper.convertValue(new ProductResponseDTO(testProduct), JSONObject.class);
        testJson.remove("id");
        testJson.remove("name");
        testJson.remove("description");
@@ -928,6 +928,7 @@ class ProductTests {
        testJson.remove("created");
        testJson.remove("images");
        testJson.remove("countryOfSale");
+       testJson.remove("business");
        assertTrue(testJson.isEmpty());
    }
 
@@ -942,11 +943,11 @@ class ProductTests {
                .withBusiness(testBusiness1)
                .build();
        JSONArray images = new JSONArray();
-       for (Image image : testProduct.getProductImages()) {
-           images.add(image.constructJSONObject());
+       for (Image image : testProduct.getImages()) {
+           images.add(new ImageDTO(image));
        }
        String imageString = images.toString();
-       JSONObject testJson = testProduct.constructJSONObject();
+       var testJson = objectMapper.convertValue(new ProductResponseDTO(testProduct), JSONObject.class);
        assertEquals(testProduct.getProductCode(), testJson.getAsString("id"));
        assertEquals(testProduct.getName(), testJson.getAsString("name"));
        assertEquals(testProduct.getDescription(), testJson.getAsString("description"));
@@ -959,36 +960,36 @@ class ProductTests {
 
     @Test
     void constructJsonObject_optionalAttributesNull_allExpectedFieldsPresent() {
-            Product testProduct = new Product.Builder()
-                    .withProductCode("NATHAN-APPLE-70")
-                    .withName("The Nathan Apple")
-                    .withBusiness(testBusiness1)
-                    .build();
-            JSONObject testJson = testProduct.constructJSONObject();
-            assertTrue(testJson.containsKey("id"));
-            assertTrue(testJson.containsKey("name"));
-            assertTrue(testJson.containsKey("created"));
-            assertTrue(testJson.containsKey("images"));
-            assertTrue(testJson.containsKey("countryOfSale"));
-
+        Product testProduct = new Product.Builder()
+                .withProductCode("NATHAN-APPLE-70")
+                .withName("The Nathan Apple")
+                .withBusiness(testBusiness1)
+                .build();
+        var testJson = objectMapper.convertValue(new ProductResponseDTO(testProduct), JSONObject.class);
+        assertTrue(testJson.containsKey("id"));
+        assertTrue(testJson.containsKey("name"));
+        assertTrue(testJson.containsKey("created"));
+        assertTrue(testJson.containsKey("images"));
+        assertTrue(testJson.containsKey("countryOfSale"));
     }
 
     @Test
     void constructJsonObject_optionalAttributesNull_noUnexpectedFieldsPresent() {
-            Product testProduct = new Product.Builder()
-                    .withProductCode("NATHAN-APPLE-70")
-                    .withName("The Nathan Apple")
-                    .withBusiness(testBusiness1)
-                    .build();
+        Product testProduct = new Product.Builder()
+                .withProductCode("NATHAN-APPLE-70")
+                .withName("The Nathan Apple")
+                .withBusiness(testBusiness1)
+                .build();
 
 
-            JSONObject testJson = testProduct.constructJSONObject();
-            testJson.remove("id");
-            testJson.remove("name");
-            testJson.remove("created");
-            testJson.remove("images");
-            testJson.remove("countryOfSale");
-            assertTrue(testJson.isEmpty());
+        var testJson = objectMapper.convertValue(new ProductResponseDTO(testProduct), JSONObject.class);
+        testJson.remove("id");
+        testJson.remove("name");
+        testJson.remove("created");
+        testJson.remove("images");
+        testJson.remove("countryOfSale");
+        testJson.remove("business");
+        assertTrue(testJson.isEmpty());
     }
 
    @Test
@@ -999,16 +1000,15 @@ class ProductTests {
                .withBusiness(testBusiness1)
                .build();
        JSONArray images = new JSONArray();
-       for (Image image : testProduct.getProductImages()) {
-           images.add(image.constructJSONObject());
+       for (Image image : testProduct.getImages()) {
+           images.add(new ImageDTO(image));
        }
        String imageString = images.toString();
-       JSONObject testJson = testProduct.constructJSONObject();
+       var testJson = objectMapper.convertValue(new ProductResponseDTO(testProduct), JSONObject.class);
        assertEquals(testProduct.getProductCode(), testJson.getAsString("id"));
        assertEquals(testProduct.getName(), testJson.getAsString("name"));
        assertEquals(testProduct.getCreated().toString(), testJson.getAsString("created"));
        assertEquals(imageString, testJson.getAsString("images"));
        assertEquals(testProduct.getCountryOfSale(), testJson.getAsString("countryOfSale"));
    }
-
 }

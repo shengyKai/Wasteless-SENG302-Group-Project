@@ -6,20 +6,25 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.junit.runner.RunWith;
+import org.mockito.Mockito;
 import org.seng302.leftovers.Main;
 import org.seng302.leftovers.persistence.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.sql.*;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes={Main.class})
@@ -73,9 +78,9 @@ class SaleItemGeneratorTest {
      * Checks that the required fields within the sale item table are not null using an SQL query.
      * @param saleItemId the id of the generated sale item
      */
-    public void checkRequiredFieldsNotNull(long saleItemId) throws SQLException {
+    private void checkRequiredFieldsNotNull(long saleItemId) throws SQLException {
       PreparedStatement stmt = conn.prepareStatement(
-              "SELECT COUNT(*) FROM sale_item WHERE sale_id = ? AND " +
+              "SELECT COUNT(*) FROM sale_item WHERE id = ? AND " +
                       "price IS NOT NULL AND quantity IS NOT NULL AND inventory_item_id IS NOT NULL"
       );
       stmt.setObject(1, saleItemId);
@@ -89,12 +94,40 @@ class SaleItemGeneratorTest {
      * Queries that database to find out how many sale items are in the database
      * @return the number of sale items in the database
      */
-    public long getNumSaleItemsInDB() throws SQLException {
+    private long getNumSaleItemsInDB() throws SQLException {
       PreparedStatement stmt = conn.prepareStatement("SELECT COUNT(*) FROM sale_item");
       stmt.executeQuery();
       ResultSet results = stmt.getResultSet();
       results.next();
       return results.getLong(1);
+    }
+
+    /**
+     * Gets the quantity value for an inventory item with given id
+     * @param id ID of the inventory item to query
+     * @return Quantity of inventory item
+     */
+    private int getInventoryItemQuantity(Long id) throws SQLException {
+        PreparedStatement stmt = conn.prepareStatement("SELECT quantity FROM inventory_item WHERE id = ?");
+        stmt.setObject(1, id);
+        stmt.executeQuery();
+        ResultSet resultSet = stmt.getResultSet();
+        resultSet.next();
+        return resultSet.getInt(1);
+    }
+
+    /**
+     * Gets the quantity value for an sale item with given id
+     * @param id ID of the sale item to query
+     * @return Quantity of sale item
+     */
+    private int getSaleItemQuantity(Long id) throws SQLException {
+        PreparedStatement stmt = conn.prepareStatement("SELECT quantity FROM sale_item WHERE id = ?");
+        stmt.setObject(1, id);
+        stmt.executeQuery();
+        ResultSet resultSet = stmt.getResultSet();
+        resultSet.next();
+        return resultSet.getInt(1);
     }
 
     /**
@@ -162,54 +195,14 @@ class SaleItemGeneratorTest {
     }
 
     @Test
-    void generateQuantities_generateQuantityWithAUpperBoundOne_quantityGeneratedEqualsOne() throws IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException, SecurityException {
-        Method generateQuantities = SaleItemGenerator.class.getDeclaredMethod("generateQuantities", int.class);
-        generateQuantities.setAccessible(true);
-        int[] quantities = (int[]) generateQuantities.invoke(saleItemGenerator, 1);
-        assertEquals(1, quantities[0]);
-    }
-
-    @Test
-    void generateQuantities_generateQuantityWithAUpperBoundFive_quantityGeneratedBetweenOneAndFive() throws IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException, SecurityException {
-        Method generateQuantities = SaleItemGenerator.class.getDeclaredMethod("generateQuantities", int.class);
-        generateQuantities.setAccessible(true);
-        int[] quantities = (int[]) generateQuantities.invoke(saleItemGenerator, 5);
-        assertTrue(quantities[0] >= 1);
-        assertTrue(quantities[0] <= 5);
-    }
-
-    @Test
-    void generateQuantities_generateQuantityWithAUpperBoundNegativeAmount_illegalArgumentExceptionThrown() throws IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException, SecurityException {
-        Method generateQuantities = SaleItemGenerator.class.getDeclaredMethod("generateQuantities", int.class);
-        generateQuantities.setAccessible(true);
-
-        var exception = assertThrows(InvocationTargetException.class, () -> {
-            generateQuantities.invoke(saleItemGenerator, -1);
-        });
-
-        assertEquals(IllegalArgumentException.class, exception.getCause().getClass());
-    }
-
-    @Test
-    void generateDates_generatedDatesIsWithinExpiresAndCreationDateContraint_closesAndCreatedDateGenerated() throws NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
-        Method generateDates = SaleItemGenerator.class.getDeclaredMethod("generateDates", String.class, String.class);
-        generateDates.setAccessible(true);
-        // the first parameter of generateDates() refers to the expires field of the inventory item, and the date would have to be after today. 
-        // Same logic for the second parameter, creationDate, except it has to be before today. 20 is just an arbitrary number. 
-        String[] generatedDates = (String[]) generateDates.invoke(saleItemGenerator, LocalDate.now().plusDays(20).toString(), LocalDate.now().minusDays(20).toString());
-
-        LocalDate closes = LocalDate.parse(generatedDates[0]);
-        LocalDate created = LocalDate.parse(generatedDates[1].substring(0, 10));
-
-        assertTrue(closes.compareTo(created) >= 0);
-    }
-
-    @Test
-    void extractInvItemInfo_informationForInventoryItemRetrievedWithInventoryItemId_inventoryItemInfoRetrievedFromDb() throws NoSuchMethodException, SecurityException, SQLException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
-        Method extractInvItemInfo = SaleItemGenerator.class.getDeclaredMethod("extractInvItemInfo", long.class);
-        extractInvItemInfo.setAccessible(true);
+    void generateSaleItems_inventoryQuantityUpdated() throws SQLException {
         List<Long> invItemIds = generateUserBusinessProductAndInvItems(1, 1, 1, 1);
-        String[] invItemInfo = (String[]) extractInvItemInfo.invoke(saleItemGenerator, invItemIds.get(0));
-        assertEquals(3, invItemInfo.length);
+        var currentQuantity = getInventoryItemQuantity(invItemIds.get(0));
+
+        List<Long> saleIds = saleItemGenerator.generateSaleItems(invItemIds, 1);
+        var expectedQuantity = currentQuantity + getSaleItemQuantity(saleIds.get(0));
+
+        assertEquals(expectedQuantity, getInventoryItemQuantity(invItemIds.get(0)));
     }
+
 }

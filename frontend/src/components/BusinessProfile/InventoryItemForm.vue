@@ -158,9 +158,10 @@
 </template>
 
 <script>
-import { createInventoryItem, getProducts, modifyInventoryItem } from '@/api/internal';
 import { currencyFromCountry } from "@/api/currency";
-import {hugePriceRules, mandatoryRules, quantityRules, smallPriceRules} from "@/utils";
+import {hugePriceRules, mandatoryRules, quantityRules, smallPriceRules, getLocalDate} from "@/utils";
+import {getProducts} from "@/api/product";
+import {createInventoryItem, modifyInventoryItem} from "@/api/inventory";
 
 export default {
   name: 'InventoryItemForm',
@@ -185,7 +186,7 @@ export default {
       sellByValid: true,
       bestBefore: this.previousItem?.bestBefore ?? "",
       bestBeforeValid: true,
-      expires: this.previousItem?.expires ?? new Date().toISOString().slice(0,10),
+      expires: this.previousItem?.expires ?? getLocalDate(new Date()),
       expiresValid: true,
       datesValid: true,
       productFilter: '',
@@ -280,11 +281,7 @@ export default {
       this.checkSellByDateValid();
       this.checkBestBeforeDateValid();
       this.checkExpiresDateVaild();
-      if (this.manufacturedValid && this.sellByValid && this.bestBeforeValid && this.expiresValid) {
-        this.datesValid = true;
-      } else {
-        this.datesValid = false;
-      }
+      this.datesValid = this.manufacturedValid && this.sellByValid && this.bestBeforeValid && this.expiresValid;
     },
     checkManufacturedDateValid() {
       //checks manufactured cannot be after today and is before sell by

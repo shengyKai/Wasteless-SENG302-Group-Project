@@ -1,262 +1,252 @@
 <template>
-  <div  class="d-flex flex-column" no-gutters>
-    <v-row justify="center">
-      <v-col cols="10">
-        <v-card max-width=1800px>
-          <v-form v-model="valid"  @submit.prevent="proceedWithModifyBusiness">
-            <v-card class="mt-5 ">
-              <v-card-title class="primary-text">Modify Business Details</v-card-title>
-              <v-card-text>
-                <v-container>
-                  <v-row no-gutters>
-                    <v-col cols="12" sm="6">
-                      <!-- INPUT: Business Name -->
-                      <v-text-field
-                        dense
-                        class="mr-1 required"
-                        v-model="businessName"
-                        label="Name of business"
-                        :rules="mandatoryRules().concat(maxCharRules()).concat(alphabetExtendedSingleLineRules())"
-                        outlined
-                      />
-                    </v-col>
-                    <v-col cols="12" sm="6">
-                      <!-- INPUT: Business Type -->
-                      <v-select
-                        dense
-                        class="ml-1 required"
-                        v-model="businessType"
-                        :items="businessTypes"
-                        label="Business Type"
-                        :rules="mandatoryRules()"
-                        outlined
-                      />
-                    </v-col>
-                    <v-col cols="12" sm="12">
-                      <!-- INPUT: Description -->
-                      <v-textarea
-                        dense
-                        v-model="description"
-                        label="Description"
-                        :rules="maxCharDescriptionRules().concat(alphabetExtendedMultilineRules())"
-                        rows="3"
-                        outlined
-                      />
-                    </v-col>
-                    <v-col cols="12" sm="12">
-                      <v-card-title class="primary-text mt-n7">Address</v-card-title>
-                    </v-col>
-                    <v-col cols="12" sm="6">
-                      <!-- INPUT: Street Address -->
-                      <v-text-field
-                        class="mr-1 required"
-                        v-model="streetAddress"
-                        label="Company Street Address"
-                        :rules="mandatoryRules().concat(streetRules())"
-                        outlined/>
-                    </v-col>
-                    <v-col cols="12" sm="6">
-                      <!-- INPUT: District -->
-                      <LocationAutocomplete
-                        type="district"
-                        class="ml-1"
-                        v-model="district"
-                        :rules="maxCharRules().concat(alphabetRules())"
-                      />
-                    </v-col>
-                    <v-col cols="12" sm="6">
-                      <!-- INPUT: City -->
-                      <LocationAutocomplete
-                        type="city"
-                        class="mr-1 required"
-                        v-model="city"
-                        :rules="mandatoryRules().concat(maxCharRules()).concat(alphabetRules())"
-                      />
-                    </v-col>
-                    <v-col cols="12" sm="6">
-                      <!-- INPUT: Region -->
-                      <LocationAutocomplete
-                        type="region"
-                        class="ml-1 required"
-                        v-model="region"
-                        :rules="mandatoryRules().concat(maxCharRules()).concat(alphabetRules())"
-                      />
-                    </v-col>
-                    <v-col cols="12" sm="6">
-                      <!-- INPUT: Country -->
-                      <LocationAutocomplete
-                        type="country"
-                        class="mr-1 required"
-                        v-model="country"
-                        :rules="mandatoryRules().concat(maxCharRules()).concat(alphabetRules())"
-                      />
-                    </v-col>
-                    <v-col cols="12" sm="6">
-                      <!-- INPUT: Postcode -->
-                      <v-text-field
-                        class="ml-1 required"
-                        v-model="postcode"
-                        label="Postcode"
-                        :rules="mandatoryRules().concat(maxCharRules()).concat(postcodeRules())"
-                        outlined
-                      />
-                    </v-col>
-                    <v-col
-                      class="text-right"
-                      cols="12"
-                      sm="12"
-                    >
-                      <!-- INPUT: Update Currency -->
-                      <v-checkbox
-                        v-model="updateProductCountry"
-                        class="mt-n5"
-                        label="Update catalogue's currency"
-                        color="primary"
-                        hide-details
-                      />
-                    </v-col>
-                  </v-row>
-                  <div v-if="isPrimaryOwner | isSystemAdmin" class="mt-1">
-                    <v-card-title>Change Primary Administrator</v-card-title>
-                    <v-row>
-                      <v-col>
-                        <!-- INPUT: Admin -->
-                        <span v-for="admin in administrators" :key="admin.id">
-                          <v-chip
-                            v-if="adminIsPrimary(admin)"
-                            class="ma-1 ml-0"
-                            color="red"
-                            text-color="white"
-                          >
-                            {{ admin.firstName }} {{ admin.lastName }}
-                          </v-chip>
-                          <v-chip
-                            v-else
-                            class="ma-1 ml-0"
-                            color="green"
-                            text-color="white"
-                            @click="changePrimaryOwner(admin)"
-                          >
-                            {{ admin.firstName }} {{ admin.lastName }}
-                          </v-chip>
-                        </span>
-                      </v-col>
-                    </v-row>
-                    <v-row>
-                      <v-alert v-if="showChangeAdminAlert" color="red" type="error" dense text>
-                        {{ primaryAdminAlertMsg }}
-                      </v-alert>
-                    </v-row>
-                  </div>
-                  <v-card-title class="mt-n3">Image</v-card-title>
-                  <v-card v-if="businessImages && businessImages.length > 0">
-                    <ImageCarousel
-                      :imagesList="businessImages"
-                      :showMakePrimary="true"
-                      :showDelete="false"
-                      @change-primary-image="makeImagePrimary"
-                      ref="businessImageCarousel"
-                    />
-                  </v-card>
-                  <!-- INPUT: Image Uploader -->
-                  <v-btn
-                    class="upload-image"
-                    color="primary"
+  <v-container>
+    <v-form v-model="valid" ref="modifyForm">
+      <v-card class="pb-2">
+        <v-card-title class="primary-text">Modify Business Profile</v-card-title>
+        <v-card-text>
+          <!-- Business Modifier Tab -->
+          <v-tabs v-model="tab">
+            <v-tab key="info">Info</v-tab>
+            <v-tab key="address">Address</v-tab>
+            <v-tab key="image">Image</v-tab>
+          </v-tabs>
+          <!-- Have a v-model 'tab' that allows user to switch between different sections -->
+          <v-tabs-items v-model="tab" class="pt-10" :eager="true">
+            <!-- Business information tab -->
+            <v-tab-item key="info" :eager="true">
+              <v-row no-gutters>
+                <v-col cols="12" sm="6">
+                  <!-- INPUT: Business Name -->
+                  <v-text-field
+                    dense
+                    class="mr-1 required"
+                    v-model="businessName"
+                    label="Name of business"
+                    :rules="mandatoryRules().concat(maxCharRules()).concat(alphabetExtendedSingleLineRules())"
                     outlined
-                    @click="showImageUploaderForm=true"
-                  >
-                    <v-icon
-                      class="expand-icon"
-                      color="primary"
-                    >
-                      mdi-upload
-                    </v-icon>
-                    Upload new image
-                  </v-btn>
-                  <BusinessImageUploader
-                    v-model="imageFile"
-                    v-if="showImageUploaderForm"
-                    @closeDialog="showImageUploaderForm=false"
-                    @uploadImage="addImage"/>
-                  <v-card-text v-if="allImageFiles.length > 0"> Images uploaded: {{ imageNames }} </v-card-text>
-                  <p class="error-text" v-if ="errorMessage !== undefined"> {{errorMessage}} </p>
-                </v-container>
-              </v-card-text>
-              <v-card-actions>
+                  />
+                </v-col>
+                <v-col cols="12" sm="6">
+                  <!-- INPUT: Business Type -->
+                  <v-select
+                    dense
+                    class="ml-1 required"
+                    v-model="businessType"
+                    :items="businessTypes"
+                    label="Business Type"
+                    :rules="mandatoryRules()"
+                    outlined
+                  />
+                </v-col>
+              </v-row>
+              <v-row>
+                <v-col cols="12" sm="12">
+                  <!-- INPUT: Description -->
+                  <v-textarea
+                    dense
+                    v-model="description"
+                    label="Description"
+                    :rules="maxCharDescriptionRules().concat(alphabetExtendedMultilineRules())"
+                    rows="3"
+                    outlined
+                  />
+                </v-col>
+              </v-row>
+              <!-- Sub section in info tab for admin modifying -->
+              <div v-if="isPrimaryOwner || isSystemAdmin" class="mt-1">
+                <v-card-title>Change Primary Administrator</v-card-title>
                 <v-row>
-                  <v-col class="text-right">
-                    <!-- INPUT: Submit -->
-                    <v-btn
-                      type="submit"
-                      color="primary"
-                      @click.prevent="openCurrencyDialog"
-                    >
-                      Submit
-                      <v-icon
-                        class="ml-1 mr-1"
-                        color="white"
+                  <v-col>
+                    <!-- INPUT: Admin -->
+                    <span v-for="admin in administrators" :key="admin.id">
+                      <v-chip
+                        v-if="adminIsPrimary(admin)"
+                        class="ma-1 ml-0"
+                        color="red"
+                        text-color="white"
                       >
-                        mdi-file-upload-outline
-                      </v-icon>
-                    </v-btn>
-                    <!-- INPUT: Discard -->
-                    <v-btn
-                      color="secondary"
-                      class="ml-2"
-                      @click="discardButton"
-                    > Discard
-                      <v-icon
-                        color="white"
+                        {{ admin.firstName }} {{ admin.lastName }}
+                      </v-chip>
+                      <v-chip
+                        v-else
+                        class="ma-1 ml-0"
+                        color="green"
+                        text-color="white"
+                        @click="changePrimaryOwner(admin)"
                       >
-                        mdi-file-cancel-outline
-                      </v-icon>
-                    </v-btn>
+                        {{ admin.firstName }} {{ admin.lastName }}
+                      </v-chip>
+                    </span>
                   </v-col>
                 </v-row>
-                <v-dialog
-                  ref="confirmDialog"
-                  v-model="currencyConfirmDialog"
-                  max-width="300px"
+                <!-- Admin modifying error message -->
+                <v-row>
+                  <v-alert v-if="showChangeAdminAlert" color="red" type="error" dense text>
+                    {{ primaryAdminAlertMsg }}
+                  </v-alert>
+                </v-row>
+              </div>
+            </v-tab-item>
+            <!-- Business address tab -->
+            <v-tab-item key="address" :eager="true">
+              <v-row no-gutters>
+                <v-col cols="12" sm="6">
+                  <!-- INPUT: Street Address -->
+                  <v-text-field
+                    class="mr-1 required"
+                    v-model="streetAddress"
+                    label="Company Street Address"
+                    :rules="mandatoryRules().concat(streetRules())"
+                    outlined/>
+                </v-col>
+                <v-col cols="12" sm="6">
+                  <!-- INPUT: District -->
+                  <LocationAutocomplete
+                    type="district"
+                    class="ml-1"
+                    v-model="district"
+                    :rules="maxCharRules().concat(alphabetRules())"
+                  />
+                </v-col>
+              </v-row>
+              <v-row no-gutters>
+                <v-col cols="12" sm="6">
+                  <!-- INPUT: City -->
+                  <LocationAutocomplete
+                    type="city"
+                    class="mr-1 required"
+                    v-model="city"
+                    :rules="mandatoryRules().concat(maxCharRules()).concat(alphabetRules())"
+                  />
+                </v-col>
+                <v-col cols="12" sm="6">
+                  <!-- INPUT: Region -->
+                  <LocationAutocomplete
+                    type="region"
+                    class="ml-1 required"
+                    v-model="region"
+                    :rules="mandatoryRules().concat(maxCharRules()).concat(alphabetRules())"
+                  />
+                </v-col>
+              </v-row>
+              <v-row no-gutters>
+                <v-col cols="12" sm="6">
+                  <!-- INPUT: Country -->
+                  <LocationAutocomplete
+                    type="country"
+                    class="mr-1 required"
+                    v-model="country"
+                    :rules="mandatoryRules().concat(maxCharRules()).concat(alphabetRules())"
+                  />
+                </v-col>
+                <v-col cols="12" sm="6">
+                  <!-- INPUT: Postcode -->
+                  <v-text-field
+                    class="ml-1 required"
+                    v-model="postcode"
+                    label="Postcode"
+                    :rules="mandatoryRules().concat(maxCharRules()).concat(postcodeRules())"
+                    outlined
+                  />
+                </v-col>
+              </v-row>
+              <v-row v-if="country !== business.address.country" justify="end" no-gutters>
+                <!-- INPUT: Update Currency -->
+                <v-checkbox
+                  v-model="updateProductCountry"
+                  class="mt-n5 mb-3"
+                  label="Update catalogue's currency"
+                  color="primary"
+                  hide-details
+                />
+              </v-row>
+            </v-tab-item>
+            <!-- Business image tab -->
+            <v-tab-item key="image" :eager="true">
+              <ImageManager v-model="images"/>
+              <p class="error-text" v-if ="errorMessage !== undefined"> {{errorMessage}} </p>
+            </v-tab-item>
+          </v-tabs-items>
+          <v-divider/>
+          <v-row>
+            <!-- Showing the error message if caught -->
+            <p class="error-text mt-1" v-if ="errorMessage !== undefined"> {{errorMessage}} </p>
+            <v-col class="text-right mt-3 mb-n3">
+              <!-- INPUT: Submit -->
+              <v-btn
+                type="submit"
+                ref="submitButton"
+                color="primary"
+                :disabled=!valid
+                @click.prevent="openCurrencyDialog"
+              >
+                Submit
+                <v-icon
+                  class="ml-1 mr-1"
+                  color="white"
                 >
-                  <!-- INPUT: Confirm Dialog -->
-                  <v-card>
-                    <v-card-title>
-                      Are you sure?
-                    </v-card-title>
-                    <v-card-text>
-                      Updating location for catalogue entries will change all of the listed product(s) currency accordingly
-                    </v-card-text>
-                    <v-card-actions>
-                      <v-spacer/>
-                      <v-btn
-                        color="primary"
-                        text
-                        @click="proceedWithModifyBusiness()"
-                      >
-                        Save Change
-                      </v-btn>
-                      <v-btn
-                        color="primary"
-                        text
-                        @click="currencyConfirmDialog = false"
-                      >
-                        Cancel
-                      </v-btn>
-                    </v-card-actions>
-                  </v-card>
-                </v-dialog>
+                  mdi-file-upload-outline
+                </v-icon>
+              </v-btn>
+              <!-- INPUT: Discard -->
+              <v-btn
+                color="secondary"
+                ref="discardButton"
+                class="ml-2"
+                @click="discardButton"
+              > Discard
+                <v-icon
+                  color="white"
+                >
+                  mdi-file-cancel-outline
+                </v-icon>
+              </v-btn>
+            </v-col>
+          </v-row>
+          <v-dialog
+            ref="confirmDialog"
+            v-model="currencyConfirmDialog"
+            max-width="300px"
+          >
+            <!-- INPUT: Confirm Dialog -->
+            <v-card>
+              <v-card-title>
+                Are you sure?
+              </v-card-title>
+              <v-card-text>
+                <span>Updating location for catalogue entries will change all of the listed product(s) currency accordingly</span>
+                <br><br>
+                <span><strong>Current currency:</strong> {{previousCountryCode}}</span><br>
+                <span><strong>New currency:</strong> {{newCountryCode}}</span>
+              </v-card-text>
+              <v-card-actions>
+                <v-spacer/>
+                <v-btn
+                  color="primary"
+                  text
+                  @click="proceedWithModifyBusiness()"
+                >
+                  Save Change
+                </v-btn>
+                <v-btn
+                  color="primary"
+                  text
+                  @click="currencyConfirmDialog = false"
+                >
+                  Cancel
+                </v-btn>
               </v-card-actions>
             </v-card>
-          </v-form>
-        </v-card>
-      </v-col>
-    </v-row>
-  </div>
+          </v-dialog>
+        </v-card-text>
+      </v-card>
+    </v-form>
+  </v-container>
 </template>
 
 <script>
 import LocationAutocomplete from '@/components/utils/LocationAutocomplete';
-import BusinessImageUploader from "@/components/utils/BusinessImageUploader";
+import ImageManager from "@/components/image/ImageManager";
 import {
   alphabetExtendedMultilineRules,
   alphabetExtendedSingleLineRules, alphabetRules,
@@ -264,23 +254,22 @@ import {
   maxCharRules, postCodeRules, streetNumRules,
   USER_ROLES
 } from "@/utils";
-import { modifyBusiness, uploadBusinessImage, makeBusinessImagePrimary } from '@/api/internal';
-import ImageCarousel from "@/components/utils/ImageCarousel";
-
+import { modifyBusiness } from '@/api/business';
+import { getUser } from '@/api/user';
+import {currencyFromCountry} from "@/api/currency";
 export default {
   name: 'ModifyBusiness',
   components: {
     LocationAutocomplete,
-    BusinessImageUploader,
-    ImageCarousel
+    ImageManager
   },
   props: {
     business: Object
   },
   data() {
     return {
+      tab: 'location',
       currencyConfirmDialog: false,
-      serverUrl: process.env.VUE_APP_SERVER_ADD,
       readableAddress: "",
       errorMessage: undefined,
       dialog: true,
@@ -294,7 +283,6 @@ export default {
       region: this.business.address.region,
       country: this.business.address.country,
       postcode: this.business.address.postcode,
-      images: this.business.images || [],
       businessTypes: [
         'Accommodation and Food Services',
         'Charitable organisation',
@@ -303,13 +291,10 @@ export default {
       ],
       updateProductCountry: false,
       valid: false,
-      showImageUploaderForm: false,
       showAlert: false,
       showChangeAdminAlert: false,
       primaryAdminAlertMsg: "",
       primaryAdministratorId: this.business.primaryAdministratorId,
-      imageFile: undefined,
-      allImageFiles: [],
       maxCharRules: () => maxCharRules(100),
       maxCharDescriptionRules: ()=> maxCharRules(200),
       mandatoryRules: ()=> mandatoryRules,
@@ -319,6 +304,9 @@ export default {
       streetRules: ()=> streetNumRules,
       postcodeRules: ()=> postCodeRules,
       isLoading: false,
+      images: this.business.images,
+      previousCountryCode: "",
+      newCountryCode: "",
     };
   },
   computed: {
@@ -336,22 +324,23 @@ export default {
     isPrimaryOwner() {
       return this.$store.state.user.id === this.business.primaryAdministratorId;
     },
-    imageNames() {
-      return this.allImageFiles.map((image) => image.name).join(", ");
+    /**
+     * Returns a list of IDs of the business's images
+     */
+    imageIds() {
+      return this.images.map(image => image.id);
     },
-    businessImages() {
-      return this.business.images;
-    }
   },
   methods: {
     /**
      * Opens the currency confirmation dialog if the updateProductCountry is checked
      */
-    openCurrencyDialog() {
-      if (this.updateProductCountry === false) {
-        this.proceedWithModifyBusiness();
-      } else {
+    async openCurrencyDialog() {
+      this.newCountryCode = await this.currencyCodeFromCountry(this.country);
+      if (this.updateProductCountry) {
         this.currencyConfirmDialog = true;
+      } else {
+        await this.proceedWithModifyBusiness();
       }
     },
     /**
@@ -367,18 +356,6 @@ export default {
      */
     discardButton() {
       this.$emit('discardModifyBusiness');
-    },
-    /**
-     * Sets the given image as primary image to be displayed
-     * @param imageId ID of the Image to set
-     */
-    async makeImagePrimary(imageId) {
-      this.errorMessage = undefined;
-      const result = await makeBusinessImagePrimary(this.business.id, imageId);
-      if (typeof result === 'string') {
-        this.errorMessage = result;
-        this.$refs.businessImageCarousel.forceClose();
-      }
     },
     /**
      * Action(s) of modifying a business
@@ -408,7 +385,8 @@ export default {
           postcode: this.postcode
         },
         businessType: this.businessType,
-        updateProductCountry: this.updateProductCountry
+        updateProductCountry: this.updateProductCountry,
+        imageIds: this.imageIds,
       };
       const result = await modifyBusiness(this.business.id, modifiedFields);
 
@@ -421,11 +399,17 @@ export default {
       if (typeof result === 'string') {
         this.errorMessage = result;
       }
-      for (let image of this.allImageFiles) {
-        if (this.errorMessage === undefined) {
-          await this.uploadImage(image);
+
+      // Updates the $store.state.user.businessesAdministered property if we are administering this business
+      if (this.administrators.some(admin => admin.id === this.$store.state.user.id)) {
+        let user = await getUser(this.$store.state.user.id);
+        if (typeof user !== 'string') {
+          let initialRole = this.$store.state.activeRole;
+          this.$store.commit('setUser', user);
+          this.$store.commit('setRole', initialRole); // Make sure we don't get set to the default role
         }
       }
+
       if (this.errorMessage === undefined) {
         this.$emit("modifySuccess");
       }
@@ -447,47 +431,16 @@ export default {
       }
       this.primaryAdministratorId = admin.id;
     },
-    addImage() {
-      this.showImageUploaderForm = false;
-      this.allImageFiles.push(this.imageFile);
-      this.imageFile = undefined;
-    },
-    async uploadImage(image) {
-      const result = await uploadBusinessImage(this.business.id, image);
-      if (typeof result === 'string') {
-        this.errorMessage = result;
-      }
+    async currencyCodeFromCountry(country) {
+      const result = await currencyFromCountry(country);
+      return result.code;
     }
+  },
+  async mounted() {
+    const initialCountryCode = await this.currencyCodeFromCountry(this.country);
+    this.previousCountryCode = initialCountryCode;
+    this.newCountryCode = initialCountryCode;
   },
 };
 </script>
 
-<style scoped>
-.body {
-    padding: 16px;
-    width: 100%;
-    margin-top: 140px;
-}
-
-.top-section {
-  display: flex;
-  flex-wrap: wrap;
-}
-
-.business-modify {
-  margin-top: 20px;
-}
-
-.modify-business-button {
-  display: block;
-  margin-right: 48%;
-}
-
-.expand-icon {
-  padding-right: 10px;
-}
-
-.upload-image {
-  margin-top: 25px;
-}
-</style>

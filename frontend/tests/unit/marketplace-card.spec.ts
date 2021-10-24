@@ -1,15 +1,15 @@
-
 import Vue from 'vue';
 import Vuetify from 'vuetify';
 import Vuex from 'vuex';
 import { createLocalVue, mount, Wrapper } from '@vue/test-utils';
 import MarketplaceCard from '@/components/cards/MarketplaceCard.vue';
 
-import { deleteMarketplaceCard, messageConversation, MarketplaceCardSection, User } from '@/api/internal';
-import { flushQueue } from './utils';
+import { findButtonWithText } from './utils';
 import { SECTION_NAMES } from '@/utils';
+import {User} from "@/api/user";
+import {deleteMarketplaceCard, MarketplaceCardSection, messageConversation} from "@/api/marketplace";
 
-jest.mock('@/api/internal', () => ({
+jest.mock('@/api/marketplace', () => ({
   deleteMarketplaceCard: jest.fn(),
   messageConversation: jest.fn(),
 }));
@@ -25,6 +25,7 @@ const testUser: User = {
   lastName: 'test_lastname',
   email: 'test_email',
   homeAddress: { country: 'test_country', city: 'test_city', district: 'test_district'},
+  images: [],
 };
 
 const testMarketplaceCard = {
@@ -46,17 +47,6 @@ describe('MarketplaceCard.vue', () => {
   let state: Object;
   let store: any;
 
-  /**
-   * Finds the required button in the MarketplaceCard card by specifying the
-   * button text in the button.
-   * @returns A Wrapper around the required button
-   */
-  function findButton(buttonText: string, specifiedWrapper: Wrapper<any>) {
-    const buttons = specifiedWrapper.findAllComponents({ name: 'v-btn' });
-    const filtered = buttons.filter(button => button.text().includes(buttonText));
-    expect(filtered.length).toBe(1);
-    return filtered.at(0);
-  }
   /**
    * Finds the edit form dialog box upon clicking the edit button
    * @returns the edit confirmation dialog box
@@ -238,7 +228,7 @@ describe('MarketplaceCard.vue', () => {
 
   it("The deleteMarketplaceCard method must be called and the dialog box should not be visible, upon clicking the delete button in the confirmation dialog box", async () => {
     const deleteConfirmationDialog = await openDeleteConfirmationDialog();
-    const dialogDeleteButton = findButton('Delete', deleteConfirmationDialog);
+    const dialogDeleteButton = findButtonWithText(deleteConfirmationDialog, 'Delete');
     await dialogDeleteButton.trigger("click");
     expect(deleteMarketplaceCard).toBeCalledWith(testMarketplaceCard.id);
     expect(wrapper.vm.deleteCardDialog).toBeFalsy();
@@ -246,7 +236,7 @@ describe('MarketplaceCard.vue', () => {
 
   it("The dialog box should not be visible if the cancel button is clicked in the confirmation dialog box", async () => {
     const deleteConfirmationDialog = await openDeleteConfirmationDialog();
-    const dialogCancelButton = findButton('Cancel', deleteConfirmationDialog);
+    const dialogCancelButton = findButtonWithText(deleteConfirmationDialog, 'Cancel');
     await dialogCancelButton.trigger("click");
     expect(wrapper.vm.deleteCardDialog).toBeFalsy();
   });
@@ -386,7 +376,7 @@ describe('MarketplaceCard.vue', () => {
       directMessageValid: true
     });
     await Vue.nextTick();
-    const dialogSendButton = findButton('Send', messageDialog);
+    const dialogSendButton = findButtonWithText(messageDialog, 'Send');
     await dialogSendButton.trigger("click");
     expect(messageConversation).toBeCalledWith(1, 3, 3, "");
     expect(wrapper.vm.messageOwnerDialog).toBeFalsy();
@@ -396,7 +386,7 @@ describe('MarketplaceCard.vue', () => {
     setUpStore(3, 'user'); // must not be the owner
     generateWrapper();
     const messageDialog = await openConversationDialog();
-    const dialogCancelButton = findButton('Cancel', messageDialog);
+    const dialogCancelButton = findButtonWithText(messageDialog, 'Cancel');
     await dialogCancelButton.trigger("click");
     expect(wrapper.vm.messageOwnerDialog).toBeFalsy();
   });
@@ -405,7 +395,7 @@ describe('MarketplaceCard.vue', () => {
     setUpStore(3, 'user'); // must not be the owner
     generateWrapper();
     const messageDialog = await openConversationDialog();
-    const dialogSendButton = findButton('Send', messageDialog);
+    const dialogSendButton = findButtonWithText(messageDialog, 'Send');
     expect(wrapper.vm.directMessageValid).toBeFalsy();
     expect(dialogSendButton.props().disabled).toBeTruthy();
     await wrapper.setData({

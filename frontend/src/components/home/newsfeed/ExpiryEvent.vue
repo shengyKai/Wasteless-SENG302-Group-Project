@@ -21,10 +21,10 @@
 </template>
 
 <script>
-import { extendMarketplaceCardExpiry } from '@/api/internal';
 import MarketplaceCard from '@/components/cards/MarketplaceCard';
 import Event from './Event';
 import synchronizedTime from '@/components/utils/Methods/synchronizedTime';
+import {extendMarketplaceCardExpiry} from "@/api/marketplace";
 
 export default {
   name: 'ExpiryEvent',
@@ -113,7 +113,7 @@ export default {
     remainingSeconds: {
       handler () {
         if (this.remainingSeconds < 0) {
-          this.$store.commit("removeEvent", this.event.id);
+          this.$store.commit('removeEvent', this.event.id);
         }
       },
       immediate: true

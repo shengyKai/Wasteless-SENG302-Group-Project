@@ -1,6 +1,8 @@
 package org.seng302.leftovers.controllers;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.SneakyThrows;
+import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -12,13 +14,19 @@ import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
+import org.seng302.leftovers.dto.LocationDTO;
+import org.seng302.leftovers.dto.user.UserRole;
+import org.seng302.leftovers.entities.Image;
 import org.seng302.leftovers.entities.Location;
 import org.seng302.leftovers.entities.User;
-import org.seng302.leftovers.exceptions.AccessTokenException;
-import org.seng302.leftovers.exceptions.InsufficientPermissionException;
+import org.seng302.leftovers.exceptions.AccessTokenResponseException;
+import org.seng302.leftovers.exceptions.DoesNotExistResponseException;
+import org.seng302.leftovers.exceptions.InsufficientPermissionResponseException;
+import org.seng302.leftovers.persistence.ImageRepository;
 import org.seng302.leftovers.persistence.UserRepository;
 import org.seng302.leftovers.tools.AuthenticationTokenManager;
 import org.seng302.leftovers.tools.PasswordAuthenticator;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpStatus;
@@ -30,6 +38,8 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 import static org.mockito.Mockito.*;
@@ -49,11 +59,16 @@ class UserControllerModifyTest {
 
     @Mock
     private UserRepository userRepository;
+    @Mock
+    private ImageRepository imageRepository;
 
     @Mock
     private User mockUser;
     @Mock
     private Location mockLocation;
+
+    @Autowired
+    private ObjectMapper objectMapper;
 
     private MockedStatic<AuthenticationTokenManager> authenticationTokenManager;
 
@@ -67,6 +82,7 @@ class UserControllerModifyTest {
 
         when(userRepository.getUser(mockUserId)).thenReturn(mockUser);
         when(userRepository.findById(mockUserId)).thenReturn(Optional.of(mockUser));
+        when(mockUser.getRole()).thenReturn(UserRole.USER);
 
         when(mockUser.getUserID()).thenReturn(mockUserId);
         when(mockUser.getBio()).thenReturn("Some bio");
@@ -80,7 +96,7 @@ class UserControllerModifyTest {
                 PasswordAuthenticator.generateAuthenticationCode(validCurrentPassword));
         when(mockUser.getAddress()).thenReturn(mockLocation);
 
-        userController = new UserController(userRepository);
+        userController = new UserController(userRepository, imageRepository);
         mockMvc = MockMvcBuilders.standaloneSetup(userController).build();
     }
 
@@ -103,7 +119,8 @@ class UserControllerModifyTest {
         jsonBody.put("firstName", "Ella");
         jsonBody.put("lastName", "Ella");
         jsonBody.put("dateOfBirth", "1999-06-26");
-        jsonBody.put("homeAddress", address.constructFullJson());
+        jsonBody.put("homeAddress", new LocationDTO(address, true));
+        jsonBody.put("imageIds", new JSONArray());
         return jsonBody;
     }
 
@@ -119,7 +136,7 @@ class UserControllerModifyTest {
                 .withPostCode("9876")
                 .atDistrict("Outback")
                 .build();
-        JSONObject jsonAddress = address.constructFullJson();
+        LocationDTO jsonAddress = new LocationDTO(address, true);
         jsonBody.put("homeAddress", jsonAddress);
         String newFirstName = "Nathan";
         jsonBody.put("firstName", newFirstName);
@@ -348,7 +365,6 @@ class UserControllerModifyTest {
     @Test
     void modifyUser_modifyInvalidNickname_userNotModified400() throws Exception {
         var jsonBody = createValidRequest();
-
         doThrow(new ResponseStatusException(HttpStatus.BAD_REQUEST))
                 .when(mockUser).setNickname(any());
 
@@ -440,7 +456,7 @@ class UserControllerModifyTest {
                 .withPostCode("1238")
                 .atDistrict("DistrictArea")
                 .build();
-        JSONObject jsonAddress = address.constructFullJson();
+        var jsonAddress = objectMapper.convertValue(new LocationDTO(address, true), JSONObject.class);
         jsonAddress.put(field, "ÉÄ○b");
         jsonBody.put("homeAddress", jsonAddress);
 
@@ -459,7 +475,7 @@ class UserControllerModifyTest {
     @Test
     void modifyUser_invalidSession_userNotModified401() throws Exception {
         authenticationTokenManager.when(() -> AuthenticationTokenManager.checkAuthenticationToken(any()))
-                .thenThrow(new AccessTokenException());
+                .thenThrow(new AccessTokenResponseException());
         var jsonBody = createValidRequest();
 
         mockMvc.perform(MockMvcRequestBuilders
@@ -476,7 +492,7 @@ class UserControllerModifyTest {
     @Test
     void modifyUser_invalidPermission_userNotModified403() throws Exception {
         authenticationTokenManager.when(() -> AuthenticationTokenManager.sessionCanSeePrivate(any(), any()))
-                .thenThrow(new InsufficientPermissionException());
+                .thenThrow(new InsufficientPermissionResponseException());
         var jsonBody = createValidRequest();
 
         mockMvc.perform(MockMvcRequestBuilders
@@ -487,6 +503,46 @@ class UserControllerModifyTest {
                 .andReturn();
 
         authenticationTokenManager.verify(() -> AuthenticationTokenManager.sessionCanSeePrivate(any(),any()));
+        verify(userRepository, times(0)).save(mockUser);
+    }
+
+    @Test
+    void modifyUser_modifyImages_imagesUpdated() throws Exception {
+        var jsonBody = createValidRequest();
+        var ids = List.of(1L,2L,3L);
+        jsonBody.put("imageIds", ids);
+        Image image1 = Mockito.mock(Image.class);
+        Image image2 = Mockito.mock(Image.class);
+        Image image3 = Mockito.mock(Image.class);
+        when(imageRepository.getImagesByIds(any())).thenReturn(List.of(image1,image2,image3));
+        mockMvc.perform(MockMvcRequestBuilders
+                .put("/users/" + mockUserId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(jsonBody.toString()))
+                .andExpect(status().isOk());
+
+        var expected = List.of(image1, image2, image3);
+        verify(imageRepository, times(1)).getImagesByIds(ids);
+        verify(mockUser, times(1)).setImages(expected);
+        verify(userRepository, times(1)).save(mockUser);
+    }
+
+    @Test
+    void modifyUser_modifyImagesInvalidId_imagesNotUpdated() throws Exception {
+        var jsonBody = createValidRequest();
+        var ids = List.of(1L);
+        jsonBody.put("imageIds", ids);
+        Image image1 = Mockito.mock(Image.class);
+        when(imageRepository.getImagesByIds(any())).thenCallRealMethod();
+        when(imageRepository.getImageById(1L)).thenThrow(new DoesNotExistResponseException(Image.class));
+        mockMvc.perform(MockMvcRequestBuilders
+                .put("/users/" + mockUserId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(jsonBody.toString()))
+                .andExpect(status().isNotAcceptable());
+
+        verify(imageRepository, times(1)).getImagesByIds(ids);
+        verify(mockUser, times(0)).setImages(any());
         verify(userRepository, times(0)).save(mockUser);
     }
 }

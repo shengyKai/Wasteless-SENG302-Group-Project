@@ -1,27 +1,29 @@
 package org.seng302.leftovers.controllers;
 
-import net.minidev.json.JSONObject;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.seng302.leftovers.dto.ResultPageDTO;
+import org.seng302.leftovers.dto.inventory.InventoryItemResponseDTO;
+import org.seng302.leftovers.dto.inventory.UpdateInventoryItemDTO;
 import org.seng302.leftovers.entities.Business;
 import org.seng302.leftovers.entities.InventoryItem;
 import org.seng302.leftovers.entities.Product;
+import org.seng302.leftovers.exceptions.DoesNotExistResponseException;
+import org.seng302.leftovers.exceptions.ValidationResponseException;
 import org.seng302.leftovers.persistence.BusinessRepository;
 import org.seng302.leftovers.persistence.InventoryItemRepository;
 import org.seng302.leftovers.persistence.ProductRepository;
-import org.seng302.leftovers.tools.JsonTools;
-import org.seng302.leftovers.tools.SearchHelper;
+import org.seng302.leftovers.service.search.SearchPageConstructor;
+import org.seng302.leftovers.service.search.SearchSpecConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ResponseStatusException;
 
 import javax.servlet.http.HttpServletRequest;
-import java.math.BigDecimal;
+import javax.validation.Valid;
 import java.util.Set;
 
 @RestController
@@ -53,34 +55,30 @@ public class InventoryController {
      */
     @PostMapping("/businesses/{id}/inventory")
     public void addInventory(@PathVariable(name = "id") Long businessId, HttpServletRequest request,
-            @RequestBody JSONObject inventory) {
-        String message = String.format("Attempting to add and inventory item for business=%d", businessId);
-        logger.info(message);
+            @RequestBody @Valid UpdateInventoryItemDTO inventory) {
+        logger.info("Attempting to add and inventory item for business={}", businessId);
         try {
             // get business + sanity
             Business business = businessRepository.getBusinessById(businessId);
             // check business perms
             business.checkSessionPermissions(request);
-            // check body exists
-            if (inventory == null) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Inventory information not provided");
-            }
-            // get productCode from body
-            String productCode = inventory.getAsString("productId");
             // sanity on product
-            Product product = productRepository.getProduct(business, productCode);
-            Integer quantity = getQuantityFromInventoryJson(inventory);
+            Product product = productRepository.getProduct(business, inventory.getProductId());
 
-            InventoryItem item = new InventoryItem.Builder().withProduct(product)
-                    .withPricePerItem(inventory.getAsString("pricePerItem")).withQuantity(quantity)
-                    .withBestBefore(inventory.getAsString("bestBefore")).withSellBy(inventory.getAsString("sellBy"))
-                    .withManufactured(inventory.getAsString("manufactured"))
-                    .withExpires(inventory.getAsString("expires")).withTotalPrice(inventory.getAsString("totalPrice"))
+            InventoryItem item = new InventoryItem.Builder()
+                    .withProduct(product)
+                    .withPricePerItem(inventory.getPricePerItem())
+                    .withQuantity(inventory.getQuantity())
+                    .withBestBefore(inventory.getBestBefore())
+                    .withSellBy(inventory.getSellBy())
+                    .withManufactured(inventory.getManufactured())
+                    .withExpires(inventory.getExpires())
+                    .withTotalPrice(inventory.getTotalPrice())
                     .build();
 
             inventoryItemRepository.save(item);
-        } catch (ResponseStatusException exception) {
-            logger.warn(exception);
+        } catch (Exception exception) {
+            logger.error(exception.getMessage());
             throw exception;
         }
     }
@@ -95,80 +93,29 @@ public class InventoryController {
     @PutMapping("/businesses/{businessId}/inventory/{invItemId}")
     public void modifyInvEntry(@PathVariable(name = "businessId") Long businessId,
                                @PathVariable(name = "invItemId") Long invItemId, HttpServletRequest request,
-                               @RequestBody JSONObject invItemInfo) {
+                               @RequestBody @Valid UpdateInventoryItemDTO invItemInfo) {
         logger.info("Attempting to modify the inventory {} for the business {}", invItemId, businessId);
 
-        Business business = businessRepository.getBusinessById(businessId);
-        if (business == null) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                    String.format("The business with the id %d does not exist", businessId));
-        }
-        business.checkSessionPermissions(request);
-
-        InventoryItem invItem = inventoryItemRepository.getInventoryItemByBusinessAndId(business, invItemId);
-        if (invItem == null) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                    String.format("The inventory item with the id %d does not exist", invItemId));
-        }
-
-        if (invItemInfo == null) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "No JSON request body was provided");
-        }
-
-        //assuming all exceptions are related to bad requests since only data is being save below
         try {
-            String newProductCode = invItemInfo.getAsString("productId");
-            Product product = productRepository.findByBusinessAndProductCode(business, newProductCode)
-                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                            "The product with the given id does not exist within the business's catalogue"));
+            Business business = businessRepository.getBusinessById(businessId);
+            business.checkSessionPermissions(request);
+
+            InventoryItem invItem = inventoryItemRepository.findInventoryItemByBusinessAndId(business, invItemId)
+                    .orElseThrow(() -> new ValidationResponseException("Inventory item does not exist for this business"));
+
+            Product product = productRepository.findByBusinessAndProductCode(business, invItemInfo.getProductId())
+                    .orElseThrow(() -> new DoesNotExistResponseException(Product.class));
             invItem.setProduct(product);
-
-            invItem.setQuantity((int) invItemInfo.getAsNumber("quantity"));
-
-            String pricePerItem = invItemInfo.getAsString("pricePerItem");
-            if (pricePerItem != null) {
-                invItem.setPricePerItem(BigDecimal.valueOf(Double.parseDouble(pricePerItem)));
-            } else {
-                invItem.setPricePerItem(null);
-            }
-            String totalPrice = invItemInfo.getAsString("totalPrice");
-            if (totalPrice != null) {
-                invItem.setTotalPrice(BigDecimal.valueOf(Double.parseDouble(totalPrice)));
-            } else {
-                invItem.setTotalPrice(null);
-            }
-
-            String manufactured = invItemInfo.getAsString("manufactured");
-            String sellBy = invItemInfo.getAsString("sellBy");
-            String bestBefore = invItemInfo.getAsString("bestBefore");
-            String expires = invItemInfo.getAsString("expires");
-            invItem.setDates(manufactured, sellBy, bestBefore, expires);
+            invItem.setQuantity(invItemInfo.getQuantity());
+            invItem.setPricePerItem(invItemInfo.getPricePerItem());
+            invItem.setTotalPrice(invItemInfo.getTotalPrice());
+            invItem.setDates(invItemInfo.getManufactured(), invItemInfo.getSellBy(), invItemInfo.getBestBefore(), invItemInfo.getExpires());
 
             inventoryItemRepository.save(invItem);
-        } catch (ResponseStatusException exception) {
-            logger.warn(exception);
-            throw exception;
         } catch (Exception exception) {
             logger.warn(exception);
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The data provided was invalid");
+            throw exception;
         }
-    }
-
-    /**
-     * Parse the inventory JSON to get quantity as an integer, or throw a response
-     * status exception if quantity is not an integer.
-     * 
-     * @param inventory A JSON object representing an inventory item.
-     * @return The number from the quantity field of the JSON.
-     */
-    private Integer getQuantityFromInventoryJson(JSONObject inventory) {
-        int quantity;
-        try {
-            quantity = Integer.parseInt(inventory.getAsString("quantity"));
-        } catch (NumberFormatException e) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The provided quantity is not a valid number");
-        }
-        return quantity;
     }
 
     /**
@@ -188,45 +135,44 @@ public class InventoryController {
      * business's inventory.
      */
     @GetMapping("/businesses/{id}/inventory")
-    public JSONObject getInventory(@PathVariable(name = "id") Long businessId,
-                                HttpServletRequest request,
-                                @RequestParam(required = false) String orderBy,
-                                @RequestParam(required = false) Integer page,
-                                @RequestParam(required = false) Integer resultsPerPage,
-                                @RequestParam(required = false) Boolean reverse) {
+    public ResultPageDTO<InventoryItemResponseDTO> getInventory(@PathVariable(name = "id") Long businessId,
+                                                                HttpServletRequest request,
+                                                                @RequestParam(required = false) String orderBy,
+                                                                @RequestParam(required = false) Integer page,
+                                                                @RequestParam(required = false) Integer resultsPerPage,
+                                                                @RequestParam(required = false) Boolean reverse) {
         try {
-        logger.info("Getting inventory item for business (businessId={}).", businessId);
-        Business business = businessRepository.getBusinessById(businessId);
-        business.checkSessionPermissions(request);
+            logger.info("Getting inventory item for business (businessId={}).", businessId);
+            Business business = businessRepository.getBusinessById(businessId);
+            business.checkSessionPermissions(request);
 
-        Sort.Direction direction = SearchHelper.getSortDirection(reverse);
+        Sort.Direction direction = SearchPageConstructor.getSortDirection(reverse);
         Sort.Order sortOrder = getInventoryItemOrder(orderBy, direction);
 
-        PageRequest pageRequest = SearchHelper.getPageRequest(page, resultsPerPage, Sort.by(sortOrder));
+        PageRequest pageRequest = SearchPageConstructor.getPageRequest(page, resultsPerPage, Sort.by(sortOrder));
 
-        Specification<InventoryItem> specification = SearchHelper.constructSpecificationFromInventoryItemsFilter(business);
+        Specification<InventoryItem> specification = SearchSpecConstructor.constructSpecificationFromInventoryItemsFilter(business);
         Page<InventoryItem> result = inventoryItemRepository.findAll(specification, pageRequest);
-        
-        return JsonTools.constructPageJSON(result.map(InventoryItem::constructJSONObject));
 
-    } catch (Exception error) {
-        logger.error(error);
-        throw error;
-    }
+            return new ResultPageDTO<>(result.map(InventoryItemResponseDTO::new));
 
+        } catch (Exception error) {
+            logger.error(error);
+            throw error;
+        }
     }
 
     private Sort.Order getInventoryItemOrder(String orderBy, Sort.Direction direction) {
         if (orderBy == null) orderBy = "productCode";
         else if (!VALID_ORDERINGS.contains(orderBy)) {
             logger.error("Invalid inventory item ordering given: {}", orderBy);
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The provided ordering is invalid");
+            throw new ValidationResponseException("The provided ordering is invalid");
         }
 
         if (orderBy.equals("productCode")) {
             orderBy = "product.productCode";
         }
-        if (orderBy.equals("name")) {
+        else if (orderBy.equals("name")) {
             orderBy = "product.name";
         }
         else if (orderBy.equals("description")) {

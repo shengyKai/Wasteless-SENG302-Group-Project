@@ -1,17 +1,18 @@
 package cucumber.stepDefinitions;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import cucumber.context.BusinessContext;
 import cucumber.context.RequestContext;
 import cucumber.context.UserContext;
-import io.cucumber.java.After;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
 import org.hibernate.Session;
+import org.seng302.leftovers.dto.inventory.InventoryItemResponseDTO;
 import org.seng302.leftovers.entities.InventoryItem;
 import org.seng302.leftovers.entities.Location;
 import org.seng302.leftovers.entities.Product;
@@ -25,6 +26,7 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.web.context.WebApplicationContext;
 
 import javax.persistence.EntityManager;
+import javax.transaction.Transactional;
 import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -64,12 +66,6 @@ public class InventoryStepDefinition  {
     private MvcResult mvcResult;
     private String productCode;
     private Integer quantity;
-
-    @After
-    public void cleanUp() {
-        productRepository.deleteAll();
-        inventoryItemRepository.deleteAll();
-    }
 
     @Given("the business has the following products in its catalogue:")
     public void the_business_has_the_following_products_in_its_catalogue(io.cucumber.datatable.DataTable dataTable) {
@@ -156,6 +152,7 @@ public class InventoryStepDefinition  {
 
     }
 
+    @Transactional
     @Then("the inventory of the business is returned to me")
     public void the_inventory_of_the_business_is_returned_to_me() throws UnsupportedEncodingException, JsonProcessingException, net.minidev.json.parser.ParseException {
         mvcResult = requestContext.getLastResult();
@@ -171,7 +168,7 @@ public class InventoryStepDefinition  {
 
         JSONArray jsonArray = new JSONArray();
         for (InventoryItem item : inventory) {
-            jsonArray.appendElement(item.constructJSONObject());
+            jsonArray.appendElement(objectMapper.convertValue(new InventoryItemResponseDTO(item), new TypeReference<JSONObject>() {}));
         }
         expectedPage.put("results", jsonArray);
         expectedPage.put("count", jsonArray.size());
@@ -510,9 +507,9 @@ public class InventoryStepDefinition  {
     public void the_quantity_of_the_inventory_item_with_the_version_will_be(
             long invItemId, int quantity) {
         assertEquals(200, mvcResult.getResponse().getStatus());
-        InventoryItem invItem = inventoryItemRepository.getInventoryItemByBusinessAndId(
-                businessContext.getLast(), invItemId);
-        assertNotNull(invItem);
+        InventoryItem invItem = inventoryItemRepository
+                .findInventoryItemByBusinessAndId(businessContext.getLast(), invItemId)
+                .orElseThrow();
         assertEquals(invItem.getQuantity(), quantity);
     }
 
@@ -520,9 +517,9 @@ public class InventoryStepDefinition  {
     public void the_price_per_item_of_the_inventory_item_with_the_version_will_be(
             long invItemId, double pricePerItem) {
         assertEquals(200, mvcResult.getResponse().getStatus());
-        InventoryItem invItem = inventoryItemRepository.getInventoryItemByBusinessAndId(
-                businessContext.getLast(), invItemId);
-        assertNotNull(invItem);
+        InventoryItem invItem = inventoryItemRepository
+                .findInventoryItemByBusinessAndId(businessContext.getLast(), invItemId)
+                .orElseThrow();
         BigDecimal pricePerItemBD = BigDecimal.valueOf(pricePerItem);
         pricePerItemBD = pricePerItemBD.setScale(2, RoundingMode.HALF_UP);
         assertEquals(invItem.getPricePerItem(), pricePerItemBD);
@@ -532,9 +529,9 @@ public class InventoryStepDefinition  {
     public void the_total_price_of_the_inventory_item_with_the_version_will_be(
             long invItemId, double totalPrice) {
         assertEquals(200, mvcResult.getResponse().getStatus());
-        InventoryItem invItem = inventoryItemRepository.getInventoryItemByBusinessAndId(
-                businessContext.getLast(), invItemId);
-        assertNotNull(invItem);
+        InventoryItem invItem = inventoryItemRepository
+                .findInventoryItemByBusinessAndId(businessContext.getLast(), invItemId)
+                .orElseThrow();
         BigDecimal totalPriceBD = BigDecimal.valueOf(totalPrice);
         totalPriceBD = totalPriceBD.setScale(2, RoundingMode.HALF_UP);
         assertEquals(invItem.getTotalPrice(), totalPriceBD);
@@ -544,9 +541,9 @@ public class InventoryStepDefinition  {
     public void the_manufactured_date_of_the_inventory_item_with_the_version_will_be(
             long invItemId, String manufactured) {
         assertEquals(200, mvcResult.getResponse().getStatus());
-        InventoryItem invItem = inventoryItemRepository.getInventoryItemByBusinessAndId(
-                businessContext.getLast(), invItemId);
-        assertNotNull(invItem);
+        InventoryItem invItem = inventoryItemRepository
+                .findInventoryItemByBusinessAndId(businessContext.getLast(), invItemId)
+                .orElseThrow();
         assertEquals(invItem.getManufactured().toString(), manufactured);
     }
 
@@ -554,18 +551,19 @@ public class InventoryStepDefinition  {
     public void the_manufactured_date_of_the_inventory_item_with_the_version_will_be_null(
             long invItemId, String manufactured) {
         assertEquals(200, mvcResult.getResponse().getStatus());
-        InventoryItem invItem = inventoryItemRepository.getInventoryItemByBusinessAndId(
-                businessContext.getLast(), invItemId);
-        assertNull(invItem);
+        InventoryItem invItem = inventoryItemRepository
+                .findInventoryItemByBusinessAndId(businessContext.getLast(), invItemId)
+                .orElseThrow();
+        assertNull(invItem.getManufactured());
     }
 
     @Then("the sell by date of the inventory item with the id {long} will be {string}")
     public void the_sell_by_date_of_the_inventory_item_with_the_version_will_be(
             long invItemId, String sellBy) {
         assertEquals(200, mvcResult.getResponse().getStatus());
-        InventoryItem invItem = inventoryItemRepository.getInventoryItemByBusinessAndId(
-                businessContext.getLast(), invItemId);
-        assertNotNull(invItem);
+        InventoryItem invItem = inventoryItemRepository
+                .findInventoryItemByBusinessAndId(businessContext.getLast(), invItemId)
+                .orElseThrow();
         assertEquals(invItem.getSellBy().toString(), sellBy);
     }
 
@@ -573,9 +571,9 @@ public class InventoryStepDefinition  {
     public void the_best_before_date_of_the_inventory_item_with_the_version_will_be(
             long invItemId, String bestBefore) {
         assertEquals(200, mvcResult.getResponse().getStatus());
-        InventoryItem invItem = inventoryItemRepository.getInventoryItemByBusinessAndId(
-                businessContext.getLast(), invItemId);
-        assertNotNull(invItem);
+        InventoryItem invItem = inventoryItemRepository
+                .findInventoryItemByBusinessAndId(businessContext.getLast(), invItemId)
+                .orElseThrow();
         assertEquals(invItem.getBestBefore().toString(), bestBefore);
     }
 
@@ -583,9 +581,9 @@ public class InventoryStepDefinition  {
     public void the_expires_date_of_the_inventory_item_with_the_version_will_be(
             long invItemId, String expires) {
         assertEquals(200, mvcResult.getResponse().getStatus());
-        InventoryItem invItem = inventoryItemRepository.getInventoryItemByBusinessAndId(
-                businessContext.getLast(), invItemId);
-        assertNotNull(invItem);
+        InventoryItem invItem = inventoryItemRepository
+                .findInventoryItemByBusinessAndId(businessContext.getLast(), invItemId)
+                .orElseThrow();
         assertEquals(invItem.getExpires().toString(), expires);
     }
 
@@ -593,9 +591,9 @@ public class InventoryStepDefinition  {
     public void the_product_of_the_inventory_item_with_the_version_will_have_the_product_code(
             long invItemId, String productCode) {
         assertEquals(200, mvcResult.getResponse().getStatus());
-        InventoryItem invItem = inventoryItemRepository.getInventoryItemByBusinessAndId(
-                businessContext.getLast(), invItemId);
-        assertNotNull(invItem);
+        InventoryItem invItem = inventoryItemRepository
+                .findInventoryItemByBusinessAndId(businessContext.getLast(), invItemId)
+                .orElseThrow();
         assertEquals(invItem.getProduct().getProductCode(), productCode);
     }
 

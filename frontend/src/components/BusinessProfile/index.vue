@@ -1,21 +1,20 @@
 <template>
   <div>
-    <v-row v-if="fromSearch && !modifyBusiness" class="mb-n16 mt-6">
-      <v-col class="text-right mt-10 mb-n10">
-        <v-btn @click="returnToSearch" color="primary">Return to search</v-btn>
+    <v-row v-if="referrer !== undefined && !modifyBusiness" class="mt-6 mb-n10">
+      <v-col class="text-right">
+        <v-btn @click="returnToReferrer" color="primary">Return {{referrer === 'home' ? 'home' : 'to search'}}</v-btn>
       </v-col>
     </v-row>
-    <div v-if='!modifyBusiness' style="margin-top: 100px">
+    <div v-if='!modifyBusiness && this.business' class="mt-16">
       <v-card v-if="businessImages && businessImages.length > 0">
         <ImageCarousel
           :imagesList="businessImages"
-          :showMakePrimary="permissionToActAsBusiness"
+          :showMakePrimary="false"
           :showDelete="false"
-          @change-primary-image="false"
           ref="businessImageCarousel"
         />
       </v-card>
-      <v-card class="body">
+      <v-card class="pa-5 pt-0">
         <div class="d-flex flex-column" no-gutters>
           <v-row>
             <v-col cols="12">
@@ -32,7 +31,10 @@
           </v-row>
           <v-row>
             <v-col cols="11">
-              <span><h1>{{ business.name }}</h1></span>
+              <span>
+                <h1 class="d-inline-block mr-3">{{ business.name }}</h1>
+                <RankIcon v-if="business.rank.name !== 'bronze'" :rankName="business.rank.name"/>
+              </span>
             </v-col>
             <v-col class="text-right" v-if='!modifyBusiness && permissionToActAsBusiness'>
               <v-tooltip bottom>
@@ -43,7 +45,7 @@
                     color="primary"
                     v-bind="attrs"
                     v-on="on"
-                    @click="modifyBusiness = true;"
+                    @click="modifyBusiness = true"
                   >
                     <v-icon>mdi-cog</v-icon>
                   </v-btn>
@@ -52,11 +54,17 @@
               </v-tooltip>
             </v-col>
           </v-row>
-          <p><strong>Created:</strong> {{ createdMsg }}</p>
-          <v-btn outlined color="primary" @click="goSalePage" :value="false" width="150">
-            Sale listings
-          </v-btn>
+          <p>
+            <strong>Created:</strong> {{ createdMsg }}
+            <strong class="rank">Rank:</strong> {{ business.rank.name.charAt(0).toUpperCase() + business.rank.name.slice(1) }}
+          </p>
         </div>
+        <v-btn class="mr-2" outlined color="primary" @click="goSalePage" :value="false" width="150">
+          Sale listings
+        </v-btn>
+        <v-btn v-if="isAdmin" class="" outlined color="primary" @click="goSaleReports" :value="false" width="150">
+          Sale reports
+        </v-btn>
         <v-container fluid>
           <v-row>
             <v-col cols="12" sm="6">
@@ -67,15 +75,19 @@
               <h4>Category</h4>
               {{ business.businessType }}
             </v-col>
-            <v-col cols="12">
+            <v-col cols="12" sm="6">
               <h4>Description</h4>
               {{ business.description }}
+            </v-col>
+            <v-col cols="12" sm="6">
+              <h4>Points</h4>
+              <LevelUp :business="this.business"/>
             </v-col>
             <v-col cols="12">
               <h4>Administrators</h4>
               <span v-for="admin in administrators" :key="admin.id">
                 <router-link :to="'/profile/' + admin.id">
-                  <v-chip class="link-chip link" :color="getAdminColour(admin)" text-color="white"> {{ admin.firstName }} {{ admin.lastName }} </v-chip>
+                  <v-chip class="mr-1 link" :color="getAdminColour(admin)" text-color="white"> {{ admin.firstName }} {{ admin.lastName }} </v-chip>
                 </router-link>
               </span>
             </v-col>
@@ -87,7 +99,7 @@
     <ModifyBusiness
       :business="business"
       v-if="modifyBusiness"
-      @discardModifyBusiness="modifyBusiness=false"
+      @discardModifyBusiness="updateBusiness"
       @modifySuccess="updateBusiness"
     />
   </div>
@@ -95,20 +107,22 @@
 
 <script>
 import ModifyBusiness from '@/components/BusinessProfile/ModifyBusiness';
-import {getBusiness} from '../../api/internal';
 import convertAddressToReadableText from '@/components/utils/Methods/convertAddressToReadableText';
 import {
-  alphabetExtendedMultilineRules,
-  alphabetExtendedSingleLineRules, alphabetRules,
-  mandatoryRules,
-  maxCharRules, postCodeRules, streetNumRules
+  USER_ROLES
 } from "@/utils";
-import ImageCarousel from "@/components/utils/ImageCarousel";
+import ImageCarousel from "@/components/image/ImageCarousel";
+import {getBusiness} from "@/api/business";
+import RankIcon from "@/components/ranks/RankIcon";
+import LevelUp from '@/components/BusinessProfile/LevelUp.vue';
+
 export default {
   name: 'BusinessProfile',
   components: {
     ImageCarousel,
-    ModifyBusiness
+    ModifyBusiness,
+    RankIcon,
+    LevelUp,
   },
   data() {
     return {
@@ -116,33 +130,7 @@ export default {
       readableAddress: "",
       errorMessage: undefined,
       dialog: true,
-      business: '',
-      businessName: '',
-      description: '',
-      businessType: [],
-      streetAddress: '',
-      district: '',
-      city: '',
-      region: '',
-      country: '',
-      postcode: '',
-      businessTypes: [
-        'Accommodation and Food Services',
-        'Charitable organisation',
-        'Non-profit organisation',
-        'Retail Trade',
-      ],
-      showImageUploaderForm: false,
-      valid: false,
-      updateProductCountry: true,
-      maxCharRules: () => maxCharRules(100),
-      maxCharDescriptionRules: ()=> maxCharRules(200),
-      mandatoryRules: ()=> mandatoryRules,
-      alphabetExtendedSingleLineRules: ()=> alphabetExtendedSingleLineRules,
-      alphabetExtendedMultilineRules: ()=> alphabetExtendedMultilineRules,
-      alphabetRules: ()=> alphabetRules,
-      streetRules: ()=> streetNumRules,
-      postcodeRules: ()=> postCodeRules
+      business: undefined,
     };
   },
   watch: {
@@ -155,6 +143,16 @@ export default {
   },
 
   computed: {
+    /**
+     * Checks to see if the user is a admin of the business
+     */
+    isAdmin() {
+      return this.business.administrators.map(admin => admin.id).includes(this.$store.state.user.id) ||
+      [USER_ROLES.DGAA, USER_ROLES.GAA].includes(this.$store.getters.role);
+    },
+    /**
+     * Gets the message for the business's creation date.
+     */
     createdMsg() {
       if (this.business.created === undefined) return '';
 
@@ -167,32 +165,42 @@ export default {
 
       return `${parts[2]} ${parts[1]} ${parts[3]} (${diffMonths} months ago)`;
     },
+    /**
+     * Gets the list of business admins
+     */
     administrators() {
       return this.business?.administrators || [];
     },
+    /**
+     * Checks whether the current user is acting as this business.
+     */
     isActingAsCurrentBusiness() {
       const isBusiness =  this.$store.state.activeRole?.type === 'business';
       if (!isBusiness) return false;
       const user = this.$store.state.user;
       return user.businessesAdministered.map(business => business.id).includes(this.business.id);
     },
+    /**
+     * Checks whether the current user has permission to act as this business.
+     */
     permissionToActAsBusiness() {
       const user = this.$store.state.user;
       return this.isActingAsCurrentBusiness ||
           user.role === 'defaultGlobalApplicationAdmin' ||
           user.role === 'globalApplicationAdmin';
     },
-
-    fromSearch() {
-      return this.$route.query.businessType !== undefined
-          || this.$route.query.orderBy !== undefined
-          || this.$route.query.page !== undefined
-          || this.$route.query.reverse !== undefined
-          || this.$route.query.searchQuery !== undefined;
+    /**
+     * Gets the page name that sent the user here
+     */
+    referrer() {
+      return this.$route.query.fromPage;
     },
+    /**
+     * Gets the list of business images
+     */
     businessImages() {
       return this.business.images;
-    }
+    },
   },
 
   methods: {
@@ -205,8 +213,22 @@ export default {
     /**
      * Returns to the search page, keeping the search parameters
      */
-    async returnToSearch() {
-      await this.$router.push({path: '/search/business', query:{...this.$route.query}});
+    async returnToReferrer() {
+      if (this.referrer === 'businessSearch') {
+        await this.$router.push({path: '/search/business', query:{...this.$route.query}});
+      } else if (this.referrer === 'saleSearch') {
+        await this.$router.push({path: '/search/sales', query:{...this.$route.query}});
+      } else if (this.referrer === 'home') {
+        await this.$router.push({path: '/home'});
+      } else {
+        throw new Error('Unknown referrer: ' + this.referrer);
+      }
+    },
+    /**
+     * Returns to the search page, keeping the search parameters
+     */
+    async returnToSaleSearch() {
+      await this.$router.push({path: '/search/sales', query:{...this.$route.query}});
     },
     /**
      * Returns the appropriate color of the admin for their chip
@@ -223,6 +245,12 @@ export default {
      */
     changeUpdateCountries() {
       this.updateProductCountry = !this.updateProductCountry;
+    },
+    /**
+     * Shows the Sale Reports page
+     */
+    goSaleReports() {
+      this.$router.push(`/salesreport/${this.$route.params.id}`);
     },
     /**
      * Updates the business profile page to show the updated details of the business.
@@ -242,35 +270,8 @@ export default {
           this.readableAddress = convertAddressToReadableText(value.address, "full");
         }
       });
-    }
+
+    },
   }
 };
 </script>
-
-<style scoped>
-.body {
-    padding: 16px;
-}
-
-.top-section {
-  display: flex;
-  flex-wrap: wrap;
-}
-
-.link-chip {
-  margin-right: 4px;
-}
-
-.business-modify {
-  margin-top: 20px;
-}
-
-.modify-business-button {
-  display: block;
-  margin-right: 48%;
-}
-
-.expand-icon {
-  padding-right: 10px;
-}
-</style>

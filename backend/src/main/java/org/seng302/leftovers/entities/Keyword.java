@@ -1,11 +1,9 @@
 package org.seng302.leftovers.entities;
 
 import lombok.NoArgsConstructor;
-import net.minidev.json.JSONObject;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
-import org.springframework.http.HttpStatus;
-import org.springframework.web.server.ResponseStatusException;
+import org.seng302.leftovers.exceptions.ValidationResponseException;
 
 import javax.persistence.*;
 import java.time.Instant;
@@ -64,18 +62,6 @@ public class Keyword {
     }
 
     /**
-     * Constructs a JSON representation of the keyword
-     * @return JSON object containing keyword data
-     */
-    public JSONObject constructJSONObject() {
-        JSONObject json = new JSONObject();
-        json.appendField("id", this.getID());
-        json.appendField("name", this.getName());
-        json.appendField("created", this.getCreated().toString());
-        return json;
-    }
-
-    /**
      * Formats keyword
      * @param name to be turned into keyword
      * @return formatted keyword name
@@ -102,13 +88,13 @@ public class Keyword {
     public void setName(String name) {
         name = formatName(name);
         if (name == null) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Keyword name must be provided");
+            throw new ValidationResponseException("Keyword name must be provided");
         }
         if (name.isEmpty() || name.length() > 25) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Keyword name must be between 1-25 characters long");
+            throw new ValidationResponseException("Keyword name must be between 1-25 characters long");
         }
         if (!name.matches("^[ \\p{L}]*$")) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Keyword name must only contain letters");
+            throw new ValidationResponseException("Keyword name must only contain letters");
         }
         this.name = name;
     }

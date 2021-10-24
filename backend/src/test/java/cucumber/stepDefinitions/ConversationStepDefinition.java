@@ -11,6 +11,7 @@ import lombok.SneakyThrows;
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
 import net.minidev.json.parser.JSONParser;
+import net.minidev.json.parser.ParseException;
 import org.hibernate.SessionFactory;
 import org.junit.jupiter.api.Assertions;
 import org.seng302.leftovers.persistence.ConversationRepository;
@@ -19,6 +20,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MvcResult;
 
+import java.io.UnsupportedEncodingException;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -153,16 +155,16 @@ public class ConversationStepDefinition {
     }
 
     @Then("I have received a notification from a conversation that I am involved in")
-    public void i_have_received_a_notification_from_a_conversation_that_i_am_involved_in() {
-        List<JSONObject> events = eventContext.lastReceivedEvents("newsfeed");
+    public void i_have_received_a_notification_from_a_conversation_that_i_am_involved_in() throws UnsupportedEncodingException, ParseException {
+        List<JSONObject> events = eventContext.mvcResultToJsonObjectList(requestContext.getLastResult());
 
         var notificationJSON = events.get(0);
         assertEquals("MessageEvent", notificationJSON.getAsString("type"));
     }
 
     @Then("the card title {string} is included in the notification")
-    public void the_card_title_is_included_in_the_notification(String title) {
-        List<JSONObject> events = eventContext.lastReceivedEvents("newsfeed");
+    public void the_card_title_is_included_in_the_notification(String title) throws UnsupportedEncodingException, ParseException {
+        List<JSONObject> events = eventContext.mvcResultToJsonObjectList(requestContext.getLastResult());
 
         var notificationJSON = events.get(0);
 
@@ -170,26 +172,25 @@ public class ConversationStepDefinition {
     }
 
     @Then("the buyer name {string} is included in the message")
-    public void the_buyer_name_is_included_in_the_message(String name) {
-        List<JSONObject> events = eventContext.lastReceivedEvents("newsfeed");
+    public void the_buyer_name_is_included_in_the_message(String name) throws UnsupportedEncodingException, ParseException {
+        List<JSONObject> events = eventContext.mvcResultToJsonObjectList(requestContext.getLastResult());
 
         var notificationJSON = events.get(0);
         assertEquals(name, getBuyerNameFromMessageEventJson(notificationJSON));
     }
 
     @Then("the card owner name {string} is included in the notification")
-    public void the_card_owner_name_is_included_in_the_notification(String name) {
-        List<JSONObject> events = eventContext.lastReceivedEvents("newsfeed");
+    public void the_card_owner_name_is_included_in_the_notification(String name) throws UnsupportedEncodingException, ParseException {
+        List<JSONObject> events = eventContext.mvcResultToJsonObjectList(requestContext.getLastResult());
 
         var notificationJSON = events.get(0);
         assertEquals(name, getOwnerNameFromMessageEventJson(notificationJSON));
     }
 
     @Given("I have received a notification from user {string} regarding the card {string}")
-    public void i_have_received_a_notification_from_user_regarding_the_card(String name, String title) {
-        requestContext.performRequest(get("/events/emitter")
-                .param("userId", requestContext.getLoggedInId().toString()));
-        List<JSONObject> events = eventContext.lastReceivedEvents("newsfeed");
+    public void i_have_received_a_notification_from_user_regarding_the_card(String name, String title) throws UnsupportedEncodingException, ParseException {
+        requestContext.performRequest(get(String.format("/users/%d/feed", requestContext.getLoggedInId())));
+        List<JSONObject> events = eventContext.mvcResultToJsonObjectList(requestContext.getLastResult());
 
 
         var notificationJSON = events.get(0);
@@ -199,8 +200,8 @@ public class ConversationStepDefinition {
     }
 
     @When("I reply to the message with {string}")
-    public void i_reply_to_the_message_with_string(String reply) {
-        List<JSONObject> events = eventContext.lastReceivedEvents("newsfeed");
+    public void i_reply_to_the_message_with_string(String reply) throws UnsupportedEncodingException, ParseException {
+        List<JSONObject> events = eventContext.mvcResultToJsonObjectList(requestContext.getLastResult());
         var notificationJSON = events.get(0);
 
         JSONObject json = new JSONObject();

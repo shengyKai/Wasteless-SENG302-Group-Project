@@ -1,6 +1,7 @@
 import { is } from 'typescript-is';
 
-import { Business, User } from '@/api/internal';
+import {User} from "@/api/user";
+import {Business} from "@/api/business";
 
 it('Testing that 7 is a number', () => {
   expect(is<number>(7)).toBeTruthy();
@@ -18,6 +19,7 @@ it('Testing valid user is a user', () => {
     },
     nickname: 'davy',
     role: 'user',
+    images: []
   })).toBeTruthy();
 });
 
@@ -44,7 +46,11 @@ it('Testing valid user with businesses', () => {
         name: "BUSINESS_NAME",
         description: "DESCRIPTION",
         id: 10,
-        businessType: "Accommodation and Food Services"
+        businessType: "Accommodation and Food Services",
+        points: 4,
+        rank: {
+          name: 'bronze',
+        },
       }
     ],
     middleName: "Percy",
@@ -59,7 +65,8 @@ it('Testing valid user with businesses', () => {
       district: "Ashburton",
       postcode: "8041",
       region: "Canterbury"
-    }
+    },
+    images: []
   })).toBeTruthy();
 });
 
@@ -79,6 +86,10 @@ const test: Business = {
   description:"DESCRIPTION",
   id:10,
   businessType:"Accommodation and Food Services",
+  points: 5,
+  rank: {
+    name: 'bronze',
+  },
   administrators:[
     {
       firstName:"Andy",
@@ -88,7 +99,8 @@ const test: Business = {
       middleName:"Percy",
       id:2,
       email:"123andyelliot@gmail.com",
-      homeAddress:{ country:"New Zealand", region:"Canterbury",city:"Christchurch" }
+      homeAddress:{ country:"New Zealand", region:"Canterbury",city:"Christchurch" },
+      images: [],
     }
   ]
 };
@@ -110,6 +122,10 @@ it('Testing valid business', () => {
     description:"DESCRIPTION",
     id:10,
     businessType:"Accommodation and Food Services",
+    points: 4,
+    rank: {
+      name: 'bronze',
+    },
     administrators:[
       {
         firstName:"Andy",
@@ -119,7 +135,8 @@ it('Testing valid business', () => {
         middleName:"Percy",
         id:2,
         email:"123andyelliot@gmail.com",
-        homeAddress:{ country:"New Zealand", region:"Canterbury",city:"Christchurch" }
+        homeAddress:{ country:"New Zealand", region:"Canterbury",city:"Christchurch" },
+        images: []
       }
     ]
   })).toBeTruthy();
@@ -137,6 +154,7 @@ it('Testing user with invalid role is not a user', () => {
     },
     nickname: 'davy',
     role: 'pirate',
+    images: []
   })).toBeFalsy();
 });
 
@@ -150,5 +168,6 @@ it('Testing user without id is not a user', () => {
       country: 'Africa'
     },
     nickname: 'davy',
+    images: []
   })).toBeFalsy();
 });

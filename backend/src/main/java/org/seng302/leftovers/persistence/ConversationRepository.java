@@ -3,11 +3,11 @@ package org.seng302.leftovers.persistence;
 import org.seng302.leftovers.entities.Conversation;
 import org.seng302.leftovers.entities.MarketplaceCard;
 import org.seng302.leftovers.entities.User;
+import org.seng302.leftovers.exceptions.DoesNotExistResponseException;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
-import org.springframework.http.HttpStatus;
-import org.springframework.web.server.ResponseStatusException;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface ConversationRepository extends CrudRepository<Conversation, Long> {
@@ -20,6 +20,8 @@ public interface ConversationRepository extends CrudRepository<Conversation, Lon
      */
     Optional<Conversation> findByCardAndBuyer(@Param("card") MarketplaceCard card, @Param("buyer") User buyer);
 
+    List<Conversation> findAllByCard(@Param("card") MarketplaceCard card);
+
     /**
      * Will retrieve the conversation regarding the given card and expected buyer, or throw a 406 response status
      * exception if no conversation exists for the card and buyer.
@@ -28,7 +30,6 @@ public interface ConversationRepository extends CrudRepository<Conversation, Lon
      * @return The conversation with the matching buyer and card, if it exists.
      */
     default Conversation getConversation(MarketplaceCard card, User buyer) {
-        return findByCardAndBuyer(card, buyer).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE,
-                "No conversation exists with the given card and buyer"));
+        return findByCardAndBuyer(card, buyer).orElseThrow(() -> new DoesNotExistResponseException(Conversation.class));
     }
 }

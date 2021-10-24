@@ -1,5 +1,7 @@
 package org.seng302.leftovers.dto;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.ToString;
 import org.seng302.leftovers.entities.Location;
@@ -9,15 +11,44 @@ import org.seng302.leftovers.entities.Location;
  */
 @Getter
 @ToString
+@JsonInclude(JsonInclude.Include.NON_NULL)
+@EqualsAndHashCode
 public class LocationDTO {
-    private String country;
-    private String city;
-    private String region;
-    private String streetName;
-    private String streetNumber;
-    private String postcode;
-    private String district;
+    protected String country;
+    protected String city;
+    protected String region;
+    protected String streetName;
+    protected String streetNumber;
+    protected String postcode;
+    protected String district;
 
+    /**
+     * Converts a Location to its JSON form
+     * @param location Location to convert
+     * @param isFull Whether to include all parts of the location, including some that may be private
+     */
+    public LocationDTO(Location location, boolean isFull) {
+        this.country = location.getCountry();
+        this.region = location.getRegion();
+        this.city = location.getCity();
+
+        if (isFull) {
+            this.district = location.getDistrict();
+            this.streetName = location.getStreetName();
+            this.streetNumber = location.getStreetNumber();
+            this.postcode = location.getPostCode();
+        }
+    }
+
+    /**
+     * Helper JSON constructor
+     */
+    protected LocationDTO() {}
+
+    /**
+     * Generate a location from this JSON representation
+     * @return Detached Location entity
+     */
     public Location createLocation() {
         return new Location.Builder()
                 .inCountry(country)

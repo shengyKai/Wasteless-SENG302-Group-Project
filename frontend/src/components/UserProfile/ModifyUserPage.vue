@@ -8,6 +8,7 @@
             <v-tab key="login">Login</v-tab>
             <v-tab key="about">About</v-tab>
             <v-tab key="address">Address</v-tab>
+            <v-tab key="image">Image</v-tab>
           </v-tabs>
           <v-tabs-items v-model="tab" class="pt-4" :eager="true">
             <!-- TAB: Login -->
@@ -258,9 +259,12 @@
                 outlined
               />
             </v-tab-item>
+            <!-- User image tab -->
+            <v-tab-item key="image" class="pt-4" :eager="true">
+              <ImageManager v-model="user.images"/>
+              <p class="error-text" v-if ="errorMessage !== undefined"> {{errorMessage}} </p>
+            </v-tab-item>
           </v-tabs-items>
-
-
           <!-- Update -->
           <v-divider/>
           <v-row class="mt-2 px-1" justify="end">
@@ -295,8 +299,7 @@
 
 <script>
 import LocationAutocomplete from '@/components/utils/LocationAutocomplete';
-
-import { getUser, modifyUser } from '@/api/internal';
+import ImageManager from '@/components/image/ImageManager';
 import {
   alphabetExtendedMultilineRules,
   alphabetRules,
@@ -307,12 +310,15 @@ import {
   passwordRules, phoneNumberRules,
   postCodeRules,
   streetNumRules,
+  getLocalDate,
 } from "@/utils";
+import {getUser, modifyUser} from "@/api/user";
 
 export default {
   name: 'ModifyUserPage',
   components: {
     LocationAutocomplete,
+    ImageManager,
   },
   data() {
     return {
@@ -340,7 +346,9 @@ export default {
           region: '',
           country: '',
           postcode: '',
-        }
+        },
+
+        images: [],
       },
       previousUser: {},
       countryCode: '',
@@ -358,7 +366,7 @@ export default {
   async mounted () {
     await this.setUser();
     this.validateAllField();
-    this.maxDate = this.minimumDateOfBirth().toISOString().slice(0, 10);
+    this.maxDate = getLocalDate(this.minimumDateOfBirth());
 
   },
   methods: {
@@ -375,6 +383,8 @@ export default {
       };
       if (this.user.newPassword === "") modifiedUser.newPassword = undefined;
       if (this.user.password === "") modifiedUser.password = undefined;
+      delete modifiedUser.images;
+      modifiedUser.imageIds = this.imageIds;
       modifyUser(this.id, modifiedUser)
         .then(response => {
           if (typeof response === 'string') {
@@ -409,7 +419,7 @@ export default {
       this.user.homeAddress = this.previousUser.homeAddress;
       this.streetAddress = this.previousUser.homeAddress.streetNumber + ' ' + this.previousUser.homeAddress.streetName;
 
-
+      this.user.images = [...this.previousUser.images];
       if (this.previousUser.phoneNumber !== undefined) {
         let parts = this.previousUser.phoneNumber.split(' ');
         this.countryCode = parts[0];
@@ -541,7 +551,13 @@ export default {
         () => !(this.phoneDigits.length > 0 && this.countryCode.length < 1) || 'Country code must be present',
         () => !(this.phoneDigits.length < 1 && this.countryCode.length > 0) || 'Cannot enter country code without phone number',
       ];
-    }
+    },
+    /**
+     * Returns a list of IDs of the user's images
+     */
+    imageIds() {
+      return this.user.images.map(image => image.id);
+    },
   }
 
 };

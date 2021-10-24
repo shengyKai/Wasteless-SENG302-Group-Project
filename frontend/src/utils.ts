@@ -1,4 +1,4 @@
-import { MarketplaceCardSection } from "./api/internal";
+import {MarketplaceCardSection} from "@/api/marketplace";
 
 /**
  * Sets a cookie. Will expire in one year.
@@ -70,6 +70,14 @@ export function formatPrice(price : number) {
   } else {
     return (+price).toFixed(2);
   }
+}
+
+/**
+ * Converts a date into an iso date string using the local timezone.
+ * @param date Date to convert
+ */
+export function getLocalDate(date: Date): string {
+  return `${date.getFullYear().toString().padStart(2, '0')}-${(date.getMonth() + 1).toString().padStart(2, '0')}-${date.getDate().toString().padStart(2, '0')}`;
 }
 
 /**
@@ -177,7 +185,7 @@ export function regxPassword() {
  * Returns a Regex that matches a valid email address
  */
 export function regxEmail() {
-  return /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+  return /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
 }
 
 /**

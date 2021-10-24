@@ -1,0 +1,55 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`SaleResult.vue Component matches snapshot 1`] = `
+<div businessid="1">
+  <div tabindex="-1" class="v-list-item theme--light purple--text">
+    <div class="pl-0 col col-auto align-self-center">
+      <div class="v-avatar white--text headline secondary" style="height: 80px; min-width: 80px; width: 80px; font-size: 40px;">W</div>
+    </div>
+    <div class="col">
+      <div class="row justify-space-between row--dense">
+        <div class="col col-8">
+          <h4><a>Watties Baked Beans - 420g can</a>
+            from
+            <span class="text--secondary link text-decoration-underline">
+              This Inc.
+            </span>
+          </h4>
+        </div>
+        <div class="align-self-center col col-auto">
+
+          <body>
+
+          </body>
+        </div>
+      </div>
+      <div class="row my-0 py-0">
+        <div class="my-0 py-0 col"><label class="font-weight-bold">More Info:</label> Seller may be willing to consider near offers.
+        </div>
+      </div>
+      <div class="row mt-0 row--dense">
+        <div class="font-weight-bold col col-auto">
+          Total Price:
+          <br>
+          Creation Date:
+        </div>
+        <div class="col col-auto">
+          Currency symbol17.99 Currency code
+          <br>
+          14 Jul 2021
+        </div>
+        <div class="font-weight-bold col col-auto">
+          Quantity:
+          <br>
+          Closing Date:
+        </div>
+        <div class="col col-auto">
+          3
+          <br>
+          22 Jul 2021
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+`;

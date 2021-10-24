@@ -1,5 +1,6 @@
 package org.seng302.leftovers.controllers;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
 import net.minidev.json.parser.JSONParser;
@@ -11,11 +12,21 @@ import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.junit.runner.RunWith;
 import org.mockito.*;
-import org.seng302.leftovers.entities.*;
-import org.seng302.leftovers.exceptions.AccessTokenException;
-import org.seng302.leftovers.persistence.*;
+import org.seng302.leftovers.dto.card.MarketplaceCardResponseDTO;
+import org.seng302.leftovers.entities.Keyword;
+import org.seng302.leftovers.entities.Location;
+import org.seng302.leftovers.entities.MarketplaceCard;
+import org.seng302.leftovers.entities.User;
+import org.seng302.leftovers.entities.event.ExpiryEvent;
+import org.seng302.leftovers.exceptions.AccessTokenResponseException;
+import org.seng302.leftovers.persistence.KeywordRepository;
+import org.seng302.leftovers.persistence.MarketplaceCardRepository;
+import org.seng302.leftovers.persistence.SearchMarketplaceCardHelper;
+import org.seng302.leftovers.persistence.UserRepository;
+import org.seng302.leftovers.persistence.event.ExpiryEventRepository;
+import org.seng302.leftovers.service.CardService;
 import org.seng302.leftovers.tools.AuthenticationTokenManager;
-import org.seng302.leftovers.tools.SearchHelper;
+import org.seng302.leftovers.service.search.SearchPageConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -51,6 +62,8 @@ class CardControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
+    @Autowired
+    private ObjectMapper objectMapper;
     @Mock
     private KeywordRepository keywordRepository;
     @Mock
@@ -59,6 +72,8 @@ class CardControllerTest {
     private UserRepository userRepository;
     @Mock
     private ExpiryEventRepository expiryEventRepository;
+    @Mock
+    private CardService cardService;
     @Mock
     private MarketplaceCard mockCard;
     @Mock
@@ -99,6 +114,8 @@ class CardControllerTest {
     private final long cardId = 32L;
     private final long keywordId1 = 25L;
     private final long keywordId2 = 71L;
+
+
 
     @BeforeEach
     private void setUp() throws Exception {
@@ -206,17 +223,29 @@ class CardControllerTest {
         when(marketplaceCardRepository.getAllByCreator(any(), any())).thenReturn(expectedPage);
         when(marketplaceCardRepository.findAll(any(), any(Pageable.class))).thenReturn(expectedPage);
 
+        Location testLocation = new Location.Builder()
+                .inCountry("New Zealand")
+                .inRegion("Canterbury")
+                .inCity("Christchurch")
+                .atStreetNumber("12")
+                .onStreet("Cool street")
+                .withPostCode("1234")
+                .atDistrict("District")
+                .build();
+
         // Set up entities to return set id when getter called
         when(mockCard.getID()).thenReturn(cardId);
         when(mockCard.getCreator()).thenReturn(mockUser);
         when(mockUser.getUserID()).thenReturn(userId);
+        when(mockUser.getAddress()).thenReturn(testLocation);
 
         // Set up keywordSpec and sectionSpec so that when they are combined with "and" they return combined spec
         when(keywordSpec.and(sectionSpec)).thenReturn(combinedSpec);
         when(sectionSpec.and(keywordSpec)).thenReturn(combinedSpec);
 
         // Tell MockMvc to use controller with mocked repositories for tests
-        cardController = new CardController(marketplaceCardRepository, keywordRepository, userRepository, expiryEventRepository);
+        cardController = new CardController(marketplaceCardRepository, keywordRepository, userRepository,
+                expiryEventRepository, cardService);
         mockMvc = MockMvcBuilders.standaloneSetup(cardController).build();
 
         constructValidCreateCardJson();
@@ -251,7 +280,7 @@ class CardControllerTest {
 
     @Test
     void createCard_invalidAuthToken_cannotCreateCard() throws Exception {
-       authenticationTokenManager.when(() -> AuthenticationTokenManager.checkAuthenticationToken(any())).thenThrow(new AccessTokenException());
+       authenticationTokenManager.when(() -> AuthenticationTokenManager.checkAuthenticationToken(any())).thenThrow(new AccessTokenResponseException());
        mockMvc.perform(post("/cards")
                .contentType(MediaType.APPLICATION_JSON)
                .content(createCardJson.toString()))
@@ -277,7 +306,6 @@ class CardControllerTest {
                 .content(createCardJson.toString()))
                 .andExpect(status().isBadRequest())
                 .andReturn();
-        assertEquals("Card title must be provided", result.getResponse().getErrorMessage());
         verify(marketplaceCardRepository, times(0)).save(any(MarketplaceCard.class));
     }
 
@@ -290,7 +318,6 @@ class CardControllerTest {
                 .content(createCardJson.toString()))
                 .andExpect(status().isBadRequest())
                 .andReturn();
-        assertEquals("Card title must be between 1-50 characters long", result.getResponse().getErrorMessage());
         verify(marketplaceCardRepository, times(0)).save(any(MarketplaceCard.class));
     }
 
@@ -435,7 +462,6 @@ class CardControllerTest {
                 .andExpect(status().isBadRequest())
                 .andReturn();
 
-        assertEquals("creatorId must be a number", result.getResponse().getErrorMessage());
         verify(marketplaceCardRepository, times(0)).save(any(MarketplaceCard.class));
     }
 
@@ -443,13 +469,12 @@ class CardControllerTest {
     void createCard_creatorIdNotInRepository_cardNotCreated() throws Exception {
         when(userRepository.findById(userId)).thenReturn(Optional.empty());
 
-        MvcResult result = mockMvc.perform(post("/cards")
+        mockMvc.perform(post("/cards")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(createCardJson.toString()))
                 .andExpect(status().isBadRequest())
                 .andReturn();
 
-        assertEquals(String.format("User with ID %d does not exist", userId), result.getResponse().getErrorMessage());
         verify(marketplaceCardRepository, times(0)).save(any(MarketplaceCard.class));
     }
 
@@ -464,7 +489,6 @@ class CardControllerTest {
                 .andExpect(status().isBadRequest())
                 .andReturn();
 
-        assertEquals("keywordIds must be an array of numbers", result.getResponse().getErrorMessage());
         verify(marketplaceCardRepository, times(0)).save(any(MarketplaceCard.class));
     }
 
@@ -474,13 +498,12 @@ class CardControllerTest {
         int[] keywordIds = new int[] {9999};
         createCardJson.appendField("keywordIds", keywordIds);
 
-        MvcResult result = mockMvc.perform(post("/cards")
+        mockMvc.perform(post("/cards")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(createCardJson.toString()))
                 .andExpect(status().isBadRequest())
                 .andReturn();
 
-        assertEquals("Invalid keyword ID", result.getResponse().getErrorMessage());
         verify(marketplaceCardRepository, times(0)).save(any(MarketplaceCard.class));
     }
 
@@ -490,7 +513,7 @@ class CardControllerTest {
     void modifyCard_invalidAuthToken_401Response() throws Exception {
         createCardJson.remove("creatorId"); // Will not need this field
 
-        authenticationTokenManager.when(() -> AuthenticationTokenManager.checkAuthenticationToken(any())).thenThrow(new AccessTokenException());
+        authenticationTokenManager.when(() -> AuthenticationTokenManager.checkAuthenticationToken(any())).thenThrow(new AccessTokenResponseException());
         mockMvc.perform(put("/cards/1")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(createCardJson.toString()))
@@ -625,7 +648,7 @@ class CardControllerTest {
 
     @Test
     void getCards_invalidAuthToken_CannotViewCards() throws Exception {
-        authenticationTokenManager.when(() -> AuthenticationTokenManager.checkAuthenticationToken(any())).thenThrow(new AccessTokenException());
+        authenticationTokenManager.when(() -> AuthenticationTokenManager.checkAuthenticationToken(any())).thenThrow(new AccessTokenResponseException());
         mockMvc.perform(get("/cards")
                 .param("section", "Wanted"))
                 .andExpect(status().isUnauthorized());
@@ -667,7 +690,7 @@ class CardControllerTest {
                 .param("reverse", "false"))
                 .andExpect(status().isOk())
                 .andReturn();
-        var expectedPageRequest = SearchHelper.getPageRequest(6, 8, Sort.by(new Sort.Order(Sort.Direction.ASC, "created").ignoreCase()));
+        var expectedPageRequest = SearchPageConstructor.getPageRequest(6, 8, Sort.by(new Sort.Order(Sort.Direction.ASC, "created").ignoreCase()));
         verify(marketplaceCardRepository).getAllBySection(section, expectedPageRequest);
 
         JSONParser parser = new JSONParser(JSONParser.MODE_PERMISSIVE);
@@ -676,8 +699,10 @@ class CardControllerTest {
         assertEquals(30, responseBody.get("count"));
 
         var expectedResults = new JSONArray();
-        expectedResults.add(mockCard.constructJSONObject());
-        assertEquals(expectedResults, responseBody.get("results"));
+        expectedResults.add(objectMapper.convertValue(new MarketplaceCardResponseDTO(mockCard), JSONObject.class));
+        assertEquals(
+                objectMapper.readTree(objectMapper.writeValueAsString(expectedResults)) ,
+                objectMapper.readTree(objectMapper.writeValueAsString(responseBody.get("results"))));
 
         assertEquals(2, responseBody.size());
     }
@@ -693,7 +718,7 @@ class CardControllerTest {
                 .param("reverse", "false"))
                 .andExpect(status().isOk())
                 .andReturn();
-        var expectedPageRequest = SearchHelper.getPageRequest(6, 8, Sort.by(new Sort.Order(Sort.Direction.ASC, ordering).ignoreCase()));
+        var expectedPageRequest = SearchPageConstructor.getPageRequest(6, 8, Sort.by(new Sort.Order(Sort.Direction.ASC, ordering).ignoreCase()));
         verify(marketplaceCardRepository).getAllBySection(MarketplaceCard.Section.WANTED, expectedPageRequest);
 
         JSONParser parser = new JSONParser(JSONParser.MODE_PERMISSIVE);
@@ -702,8 +727,10 @@ class CardControllerTest {
         assertEquals(30, responseBody.get("count"));
 
         var expectedResults = new JSONArray();
-        expectedResults.add(mockCard.constructJSONObject());
-        assertEquals(expectedResults, responseBody.get("results"));
+        expectedResults.add(objectMapper.convertValue(new MarketplaceCardResponseDTO(mockCard), JSONObject.class));
+        assertEquals(
+                objectMapper.readTree(objectMapper.writeValueAsString(expectedResults)) ,
+                objectMapper.readTree(objectMapper.writeValueAsString(responseBody.get("results"))));
 
         assertEquals(2, responseBody.size());
     }
@@ -712,7 +739,7 @@ class CardControllerTest {
 
     @Test
     void searchCards_invalidAuthToken_cannotViewCards() throws Exception {
-        authenticationTokenManager.when(() -> AuthenticationTokenManager.checkAuthenticationToken(any())).thenThrow(new AccessTokenException());
+        authenticationTokenManager.when(() -> AuthenticationTokenManager.checkAuthenticationToken(any())).thenThrow(new AccessTokenResponseException());
         var res = mockMvc.perform(get("/cards/search")
                 .param("section", "Wanted")
                 .param("keywordIds", "1")
@@ -797,7 +824,7 @@ class CardControllerTest {
                 .andExpect(status().isOk())
                 .andReturn();
 
-        var expectedPageRequest = SearchHelper.getPageRequest(6, 8, Sort.by(new Sort.Order(Sort.Direction.ASC, ordering).ignoreCase()));
+        var expectedPageRequest = SearchPageConstructor.getPageRequest(6, 8, Sort.by(new Sort.Order(Sort.Direction.ASC, ordering).ignoreCase()));
 
         verify(marketplaceCardRepository).findAll(combinedSpec, expectedPageRequest);
 
@@ -807,8 +834,10 @@ class CardControllerTest {
         assertEquals(30, responseBody.get("count"));
 
         var expectedResults = new JSONArray();
-        expectedResults.add(mockCard.constructJSONObject());
-        assertEquals(expectedResults, responseBody.get("results"));
+        expectedResults.add(objectMapper.convertValue(new MarketplaceCardResponseDTO(mockCard), JSONObject.class));
+        assertEquals(
+                objectMapper.readTree(objectMapper.writeValueAsString(expectedResults)) ,
+                objectMapper.readTree(objectMapper.writeValueAsString(responseBody.get("results"))));
 
         assertEquals(2, responseBody.size());
     }
@@ -831,7 +860,7 @@ class CardControllerTest {
                 .andExpect(status().isOk())
                 .andReturn();
 
-        var expectedPageRequest = SearchHelper.getPageRequest(6, 8, Sort.by(new Sort.Order(Sort.Direction.ASC, "created").ignoreCase()));
+        var expectedPageRequest = SearchPageConstructor.getPageRequest(6, 8, Sort.by(new Sort.Order(Sort.Direction.ASC, "created").ignoreCase()));
 
         verify(marketplaceCardRepository).findAll(combinedSpec, expectedPageRequest);
 
@@ -841,8 +870,10 @@ class CardControllerTest {
         assertEquals(30, responseBody.get("count"));
 
         var expectedResults = new JSONArray();
-        expectedResults.add(mockCard.constructJSONObject());
-        assertEquals(expectedResults, responseBody.get("results"));
+        expectedResults.add(objectMapper.convertValue(new MarketplaceCardResponseDTO(mockCard), JSONObject.class));
+        assertEquals(
+                objectMapper.readTree(objectMapper.writeValueAsString(expectedResults)) ,
+                objectMapper.readTree(objectMapper.writeValueAsString(responseBody.get("results"))));
 
         assertEquals(2, responseBody.size());
     }
@@ -850,10 +881,8 @@ class CardControllerTest {
     /**
      * Creates several marketplace cards based on a product. These items have
      * differing attributes to identify them.
-     * 
-     * @throws Exception
      */
-    public void addSeveralMarketplaceCards(List<MarketplaceCard> cards) throws Exception {
+    public void addSeveralMarketplaceCards(List<MarketplaceCard> cards) {
         cards.add(new MarketplaceCard.Builder().withCreator(testUser).withCloses(Instant.now().plus(1, ChronoUnit.HOURS))
             .withSection("ForSale").withTitle("abcd").build());
         cards.add(new MarketplaceCard.Builder().withCreator(testUser1).withCloses(Instant.now().plus(2, ChronoUnit.HOURS))
@@ -867,15 +896,15 @@ class CardControllerTest {
 
     @Test
     void extendCardDisplayPeriod_noAuthToken_401Response() throws Exception {
-        authenticationTokenManager.when(() -> AuthenticationTokenManager.checkAuthenticationToken(any())).thenThrow(new AccessTokenException());
+        authenticationTokenManager.when(() -> AuthenticationTokenManager.checkAuthenticationToken(any())).thenThrow(new AccessTokenResponseException());
         mockMvc.perform(put("/cards/1/extenddisplayperiod")).andExpect(status().isUnauthorized());
         verify(mockCard, times(0)).delayCloses();
         verify(marketplaceCardRepository, times(0)).save(any());
     }
 
     @Test
-    void extendCardDisplayPeriod_cardDoesNotExist_404Response() throws Exception {
-        mockMvc.perform(put("/cards/2/extenddisplayperiod")).andExpect(status().isNotFound());
+    void extendCardDisplayPeriod_cardDoesNotExist_406Response() throws Exception {
+        mockMvc.perform(put("/cards/2/extenddisplayperiod")).andExpect(status().isNotAcceptable());
         verify(mockCard, times(0)).delayCloses();
         verify(marketplaceCardRepository, times(0)).save(any());
     }
@@ -907,14 +936,14 @@ class CardControllerTest {
 
     @Test
     void deleteCard_noAuthToken_401Response() throws Exception {
-        authenticationTokenManager.when(() -> AuthenticationTokenManager.checkAuthenticationToken(any())).thenThrow(new AccessTokenException());
+        authenticationTokenManager.when(() -> AuthenticationTokenManager.checkAuthenticationToken(any())).thenThrow(new AccessTokenResponseException());
         mockMvc.perform(delete("/cards/1")).andExpect(status().isUnauthorized());
         verify(marketplaceCardRepository, times(0)).delete(any());
     }
 
     @Test
-    void deleteCard_cardDoesNotExist_404Response() throws Exception {
-        mockMvc.perform(delete("/cards/2")).andExpect(status().isNotFound());
+    void deleteCard_cardDoesNotExist_406Response() throws Exception {
+        mockMvc.perform(delete("/cards/2")).andExpect(status().isNotAcceptable());
         verify(marketplaceCardRepository, times(0)).delete(any());
     }
 
@@ -929,7 +958,7 @@ class CardControllerTest {
     @Test
     void deleteCard_cardExistsAndIsAuthorised_200ResponseAndDeleted() throws Exception {
         mockMvc.perform(delete("/cards/1")).andExpect(status().isOk());
-        verify(marketplaceCardRepository, times(1)).delete(mockCard);
+        verify(cardService, times(1)).deleteCardWithRelations(mockCard);
     }
 
     @Test
@@ -938,12 +967,12 @@ class CardControllerTest {
         when(expiryEventRepository.getByExpiringCard(mockCard)).thenReturn(optionalExpiryEvent);
         mockMvc.perform(delete("/cards/1")).andExpect(status().isOk());
         verify(expiryEventRepository, times(1)).delete(mockEvent);
-        verify(marketplaceCardRepository, times(1)).delete(mockCard);
+        verify(cardService, times(1)).deleteCardWithRelations(mockCard);
     }
 
     @Test
     void getCardsForUser_noAuthToken_401Response() throws Exception {
-        authenticationTokenManager.when(() -> AuthenticationTokenManager.checkAuthenticationToken(any())).thenThrow(new AccessTokenException());
+        authenticationTokenManager.when(() -> AuthenticationTokenManager.checkAuthenticationToken(any())).thenThrow(new AccessTokenResponseException());
         mockMvc.perform(get("/users/1/cards")).andExpect(status().isUnauthorized());
         // Check that the authentication token manager was called
         authenticationTokenManager.verify(() -> AuthenticationTokenManager.checkAuthenticationToken(any()));
@@ -963,7 +992,7 @@ class CardControllerTest {
                 .param("page", "6"))
                 .andExpect(status().isOk())
                 .andReturn();
-        var expectedPageRequest = SearchHelper.getPageRequest(6, 8, Sort.by(new Sort.Order(Sort.Direction.DESC, "lastRenewed")));
+        var expectedPageRequest = SearchPageConstructor.getPageRequest(6, 8, Sort.by(new Sort.Order(Sort.Direction.DESC, "lastRenewed")));
         verify(marketplaceCardRepository).getAllByCreator(mockUser, expectedPageRequest);
 
         JSONParser parser = new JSONParser(JSONParser.MODE_PERMISSIVE);
@@ -972,8 +1001,10 @@ class CardControllerTest {
         assertEquals(30, responseBody.get("count"));
 
         var expectedResults = new JSONArray();
-        expectedResults.add(mockCard.constructJSONObject());
-        assertEquals(expectedResults, responseBody.get("results"));
+        expectedResults.add(objectMapper.convertValue(new MarketplaceCardResponseDTO(mockCard), JSONObject.class));
+        assertEquals(
+                objectMapper.readTree(objectMapper.writeValueAsString(expectedResults)) ,
+                objectMapper.readTree(objectMapper.writeValueAsString(responseBody.get("results"))));
 
         assertEquals(2, responseBody.size());
     }
@@ -991,20 +1022,21 @@ class CardControllerTest {
                 .andReturn();
         
         //verify the arguments for the method call are the same
-        var expectedPageRequest = SearchHelper.getPageRequest(6, 8, Sort.by(List.of(new Sort.Order(Sort.Direction.ASC, "creator.address.country").ignoreCase(), new Sort.Order(Sort.Direction.ASC, "creator.address.city").ignoreCase())));
+        var expectedPageRequest = SearchPageConstructor.getPageRequest(6, 8, Sort.by(List.of(new Sort.Order(Sort.Direction.ASC, "creator.address.country").ignoreCase(), new Sort.Order(Sort.Direction.ASC, "creator.address.city").ignoreCase())));
         verify(marketplaceCardRepository).getAllBySection(MarketplaceCard.Section.WANTED, expectedPageRequest);
 
         JSONParser parser = new JSONParser(JSONParser.MODE_PERMISSIVE);
         JSONObject responseBody = (JSONObject) parser.parse(result.getResponse().getContentAsString());
 
         assertEquals(3, responseBody.get("count"));
-
-        var expectedResults = new JSONArray();
-        expectedResults.add(testCard1.constructJSONObject());
-        expectedResults.add(testCard2.constructJSONObject());
-        expectedResults.add(testCard3.constructJSONObject());
-
-        assertEquals(expectedResults, responseBody.get("results"));
+        JSONArray responseArray = (JSONArray) responseBody.get("results");
+        JSONArray expectedArray = new JSONArray();
+        expectedArray.add(objectMapper.convertValue(new MarketplaceCardResponseDTO(testCard1), JSONObject.class));
+        expectedArray.add(objectMapper.convertValue(new MarketplaceCardResponseDTO(testCard2), JSONObject.class));
+        expectedArray.add(objectMapper.convertValue(new MarketplaceCardResponseDTO(testCard3), JSONObject.class));
+        assertEquals(
+                objectMapper.readTree(objectMapper.writeValueAsString(expectedArray)) ,
+                objectMapper.readTree(objectMapper.writeValueAsString(responseArray)));
     }
 
     @Test
@@ -1019,7 +1051,7 @@ class CardControllerTest {
                 .andReturn();
         
         //verify the arguments for the method call are the same
-        var expectedPageRequest = SearchHelper.getPageRequest(6, 8, Sort.by(List.of(new Sort.Order(Sort.Direction.DESC, "creator.address.country").ignoreCase(), new Sort.Order(Sort.Direction.DESC, "creator.address.city").ignoreCase())));
+        var expectedPageRequest = SearchPageConstructor.getPageRequest(6, 8, Sort.by(List.of(new Sort.Order(Sort.Direction.DESC, "creator.address.country").ignoreCase(), new Sort.Order(Sort.Direction.DESC, "creator.address.city").ignoreCase())));
         verify(marketplaceCardRepository).getAllBySection(MarketplaceCard.Section.WANTED, expectedPageRequest); 
     }
 }

@@ -1,11 +1,11 @@
 import Vue from "vue";
 import Vuex from "vuex";
 import Vuetify from "vuetify";
-import { createLocalVue, Wrapper, mount } from "@vue/test-utils";
+import {createLocalVue, mount, Wrapper} from "@vue/test-utils";
 import CreateSaleItem from "@/components/BusinessProfile/CreateSaleItem.vue";
-import { castMock, flushQueue, todayPlusYears } from "./utils";
-import { getStore, resetStoreForTesting } from "@/store";
-import * as api from "@/api/internal";
+import {castMock, todayPlusYears, findButtonWithText, flushQueue} from "./utils";
+import {getStore, resetStoreForTesting} from "@/store";
+import {createSaleItem as createSaleItem1} from "@/api/sale";
 
 Vue.use(Vuetify);
 
@@ -17,10 +17,10 @@ jest.mock('@/api/currency', () => ({
   }),
 }));
 
-jest.mock('@/api/internal', () => ({
+jest.mock('@/api/sale', () => ({
   createSaleItem: jest.fn(),
 }));
-const createSaleItem = castMock(api.createSaleItem);
+const createSaleItem = castMock(createSaleItem1);
 
 // Characters that are in the set of number, decimal, number with decimal
 const validPriceCharacters = [
@@ -151,28 +151,14 @@ describe("CreateSaleItem.vue", () => {
      *
      * @returns A Wrapper around the close button
      */
-  function findCloseButton() {
-    const buttons = wrapper.findAllComponents({ name: "v-btn" });
-    const filtered = buttons.filter((button) =>
-      button.text().includes("Close")
-    );
-    expect(filtered.length).toBe(1);
-    return filtered.at(0);
-  }
+  const findCloseButton = () => findButtonWithText(wrapper, 'Close');
 
   /**
      * Finds the create button in the ProductForm form
      *
      * @returns A Wrapper around the create button
      */
-  function findCreateButton() {
-    const buttons = wrapper.findAllComponents({ name: "v-btn" });
-    const filtered = buttons.filter((button) =>
-      button.text().includes("Create")
-    );
-    expect(filtered.length).toBe(1);
-    return filtered.at(0);
-  }
+  const findCreateButton = () => findButtonWithText(wrapper, 'Create');
 
   it("Valid if all required fields are provided", async () => {
     await populateRequiredFields();

@@ -226,7 +226,6 @@
 
 <script>
 import LocationAutocomplete from '@/components/utils/LocationAutocomplete';
-import {createUser} from '../../api/internal';
 import {
   alphabetExtendedMultilineRules,
   alphabetRules,
@@ -237,7 +236,9 @@ import {
   passwordRules, phoneNumberRules,
   postCodeRules,
   streetNumRules,
+  getLocalDate,
 } from "@/utils";
+import {createUser} from "@/api/user";
 
 export default {
   name: 'Register',
@@ -335,11 +336,16 @@ export default {
       };
 
       let response = await createUser(user);
-      if (response === undefined ) {
-        this.$emit('showLogin');
+      if (response !== undefined ) {
+        this.errorMessage = response;
         return;
       }
-      this.errorMessage = response;
+      response = await this.$store.dispatch("login", { email : this.email, password : this.password });
+      if (response !== undefined) {
+        this.errorMessage = response;
+        return;
+      }
+      await this.$router.push("/home");
     },
     // Close the date picker modal
     closeDatePicker () {
@@ -398,8 +404,8 @@ export default {
   //as any components are added to the dom, mounted() will be called
   mounted () {
     //sets maxDate and date of birth value
-    this.maxDate = this.minimumDateOfBirth().toISOString().slice(0, 10);
-    this.dob = this.minimumDateOfBirth().toISOString().slice(0, 10);
+    this.maxDate = getLocalDate(this.minimumDateOfBirth());
+    this.dob = getLocalDate(this.minimumDateOfBirth());
   }
 };
 
