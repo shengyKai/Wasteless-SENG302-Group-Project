@@ -1,7 +1,7 @@
 # LEFT_OVERS
 ## Team Internal Error (500) 
 
-^^Yes that was our team name ^^
+^^Yes that was our team name ^^\
 An application for buying and selling products which are close to their expiration date.
 
 ## Deployed Application
