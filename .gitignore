@@ -9,6 +9,7 @@ node_modules/
 .scannerwork/
 .metadata
 .scannerwork/
+*.hprof
 
 ### STS ###
 .apt_generated
